@@ -224,9 +224,6 @@
       3. 單色款式
       <button class="draw-btn" onclick="drawMainColor()">🎲 幫我抽色系</button>
     </div>
-    <div style="margin-bottom: 8px;">
-      <label><input type="checkbox" id="enableMainColor" checked onchange="toggleMainColor()"> 施作單色美甲</label>
-    </div>
     <select id="mainColor" onchange="onSelectionChange()">
       <option value="">-- 請選擇色系 (無則留空) --</option>
       <option value="紅色">紅色</option>
@@ -240,6 +237,7 @@
       <option value="紫色">紫色</option>
       <option value="黑色">黑色</option>
       <option value="銀色/白色">銀色/白色</option>
+      <option value="灰色">灰色</option>
       <option value="金色/香檳色">金色/香檳色</option>
     </select>
   </div>
@@ -250,7 +248,6 @@
     <div class="radio-group">
       <label><input type="radio" name="tone" value="深色感" checked> 深色感</label>
       <label><input type="radio" name="tone" value="淺色感"> 淺色感</label>
-      <label><input type="radio" name="tone" value="灰色"> 灰色</label>
       <label><input type="radio" name="tone" value="隨機發揮"> 隨機發揮</label>
     </div>
   </div>
@@ -281,8 +278,8 @@
         <option value="紫色">紫色</option>
         <option value="黑色">黑色</option>
         <option value="銀色/白色">銀色/白色</option>
-        <option value="金色/香檳色">金色/香檳色</option>
         <option value="灰色">灰色</option>
+        <option value="金色/香檳色">金色/香檳色</option>
       </select>
     </div>
 
@@ -313,7 +310,6 @@
         <select id="catEyeType" disabled style="background-color: #eae5dc; font-weight: bold;">
           <option value="指定單色貓眼">指定單色貓眼</option>
           <option value="雙色貓眼">雙色貓眼</option>
-          <option value="搭配單色底色">搭配單色底色</option>
         </select>
       </div>
 
@@ -339,13 +335,6 @@
   // 預設今天日期
   document.getElementById('bookingDate').valueAsDate = new Date();
 
-  function toggleMainColor() {
-    const isChecked = document.getElementById('enableMainColor').checked;
-    document.getElementById('mainColor').disabled = !isChecked;
-    document.getElementById('toneSection').style.opacity = isChecked ? '1' : '0.5';
-    onSelectionChange();
-  }
-
   function toggleOption(id) {
     const el = document.getElementById(id);
     if (id === 'jumpColorSection') {
@@ -363,7 +352,7 @@
     calculateTotal();
   }
 
-  // 🤖 貓眼類型自動邏輯判斷
+  // 🤖 貓眼類型自動判斷：有選擇跳色一律顯示雙色貓眼，其餘為指定單色貓眼
   function autoDetermineCatEye() {
     const catEyeCb = document.getElementById('catEyeCb');
     const catEyeDetailDiv = document.getElementById('catEyeDetailDiv');
@@ -376,28 +365,18 @@
 
     catEyeDetailDiv.classList.remove('hidden');
 
-    const selectedStyles = document.querySelectorAll('input[name="style"]:checked');
-    const styleCount = selectedStyles.length;
-    const hasJumpColor = showJumpColor;
-    const hasMainColor = document.getElementById('enableMainColor').checked && document.getElementById('mainColor').value !== "";
-
-    if (hasJumpColor && styleCount === 1) {
+    if (showJumpColor) {
       catEyeSelect.value = "雙色貓眼";
-    } else if (hasMainColor && !hasJumpColor && styleCount === 1) {
-      catEyeSelect.value = "指定單色貓眼";
     } else {
-      catEyeSelect.value = "搭配單色底色";
+      catEyeSelect.value = "指定單色貓眼";
     }
   }
 
   // 🎲 隨機抽單色色系
   function drawMainColor() {
-    if (!document.getElementById('enableMainColor').checked) {
-      document.getElementById('enableMainColor').checked = true;
-      toggleMainColor();
-    }
     const select = document.getElementById('mainColor');
     const options = select.options;
+    // 避開第一個空白選項
     const randomIndex = Math.floor(Math.random() * (options.length - 1)) + 1;
     select.selectedIndex = randomIndex;
     alert(`🎲 恭喜抽中色系：【${options[randomIndex].value}】！`);
@@ -468,12 +447,12 @@
     onSelectionChange();
   }
 
-  // 💡 最新金流計算邏輯
+  // 💡 金額計算邏輯
   function calculateTotal() {
     let total = 0;
 
-    // 判斷是否有美甲項目 (單色 / 跳色 / 款式)
-    const isMainColorSelected = document.getElementById('enableMainColor').checked && document.getElementById('mainColor').value !== "";
+    const mainColorVal = document.getElementById('mainColor').value;
+    const isMainColorSelected = mainColorVal !== "";
     const isJumpColorSelected = showJumpColor;
     const selectedStyles = showStyle ? document.querySelectorAll('input[name="style"]:checked') : [];
     const isStyleSelected = selectedStyles.length > 0;
@@ -520,8 +499,8 @@
     const bookingTime = `${hour}:${minute}`;
 
     const needOff = document.querySelector('input[name="off"]:checked').value === "yes";
-    const isMainColorSelected = document.getElementById('enableMainColor').checked && document.getElementById('mainColor').value !== "";
     const mainColorVal = document.getElementById('mainColor').value;
+    const isMainColorSelected = mainColorVal !== "";
     
     let details = `【美甲服務預約單】\n`;
     details += `----------------------------\n`;
