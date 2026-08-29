@@ -14,10 +14,10 @@
       font-family: 'ChenYuluoyan', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
     }
 
-    /* 統一全頁亮顯與勾選框顏色，避免出現預設藍色 */
+    /* 統一全頁亮顯與勾選框顏色（莫蘭迪大地色系） */
     input[type="checkbox"], 
     input[type="radio"] {
-      accent-color: #8c7c75;
+      accent-color: #7a6b63;
       cursor: pointer;
       width: 16px;
       height: 16px;
@@ -25,9 +25,9 @@
     }
 
     body {
-      background-color: #efece6;
+      background-color: #f4f1ea;
       margin: 0;
-      padding: 15px;
+      padding: 20px 15px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -35,77 +35,73 @@
       color: #4a423d;
     }
     .card {
-      background: #fdfbf7;
-      max-width: 450px;
+      background: #faf8f5;
+      max-width: 440px;
       width: 100%;
-      border-radius: 20px;
-      box-shadow: 0 10px 25px rgba(140, 124, 117, 0.18);
-      padding: 24px 20px;
-      border: 1px solid #d8d0c5;
+      border-radius: 16px;
+      box-shadow: 0 6px 18px rgba(120, 108, 100, 0.08);
+      padding: 28px 22px;
+      border: 1px solid #e2dad1;
     }
     
-    /* ✨ 美化後的標題樣式 (加入大地色底色卡片) */
-    .title-banner {
-      background: linear-gradient(135deg, #8c7c75, #6e6058);
-      color: #ffffff;
+    /* ✨ 簡潔乾淨標題：無底色，搭配較深色底線 */
+    .title-header {
       text-align: center;
-      padding: 14px 10px;
-      border-radius: 12px;
-      margin-bottom: 22px;
-      box-shadow: 0 4px 12px rgba(110, 96, 88, 0.25);
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #5a4e47; /* 較深色底線 */
     }
-    .title-banner h2 {
+    .title-header h2 {
       margin: 0;
-      font-size: 24px;
-      font-weight: normal;
+      font-size: 25px;
+      font-weight: bold;
       letter-spacing: 2px;
-      color: #fdfbf7;
-      border-bottom: none;
-      padding-bottom: 0;
+      color: #433934;
     }
 
     .section {
-      margin-bottom: 20px;
-      padding-bottom: 15px;
-      border-bottom: 1px solid #e5decb;
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #eae3d9;
     }
     .section-title {
       font-weight: bold;
-      color: #6e6058;
+      color: #5c5049;
       margin-bottom: 10px;
-      font-size: 17px;
+      font-size: 16.5px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
     .radio-group {
       display: flex;
-      gap: 12px;
+      gap: 14px;
       flex-wrap: wrap;
     }
     label {
-      font-size: 16px;
-      color: #5c504a;
+      font-size: 15.5px;
+      color: #524741;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
     }
     select, input[type="text"], input[type="date"] {
       width: 100%;
-      padding: 9px 10px;
-      border: 1px solid #c8beba;
+      padding: 9px 12px;
+      border: 1px solid #cfc5bb;
       border-radius: 8px;
       outline: none;
       font-size: 15px;
-      background-color: #f7f4ee;
+      background-color: #fefdfc;
       color: #4a423d;
       appearance: none;
       -webkit-appearance: none;
+      transition: border-color 0.2s;
     }
     select:focus, input[type="text"]:focus, input[type="date"]:focus {
-      border-color: #8c7c75;
-      box-shadow: 0 0 5px rgba(140, 124, 117, 0.4);
+      border-color: #7a6b63;
+      box-shadow: 0 0 4px rgba(122, 107, 99, 0.25);
     }
     
     .datetime-container {
@@ -124,31 +120,31 @@
     }
 
     .add-btn {
-      background-color: #a3958d;
+      background-color: #96887f;
       color: #ffffff;
       border: none;
-      padding: 5px 10px;
-      border-radius: 12px;
-      font-size: 14px;
+      padding: 4px 10px;
+      border-radius: 10px;
+      font-size: 13.5px;
       cursor: pointer;
       transition: 0.2s;
-      margin-left: 5px;
+      margin-left: 4px;
     }
     .add-btn:hover {
-      background-color: #8c7c75;
+      background-color: #7a6b63;
     }
     .draw-btn {
-      background-color: #d8c2b5;
+      background-color: #e4dcd3;
       color: #4a423d;
-      border: 1px solid #b8a295;
+      border: 1px solid #c9bebc;
       padding: 3px 8px;
-      border-radius: 12px;
-      font-size: 13px;
+      border-radius: 10px;
+      font-size: 12.5px;
       cursor: pointer;
       transition: 0.2s;
     }
     .draw-btn:hover {
-      background-color: #c8b2a5;
+      background-color: #d7ccc3;
     }
     .hidden {
       display: none;
@@ -156,35 +152,36 @@
     .checkbox-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 10px 8px;
     }
     .total-box {
-      background-color: #e8d8ce;
-      color: #5c504a;
-      padding: 15px;
+      background-color: #ebdcd3;
+      color: #4e423b;
+      padding: 14px;
       border-radius: 12px;
       text-align: center;
-      font-size: 20px;
+      font-size: 19px;
       font-weight: bold;
       margin-top: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
+      letter-spacing: 0.5px;
     }
     .submit-btn {
       width: 100%;
-      background-color: #8c7c75;
+      background-color: #7a6b63;
       color: #ffffff;
       border: none;
       padding: 12px;
-      font-size: 18px;
+      font-size: 17.5px;
       font-weight: bold;
-      border-radius: 25px;
+      border-radius: 22px;
       cursor: pointer;
-      box-shadow: 0 4px 10px rgba(140, 124, 117, 0.3);
+      box-shadow: 0 4px 10px rgba(122, 107, 99, 0.2);
       transition: background 0.2s;
       letter-spacing: 1px;
     }
     .submit-btn:hover {
-      background-color: #6e6058;
+      background-color: #5c5049;
     }
     .sub-input {
       margin-top: 8px;
@@ -194,9 +191,9 @@
 <body>
 
 <div class="card">
-  <!-- ✨ 美化標題 banner -->
-  <div class="title-banner">
-    <h2>💅 美甲服務預約選單</h2>
+  <!-- ✨ 簡潔乾淨標題：深色底線 -->
+  <div class="title-header">
+    <h2>美甲服務預約選單</h2>
   </div>
 
   <!-- 1. 預約日期與時間 -->
@@ -204,13 +201,13 @@
     <div class="section-title">1. 預約日期與時間</div>
     <div class="datetime-container">
       <div>
-        <label style="font-size: 14px; font-weight: bold; display: block; margin-bottom: 4px;">預約日期：</label>
+        <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #6e6058;">預約日期：</label>
         <input type="date" id="bookingDate">
       </div>
       <div>
-        <label style="font-size: 14px; font-weight: bold; display: block; margin-bottom: 4px;">預約時間：</label>
+        <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #6e6058;">預約時間：</label>
         <div class="time-picker-group">
-          <!-- 補齊 00 ~ 23 時 -->
+          <!-- 00 ~ 23 時 -->
           <select id="bookingHour">
             <option value="00">00 時</option>
             <option value="01">01 時</option>
@@ -302,8 +299,8 @@
     </div>
 
     <!-- 跳色選單 -->
-    <div id="jumpColorSection" class="hidden" style="margin-top: 10px; padding: 10px; background: #f2ebe5; border-radius: 8px;">
-      <div style="font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #6e6058;">跳色選擇：</div>
+    <div id="jumpColorSection" class="hidden" style="margin-top: 10px; padding: 10px; background: #f1ebd5; border-radius: 8px;">
+      <div style="font-size: 13.5px; font-weight: bold; margin-bottom: 5px; color: #6e6058;">跳色選擇：</div>
       <select id="jumpColor" onchange="onSelectionChange()">
         <option value="交給琦選!">交給琦選!</option>
         <option value="紅色">紅色</option>
@@ -323,12 +320,12 @@
     </div>
 
     <!-- 款式勾選區 -->
-    <div id="styleSection" class="hidden" style="margin-top: 10px; padding: 10px; background: #f2ebe5; border-radius: 8px;">
+    <div id="styleSection" class="hidden" style="margin-top: 10px; padding: 10px; background: #f1ebd5; border-radius: 8px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-        <div style="font-size: 14px; font-weight: bold; color: #6e6058;">款式類型 (最多選4個)：</div>
+        <div style="font-size: 13.5px; font-weight: bold; color: #6e6058;">款式類型 (最多選4個)：</div>
         <button class="draw-btn" onclick="drawStyle()">🎲 幫我抽款式</button>
       </div>
-      <div style="font-size: 12px; color: #8c7c75; margin-bottom: 8px;">(選1個 +150元 / 選2個以上 +200元)</div>
+      <div style="font-size: 11.5px; color: #8c7c75; margin-bottom: 8px;">(選1個 +150元 / 選2個以上 +200元)</div>
       
       <div class="checkbox-grid">
         <label><input type="checkbox" name="style" id="catEyeCb" value="貓眼" onchange="checkLimit(this)"> 貓眼</label>
@@ -346,7 +343,7 @@
       <!-- 貓眼細項自動呈現 -->
       <div id="catEyeDetailDiv" class="sub-input hidden">
         <label style="font-size: 13px; font-weight: bold; color: #6e6058;">貓眼類型：</label>
-        <select id="catEyeType" disabled style="background-color: #eae5dc; font-weight: bold;">
+        <select id="catEyeType" disabled style="background-color: #e5ded7; font-weight: bold;">
           <option value="指定單色貓眼">指定單色貓眼</option>
           <option value="雙色貓眼">雙色貓眼</option>
         </select>
@@ -485,7 +482,7 @@
     onSelectionChange();
   }
 
-  // 💡 金額計算邏輯
+  // 💡 金額計算邏輯 (單色改為 $650)
   function calculateTotal() {
     let total = 0;
 
@@ -507,9 +504,9 @@
       }
     }
 
-    // 2. 單色美甲 (+700)
+    // 2. 單色美甲 (+650)
     if (isMainColorSelected) {
-      total += 700;
+      total += 650;
     }
 
     // 3. 跳色 (+50)
@@ -583,7 +580,7 @@
     window.location.href = lineShareUrl;
   }
 
-  // 初始化計算一次金額
+  // 初始化計算金額
   calculateTotal();
 </script>
 
