@@ -14,14 +14,29 @@
       font-family: 'ChenYuluoyan', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
     }
 
-    /* 統一全頁亮顯與勾選框顏色（莫蘭迪大地色系） */
+    /* 統一全頁亮顯、日曆與勾選框顏色（莫蘭迪大地色系，防止藍色出現） */
+    :root {
+      color-scheme: light;
+    }
+
+    input[type="checkbox"], 
+    input[type="radio"],
+    input[type="date"] {
+      accent-color: #7a6b63; /* 勾選框、單選鈕及日曆選取高亮改為大地色 */
+      cursor: pointer;
+    }
+
     input[type="checkbox"], 
     input[type="radio"] {
-      accent-color: #7a6b63;
-      cursor: pointer;
       width: 16px;
       height: 16px;
       vertical-align: middle;
+    }
+
+    /* 客製化日曆圖示與點擊高亮 */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+      filter: opacity(0.6) sepia(100%) hue-rotate(330deg); /* 微調日曆小圖示色調配合全頁 */
     }
 
     body {
@@ -44,19 +59,19 @@
       border: 1px solid #e2dad1;
     }
     
-    /* ✨ 簡潔乾淨標題：無底色，搭配較深色底線 */
+    /* ✨ 標題樣式：字色與項目標題一致，底線與【預計總金額】底色 (#ebdcd3) 一致 */
     .title-header {
       text-align: center;
       margin-bottom: 24px;
       padding-bottom: 12px;
-      border-bottom: 2px solid #5a4e47; /* 較深色底線 */
+      border-bottom: 3px solid #ebdcd3; /* 與預計總金額底色相同 */
     }
     .title-header h2 {
       margin: 0;
       font-size: 25px;
       font-weight: bold;
       letter-spacing: 2px;
-      color: #433934;
+      color: #5c5049; /* 與其他項目標題顏色相同 */
     }
 
     .section {
@@ -154,8 +169,10 @@
       grid-template-columns: 1fr 1fr;
       gap: 10px 8px;
     }
+    
+    /* 預計總金額區塊 */
     .total-box {
-      background-color: #ebdcd3;
+      background-color: #ebdcd3; /* 原底色 */
       color: #4e423b;
       padding: 14px;
       border-radius: 12px;
@@ -191,7 +208,7 @@
 <body>
 
 <div class="card">
-  <!-- ✨ 簡潔乾淨標題：深色底線 -->
+  <!-- ✨ 標題：文字顏色與項目一致，底線與預計總金額底色 (#ebdcd3) 一致 -->
   <div class="title-header">
     <h2>美甲服務預約選單</h2>
   </div>
@@ -201,11 +218,11 @@
     <div class="section-title">1. 預約日期與時間</div>
     <div class="datetime-container">
       <div>
-        <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #6e6058;">預約日期：</label>
+        <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #5c5049;">預約日期：</label>
         <input type="date" id="bookingDate">
       </div>
       <div>
-        <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #6e6058;">預約時間：</label>
+        <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #5c5049;">預約時間：</label>
         <div class="time-picker-group">
           <!-- 00 ~ 23 時 -->
           <select id="bookingHour">
@@ -298,9 +315,9 @@
       </div>
     </div>
 
-    <!-- 跳色選單 -->
-    <div id="jumpColorSection" class="hidden" style="margin-top: 10px; padding: 10px; background: #f1ebd5; border-radius: 8px;">
-      <div style="font-size: 13.5px; font-weight: bold; margin-bottom: 5px; color: #6e6058;">跳色選擇：</div>
+    <!-- 跳色選單 (底色還原為 #f2ebe5) -->
+    <div id="jumpColorSection" class="hidden" style="margin-top: 10px; padding: 10px; background: #f2ebe5; border-radius: 8px;">
+      <div style="font-size: 13.5px; font-weight: bold; margin-bottom: 5px; color: #5c5049;">跳色選擇：</div>
       <select id="jumpColor" onchange="onSelectionChange()">
         <option value="交給琦選!">交給琦選!</option>
         <option value="紅色">紅色</option>
@@ -319,10 +336,10 @@
       </select>
     </div>
 
-    <!-- 款式勾選區 -->
-    <div id="styleSection" class="hidden" style="margin-top: 10px; padding: 10px; background: #f1ebd5; border-radius: 8px;">
+    <!-- 款式勾選區 (底色還原為 #f2ebe5) -->
+    <div id="styleSection" class="hidden" style="margin-top: 10px; padding: 10px; background: #f2ebe5; border-radius: 8px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-        <div style="font-size: 13.5px; font-weight: bold; color: #6e6058;">款式類型 (最多選4個)：</div>
+        <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">款式類型 (最多選4個)：</div>
         <button class="draw-btn" onclick="drawStyle()">🎲 幫我抽款式</button>
       </div>
       <div style="font-size: 11.5px; color: #8c7c75; margin-bottom: 8px;">(選1個 +150元 / 選2個以上 +200元)</div>
@@ -342,7 +359,7 @@
 
       <!-- 貓眼細項自動呈現 -->
       <div id="catEyeDetailDiv" class="sub-input hidden">
-        <label style="font-size: 13px; font-weight: bold; color: #6e6058;">貓眼類型：</label>
+        <label style="font-size: 13px; font-weight: bold; color: #5c5049;">貓眼類型：</label>
         <select id="catEyeType" disabled style="background-color: #e5ded7; font-weight: bold;">
           <option value="指定單色貓眼">指定單色貓眼</option>
           <option value="雙色貓眼">雙色貓眼</option>
@@ -482,7 +499,7 @@
     onSelectionChange();
   }
 
-  // 💡 金額計算邏輯 (單色改為 $650)
+  // 💡 金額計算邏輯 (單色 $650)
   function calculateTotal() {
     let total = 0;
 
