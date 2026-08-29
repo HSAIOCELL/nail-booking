@@ -13,6 +13,17 @@
       box-sizing: border-box;
       font-family: 'ChenYuluoyan', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
     }
+
+    /* 統一全頁亮顯與勾選框顏色，避免出現預設藍色 */
+    input[type="checkbox"], 
+    input[type="radio"] {
+      accent-color: #8c7c75;
+      cursor: pointer;
+      width: 16px;
+      height: 16px;
+      vertical-align: middle;
+    }
+
     body {
       background-color: #efece6;
       margin: 0;
@@ -27,21 +38,32 @@
       background: #fdfbf7;
       max-width: 450px;
       width: 100%;
-      border-radius: 16px;
-      box-shadow: 0 8px 20px rgba(140, 124, 117, 0.15);
-      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(140, 124, 117, 0.18);
+      padding: 24px 20px;
       border: 1px solid #d8d0c5;
     }
-    h2 {
+    
+    /* ✨ 美化後的標題樣式 (加入大地色底色卡片) */
+    .title-banner {
+      background: linear-gradient(135deg, #8c7c75, #6e6058);
+      color: #ffffff;
       text-align: center;
-      color: #5c504a;
-      margin-top: 0;
-      margin-bottom: 20px;
-      font-size: 24px;
-      border-bottom: 1px dashed #a3958d;
-      padding-bottom: 10px;
-      letter-spacing: 1px;
+      padding: 14px 10px;
+      border-radius: 12px;
+      margin-bottom: 22px;
+      box-shadow: 0 4px 12px rgba(110, 96, 88, 0.25);
     }
+    .title-banner h2 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: normal;
+      letter-spacing: 2px;
+      color: #fdfbf7;
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
     .section {
       margin-bottom: 20px;
       padding-bottom: 15px;
@@ -65,6 +87,9 @@
       font-size: 16px;
       color: #5c504a;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
     select, input[type="text"], input[type="date"] {
       width: 100%;
@@ -80,7 +105,7 @@
     }
     select:focus, input[type="text"]:focus, input[type="date"]:focus {
       border-color: #8c7c75;
-      box-shadow: 0 0 5px rgba(140, 124, 117, 0.3);
+      box-shadow: 0 0 5px rgba(140, 124, 117, 0.4);
     }
     
     .datetime-container {
@@ -169,7 +194,10 @@
 <body>
 
 <div class="card">
-  <h2>美甲服務預約選單</h2>
+  <!-- ✨ 美化標題 banner -->
+  <div class="title-banner">
+    <h2>💅 美甲服務預約選單</h2>
+  </div>
 
   <!-- 1. 預約日期與時間 -->
   <div class="section">
@@ -182,7 +210,16 @@
       <div>
         <label style="font-size: 14px; font-weight: bold; display: block; margin-bottom: 4px;">預約時間：</label>
         <div class="time-picker-group">
+          <!-- 補齊 00 ~ 23 時 -->
           <select id="bookingHour">
+            <option value="00">00 時</option>
+            <option value="01">01 時</option>
+            <option value="02">02 時</option>
+            <option value="03">03 時</option>
+            <option value="04">04 時</option>
+            <option value="05">05 時</option>
+            <option value="06">06 時</option>
+            <option value="07">07 時</option>
             <option value="08">08 時</option>
             <option value="09">09 時</option>
             <option value="10">10 時</option>
@@ -197,6 +234,8 @@
             <option value="19">19 時</option>
             <option value="20">20 時</option>
             <option value="21">21 時</option>
+            <option value="22">22 時</option>
+            <option value="23">23 時</option>
           </select>
           <select id="bookingMinute">
             <option value="00" selected>00 分</option>
@@ -322,7 +361,7 @@
 
   <!-- 金額顯示 -->
   <div class="total-box">
-    預計總金額：NT$ <span id="totalPrice">700</span> 元
+    預計總金額：NT$ <span id="totalPrice">0</span> 元
   </div>
 
   <button class="submit-btn" onclick="sendToLine()">送出預約至 LINE</button>
@@ -376,7 +415,6 @@
   function drawMainColor() {
     const select = document.getElementById('mainColor');
     const options = select.options;
-    // 避開第一個空白選項
     const randomIndex = Math.floor(Math.random() * (options.length - 1)) + 1;
     select.selectedIndex = randomIndex;
     alert(`🎲 恭喜抽中色系：【${options[randomIndex].value}】！`);
@@ -544,6 +582,9 @@
     const lineShareUrl = `https://line.me/R/share?text=${encodeURIComponent(details)}`;
     window.location.href = lineShareUrl;
   }
+
+  // 初始化計算一次金額
+  calculateTotal();
 </script>
 
 </body>
