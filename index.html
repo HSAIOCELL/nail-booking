@@ -59,6 +59,7 @@
     .radio-group {
       display: flex;
       gap: 15px;
+      flex-wrap: wrap;
     }
     label {
       font-size: 16px;
@@ -92,6 +93,19 @@
     }
     .add-btn:hover {
       background-color: #8c7c75;
+    }
+    .draw-btn {
+      background-color: #d8c2b5;
+      color: #4a423d;
+      border: 1px solid #b8a295;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .draw-btn:hover {
+      background-color: #c8b2a5;
     }
     .hidden {
       display: none;
@@ -150,13 +164,17 @@
 
   <!-- 2. 單色款式 -->
   <div class="section">
-    <div class="section-title">2. 單色款式 (700元)</div>
+    <div class="section-title">
+      2. 單色款式 (700元)
+      <button class="draw-btn" onclick="drawMainColor()">🎲 幫我抽色系</button>
+    </div>
     <select id="mainColor" onchange="calculateTotal()">
       <option value="紅色">紅色</option>
       <option value="粉色">粉色</option>
       <option value="橘色">橘色</option>
       <option value="黃色">黃色</option>
-      <option value="咖色/可可色">咖色/可可色</option>
+      <option value="深咖/可可色">深咖/可可色</option>
+      <option value="淺咖色">淺咖色</option>
       <option value="綠色">綠色</option>
       <option value="藍色">藍色</option>
       <option value="紫色">紫色</option>
@@ -166,10 +184,20 @@
     </select>
   </div>
 
-  <!-- 3. 加購項目 -->
+  <!-- 3. 色調 -->
+  <div class="section">
+    <div class="section-title">3. 色調選擇</div>
+    <div class="radio-group">
+      <label><input type="radio" name="tone" value="深色感" checked> 深色感</label>
+      <label><input type="radio" name="tone" value="淺色感"> 淺色感</label>
+      <label><input type="radio" name="tone" value="隨機發揮"> 隨機發揮</label>
+    </div>
+  </div>
+
+  <!-- 4. 加購項目 -->
   <div class="section">
     <div class="section-title">
-      3. 加購項目
+      4. 加購項目
       <div>
         <button class="add-btn" onclick="toggleOption('jumpColorSection')">+ 跳色 (+50)</button>
         <button class="add-btn" onclick="toggleOption('styleSection')">+ 款式造型</button>
@@ -185,7 +213,8 @@
         <option value="粉色">粉色</option>
         <option value="橘色">橘色</option>
         <option value="黃色">黃色</option>
-        <option value="咖色/可可色">咖色/可可色</option>
+        <option value="深咖/可可色">深咖/可可色</option>
+        <option value="淺咖色">淺咖色</option>
         <option value="綠色">綠色</option>
         <option value="藍色">藍色</option>
         <option value="紫色">紫色</option>
@@ -197,7 +226,10 @@
 
     <!-- 款式勾選區 -->
     <div id="styleSection" class="hidden" style="margin-top: 10px; padding: 10px; background: #f2ebe5; border-radius: 8px;">
-      <div style="font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #6e6058;">款式類型 (最多選4個)：</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+        <div style="font-size: 14px; font-weight: bold; color: #6e6058;">款式類型 (最多選4個)：</div>
+        <button class="draw-btn" onclick="drawStyle()">🎲 幫我抽款式</button>
+      </div>
       <div style="font-size: 12px; color: #8c7c75; margin-bottom: 8px;">(選1個 +150元 / 選2個以上 +200元)</div>
       
       <div class="checkbox-grid">
@@ -221,7 +253,7 @@
     預計總金額：NT$ <span id="totalPrice">700</span> 元
   </div>
 
-  <button class="submit-btn" onclick="sendToLine()">送出預預至 LINE</button>
+  <button class="submit-btn" onclick="sendToLine()">送出預約至 LINE</button>
 </div>
 
 <script>
@@ -237,6 +269,53 @@
       showStyle = !showStyle;
       el.classList.toggle('hidden', !showStyle);
     }
+    calculateTotal();
+  }
+
+  // 🎲 隨機抽單色色系
+  function drawMainColor() {
+    const select = document.getElementById('mainColor');
+    const options = select.options;
+    const randomIndex = Math.floor(Math.random() * options.length);
+    select.selectedIndex = randomIndex;
+    alert(`🎲 恭喜抽中色系：【${options[randomIndex].value}】！`);
+    calculateTotal();
+  }
+
+  // 🎲 隨機抽款式造型 (貓眼 75% 機率)
+  function drawStyle() {
+    // 若款式區還沒展開，自動幫忙展開
+    if (!showStyle) {
+      toggleOption('styleSection');
+    }
+
+    // 先清空所有已勾選的款式
+    const checkboxes = document.querySelectorAll('input[name="style"]');
+    checkboxes.forEach(cb => cb.checked = false);
+
+    // 抽籤邏輯 (0 ~ 1 隨機數)
+    const rand = Math.random();
+    let chosenValue = "";
+
+    if (rand < 0.75) {
+      // 75% 機率抽中貓眼
+      chosenValue = "貓眼(依單色)";
+    } else {
+      // 25% 機率均分給其餘 7 個款式 (每個約 3.57%)
+      const otherStyles = ["法式", "漸層", "海莉款", "亮面銀", "小飾品/貼紙", "格紋", "指定圖案"];
+      const otherIndex = Math.floor(Math.random() * otherStyles.length);
+      chosenValue = otherStyles[otherIndex];
+    }
+
+    // 勾選對應的選項
+    checkboxes.forEach(cb => {
+      if (cb.value === chosenValue) {
+        cb.checked = true;
+        checkLimit(cb);
+      }
+    });
+
+    alert(`🎲 恭喜抽中款式：【${chosenValue}】！`);
     calculateTotal();
   }
 
@@ -279,11 +358,13 @@
   function sendToLine() {
     const offText = document.querySelector('input[name="off"]:checked').parentElement.innerText.trim();
     const mainColor = document.getElementById('mainColor').value;
+    const toneText = document.querySelector('input[name="tone"]:checked').value;
     
     let details = `【美甲服務預約單】\n`;
     details += `----------------------------\n`;
     details += `• 卸甲服務：${offText}\n`;
     details += `• 單色款式：${mainColor} (700元)\n`;
+    details += `• 色調選擇：${toneText}\n`;
 
     if (showJumpColor) {
       const jumpColor = document.getElementById('jumpColor').value;
