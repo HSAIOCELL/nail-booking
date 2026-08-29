@@ -16,7 +16,7 @@
     body {
       background-color: #efece6;
       margin: 0;
-      padding: 20px;
+      padding: 15px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -29,7 +29,7 @@
       width: 100%;
       border-radius: 16px;
       box-shadow: 0 8px 20px rgba(140, 124, 117, 0.15);
-      padding: 24px;
+      padding: 20px;
       border: 1px solid #d8d0c5;
     }
     h2 {
@@ -58,7 +58,7 @@
     }
     .radio-group {
       display: flex;
-      gap: 15px;
+      gap: 12px;
       flex-wrap: wrap;
     }
     label {
@@ -68,36 +68,41 @@
     }
     select, input[type="text"], input[type="date"] {
       width: 100%;
-      padding: 8px 12px;
+      padding: 9px 10px;
       border: 1px solid #c8beba;
       border-radius: 8px;
       outline: none;
       font-size: 15px;
       background-color: #f7f4ee;
       color: #4a423d;
+      appearance: none;
+      -webkit-appearance: none;
     }
     select:focus, input[type="text"]:focus, input[type="date"]:focus {
       border-color: #8c7c75;
       box-shadow: 0 0 5px rgba(140, 124, 117, 0.3);
     }
-    .calendar-container {
-      width: 100%;
-      height: 300px;
-      margin-bottom: 15px;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid #c8beba;
+    
+    .datetime-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
-    .calendar-container iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
+    .time-picker-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
     }
+    .time-picker-group select {
+      flex: 1;
+      text-align: center;
+    }
+
     .add-btn {
       background-color: #a3958d;
       color: #ffffff;
       border: none;
-      padding: 4px 10px;
+      padding: 5px 10px;
       border-radius: 12px;
       font-size: 14px;
       cursor: pointer;
@@ -159,11 +164,6 @@
     .sub-input {
       margin-top: 8px;
     }
-    .time-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
   </style>
 </head>
 <body>
@@ -171,57 +171,40 @@
 <div class="card">
   <h2>美甲服務預約選單</h2>
 
-  <!-- 1. 當月可預約空檔 -->
+  <!-- 1. 預約日期與時間 -->
   <div class="section">
-    <div class="section-title">
-      1. 當月可預約空檔
-      <button class="draw-btn" onclick="toggleCalendar()">📅 顯示/隱藏 行事曆</button>
-    </div>
-    <div id="calendarWrapper" class="calendar-container">
-      <iframe src="https://calendar.google.com/calendar/embed?src=zh-tw.taiwan%23holiday%40group.v.calendar.google.com&ctz=Asia%2FTaipei"></iframe>
-    </div>
-
-    <!-- 預約日期與時間選擇 -->
-    <div class="time-grid" style="margin-top: 10px;">
+    <div class="section-title">1. 預約日期與時間</div>
+    <div class="datetime-container">
       <div>
-        <label style="font-size: 14px; font-weight: bold;">預約日期：</label>
+        <label style="font-size: 14px; font-weight: bold; display: block; margin-bottom: 4px;">預約日期：</label>
         <input type="date" id="bookingDate">
       </div>
       <div>
-        <label style="font-size: 14px; font-weight: bold;">預約時間：</label>
-        <select id="bookingTime">
-          <option value="10:00">10:00 (整點)</option>
-          <option value="10:15">10:15 (15分)</option>
-          <option value="10:30">10:30 (30分)</option>
-          <option value="11:00">11:00 (整點)</option>
-          <option value="11:15">11:15 (15分)</option>
-          <option value="11:30">11:30 (30分)</option>
-          <option value="12:00">12:00 (整點)</option>
-          <option value="12:15">12:15 (15分)</option>
-          <option value="12:30">12:30 (30分)</option>
-          <option value="13:00">13:00 (整點)</option>
-          <option value="13:15">13:15 (15分)</option>
-          <option value="13:30">13:30 (30分)</option>
-          <option value="14:00" selected>14:00 (整點)</option>
-          <option value="14:15">14:15 (15分)</option>
-          <option value="14:30">14:30 (30分)</option>
-          <option value="15:00">15:00 (整點)</option>
-          <option value="15:15">15:15 (15分)</option>
-          <option value="15:30">15:30 (30分)</option>
-          <option value="16:00">16:00 (整點)</option>
-          <option value="16:15">16:15 (15分)</option>
-          <option value="16:30">16:30 (30分)</option>
-          <option value="17:00">17:00 (整點)</option>
-          <option value="17:15">17:15 (15分)</option>
-          <option value="17:30">17:30 (30分)</option>
-          <option value="18:00">18:00 (整點)</option>
-          <option value="18:15">18:15 (15分)</option>
-          <option value="18:30">18:30 (30分)</option>
-          <option value="19:00">19:00 (整點)</option>
-          <option value="19:15">19:15 (15分)</option>
-          <option value="19:30">19:30 (30分)</option>
-          <option value="20:00">20:00 (整點)</option>
-        </select>
+        <label style="font-size: 14px; font-weight: bold; display: block; margin-bottom: 4px;">預約時間：</label>
+        <div class="time-picker-group">
+          <select id="bookingHour">
+            <option value="08">08 時</option>
+            <option value="09">09 時</option>
+            <option value="10">10 時</option>
+            <option value="11">11 時</option>
+            <option value="12">12 時</option>
+            <option value="13">13 時</option>
+            <option value="14" selected>14 時</option>
+            <option value="15">15 時</option>
+            <option value="16">16 時</option>
+            <option value="17">17 時</option>
+            <option value="18">18 時</option>
+            <option value="19">19 時</option>
+            <option value="20">20 時</option>
+            <option value="21">21 時</option>
+          </select>
+          <select id="bookingMinute">
+            <option value="00" selected>00 分</option>
+            <option value="15">15 分</option>
+            <option value="30">30 分</option>
+            <option value="45">45 分</option>
+          </select>
+        </div>
       </div>
     </div>
   </div>
@@ -230,8 +213,8 @@
   <div class="section">
     <div class="section-title">2. 卸甲服務</div>
     <div class="radio-group">
-      <label><input type="radio" name="off" value="150" onchange="calculateTotal()"> 我要卸甲! (+150)</label>
-      <label><input type="radio" name="off" value="0" checked onchange="calculateTotal()"> 不需要卸甲~</label>
+      <label><input type="radio" name="off" value="yes" onchange="onSelectionChange()"> 我要卸甲</label>
+      <label><input type="radio" name="off" value="no" checked onchange="onSelectionChange()"> 不需要卸甲</label>
     </div>
   </div>
 
@@ -241,10 +224,11 @@
       3. 單色款式
       <button class="draw-btn" onclick="drawMainColor()">🎲 幫我抽色系</button>
     </div>
-    <div style="margin-bottom: 5px;">
-      <label><input type="checkbox" id="enableMainColor" checked onchange="toggleMainColor()"> 施作單色美甲 (700元)</label>
+    <div style="margin-bottom: 8px;">
+      <label><input type="checkbox" id="enableMainColor" checked onchange="toggleMainColor()"> 施作單色美甲</label>
     </div>
-    <select id="mainColor" onchange="calculateTotal()">
+    <select id="mainColor" onchange="onSelectionChange()">
+      <option value="">-- 請選擇色系 (無則留空) --</option>
       <option value="紅色">紅色</option>
       <option value="粉色">粉色</option>
       <option value="橘色">橘色</option>
@@ -266,6 +250,7 @@
     <div class="radio-group">
       <label><input type="radio" name="tone" value="深色感" checked> 深色感</label>
       <label><input type="radio" name="tone" value="淺色感"> 淺色感</label>
+      <label><input type="radio" name="tone" value="灰色"> 灰色</label>
       <label><input type="radio" name="tone" value="隨機發揮"> 隨機發揮</label>
     </div>
   </div>
@@ -283,7 +268,7 @@
     <!-- 跳色選單 -->
     <div id="jumpColorSection" class="hidden" style="margin-top: 10px; padding: 10px; background: #f2ebe5; border-radius: 8px;">
       <div style="font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #6e6058;">跳色選擇：</div>
-      <select id="jumpColor" onchange="calculateTotal()">
+      <select id="jumpColor" onchange="onSelectionChange()">
         <option value="交給琦選!">交給琦選!</option>
         <option value="紅色">紅色</option>
         <option value="粉色">粉色</option>
@@ -297,6 +282,7 @@
         <option value="黑色">黑色</option>
         <option value="銀色/白色">銀色/白色</option>
         <option value="金色/香檳色">金色/香檳色</option>
+        <option value="灰色">灰色</option>
       </select>
     </div>
 
@@ -321,13 +307,13 @@
         <label><input type="checkbox" name="style" id="customStyleCb" value="指定圖案" onchange="checkLimit(this)"> 指定圖案</label>
       </div>
 
-      <!-- 貓眼細項選擇 -->
+      <!-- 貓眼細項自動呈現 -->
       <div id="catEyeDetailDiv" class="sub-input hidden">
         <label style="font-size: 13px; font-weight: bold; color: #6e6058;">貓眼類型：</label>
-        <select id="catEyeType">
-          <option value="依單色色系為主">依單色色系為主</option>
-          <option value="雙色貓眼">雙色貓眼</option>
+        <select id="catEyeType" disabled style="background-color: #eae5dc; font-weight: bold;">
           <option value="指定單色貓眼">指定單色貓眼</option>
+          <option value="雙色貓眼">雙色貓眼</option>
+          <option value="搭配單色底色">搭配單色底色</option>
         </select>
       </div>
 
@@ -350,19 +336,14 @@
   let showJumpColor = false;
   let showStyle = false;
 
-  // 自動預設今天日期
+  // 預設今天日期
   document.getElementById('bookingDate').valueAsDate = new Date();
-
-  function toggleCalendar() {
-    const cal = document.getElementById('calendarWrapper');
-    cal.classList.toggle('hidden');
-  }
 
   function toggleMainColor() {
     const isChecked = document.getElementById('enableMainColor').checked;
     document.getElementById('mainColor').disabled = !isChecked;
     document.getElementById('toneSection').style.opacity = isChecked ? '1' : '0.5';
-    calculateTotal();
+    onSelectionChange();
   }
 
   function toggleOption(id) {
@@ -374,7 +355,39 @@
       showStyle = !showStyle;
       el.classList.toggle('hidden', !showStyle);
     }
+    onSelectionChange();
+  }
+
+  function onSelectionChange() {
+    autoDetermineCatEye();
     calculateTotal();
+  }
+
+  // 🤖 貓眼類型自動邏輯判斷
+  function autoDetermineCatEye() {
+    const catEyeCb = document.getElementById('catEyeCb');
+    const catEyeDetailDiv = document.getElementById('catEyeDetailDiv');
+    const catEyeSelect = document.getElementById('catEyeType');
+    
+    if (!catEyeCb || !catEyeCb.checked || !showStyle) {
+      catEyeDetailDiv.classList.add('hidden');
+      return;
+    }
+
+    catEyeDetailDiv.classList.remove('hidden');
+
+    const selectedStyles = document.querySelectorAll('input[name="style"]:checked');
+    const styleCount = selectedStyles.length;
+    const hasJumpColor = showJumpColor;
+    const hasMainColor = document.getElementById('enableMainColor').checked && document.getElementById('mainColor').value !== "";
+
+    if (hasJumpColor && styleCount === 1) {
+      catEyeSelect.value = "雙色貓眼";
+    } else if (hasMainColor && !hasJumpColor && styleCount === 1) {
+      catEyeSelect.value = "指定單色貓眼";
+    } else {
+      catEyeSelect.value = "搭配單色底色";
+    }
   }
 
   // 🎲 隨機抽單色色系
@@ -385,10 +398,10 @@
     }
     const select = document.getElementById('mainColor');
     const options = select.options;
-    const randomIndex = Math.floor(Math.random() * options.length);
+    const randomIndex = Math.floor(Math.random() * (options.length - 1)) + 1;
     select.selectedIndex = randomIndex;
     alert(`🎲 恭喜抽中色系：【${options[randomIndex].value}】！`);
-    calculateTotal();
+    onSelectionChange();
   }
 
   // 🎲 隨機抽選 1 ~ 3 個款式造型
@@ -412,12 +425,10 @@
       { name: "(全/造型)鏡面銀", weight: 0.5 }
     ];
 
-    // 隨機決定要抽出 1 ~ 3 個項目
     const countToDraw = Math.floor(Math.random() * 3) + 1;
     let chosenList = [];
 
     for (let i = 0; i < countToDraw; i++) {
-      // 排除已抽中的項目，避免重複
       const availablePool = pool.filter(item => !chosenList.includes(item.name));
       if (availablePool.length === 0) break;
 
@@ -433,7 +444,6 @@
       }
     }
 
-    // 勾選抽中的項目
     checkboxes.forEach(cb => {
       if (chosenList.includes(cb.value)) {
         cb.checked = true;
@@ -442,7 +452,7 @@
     });
 
     alert(`🎲 恭喜抽中 ${chosenList.length} 個款式：\n【${chosenList.join('、')}】！`);
-    calculateTotal();
+    onSelectionChange();
   }
 
   function checkLimit(checkbox) {
@@ -451,39 +461,47 @@
       alert("款式類型最多只能勾選 4 個喔！");
       checkbox.checked = false;
     }
-    
-    // 貓眼細項顯示控制
-    const catEyeCb = document.getElementById('catEyeCb');
-    document.getElementById('catEyeDetailDiv').classList.toggle('hidden', !catEyeCb.checked);
 
-    // 指定圖案備註顯示控制
     const customCb = document.getElementById('customStyleCb');
     document.getElementById('customInputDiv').classList.toggle('hidden', !customCb.checked);
 
-    calculateTotal();
+    onSelectionChange();
   }
 
+  // 💡 最新金流計算邏輯
   function calculateTotal() {
     let total = 0;
 
-    // 1. 單色美甲
-    const isMainColor = document.getElementById('enableMainColor').checked;
-    if (isMainColor) {
+    // 判斷是否有美甲項目 (單色 / 跳色 / 款式)
+    const isMainColorSelected = document.getElementById('enableMainColor').checked && document.getElementById('mainColor').value !== "";
+    const isJumpColorSelected = showJumpColor;
+    const selectedStyles = showStyle ? document.querySelectorAll('input[name="style"]:checked') : [];
+    const isStyleSelected = selectedStyles.length > 0;
+
+    const hasNailService = isMainColorSelected || isJumpColorSelected || isStyleSelected;
+
+    // 1. 卸甲計算 (單純卸甲 $200 / 卸甲加做美甲 $150)
+    const needOff = document.querySelector('input[name="off"]:checked').value === "yes";
+    if (needOff) {
+      if (hasNailService) {
+        total += 150; // 美甲加購卸甲
+      } else {
+        total += 200; // 單純卸甲
+      }
+    }
+
+    // 2. 單色美甲 (+700)
+    if (isMainColorSelected) {
       total += 700;
     }
 
-    // 2. 卸甲
-    const offValue = parseInt(document.querySelector('input[name="off"]:checked').value);
-    total += offValue;
-
     // 3. 跳色 (+50)
-    if (showJumpColor) {
+    if (isJumpColorSelected) {
       total += 50;
     }
 
-    // 4. 款式加價
-    if (showStyle) {
-      const selectedStyles = document.querySelectorAll('input[name="style"]:checked');
+    // 4. 款式加價 (1個 +150 / 2個以上 +200)
+    if (isStyleSelected) {
       const count = selectedStyles.length;
       if (count === 1) {
         total += 150;
@@ -497,46 +515,46 @@
 
   function sendToLine() {
     const bookingDate = document.getElementById('bookingDate').value || '未選擇日期';
-    const bookingTime = document.getElementById('bookingTime').value;
-    const offText = document.querySelector('input[name="off"]:checked').parentElement.innerText.trim();
-    const isMainColor = document.getElementById('enableMainColor').checked;
+    const hour = document.getElementById('bookingHour').value;
+    const minute = document.getElementById('bookingMinute').value;
+    const bookingTime = `${hour}:${minute}`;
+
+    const needOff = document.querySelector('input[name="off"]:checked').value === "yes";
+    const isMainColorSelected = document.getElementById('enableMainColor').checked && document.getElementById('mainColor').value !== "";
+    const mainColorVal = document.getElementById('mainColor').value;
     
     let details = `【美甲服務預約單】\n`;
     details += `----------------------------\n`;
-    details += `• 預約時間：${bookingDate} (${bookingTime})\n`;
-    details += `• 卸甲服務：${offText}\n`;
+    details += `• 預約時間：${bookingDate} ${bookingTime}\n`;
+    details += `• 卸甲服務：${needOff ? '我要卸甲' : '不需要卸甲'}\n`;
 
-    if (isMainColor) {
-      const mainColor = document.getElementById('mainColor').value;
+    if (isMainColorSelected) {
       const toneText = document.querySelector('input[name="tone"]:checked').value;
-      details += `• 單色款式：${mainColor}\n`;
+      details += `• 單色款式：${mainColorVal}\n`;
       details += `• 色調選擇：${toneText}\n`;
     } else {
-      details += `• 單色美甲：不需要 (僅純卸甲/單做項目)\n`;
+      details += `• 單色美甲：無 (單純卸甲/加購項目)\n`;
     }
 
     if (showJumpColor) {
       const jumpColor = document.getElementById('jumpColor').value;
-      details += `• 加價跳色：${jumpColor}\n`;
+      details += `• 加購跳色：${jumpColor}\n`;
     }
 
     if (showStyle) {
       const selectedStyles = Array.from(document.querySelectorAll('input[name="style"]:checked')).map(cb => cb.value);
       if (selectedStyles.length > 0) {
-        // 貓眼細項格式化
         if (selectedStyles.includes('貓眼')) {
           const catType = document.getElementById('catEyeType').value;
           const idx = selectedStyles.indexOf('貓眼');
           selectedStyles[idx] = `貓眼(${catType})`;
         }
-        // 指定圖案格式化
         if (selectedStyles.includes('指定圖案')) {
           const customText = document.getElementById('customPattern').value || '未填寫';
           const idx = selectedStyles.indexOf('指定圖案');
           selectedStyles[idx] = `指定圖案(${customText})`;
         }
-        const stylePrice = selectedStyles.length === 1 ? '150元' : '200元';
-        details += `• 款式造型：${selectedStyles.join('、')} (+${stylePrice})\n`;
+        details += `• 款式造型：${selectedStyles.join('、')}\n`;
       }
     }
 
