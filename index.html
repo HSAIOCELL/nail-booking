@@ -66,7 +66,7 @@
       color: #5c504a;
       cursor: pointer;
     }
-    select, input[type="text"] {
+    select, input[type="text"], input[type="date"] {
       width: 100%;
       padding: 8px 12px;
       border: 1px solid #c8beba;
@@ -76,7 +76,7 @@
       background-color: #f7f4ee;
       color: #4a423d;
     }
-    select:focus, input[type="text"]:focus {
+    select:focus, input[type="text"]:focus, input[type="date"]:focus {
       border-color: #8c7c75;
       box-shadow: 0 0 5px rgba(140, 124, 117, 0.3);
     }
@@ -153,19 +153,25 @@
 <div class="card">
   <h2>美甲服務預約選單</h2>
 
-  <!-- 1. 卸甲選項 -->
+  <!-- 1. 預約日期 -->
   <div class="section">
-    <div class="section-title">1. 卸甲服務</div>
+    <div class="section-title">1. 預約日期</div>
+    <input type="date" id="bookingDate">
+  </div>
+
+  <!-- 2. 卸甲選項 -->
+  <div class="section">
+    <div class="section-title">2. 卸甲服務</div>
     <div class="radio-group">
       <label><input type="radio" name="off" value="150" onchange="calculateTotal()"> 我要卸甲!</label>
       <label><input type="radio" name="off" value="0" checked onchange="calculateTotal()"> 不需要卸甲~</label>
     </div>
   </div>
 
-  <!-- 2. 單色款式 -->
+  <!-- 3. 單色款式 -->
   <div class="section">
     <div class="section-title">
-      2. 單色款式 (700元)
+      3. 單色款式 (700元)
       <button class="draw-btn" onclick="drawMainColor()">🎲 幫我抽色系</button>
     </div>
     <select id="mainColor" onchange="calculateTotal()">
@@ -184,9 +190,9 @@
     </select>
   </div>
 
-  <!-- 3. 色調 -->
+  <!-- 4. 色調選擇 -->
   <div class="section">
-    <div class="section-title">3. 色調選擇</div>
+    <div class="section-title">4. 色調選擇</div>
     <div class="radio-group">
       <label><input type="radio" name="tone" value="深色感" checked> 深色感</label>
       <label><input type="radio" name="tone" value="淺色感"> 淺色感</label>
@@ -194,10 +200,10 @@
     </div>
   </div>
 
-  <!-- 4. 加購項目 -->
+  <!-- 5. 加購項目 -->
   <div class="section">
     <div class="section-title">
-      4. 加購項目
+      5. 加購項目
       <div>
         <button class="add-btn" onclick="toggleOption('jumpColorSection')">+ 跳色 (+50)</button>
         <button class="add-btn" onclick="toggleOption('styleSection')">+ 款式造型</button>
@@ -260,6 +266,9 @@
   let showJumpColor = false;
   let showStyle = false;
 
+  // 自動預設今天日期
+  document.getElementById('bookingDate').valueAsDate = new Date();
+
   function toggleOption(id) {
     const el = document.getElementById(id);
     if (id === 'jumpColorSection') {
@@ -284,30 +293,24 @@
 
   // 🎲 隨機抽款式造型 (貓眼 75% 機率)
   function drawStyle() {
-    // 若款式區還沒展開，自動幫忙展開
     if (!showStyle) {
       toggleOption('styleSection');
     }
 
-    // 先清空所有已勾選的款式
     const checkboxes = document.querySelectorAll('input[name="style"]');
     checkboxes.forEach(cb => cb.checked = false);
 
-    // 抽籤邏輯 (0 ~ 1 隨機數)
     const rand = Math.random();
     let chosenValue = "";
 
     if (rand < 0.75) {
-      // 75% 機率抽中貓眼
       chosenValue = "貓眼(依單色)";
     } else {
-      // 25% 機率均分給其餘 7 個款式 (每個約 3.57%)
       const otherStyles = ["法式", "漸層", "海莉款", "亮面銀", "小飾品/貼紙", "格紋", "指定圖案"];
       const otherIndex = Math.floor(Math.random() * otherStyles.length);
       chosenValue = otherStyles[otherIndex];
     }
 
-    // 勾選對應的選項
     checkboxes.forEach(cb => {
       if (cb.value === chosenValue) {
         cb.checked = true;
@@ -356,12 +359,14 @@
   }
 
   function sendToLine() {
+    const bookingDate = document.getElementById('bookingDate').value || '未選擇日期';
     const offText = document.querySelector('input[name="off"]:checked').parentElement.innerText.trim();
     const mainColor = document.getElementById('mainColor').value;
     const toneText = document.querySelector('input[name="tone"]:checked').value;
     
     let details = `【美甲服務預約單】\n`;
     details += `----------------------------\n`;
+    details += `• 預約日期：${bookingDate}\n`;
     details += `• 卸甲服務：${offText}\n`;
     details += `• 單色款式：${mainColor} (700元)\n`;
     details += `• 色調選擇：${toneText}\n`;
