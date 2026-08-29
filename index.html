@@ -239,11 +239,12 @@
       <div style="font-size: 12px; color: #8c7c75; margin-bottom: 8px;">(選1個 +150元 / 選2個以上 +200元)</div>
       
       <div class="checkbox-grid">
-        <label><input type="checkbox" name="style" id="catEyeCb" value="貓眼(依單色)" onchange="checkLimit(this)"> 貓眼 (依單色)</label>
+        <label><input type="checkbox" name="style" value="貓眼(依單色)" onchange="checkLimit(this)"> 貓眼 (依單色)</label>
+        <label><input type="checkbox" name="style" value="暈染" onchange="checkLimit(this)"> 暈染</label>
         <label><input type="checkbox" name="style" value="法式" onchange="checkLimit(this)"> 法式</label>
         <label><input type="checkbox" name="style" value="漸層" onchange="checkLimit(this)"> 漸層</label>
         <label><input type="checkbox" name="style" value="海莉款" onchange="checkLimit(this)"> 海莉款</label>
-        <label><input type="checkbox" name="style" value="亮面銀" onchange="checkLimit(this)"> 亮面銀</label>
+        <label><input type="checkbox" name="style" value="(全/造型)鏡面銀" onchange="checkLimit(this)"> (全/造型)鏡面銀</label>
         <label><input type="checkbox" name="style" value="小飾品/貼紙" onchange="checkLimit(this)"> 小飾品/貼紙</label>
         <label><input type="checkbox" name="style" value="格紋" onchange="checkLimit(this)"> 格紋</label>
         <label><input type="checkbox" name="style" id="customStyleCb" value="指定圖案" onchange="checkLimit(this)"> 指定圖案</label>
@@ -291,7 +292,7 @@
     calculateTotal();
   }
 
-  // 🎲 隨機抽款式造型 (貓眼 75% 機率)
+  // 🎲 依指定機率抽款式造型
   function drawStyle() {
     if (!showStyle) {
       toggleOption('styleSection');
@@ -300,15 +301,28 @@
     const checkboxes = document.querySelectorAll('input[name="style"]');
     checkboxes.forEach(cb => cb.checked = false);
 
-    const rand = Math.random();
+    // 各項目抽籤權重配置
+    const pool = [
+      { name: "貓眼(依單色)", weight: 75 },
+      { name: "暈染", weight: 30 },
+      { name: "小飾品/貼紙", weight: 2 },
+      { name: "格紋", weight: 1 },
+      { name: "法式", weight: 1 },
+      { name: "漸層", weight: 0.5 },
+      { name: "海莉款", weight: 0.5 },
+      { name: "(全/造型)鏡面銀", weight: 0.5 }
+    ];
+
+    const totalWeight = pool.reduce((sum, item) => sum + item.weight, 0);
+    let randomNum = Math.random() * totalWeight;
     let chosenValue = "";
 
-    if (rand < 0.75) {
-      chosenValue = "貓眼(依單色)";
-    } else {
-      const otherStyles = ["法式", "漸層", "海莉款", "亮面銀", "小飾品/貼紙", "格紋", "指定圖案"];
-      const otherIndex = Math.floor(Math.random() * otherStyles.length);
-      chosenValue = otherStyles[otherIndex];
+    for (let item of pool) {
+      if (randomNum < item.weight) {
+        chosenValue = item.name;
+        break;
+      }
+      randomNum -= item.weight;
     }
 
     checkboxes.forEach(cb => {
