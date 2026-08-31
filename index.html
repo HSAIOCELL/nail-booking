@@ -229,10 +229,6 @@
     .submit-btn:hover {
       background-color: #5c5049;
     }
-    .submit-btn:disabled {
-      background-color: #c5beba;
-      cursor: not-allowed;
-    }
     .sub-input {
       margin-top: 8px;
     }
@@ -245,6 +241,7 @@
     <h2>美甲服務預約選單</h2>
   </div>
 
+  <!-- 1. 預約日期與時間 -->
   <div class="section">
     <div class="section-title">1. 預約日期與時間</div>
     <div class="datetime-container">
@@ -276,6 +273,7 @@
     </div>
   </div>
 
+  <!-- 2. 卸甲服務 -->
   <div class="section">
     <div class="section-title">2. 卸甲服務</div>
     <div class="radio-group">
@@ -284,6 +282,7 @@
     </div>
   </div>
 
+  <!-- 3. 單色款式 -->
   <div class="section">
     <div class="section-title">
       3. 單色款式
@@ -307,6 +306,7 @@
     </select>
   </div>
 
+  <!-- 4. 色調選擇 -->
   <div class="section" id="toneSection">
     <div class="section-title">4. 色調選擇</div>
     <div class="radio-group">
@@ -316,6 +316,7 @@
     </div>
   </div>
 
+  <!-- 5. 加購項目 -->
   <div class="section">
     <div class="section-title">
       5. 加購項目
@@ -325,6 +326,7 @@
       </div>
     </div>
 
+    <!-- 跳色選單 -->
     <div id="jumpColorSection" class="hidden" style="margin-top: 10px; padding: 10px; background: #f2ebe5; border-radius: 8px;">
       <div style="font-size: 13.5px; font-weight: bold; margin-bottom: 5px; color: #5c5049;">跳色選擇：</div>
       <select id="jumpColor" onchange="onSelectionChange()">
@@ -345,6 +347,7 @@
       </select>
     </div>
 
+    <!-- 款式勾選區 -->
     <div id="styleSection" class="hidden" style="margin-top: 10px; padding: 10px; background: #f2ebe5; border-radius: 8px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
         <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">款式類型 (最多選4個)：</div>
@@ -383,12 +386,12 @@
     預計總金額：NT$ <span id="totalPrice">0</span> 元
   </div>
 
-  <button class="submit-btn" id="submitBtn" onclick="sendBooking()">送出預約通知</button>
+  <button class="submit-btn" onclick="sendBooking()">送出預約單 (開啟 LINE)</button>
 </div>
 
 <script>
-  // 🔗 您的專屬 Google Apps Script 後端網址 (無任何 API Key，安全防洩漏)
-  const GOOGLE_BACKEND_URL = "https://script.google.com/macros/s/AKfycbxNOZA_Yx-cccHFGbvkBZanb1A8FkUgFnMTtxlMIJ5yjA9TDL70r00UO-Ld9Bbtg2cM/exec";
+  // 🎯 請將此處替換為您的 LINE 官方帳號 Basic ID (記得要保留 @ 符號)
+  const LINE_OFFICIAL_ACCOUNT_ID = "@344gjuzg"; 
 
   // 防同行偷看/側錄防護牆
   document.addEventListener('keydown', function(e) {
@@ -502,9 +505,8 @@
     document.getElementById('totalPrice').innerText = total;
   }
 
-  // 透過安全後端發送預約訊息
+  // 自動生成文字並開啟 LINE 官方帳號發送
   function sendBooking() {
-    const submitBtn = document.getElementById('submitBtn');
     const bookingDate = document.getElementById('bookingDate').value || '未選擇日期';
     const hour = document.getElementById('bookingHour').value;
     const minute = document.getElementById('bookingMinute').value;
@@ -514,7 +516,7 @@
     const mainColorVal = document.getElementById('mainColor').value;
     const isMainColorSelected = mainColorVal !== "";
     
-    let details = `【美甲服務預約單】\n`;
+    let details = `你好！我想預約美甲：\n`;
     details += `----------------------------\n`;
     details += `• 預約時間：${bookingDate} ${bookingTime}\n`;
     details += `• 卸甲服務：${needOff ? '我要卸甲' : '不需要卸甲'}\n`;
@@ -553,30 +555,12 @@
     details += `----------------------------\n`;
     details += `💰 預計總金額：NT$ ${finalPrice} 元`;
 
-    // 防止重複點擊
-    submitBtn.disabled = true;
-    submitBtn.innerText = "預約傳送中...";
+    // 開啟 LINE 官方帳號聊天室並帶入文字
+    const encodedMessage = encodeURIComponent(details);
+    const lineUrl = `https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodedMessage}`;
 
-    fetch(GOOGLE_BACKEND_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify({ message: details })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.status === 'success') {
-        alert("✨ 預約成功！訊息已直接傳送給美甲師。");
-      } else {
-        alert("發送失敗，請直接聯繫美甲師喔！");
-      }
-    })
-    .catch(err => {
-      alert("預約已送出！請至 LINE 確認通知喔～");
-    })
-    .finally(() => {
-      submitBtn.disabled = false;
-      submitBtn.innerText = "送出預約通知";
-    });
+    alert("✨ 即將為您開啟 LINE，請在聊天室按「傳送」送出預約單！");
+    window.location.href = lineUrl;
   }
 
   calculateTotal();
