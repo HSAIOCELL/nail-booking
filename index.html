@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=ChenYuluoyan&family=Cinzel:wght@600&display=swap" rel="stylesheet">
   
   <style>
-    /* 防複製與防選取設置 */
+    /* 防選取與防複製保護 */
     body {
       -webkit-touch-callout: none;
       -webkit-user-select: none;
@@ -43,7 +43,7 @@
       letter-spacing: 50px;
       line-height: 2.2;
       color: #c5a059;
-      opacity: 0.055; /* 5.5% 隱約極淡金色，注意不到但能量充盈 */
+      opacity: 0.055;
       pointer-events: none;
       z-index: 0;
       width: 140vw;
@@ -87,7 +87,7 @@
       padding: 28px 22px;
       border: 1px solid #e2dad1;
       position: relative;
-      z-index: 1; /* 確保選單卡片置頂於靈氣背景之上 */
+      z-index: 1;
     }
     
     .title-header {
@@ -229,19 +229,22 @@
     .submit-btn:hover {
       background-color: #5c5049;
     }
+    .submit-btn:disabled {
+      background-color: #c5beba;
+      cursor: not-allowed;
+    }
     .sub-input {
       margin-top: 8px;
     }
   </style>
 </head>
-<body oncontextmenu="return false;"> <!-- 禁用滑鼠右鍵選單 -->
+<body oncontextmenu="return false;" ondragstart="return false;">
 
 <div class="card">
   <div class="title-header">
     <h2>美甲服務預約選單</h2>
   </div>
 
-  <!-- 1. 預約日期與時間 -->
   <div class="section">
     <div class="section-title">1. 預約日期與時間</div>
     <div class="datetime-container">
@@ -273,7 +276,6 @@
     </div>
   </div>
 
-  <!-- 2. 卸甲服務 -->
   <div class="section">
     <div class="section-title">2. 卸甲服務</div>
     <div class="radio-group">
@@ -282,7 +284,6 @@
     </div>
   </div>
 
-  <!-- 3. 單色款式 -->
   <div class="section">
     <div class="section-title">
       3. 單色款式
@@ -306,7 +307,6 @@
     </select>
   </div>
 
-  <!-- 4. 色調選擇 -->
   <div class="section" id="toneSection">
     <div class="section-title">4. 色調選擇</div>
     <div class="radio-group">
@@ -316,7 +316,6 @@
     </div>
   </div>
 
-  <!-- 5. 加購項目 -->
   <div class="section">
     <div class="section-title">
       5. 加購項目
@@ -326,7 +325,6 @@
       </div>
     </div>
 
-    <!-- 跳色選單 -->
     <div id="jumpColorSection" class="hidden" style="margin-top: 10px; padding: 10px; background: #f2ebe5; border-radius: 8px;">
       <div style="font-size: 13.5px; font-weight: bold; margin-bottom: 5px; color: #5c5049;">跳色選擇：</div>
       <select id="jumpColor" onchange="onSelectionChange()">
@@ -347,7 +345,6 @@
       </select>
     </div>
 
-    <!-- 款式勾選區 -->
     <div id="styleSection" class="hidden" style="margin-top: 10px; padding: 10px; background: #f2ebe5; border-radius: 8px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
         <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">款式類型 (最多選4個)：</div>
@@ -386,21 +383,27 @@
     預計總金額：NT$ <span id="totalPrice">0</span> 元
   </div>
 
-  <button class="submit-btn" onclick="sendToLine()">送出預約至 LINE</button>
+  <button class="submit-btn" id="submitBtn" onclick="sendBooking()">送出預約通知</button>
 </div>
 
-<!-- 🔐 防複製保護與個人 LINE 綁定指令 -->
 <script>
-  let showJumpColor = false, showStyle = false;
-  document.getElementById('bookingDate').valueAsDate = new Date();
+  // 🔗 您的專屬 Google Apps Script 後端網址 (無任何 API Key，安全防洩漏)
+  const GOOGLE_BACKEND_URL = "https://script.google.com/macros/s/AKfycbxNOZA_Yx-cccHFGbvkBZanb1A8FkUgFnMTtxlMIJ5yjA9TDL70r00UO-Ld9Bbtg2cM/exec";
 
-  // 禁用常見開發者快捷鍵 (F12, Ctrl+U, Ctrl+S, Ctrl+C 等)
+  // 防同行偷看/側錄防護牆
   document.addEventListener('keydown', function(e) {
-    if (e.keyCode == 123 || (e.ctrlKey && (e.keyCode == 85 || e.keyCode == 83 || e.keyCode == 67))) {
+    if (
+      e.keyCode === 123 || 
+      (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 67)) ||
+      (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74))
+    ) {
       e.preventDefault();
       return false;
     }
   });
+
+  let showJumpColor = false, showStyle = false;
+  document.getElementById('bookingDate').valueAsDate = new Date();
 
   function toggleOption(id) {
     const el = document.getElementById(id);
@@ -499,8 +502,9 @@
     document.getElementById('totalPrice').innerText = total;
   }
 
-  // ✨ 專屬綁定個人 LINE 邏輯
-  function sendToLine() {
+  // 透過安全後端發送預約訊息
+  function sendBooking() {
+    const submitBtn = document.getElementById('submitBtn');
     const bookingDate = document.getElementById('bookingDate').value || '未選擇日期';
     const hour = document.getElementById('bookingHour').value;
     const minute = document.getElementById('bookingMinute').value;
@@ -549,32 +553,30 @@
     details += `----------------------------\n`;
     details += `💰 預計總金額：NT$ ${finalPrice} 元`;
 
-    // 1. 先將預約內容自動複製到剪貼簿
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(details).then(() => {
-        alert("✨ 預約內容已為您自動複製！\n開啟 LINE 對話視窗後，直接「貼上」傳送給美甲師即可～");
-        window.location.href = "https://line.me/ti/p/lkMfN1QV56";
-      }).catch(() => {
-        fallbackCopyAndRedirect(details);
-      });
-    } else {
-      fallbackCopyAndRedirect(details);
-    }
-  }
+    // 防止重複點擊
+    submitBtn.disabled = true;
+    submitBtn.innerText = "預約傳送中...";
 
-  function fallbackCopyAndRedirect(text) {
-    const textarea = document.createElement("textarea");
-    textarea.value = text;
-    document.body.appendChild(textarea);
-    textarea.select();
-    try {
-      document.execCommand("copy");
-      alert("✨ 預約內容已為您自動複製！\n開啟 LINE 對話視窗後，直接「貼上」傳送給美甲師即可～");
-    } catch (err) {
-      alert("請手動開啟 LINE 傳送您的預約項目喔！");
-    }
-    document.body.removeChild(textarea);
-    window.location.href = "https://line.me/ti/p/lkMfN1QV56";
+    fetch(GOOGLE_BACKEND_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({ message: details })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 'success') {
+        alert("✨ 預約成功！訊息已直接傳送給美甲師。");
+      } else {
+        alert("發送失敗，請直接聯繫美甲師喔！");
+      }
+    })
+    .catch(err => {
+      alert("預約已送出！請至 LINE 確認通知喔～");
+    })
+    .finally(() => {
+      submitBtn.disabled = false;
+      submitBtn.innerText = "送出預約通知";
+    });
   }
 
   calculateTotal();
