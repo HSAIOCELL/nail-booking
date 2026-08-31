@@ -183,7 +183,7 @@
       color: #4a423d;
       border: 1px solid #c9bebc;
       padding: 3px 8px;
-      border-radius: 10px;
+      border-radius: 12.5px;
       font-size: 12.5px;
       cursor: pointer;
       transition: 0.2s;
@@ -389,7 +389,7 @@
   <button class="submit-btn" onclick="sendToLine()">送出預約至 LINE</button>
 </div>
 
-<!-- 🔐 防複製保護之 JavaScript 程式碼 -->
+<!-- 🔐 防複製保護與個人 LINE 綁定指令 -->
 <script>
   let showJumpColor = false, showStyle = false;
   document.getElementById('bookingDate').valueAsDate = new Date();
@@ -499,6 +499,7 @@
     document.getElementById('totalPrice').innerText = total;
   }
 
+  // ✨ 專屬綁定個人 LINE 邏輯
   function sendToLine() {
     const bookingDate = document.getElementById('bookingDate').value || '未選擇日期';
     const hour = document.getElementById('bookingHour').value;
@@ -509,8 +510,7 @@
     const mainColorVal = document.getElementById('mainColor').value;
     const isMainColorSelected = mainColorVal !== "";
     
-    // ✨ 專屬標籤，確保同行無法拿去私用
-    let details = `【獨家個人專屬預約單】\n`;
+    let details = `【美甲服務預約單】\n`;
     details += `----------------------------\n`;
     details += `• 預約時間：${bookingDate} ${bookingTime}\n`;
     details += `• 卸甲服務：${needOff ? '我要卸甲' : '不需要卸甲'}\n`;
@@ -549,8 +549,32 @@
     details += `----------------------------\n`;
     details += `💰 預計總金額：NT$ ${finalPrice} 元`;
 
-    const lineShareUrl = `https://line.me/R/share?text=${encodeURIComponent(details)}`;
-    window.location.href = lineShareUrl;
+    // 1. 先將預約內容自動複製到剪貼簿
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(details).then(() => {
+        alert("✨ 預約內容已為您自動複製！\n開啟 LINE 對話視窗後，直接「貼上」傳送給美甲師即可～");
+        window.location.href = "https://line.me/ti/p/lkMfN1QV56";
+      }).catch(() => {
+        fallbackCopyAndRedirect(details);
+      });
+    } else {
+      fallbackCopyAndRedirect(details);
+    }
+  }
+
+  function fallbackCopyAndRedirect(text) {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand("copy");
+      alert("✨ 預約內容已為您自動複製！\n開啟 LINE 對話視窗後，直接「貼上」傳送給美甲師即可～");
+    } catch (err) {
+      alert("請手動開啟 LINE 傳送您的預約項目喔！");
+    }
+    document.body.removeChild(textarea);
+    window.location.href = "https://line.me/ti/p/lkMfN1QV56";
   }
 
   calculateTotal();
