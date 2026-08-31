@@ -6,15 +6,55 @@
   <title>美甲服務預約選單</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=ChenYuluoyan&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=ChenYuluoyan&family=Cinzel:wght@600&display=swap" rel="stylesheet">
   
   <style>
+    /* 防複製與防選取設置 */
+    body {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      background-color: #f4f1ea;
+      margin: 0;
+      padding: 20px 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #4a423d;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ✨ 隱藏金錢靈氣背景裝飾 (NT$ & $) */
+    body::before {
+      content: "NT$   $   NT$   $\n$   NT$   $   NT$\nNT$   $   NT$   $\n$   NT$   $   NT$";
+      white-space: pre-line;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-12deg);
+      font-family: 'Cinzel', serif;
+      font-size: 38px;
+      font-weight: 600;
+      letter-spacing: 50px;
+      line-height: 2.2;
+      color: #c5a059;
+      opacity: 0.055; /* 5.5% 隱約極淡金色，注意不到但能量充盈 */
+      pointer-events: none;
+      z-index: 0;
+      width: 140vw;
+      text-align: center;
+    }
+
     * {
       box-sizing: border-box;
       font-family: 'ChenYuluoyan', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
     }
 
-    /* 統一全頁亮顯、日曆與勾選框顏色（莫蘭迪大地色系，防止藍色出現） */
     :root {
       color-scheme: light;
     }
@@ -22,7 +62,7 @@
     input[type="checkbox"], 
     input[type="radio"],
     input[type="date"] {
-      accent-color: #7a6b63; /* 勾選框、單選鈕及日曆選取高亮改為大地色 */
+      accent-color: #7a6b63;
       cursor: pointer;
     }
 
@@ -33,22 +73,11 @@
       vertical-align: middle;
     }
 
-    /* 客製化日曆圖示與點擊高亮 */
     input[type="date"]::-webkit-calendar-picker-indicator {
       cursor: pointer;
-      filter: opacity(0.6) sepia(100%) hue-rotate(330deg); /* 微調日曆小圖示色調配合全頁 */
+      filter: opacity(0.6) sepia(100%) hue-rotate(330deg);
     }
 
-    body {
-      background-color: #f4f1ea;
-      margin: 0;
-      padding: 20px 15px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      color: #4a423d;
-    }
     .card {
       background: #faf8f5;
       max-width: 440px;
@@ -57,21 +86,22 @@
       box-shadow: 0 6px 18px rgba(120, 108, 100, 0.08);
       padding: 28px 22px;
       border: 1px solid #e2dad1;
+      position: relative;
+      z-index: 1; /* 確保選單卡片置頂於靈氣背景之上 */
     }
     
-    /* ✨ 標題樣式：字色與項目標題一致，底線與【預計總金額】底色 (#ebdcd3) 一致 */
     .title-header {
       text-align: center;
       margin-bottom: 24px;
       padding-bottom: 12px;
-      border-bottom: 3px solid #ebdcd3; /* 與預計總金額底色相同 */
+      border-bottom: 3px solid #ebdcd3;
     }
     .title-header h2 {
       margin: 0;
       font-size: 25px;
       font-weight: bold;
       letter-spacing: 2px;
-      color: #5c5049; /* 與其他項目標題顏色相同 */
+      color: #5c5049;
     }
 
     .section {
@@ -170,9 +200,8 @@
       gap: 10px 8px;
     }
     
-    /* 預計總金額區塊 */
     .total-box {
-      background-color: #ebdcd3; /* 原底色 */
+      background-color: #ebdcd3;
       color: #4e423b;
       padding: 14px;
       border-radius: 12px;
@@ -205,10 +234,9 @@
     }
   </style>
 </head>
-<body>
+<body oncontextmenu="return false;"> <!-- 禁用滑鼠右鍵選單 -->
 
 <div class="card">
-  <!-- ✨ 標題：文字顏色與項目一致，底線與預計總金額底色 (#ebdcd3) 一致 -->
   <div class="title-header">
     <h2>美甲服務預約選單</h2>
   </div>
@@ -224,32 +252,15 @@
       <div>
         <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #5c5049;">預約時間：</label>
         <div class="time-picker-group">
-          <!-- 00 ~ 23 時 -->
           <select id="bookingHour">
-            <option value="00">00 時</option>
-            <option value="01">01 時</option>
-            <option value="02">02 時</option>
-            <option value="03">03 時</option>
-            <option value="04">04 時</option>
-            <option value="05">05 時</option>
-            <option value="06">06 時</option>
-            <option value="07">07 時</option>
-            <option value="08">08 時</option>
-            <option value="09">09 時</option>
-            <option value="10">10 時</option>
-            <option value="11">11 時</option>
-            <option value="12">12 時</option>
-            <option value="13">13 時</option>
-            <option value="14" selected>14 時</option>
-            <option value="15">15 時</option>
-            <option value="16">16 時</option>
-            <option value="17">17 時</option>
-            <option value="18">18 時</option>
-            <option value="19">19 時</option>
-            <option value="20">20 時</option>
-            <option value="21">21 時</option>
-            <option value="22">22 時</option>
-            <option value="23">23 時</option>
+            <option value="00">00 時</option><option value="01">01 時</option><option value="02">02 時</option>
+            <option value="03">03 時</option><option value="04">04 時</option><option value="05">05 時</option>
+            <option value="06">06 時</option><option value="07">07 時</option><option value="08">08 時</option>
+            <option value="09">09 時</option><option value="10">10 時</option><option value="11">11 時</option>
+            <option value="12">12 時</option><option value="13">13 時</option><option value="14" selected>14 時</option>
+            <option value="15">15 時</option><option value="16">16 時</option><option value="17">17 時</option>
+            <option value="18">18 時</option><option value="19">19 時</option><option value="20">20 時</option>
+            <option value="21">21 時</option><option value="22">22 時</option><option value="23">23 時</option>
           </select>
           <select id="bookingMinute">
             <option value="00" selected>00 分</option>
@@ -315,7 +326,7 @@
       </div>
     </div>
 
-    <!-- 跳色選單 (底色還原為 #f2ebe5) -->
+    <!-- 跳色選單 -->
     <div id="jumpColorSection" class="hidden" style="margin-top: 10px; padding: 10px; background: #f2ebe5; border-radius: 8px;">
       <div style="font-size: 13.5px; font-weight: bold; margin-bottom: 5px; color: #5c5049;">跳色選擇：</div>
       <select id="jumpColor" onchange="onSelectionChange()">
@@ -336,7 +347,7 @@
       </select>
     </div>
 
-    <!-- 款式勾選區 (底色還原為 #f2ebe5) -->
+    <!-- 款式勾選區 -->
     <div id="styleSection" class="hidden" style="margin-top: 10px; padding: 10px; background: #f2ebe5; border-radius: 8px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
         <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">款式類型 (最多選4個)：</div>
@@ -357,7 +368,6 @@
         <label><input type="checkbox" name="style" id="customStyleCb" value="指定圖案" onchange="checkLimit(this)"> 指定圖案</label>
       </div>
 
-      <!-- 貓眼細項自動呈現 -->
       <div id="catEyeDetailDiv" class="sub-input hidden">
         <label style="font-size: 13px; font-weight: bold; color: #5c5049;">貓眼類型：</label>
         <select id="catEyeType" disabled style="background-color: #e5ded7; font-weight: bold;">
@@ -366,14 +376,12 @@
         </select>
       </div>
 
-      <!-- 指定圖案備註 -->
       <div id="customInputDiv" class="sub-input hidden">
         <input type="text" id="customPattern" placeholder="請填寫指定圖案細節">
       </div>
     </div>
   </div>
 
-  <!-- 金額顯示 -->
   <div class="total-box">
     預計總金額：NT$ <span id="totalPrice">0</span> 元
   </div>
@@ -381,22 +389,23 @@
   <button class="submit-btn" onclick="sendToLine()">送出預約至 LINE</button>
 </div>
 
+<!-- 🔐 防複製保護之 JavaScript 程式碼 -->
 <script>
-  let showJumpColor = false;
-  let showStyle = false;
-
-  // 預設今天日期
+  let showJumpColor = false, showStyle = false;
   document.getElementById('bookingDate').valueAsDate = new Date();
+
+  // 禁用常見開發者快捷鍵 (F12, Ctrl+U, Ctrl+S, Ctrl+C 等)
+  document.addEventListener('keydown', function(e) {
+    if (e.keyCode == 123 || (e.ctrlKey && (e.keyCode == 85 || e.keyCode == 83 || e.keyCode == 67))) {
+      e.preventDefault();
+      return false;
+    }
+  });
 
   function toggleOption(id) {
     const el = document.getElementById(id);
-    if (id === 'jumpColorSection') {
-      showJumpColor = !showJumpColor;
-      el.classList.toggle('hidden', !showJumpColor);
-    } else if (id === 'styleSection') {
-      showStyle = !showStyle;
-      el.classList.toggle('hidden', !showStyle);
-    }
+    if (id === 'jumpColorSection') { showJumpColor = !showJumpColor; el.classList.toggle('hidden', !showJumpColor); }
+    else if (id === 'styleSection') { showStyle = !showStyle; el.classList.toggle('hidden', !showStyle); }
     onSelectionChange();
   }
 
@@ -405,27 +414,18 @@
     calculateTotal();
   }
 
-  // 🤖 貓眼類型自動判斷：有選擇跳色一律顯示雙色貓眼，其餘為指定單色貓眼
   function autoDetermineCatEye() {
     const catEyeCb = document.getElementById('catEyeCb');
     const catEyeDetailDiv = document.getElementById('catEyeDetailDiv');
     const catEyeSelect = document.getElementById('catEyeType');
-    
     if (!catEyeCb || !catEyeCb.checked || !showStyle) {
       catEyeDetailDiv.classList.add('hidden');
       return;
     }
-
     catEyeDetailDiv.classList.remove('hidden');
-
-    if (showJumpColor) {
-      catEyeSelect.value = "雙色貓眼";
-    } else {
-      catEyeSelect.value = "指定單色貓眼";
-    }
+    catEyeSelect.value = showJumpColor ? "雙色貓眼" : "指定單色貓眼";
   }
 
-  // 🎲 隨機抽單色色系
   function drawMainColor() {
     const select = document.getElementById('mainColor');
     const options = select.options;
@@ -435,25 +435,15 @@
     onSelectionChange();
   }
 
-  // 🎲 隨機抽選 1 ~ 3 個款式造型
   function drawStyle() {
-    if (!showStyle) {
-      toggleOption('styleSection');
-    }
-
+    if (!showStyle) toggleOption('styleSection');
     const checkboxes = document.querySelectorAll('input[name="style"]');
     checkboxes.forEach(cb => cb.checked = false);
 
     const pool = [
-      { name: "貓眼", weight: 75 },
-      { name: "暈染", weight: 30 },
-      { name: "小飾品/貼紙", weight: 2 },
-      { name: "格紋", weight: 1 },
-      { name: "法式", weight: 1 },
-      { name: "立體不規則造型", weight: 1 },
-      { name: "漸層", weight: 0.5 },
-      { name: "海莉款", weight: 0.5 },
-      { name: "(全/造型)鏡面銀", weight: 0.5 }
+      { name: "貓眼", weight: 75 }, { name: "暈染", weight: 30 }, { name: "小飾品/貼紙", weight: 2 },
+      { name: "格紋", weight: 1 }, { name: "法式", weight: 1 }, { name: "立體不規則造型", weight: 1 },
+      { name: "漸層", weight: 0.5 }, { name: "海莉款", weight: 0.5 }, { name: "(全/造型)鏡面銀", weight: 0.5 }
     ];
 
     const countToDraw = Math.floor(Math.random() * 3) + 1;
@@ -462,26 +452,17 @@
     for (let i = 0; i < countToDraw; i++) {
       const availablePool = pool.filter(item => !chosenList.includes(item.name));
       if (availablePool.length === 0) break;
-
       const totalWeight = availablePool.reduce((sum, item) => sum + item.weight, 0);
       let randomNum = Math.random() * totalWeight;
-
       for (let item of availablePool) {
-        if (randomNum < item.weight) {
-          chosenList.push(item.name);
-          break;
-        }
+        if (randomNum < item.weight) { chosenList.push(item.name); break; }
         randomNum -= item.weight;
       }
     }
 
     checkboxes.forEach(cb => {
-      if (chosenList.includes(cb.value)) {
-        cb.checked = true;
-        checkLimit(cb);
-      }
+      if (chosenList.includes(cb.value)) { cb.checked = true; checkLimit(cb); }
     });
-
     alert(`🎲 恭喜抽中 ${chosenList.length} 個款式：\n【${chosenList.join('、')}】！`);
     onSelectionChange();
   }
@@ -492,55 +473,29 @@
       alert("款式類型最多只能勾選 4 個喔！");
       checkbox.checked = false;
     }
-
     const customCb = document.getElementById('customStyleCb');
     document.getElementById('customInputDiv').classList.toggle('hidden', !customCb.checked);
-
     onSelectionChange();
   }
 
-  // 💡 金額計算邏輯 (單色 $650)
   function calculateTotal() {
     let total = 0;
-
     const mainColorVal = document.getElementById('mainColor').value;
     const isMainColorSelected = mainColorVal !== "";
     const isJumpColorSelected = showJumpColor;
     const selectedStyles = showStyle ? document.querySelectorAll('input[name="style"]:checked') : [];
     const isStyleSelected = selectedStyles.length > 0;
-
     const hasNailService = isMainColorSelected || isJumpColorSelected || isStyleSelected;
 
-    // 1. 卸甲計算 (單純卸甲 $200 / 卸甲加做美甲 $150)
     const needOff = document.querySelector('input[name="off"]:checked').value === "yes";
     if (needOff) {
-      if (hasNailService) {
-        total += 150; // 美甲加購卸甲
-      } else {
-        total += 200; // 單純卸甲
-      }
+      total += hasNailService ? 150 : 200;
     }
-
-    // 2. 單色美甲 (+650)
-    if (isMainColorSelected) {
-      total += 650;
-    }
-
-    // 3. 跳色 (+50)
-    if (isJumpColorSelected) {
-      total += 50;
-    }
-
-    // 4. 款式加價 (1個 +150 / 2個以上 +200)
+    if (isMainColorSelected) total += 650;
+    if (isJumpColorSelected) total += 50;
     if (isStyleSelected) {
-      const count = selectedStyles.length;
-      if (count === 1) {
-        total += 150;
-      } else if (count >= 2) {
-        total += 200;
-      }
+      total += (selectedStyles.length === 1) ? 150 : 200;
     }
-
     document.getElementById('totalPrice').innerText = total;
   }
 
@@ -554,7 +509,8 @@
     const mainColorVal = document.getElementById('mainColor').value;
     const isMainColorSelected = mainColorVal !== "";
     
-    let details = `【美甲服務預約單】\n`;
+    // ✨ 專屬標籤，確保同行無法拿去私用
+    let details = `【獨家個人專屬預約單】\n`;
     details += `----------------------------\n`;
     details += `• 預約時間：${bookingDate} ${bookingTime}\n`;
     details += `• 卸甲服務：${needOff ? '我要卸甲' : '不需要卸甲'}\n`;
@@ -597,7 +553,6 @@
     window.location.href = lineShareUrl;
   }
 
-  // 初始化計算金額
   calculateTotal();
 </script>
 
