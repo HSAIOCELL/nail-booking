@@ -31,7 +31,7 @@
 
     /* ✨ 隱藏金錢靈氣背景裝飾 (NT$ & $) */
     body::before {
-      content: "NT$   $   NT$   $\n$   NT$   $   NT$\nNT$   $   NT$   $\n$   NT$   $   NT$";
+      content: "NT$   $   NT$   $\n$   NT$   $   NT$\nNT$   $   NT$   $\n$NT$   $   NT$";
       white-space: pre-line;
       position: fixed;
       top: 50%;
@@ -112,11 +112,17 @@
     .section-title {
       font-weight: bold;
       color: #5c5049;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
       font-size: 16.5px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+    }
+    .step-hint {
+      font-size: 12.5px;
+      color: #8c7c75;
+      margin-bottom: 10px;
+      line-height: 1.3;
     }
     .radio-group {
       display: flex;
@@ -164,19 +170,23 @@
       text-align: center;
     }
 
+    /* 醒目的加購項目按鈕樣式 */
     .add-btn {
-      background-color: #96887f;
+      background-color: #827167;
       color: #ffffff;
       border: none;
-      padding: 4px 10px;
-      border-radius: 10px;
-      font-size: 13.5px;
+      padding: 5px 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: bold;
       cursor: pointer;
-      transition: 0.2s;
-      margin-left: 4px;
+      transition: all 0.2s;
+      margin-left: 6px;
+      box-shadow: 0 2px 5px rgba(122, 107, 99, 0.2);
     }
     .add-btn:hover {
-      background-color: #7a6b63;
+      background-color: #5c5049;
+      transform: translateY(-1px);
     }
     .draw-btn {
       background-color: #e4dcd3;
@@ -273,21 +283,13 @@
     </div>
   </div>
 
-  <!-- 2. 卸甲服務 -->
-  <div class="section">
-    <div class="section-title">2. 卸甲服務</div>
-    <div class="radio-group">
-      <label><input type="radio" name="off" value="yes" onchange="onSelectionChange()"> 我要卸甲</label>
-      <label><input type="radio" name="off" value="no" checked onchange="onSelectionChange()"> 不需要卸甲</label>
-    </div>
-  </div>
-
-  <!-- 3. 單色款式 -->
+  <!-- 2. 單色款式 -->
   <div class="section">
     <div class="section-title">
-      3. 單色款式
+      2. 單色款式
       <button class="draw-btn" onclick="drawMainColor()">🎲 幫我抽色系</button>
     </div>
+    <div class="step-hint">💡 步驟 1：挑選喜歡的主色調，若不想要做單色美甲可保留空白哦！</div>
     <select id="mainColor" onchange="onSelectionChange()">
       <option value="">-- 請選擇色系 (無則留空) --</option>
       <option value="紅色">紅色</option>
@@ -306,31 +308,23 @@
     </select>
   </div>
 
-  <!-- 4. 色調選擇 -->
-  <div class="section" id="toneSection">
-    <div class="section-title">4. 色調選擇</div>
-    <div class="radio-group">
-      <label><input type="radio" name="tone" value="深色感" checked> 深色感</label>
-      <label><input type="radio" name="tone" value="淺色感"> 淺色感</label>
-      <label><input type="radio" name="tone" value="隨機發揮"> 隨機發揮</label>
-    </div>
-  </div>
-
-  <!-- 5. 加購項目 -->
+  <!-- 3. 加購項目 -->
   <div class="section">
     <div class="section-title">
-      5. 加購項目
+      3. 加購項目
       <div>
         <button class="add-btn" onclick="toggleOption('jumpColorSection')">+ 跳色</button>
         <button class="add-btn" onclick="toggleOption('styleSection')">+ 款式造型</button>
       </div>
     </div>
+    <div class="step-hint">💡 步驟 2：點選上方按鈕可展開「跳色」或「造型款式」加購選單。</div>
 
     <!-- 跳色選單 -->
     <div id="jumpColorSection" class="hidden" style="margin-top: 10px; padding: 10px; background: #f2ebe5; border-radius: 8px;">
       <div style="font-size: 13.5px; font-weight: bold; margin-bottom: 5px; color: #5c5049;">跳色選擇：</div>
       <select id="jumpColor" onchange="onSelectionChange()">
-        <option value="交給琦選!">交給琦選!</option>
+        <option value="">-- 請選擇跳色色系 --</option>
+        <option value="隨機發揮">隨機發揮</option>
         <option value="紅色">紅色</option>
         <option value="粉色">粉色</option>
         <option value="橘色">橘色</option>
@@ -379,6 +373,27 @@
       <div id="customInputDiv" class="sub-input hidden">
         <input type="text" id="customPattern" placeholder="請填寫指定圖案細節">
       </div>
+    </div>
+  </div>
+
+  <!-- 4. 色調選擇 -->
+  <div class="section" id="toneSection">
+    <div class="section-title">4. 色調選擇</div>
+    <div class="step-hint">💡 步驟 3：選擇您偏好的整體視覺氛圍，無特別偏好可選擇不挑選（交給我發揮）。</div>
+    <div class="radio-group">
+      <label><input type="radio" name="tone" value="不挑選 (交給我發揮)" checked> 不挑選 (交給我發揮)</label>
+      <label><input type="radio" name="tone" value="濃郁暗色調"> 濃郁暗色調</label>
+      <label><input type="radio" name="tone" value="清透亮色調"> 清透亮色調</label>
+    </div>
+  </div>
+
+  <!-- 5. 卸甲服務 -->
+  <div class="section">
+    <div class="section-title">5. 卸甲服務</div>
+    <div class="step-hint">💡 步驟 4：確認您目前手上是否有舊凝膠需要卸除。</div>
+    <div class="radio-group">
+      <label><input type="radio" name="off" value="yes" onchange="onSelectionChange()"> 我要卸甲</label>
+      <label><input type="radio" name="off" value="no" checked onchange="onSelectionChange()"> 不需要卸甲</label>
     </div>
   </div>
 
@@ -488,7 +503,7 @@
     let total = 0;
     const mainColorVal = document.getElementById('mainColor').value;
     const isMainColorSelected = mainColorVal !== "";
-    const isJumpColorSelected = showJumpColor;
+    const isJumpColorSelected = showJumpColor && document.getElementById('jumpColor').value !== "";
     const selectedStyles = showStyle ? document.querySelectorAll('input[name="style"]:checked') : [];
     const isStyleSelected = selectedStyles.length > 0;
     const hasNailService = isMainColorSelected || isJumpColorSelected || isStyleSelected;
@@ -507,6 +522,15 @@
 
   // 自動生成文字並開啟 LINE 官方帳號發送
   function sendBooking() {
+    // 檢查若點開了款式造型，但卻沒有勾選任何項目
+    if (showStyle) {
+      const selectedStyles = document.querySelectorAll('input[name="style"]:checked');
+      if (selectedStyles.length === 0) {
+        alert("✨ 提示：您展開了「+ 款式造型」，但尚未挑選款式喔！\n請勾選您想做的造型，或者再次點擊按鈕將其關閉～");
+        return;
+      }
+    }
+
     const bookingDate = document.getElementById('bookingDate').value || '未選擇日期';
     const hour = document.getElementById('bookingHour').value;
     const minute = document.getElementById('bookingMinute').value;
@@ -519,18 +543,15 @@
     let details = `你好！我想預約美甲：\n`;
     details += `----------------------------\n`;
     details += `• 預約時間：${bookingDate} ${bookingTime}\n`;
-    details += `• 卸甲服務：${needOff ? '我要卸甲' : '不需要卸甲'}\n`;
 
     if (isMainColorSelected) {
-      const toneText = document.querySelector('input[name="tone"]:checked').value;
       details += `• 單色款式：${mainColorVal}\n`;
-      details += `• 色調選擇：${toneText}\n`;
     } else {
       details += `• 單色美甲：無 (單純卸甲/加購項目)\n`;
     }
 
     if (showJumpColor) {
-      const jumpColor = document.getElementById('jumpColor').value;
+      const jumpColor = document.getElementById('jumpColor').value || '尚未選擇';
       details += `• 加購跳色：${jumpColor}\n`;
     }
 
@@ -551,6 +572,13 @@
       }
     }
 
+    if (isMainColorSelected) {
+      const toneText = document.querySelector('input[name="tone"]:checked').value;
+      details += `• 色調選擇：${toneText}\n`;
+    }
+
+    details += `• 卸甲服務：${needOff ? '我要卸甲' : '不需要卸甲'}\n`;
+
     const finalPrice = document.getElementById('totalPrice').innerText;
     details += `----------------------------\n`;
     details += `💰 預計總金額：NT$ ${finalPrice} 元`;
@@ -559,7 +587,7 @@
     const encodedMessage = encodeURIComponent(details);
     const lineUrl = `https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodedMessage}`;
 
-    alert("✨ 即將為您開啟 LINE，請在聊天室按「傳送」送出預約單！");
+    alert("✨ 即將為您開啟 LINE，請在聊天室按「傳送」送出預預單！");
     window.location.href = lineUrl;
   }
 
