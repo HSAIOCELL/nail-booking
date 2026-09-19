@@ -29,7 +29,7 @@
       overflow-x: hidden;
     }
 
-    /* 背景裝飾 */
+    /* 背景水印裝飾 */
     body::before {
       content: "NT$   $   NT$   $\n$   NT$   $   NT$\nNT$   $   NT$   $\n$NT$   $   NT$";
       white-space: pre-line;
@@ -164,7 +164,7 @@
       text-align: center;
     }
 
-    /* 人因工程：直覺式加購選項區塊 */
+    /* 人因工程：加購項目面板 */
     .addon-item-box {
       border: 1.5px dashed #c2b5aa;
       background-color: #fcfaf7;
@@ -205,7 +205,7 @@
       color: #ffffff;
     }
 
-    /* 人因直覺：亮色系被激活 + 前後景深度動畫 (Step 5 卸甲卡片) */
+    /* 人因直覺：亮色系激活卡片 (Step 5 卸甲服務) */
     .removal-card-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -229,7 +229,7 @@
       opacity: 0.95;
       border-color: #c5b8ad;
     }
-    /* 選取狀態：高級亮色系（明亮奶茶金）、深色文字、微放大前景、明亮光影 */
+    /* 選取狀態：高級亮色系（明亮奶茶金）、深色文字、微放大前景 */
     .removal-card.active {
       background: #EADECB;
       border: 1.5px solid #8C7355;
@@ -262,7 +262,7 @@
       background-color: #d7ccc3;
     }
     .hidden {
-      display: none;
+      display: none !important;
     }
     .checkbox-grid {
       display: grid;
@@ -409,7 +409,7 @@
       <div id="styleSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
           <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">(最多選4個)：</div>
-          <button class="draw-btn" onclick="drawStyle()">🎲 幫我抽款式</button>
+          <button class="draw-btn" onclick="drawStyle(event)">🎲 幫我抽款式</button>
         </div>
         <div style="font-size: 11.5px; color: #8c7c75; margin-bottom: 8px;">(選1個 +150元 / 選2個以上 +200元)</div>
         
@@ -491,6 +491,7 @@
 
   document.getElementById('bookingDate').valueAsDate = new Date();
 
+  // 卸甲切換與即時算錢邏輯
   function selectRemoval(status) {
     needRemoval = status;
     document.getElementById('cardRemovalYes').classList.toggle('active', needRemoval);
@@ -498,7 +499,9 @@
     onSelectionChange();
   }
 
+  // 加購面板展開/隱藏邏輯
   function toggleOption(id, event) {
+    if (event) event.stopPropagation();
     const el = document.getElementById(id);
     if (id === 'jumpColorSection') { 
       showJumpColor = !showJumpColor; 
@@ -541,15 +544,21 @@
     onSelectionChange();
   }
 
-  function drawStyle() {
-    if (!showStyle) toggleOption('styleSection');
+  function drawStyle(event) {
+    if (event) event.stopPropagation();
+    if (!showStyle) {
+      showStyle = true;
+      document.getElementById('styleSection').classList.remove('hidden');
+      document.getElementById('boxStyle').classList.add('active');
+      document.getElementById('badgeStyle').innerText = '已加購 ✔';
+    }
     const checkboxes = document.querySelectorAll('input[name="style"]');
     checkboxes.forEach(cb => cb.checked = false);
 
     const pool = [
       { name: "貓眼", weight: 75 }, { name: "暈染", weight: 30 }, { name: "小飾品/貼紙", weight: 2 },
       { name: "格紋", weight: 1 }, { name: "法式", weight: 1 }, { name: "立體不規則造型", weight: 1 },
-      { name: "漸層", weight: 0.5 }, { name: "海莉款", weight: 0.5 }, { name="(全/造型)鏡面銀", weight: 0.5 }
+      { name: "漸層", weight: 0.5 }, { name: "海莉款", weight: 0.5 }, { name: "(全/造型)鏡面銀", weight: 0.5 }
     ];
 
     const countToDraw = Math.floor(Math.random() * 3) + 1;
@@ -584,6 +593,7 @@
     onSelectionChange();
   }
 
+  // 金額自動統計核心算法
   function calculateTotal() {
     let total = 0;
     const mainColorVal = document.getElementById('mainColor').value;
@@ -593,14 +603,23 @@
     const isStyleSelected = selectedStyles.length > 0;
     const hasNailService = isMainColorSelected || isJumpColorSelected || isStyleSelected;
 
+    // 1. 卸甲計算：有做款式/單色加購則 150 元，單純卸甲則 200 元
     if (needRemoval) {
       total += hasNailService ? 150 : 200;
     }
+
+    // 2. 單色款式：650 元
     if (isMainColorSelected) total += 650;
+
+    // 3. 跳色：50 元
     if (isJumpColorSelected) total += 50;
+
+    // 4. 款式造型：選1個 +150 元，選2個以上 +200 元
     if (isStyleSelected) {
       total += (selectedStyles.length === 1) ? 150 : 200;
     }
+
+    // 即時更新總金額
     document.getElementById('totalPrice').innerText = total;
   }
 
@@ -671,6 +690,7 @@
     window.location.href = lineUrl;
   }
 
+  // 頁面初始化計算一次金額
   calculateTotal();
 </script>
 
