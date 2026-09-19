@@ -28,6 +28,7 @@
       overflow-x: hidden;
     }
 
+    /* 背景水印裝飾 */
     body::before {
       content: "NT$   $   NT$   $\n$   NT$   $   NT$\nNT$   $   NT$   $\n$NT$   $   NT$";
       white-space: pre-line;
@@ -102,6 +103,7 @@
       transition: opacity 0.3s ease, filter 0.3s ease;
     }
 
+    /* 依賴未滿時的鎖定淡色樣式 */
     .section.disabled-step {
       opacity: 0.4;
       pointer-events: none;
@@ -140,10 +142,23 @@
       box-shadow: 0 0 4px rgba(122, 107, 99, 0.25);
     }
 
+    /* 閃爍提醒動畫：閃爍後保持白色底 */
     @keyframes selectFlash {
-      0% { border-color: #7a6b63; box-shadow: 0 0 0 3px rgba(122, 107, 99, 0.4); background-color: #ffffff; }
-      50% { border-color: #a8988e; box-shadow: 0 0 0 5px rgba(122, 107, 99, 0.6); background-color: #eae1d7; }
-      100% { border-color: #cfc5bb; box-shadow: none; background-color: #ffffff; }
+      0% {
+        border-color: #7a6b63;
+        box-shadow: 0 0 0 3px rgba(122, 107, 99, 0.4);
+        background-color: #ffffff;
+      }
+      50% {
+        border-color: #a8988e;
+        box-shadow: 0 0 0 5px rgba(122, 107, 99, 0.6);
+        background-color: #eae1d7;
+      }
+      100% {
+        border-color: #cfc5bb;
+        box-shadow: none;
+        background-color: #ffffff;
+      }
     }
 
     .flash-highlight {
@@ -171,59 +186,54 @@
       text-align: center;
     }
 
-    /* Step 4. 色調 - 三個選項同排，未被選擇與背景同色，被選擇時小圓形外加一圈特效 */
     .tone-palette-group {
       display: flex;
-      justify-content: space-between; /* 三個選項平均分配為一排 */
+      justify-content: space-between;
       align-items: center;
-      gap: 6px;
+      gap: 12px;
       margin-top: 10px;
-      padding: 6px 2px;
+      padding: 6px 4px;
     }
     .tone-option {
-      flex: 1;
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 6px;
+      gap: 8px;
       cursor: pointer;
-      padding: 8px 6px;
+      padding: 6px 10px;
       border-radius: 20px;
-      background-color: #faf8f5;      /* 未被選擇時與背景顏色相同 */
-      border: none;                   /* 無邊框 */
       transition: all 0.25s ease;
       user-select: none;
       white-space: nowrap;
     }
     .tone-option:hover {
-      background-color: #f2ede6;
+      background-color: rgba(240, 236, 227, 0.6);
     }
     .color-dot {
-      width: 14px;
-      height: 14px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
       box-sizing: border-box;
-      transition: all 0.25s ease;
-      background-color: #d8cecf; 
-      border: 2px solid #bdafa6;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      flex-shrink: 0;
+      background-color: #e8e0d5; 
+      border: 1.5px solid #d4c7b8;
     }
     .tone-label {
-      font-size: 14px;
-      color: #786c65;
+      font-size: 15px;
+      color: #8c7c75;
       font-weight: 500;
-    }
-    .tone-option.active {
-      background-color: #f2ebe4;      /* 被選擇後的微幅加深底色 */
-      border: none;
+      white-space: nowrap;
+      transition: color 0.25s ease, font-weight 0.25s ease;
     }
     .tone-option.active .color-dot {
       background-color: #7a6b63;
       border-color: #5c5049;
-      box-shadow: 0 0 0 3px #ded4cc; /* 小圓形外層加一圈圓型環繞 */
-      transform: scale(1.05);
+      transform: scale(1.15);
+      box-shadow: 0 0 0 2.5px #faf8f5, 0 0 0 4.5px #7a6b63;
     }
     .tone-option.active .tone-label {
-      color: #4a423d;
+      color: #3d3028;
       font-weight: 700;
     }
 
@@ -321,22 +331,25 @@
       display: none !important;
     }
 
-    /* ===款式造型：一體方圓型底座，預設白色，被選擇時微微加深底色=== */
+    /* ===人因工程 Choice Chips 按鈕化選單=== */
     .checkbox-grid {
       display: grid;
       grid-template-columns: 0.85fr 1.15fr;
       gap: 8px 10px;
-      padding: 10px 4px;
+      padding: 10px;
+      background-color: #ffffff;
+      border-radius: 12px;
+      border: 1px solid #ebdcd3;
     }
 
     .chip-item {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 7px 12px;
-      border-radius: 8px;              /* 微圓角矩形（方圓型） */
-      background-color: #ffffff;       /* 預設為白色底座 */
-      border: none;                   /* 無邊框 */
+      padding: 8px 10px;
+      border-radius: 20px;
+      background-color: #f9f6f2;
+      border: 1px solid #e3d8ce;
       color: #524741;
       font-size: 14.5px;
       font-weight: 500;
@@ -347,28 +360,42 @@
       white-space: nowrap;
     }
 
+    /* 隱藏預設的 checkbox 方框 */
     .chip-item input[type="checkbox"] {
       display: none;
     }
 
-    .chip-item:hover {
-      background-color: #f5efe8;
+    /* 動態勾選圖標裝飾 */
+    .chip-item::before {
+      content: "";
+      display: inline-block;
+      width: 0;
+      opacity: 0;
+      transition: all 0.2s ease;
+      margin-right: 0;
     }
 
-    /* 已選取的項目：微幅加深底色 */
+    /* 滑鼠微懸停效果 */
+    .chip-item:hover {
+      background-color: #f0e6dd;
+      border-color: #cbbab0;
+    }
+
+    /* 被選取時的高對比顯眼樣式 (主色調背景 + 白字 + 打勾圖標) */
     .chip-item:has(input:checked) {
-      background-color: #ede4dc; /* 微微加深的柔和底色 */
-      border: none;
-      color: #4a423d;
-      font-weight: bold;
+      background-color: #7a6b63;
+      border-color: #5c5049;
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(122, 107, 99, 0.25);
     }
 
     .chip-item:has(input:checked)::before {
       content: "✓";
-      display: inline-block;
+      width: 14px;
+      opacity: 1;
       margin-right: 4px;
       font-weight: bold;
-      color: #7a6b63;
     }
     
     .total-box {
@@ -593,6 +620,7 @@
 <script>
   const LINE_OFFICIAL_ACCOUNT_ID = "@344gjuzg"; 
 
+  // 防同行偷看/側錄防護牆
   document.addEventListener('keydown', function(e) {
     if (
       e.keyCode === 123 || 
@@ -761,8 +789,10 @@
     if (event) event.stopPropagation();
     const jumpSelect = document.getElementById('jumpColor');
     
+    // 選擇隨機發揮
     jumpSelect.value = "隨機發揮";
     
+    // 下拉選單框閃爍提示
     jumpSelect.classList.remove('flash-highlight');
     void jumpSelect.offsetWidth;
     jumpSelect.classList.add('flash-highlight');
@@ -776,6 +806,7 @@
     const randomIndex = Math.floor(Math.random() * (options.length - 1)) + 1;
     select.selectedIndex = randomIndex;
     
+    // 下拉選單框閃爍提示
     select.classList.remove('flash-highlight');
     void select.offsetWidth;
     select.classList.add('flash-highlight');
@@ -818,6 +849,7 @@
       if (chosenList.includes(cb.value)) { cb.checked = true; checkLimit(cb); }
     });
 
+    // 觸發多選區塊閃爍動畫
     const gridEl = document.querySelector('.checkbox-grid');
     if (gridEl) {
       gridEl.classList.remove('flash-highlight');
