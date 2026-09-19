@@ -141,7 +141,7 @@
       border-radius: 8px;
       outline: none;
       font-size: 15px;
-      background-color: #fefdfc;
+      background-color: #ffffff;
       color: #4a423d;
       appearance: none;
       -webkit-appearance: none;
@@ -152,12 +152,12 @@
       box-shadow: 0 0 4px rgba(122, 107, 99, 0.25);
     }
 
-    /* 閃爍提醒動畫 */
+    /* 閃爍提醒動畫：閃爍後保持白色底 */
     @keyframes selectFlash {
       0% {
         border-color: #7a6b63;
         box-shadow: 0 0 0 3px rgba(122, 107, 99, 0.4);
-        background-color: #f2ebe4;
+        background-color: #ffffff;
       }
       50% {
         border-color: #a8988e;
@@ -167,7 +167,7 @@
       100% {
         border-color: #cfc5bb;
         box-shadow: none;
-        background-color: #fefdfc;
+        background-color: #ffffff;
       }
     }
 
@@ -344,7 +344,10 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px 8px;
-      padding: 4px;
+      padding: 8px;
+      background-color: #ffffff;
+      border-radius: 8px;
+      border: 1px solid #ebdcd3;
     }
     
     .total-box {
@@ -509,7 +512,7 @@
 
         <div id="catEyeDetailDiv" class="sub-input hidden">
           <label style="font-size: 13px; font-weight: bold; color: #5c5049;">貓眼類型：</label>
-          <select id="catEyeType" style="background-color: #fefdfc; font-weight: bold;">
+          <select id="catEyeType" style="background-color: #ffffff; font-weight: bold;">
             <option value="指定單色貓眼">指定單色貓眼</option>
             <option value="雙色貓眼">雙色貓眼</option>
           </select>
@@ -838,7 +841,7 @@
 
     if (hasJumpColorSelected) {
       catEyeSelect.disabled = false;
-      catEyeSelect.style.backgroundColor = "#fefdfc";
+      catEyeSelect.style.backgroundColor = "#ffffff";
       if (catEyeSelect.value !== "雙色貓眼" && catEyeSelect.value !== "指定單色貓眼") {
         catEyeSelect.value = "雙色貓眼";
       }
