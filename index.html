@@ -152,7 +152,7 @@
       box-shadow: 0 0 4px rgba(122, 107, 99, 0.25);
     }
 
-    /* 下拉選單閃爍動畫 */
+    /* 閃爍提醒動畫 */
     @keyframes selectFlash {
       0% {
         border-color: #7a6b63;
@@ -173,6 +173,7 @@
 
     .flash-highlight {
       animation: selectFlash 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      border-radius: 8px;
     }
     
     select option:disabled {
@@ -343,6 +344,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px 8px;
+      padding: 4px;
     }
     
     .total-box {
@@ -456,11 +458,11 @@
       </div>
       <div id="jumpColorSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-          <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">選擇跳色色系：</div>
+          <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">選擇色系：</div>
           <button class="draw-btn" onclick="drawJumpColor(event)">🫯 隨機發揮</button>
         </div>
         <select id="jumpColor" onchange="onSelectionChange()">
-          <option value="">-- 請選擇跳色色系 --</option>
+          <option value="">--請選擇色系--</option>
           <option value="隨機發揮">隨機發揮</option>
           <option value="紅色">紅色</option>
           <option value="粉色">粉色</option>
@@ -482,12 +484,12 @@
     <!-- 直覺開關 2：款式造型 -->
     <div id="boxStyle" class="addon-item-box" onclick="toggleOption('styleSection', event)">
       <div class="addon-header">
-        <span>✨ 加購款式造型</span>
+        <span>✨ 款式造型</span>
         <span id="badgeStyle" class="addon-badge">150~200 元 ➕</span>
       </div>
       <div id="styleSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-          <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">(最多選4個)：</div>
+          <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">最多選4個</div>
           <button class="draw-btn" onclick="drawStyle(event)">🎲 幫我抽款式</button>
         </div>
         <div style="font-size: 11.5px; color: #8c7c75; margin-bottom: 8px;">(選1個 +150元 / 選2個以上 +200元)</div>
@@ -748,7 +750,12 @@
     const options = select.options;
     const randomIndex = Math.floor(Math.random() * (options.length - 1)) + 1;
     select.selectedIndex = randomIndex;
-    alert(`🎲 恭喜抽中色系：【${options[randomIndex].value}】！`);
+    
+    // 下拉選單框閃爍提示
+    select.classList.remove('flash-highlight');
+    void select.offsetWidth;
+    select.classList.add('flash-highlight');
+
     onMainColorChange();
   }
 
@@ -786,7 +793,15 @@
     checkboxes.forEach(cb => {
       if (chosenList.includes(cb.value)) { cb.checked = true; checkLimit(cb); }
     });
-    alert(`🎲 恭喜抽中 ${chosenList.length} 個款式：\n【${chosenList.join('、')}】！`);
+
+    // 觸發多選區塊閃爍動畫
+    const gridEl = document.querySelector('.checkbox-grid');
+    if (gridEl) {
+      gridEl.classList.remove('flash-highlight');
+      void gridEl.offsetWidth;
+      gridEl.classList.add('flash-highlight');
+    }
+
     onSelectionChange();
   }
 
