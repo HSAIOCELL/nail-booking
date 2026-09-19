@@ -29,7 +29,7 @@
       overflow-x: hidden;
     }
 
-    /* ✨ 隱藏金錢靈氣背景裝飾 (NT$ & $) */
+    /* 背景裝飾 */
     body::before {
       content: "NT$   $   NT$   $\n$   NT$   $   NT$\nNT$   $   NT$   $\n$NT$   $   NT$";
       white-space: pre-line;
@@ -164,23 +164,47 @@
       text-align: center;
     }
 
-    /* 調整加購項目按鈕（精緻偏小尺寸） */
-    .add-btn {
-      background-color: #827167;
-      color: #ffffff;
-      border: none;
-      padding: 4px 10px;
-      border-radius: 10px;
-      font-size: 13.5px;
-      font-weight: bold;
+    /* 🧠 人因工程：直覺式加購選項區塊 */
+    .addon-item-box {
+      border: 1.5px dashed #c2b5aa;
+      background-color: #fcfaf7;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
       cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 2px 4px rgba(122, 107, 99, 0.15);
+      transition: all 0.25s ease;
     }
-    .add-btn:hover {
-      background-color: #5c5049;
-      transform: translateY(-1px);
+    .addon-item-box:hover {
+      border-color: #827167;
+      background-color: #f5efe8;
     }
+    .addon-item-box.active {
+      border-style: solid;
+      border-color: #7a6b63;
+      background-color: #f2ebe4;
+      box-shadow: 0 2px 8px rgba(122, 107, 99, 0.12);
+    }
+    .addon-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 16px;
+      font-weight: bold;
+      color: #5c5049;
+    }
+    .addon-badge {
+      font-size: 13px;
+      background-color: #e5ded7;
+      color: #6e6057;
+      padding: 3px 10px;
+      border-radius: 20px;
+      transition: all 0.2s ease;
+    }
+    .addon-item-box.active .addon-badge {
+      background-color: #7a6b63;
+      color: #ffffff;
+    }
+
     .draw-btn {
       background-color: #e4dcd3;
       color: #4a423d;
@@ -302,15 +326,17 @@
 
   <!-- 💡 Step 3. 加購項目 -->
   <div class="section">
-    <div style="font-weight: bold; color: #5c5049; margin-bottom: 10px; font-size: 16.5px;">
+    <div style="font-weight: bold; color: #5c5049; margin-bottom: 12px; font-size: 16.5px;">
       💡 Step 3. 加購項目
     </div>
 
-    <!-- 按鈕與展開選單 1：跳色 -->
-    <div style="margin-bottom: 10px;">
-      <button class="add-btn" onclick="toggleOption('jumpColorSection')">+ 跳色</button>
-      <div id="jumpColorSection" class="hidden" style="margin-top: 8px; padding: 10px; background: #f2ebe5; border-radius: 8px;">
-        <div style="font-size: 13.5px; font-weight: bold; margin-bottom: 5px; color: #5c5049;">跳色選擇：</div>
+    <!-- 🧠 直覺開關 1：跳色 -->
+    <div id="boxJumpColor" class="addon-item-box" onclick="toggleOption('jumpColorSection', event)">
+      <div class="addon-header">
+        <span>🎨 加購跳色</span>
+        <span id="badgeJumpColor" class="addon-badge">+50 元 ➕</span>
+      </div>
+      <div id="jumpColorSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
         <select id="jumpColor" onchange="onSelectionChange()">
           <option value="">-- 請選擇跳色色系 --</option>
           <option value="隨機發揮">隨機發揮</option>
@@ -331,10 +357,13 @@
       </div>
     </div>
 
-    <!-- 按鈕與展開選單 2：款式造型 (完整復原) -->
-    <div>
-      <button class="add-btn" onclick="toggleOption('styleSection')">+ 款式造型</button>
-      <div id="styleSection" class="hidden" style="margin-top: 8px; padding: 10px; background: #f2ebe5; border-radius: 8px;">
+    <!-- 🧠 直覺開關 2：款式造型 -->
+    <div id="boxStyle" class="addon-item-box" onclick="toggleOption('styleSection', event)">
+      <div class="addon-header">
+        <span>✨ 加購款式造型</span>
+        <span id="badgeStyle" class="addon-badge">+150~200 元 ➕</span>
+      </div>
+      <div id="styleSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
           <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">款式類型 (最多選4個)：</div>
           <button class="draw-btn" onclick="drawStyle()">🎲 幫我抽款式</button>
@@ -396,7 +425,6 @@
 </div>
 
 <script>
-  // 🎯 請將此處替換為您的 LINE 官方帳號 Basic ID (記得要保留 @ 符號)
   const LINE_OFFICIAL_ACCOUNT_ID = "@344gjuzg"; 
 
   // 防同行偷看/側錄防護牆
@@ -414,10 +442,20 @@
   let showJumpColor = false, showStyle = false;
   document.getElementById('bookingDate').valueAsDate = new Date();
 
-  function toggleOption(id) {
+  function toggleOption(id, event) {
     const el = document.getElementById(id);
-    if (id === 'jumpColorSection') { showJumpColor = !showJumpColor; el.classList.toggle('hidden', !showJumpColor); }
-    else if (id === 'styleSection') { showStyle = !showStyle; el.classList.toggle('hidden', !showStyle); }
+    if (id === 'jumpColorSection') { 
+      showJumpColor = !showJumpColor; 
+      el.classList.toggle('hidden', !showJumpColor); 
+      document.getElementById('boxJumpColor').classList.toggle('active', showJumpColor);
+      document.getElementById('badgeJumpColor').innerText = showJumpColor ? '已加購 ✔' : '+50 元 ➕';
+    }
+    else if (id === 'styleSection') { 
+      showStyle = !showStyle; 
+      el.classList.toggle('hidden', !showStyle); 
+      document.getElementById('boxStyle').classList.toggle('active', showStyle);
+      document.getElementById('badgeStyle').innerText = showStyle ? '已加購 ✔' : '+150~200 元 ➕';
+    }
     onSelectionChange();
   }
 
@@ -511,12 +549,11 @@
     document.getElementById('totalPrice').innerText = total;
   }
 
-  // 自動生成文字並開啟 LINE 官方帳號發送
   function sendBooking() {
     if (showStyle) {
       const selectedStyles = document.querySelectorAll('input[name="style"]:checked');
       if (selectedStyles.length === 0) {
-        alert("✨ 提示：您展開了「+ 款式造型」，但尚未挑選款式喔！\n請勾選您想做的造型，或者再次點擊按鈕將其關閉～");
+        alert("✨ 提示：您開啟了「加購款式造型」，但尚未挑選款式喔！\n請勾選您想做的造型，或者再次點擊開啟框將其關閉～");
         return;
       }
     }
@@ -573,11 +610,10 @@
     details += `----------------------------\n`;
     details += `💰 預計總金額：NT$ ${finalPrice} 元`;
 
-    // 開啟 LINE 官方帳號聊天室並帶入文字
     const encodedMessage = encodeURIComponent(details);
     const lineUrl = `https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodedMessage}`;
 
-    alert("✨ 即將為您開啟 LINE，請在聊天室按「傳送」送出預預單！");
+    alert("✨ 即將為您開啟 LINE，請在聊天室按「傳送」送出預約單！");
     window.location.href = lineUrl;
   }
 
