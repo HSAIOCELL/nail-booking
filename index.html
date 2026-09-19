@@ -30,7 +30,7 @@
 
     /* 背景水印裝飾 */
     body::before {
-      content: "NT$   $   NT$   $\n$   NT$   $   NT$\nNT$   $   NT$   $\n$NT$   $   NT$";
+      content: "NT$    $    NT$    $\n$    NT$    $    NT$\nNT$    $    NT$    $\n$NT$    $    NT$";
       white-space: pre-line;
       position: fixed;
       top: 50%;
@@ -348,8 +348,8 @@
       justify-content: center;
       padding: 8px 10px;
       border-radius: 20px;
-      background-color: #f9f6f2;
-      border: 1px solid #e3d8ce;
+      background-color: transparent; /* 拿掉未選取時的底色 */
+      border: none;                  /* 拿掉未選取時的邊框 */
       color: #524741;
       font-size: 14.5px;
       font-weight: 500;
@@ -377,8 +377,8 @@
 
     /* 滑鼠微懸停效果 */
     .chip-item:hover {
-      background-color: #f0e6dd;
-      border-color: #cbbab0;
+      background-color: #f5efe8; /* 滑鼠懸停時給予極淡的底色提示 */
+      border-radius: 20px;
     }
 
     /* 被選取時的高對比顯眼樣式 (主色調背景 + 白字 + 打勾圖標) */
@@ -789,10 +789,8 @@
     if (event) event.stopPropagation();
     const jumpSelect = document.getElementById('jumpColor');
     
-    // 選擇隨機發揮
     jumpSelect.value = "隨機發揮";
     
-    // 下拉選單框閃爍提示
     jumpSelect.classList.remove('flash-highlight');
     void jumpSelect.offsetWidth;
     jumpSelect.classList.add('flash-highlight');
@@ -806,7 +804,6 @@
     const randomIndex = Math.floor(Math.random() * (options.length - 1)) + 1;
     select.selectedIndex = randomIndex;
     
-    // 下拉選單框閃爍提示
     select.classList.remove('flash-highlight');
     void select.offsetWidth;
     select.classList.add('flash-highlight');
@@ -849,7 +846,6 @@
       if (chosenList.includes(cb.value)) { cb.checked = true; checkLimit(cb); }
     });
 
-    // 觸發多選區塊閃爍動畫
     const gridEl = document.querySelector('.checkbox-grid');
     if (gridEl) {
       gridEl.classList.remove('flash-highlight');
@@ -1002,10 +998,7 @@
 
   document.addEventListener('DOMContentLoaded', function() {
     initDatePicker();
-    onMainColorChange();
-    setRemoval(false);
   });
 </script>
-
 </body>
 </html>
