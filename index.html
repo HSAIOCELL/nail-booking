@@ -151,6 +151,29 @@
       border-color: #7a6b63;
       box-shadow: 0 0 4px rgba(122, 107, 99, 0.25);
     }
+
+    /* 下拉選單閃爍動畫 */
+    @keyframes selectFlash {
+      0% {
+        border-color: #7a6b63;
+        box-shadow: 0 0 0 3px rgba(122, 107, 99, 0.4);
+        background-color: #f2ebe4;
+      }
+      50% {
+        border-color: #a8988e;
+        box-shadow: 0 0 0 5px rgba(122, 107, 99, 0.6);
+        background-color: #eae1d7;
+      }
+      100% {
+        border-color: #cfc5bb;
+        box-shadow: none;
+        background-color: #fefdfc;
+      }
+    }
+
+    .flash-highlight {
+      animation: selectFlash 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    }
     
     select option:disabled {
       color: #c0b5ac;
@@ -202,7 +225,6 @@
       transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
       position: relative;
       flex-shrink: 0;
-      /* 預設未選定為溫柔淺色系 */
       background-color: #e8e0d5; 
       border: 1.5px solid #d4c7b8;
     }
@@ -213,7 +235,6 @@
       white-space: nowrap;
       transition: color 0.25s ease, font-weight 0.25s ease;
     }
-    /* 選定後圓形變成質感深咖色，外圈加上柔和焦調 Glow */
     .tone-option.active .color-dot {
       background-color: #7a6b63;
       border-color: #5c5049;
@@ -519,7 +540,7 @@
     <input type="hidden" id="selectedTone" value="隨機">
   </div>
 
-  <!-- Step 5. 卸甲服務（已移除輔助文字） -->
+  <!-- Step 5. 卸甲服務 -->
   <div class="section">
     <div class="section-title">Step 5. 卸甲服務</div>
     <div class="removal-card-group">
@@ -575,7 +596,7 @@
     const todayStr = formatDateToYYYYMMDD(taipeiNow);
     const dateInput = document.getElementById("bookingDate");
     
-    dateInput.min = todayStr; // 禁止選擇過去日期
+    dateInput.min = todayStr;
     if (!dateInput.value || dateInput.value < todayStr) {
       dateInput.value = todayStr;
     }
@@ -597,7 +618,6 @@
 
     const isToday = (selectedDateStr === todayStr);
 
-    // 1. 驗證與過濾「小時」選項
     let firstValidHour = null;
     Array.from(hourSelect.options).forEach(opt => {
       const h = parseInt(opt.value, 10);
@@ -615,7 +635,6 @@
       }
     }
 
-    // 2. 驗證與過濾「分鐘」選項
     const selectedHour = parseInt(hourSelect.value, 10);
     let firstValidMinute = null;
     Array.from(minuteSelect.options).forEach(opt => {
@@ -712,8 +731,15 @@
   function drawJumpColor(event) {
     if (event) event.stopPropagation();
     const jumpSelect = document.getElementById('jumpColor');
+    
+    // 選擇隨機發揮
     jumpSelect.value = "隨機發揮";
-    alert("🫯 恭喜選擇跳色：【隨機發揮】！");
+    
+    // 下拉選單框閃爍提示
+    jumpSelect.classList.remove('flash-highlight');
+    void jumpSelect.offsetWidth; // 觸發重繪
+    jumpSelect.classList.add('flash-highlight');
+
     onSelectionChange();
   }
 
@@ -796,14 +822,12 @@
     const hasJumpColorSelected = showJumpColor && jumpColorVal !== "";
 
     if (hasJumpColorSelected) {
-      // 有選擇跳色：取消鎖定，允許自由下拉選擇，並預設為雙色貓眼
       catEyeSelect.disabled = false;
       catEyeSelect.style.backgroundColor = "#fefdfc";
       if (catEyeSelect.value !== "雙色貓眼" && catEyeSelect.value !== "指定單色貓眼") {
         catEyeSelect.value = "雙色貓眼";
       }
     } else {
-      // 無選擇跳色：鎖定選單並固定為指定單色貓眼
       catEyeSelect.disabled = true;
       catEyeSelect.style.backgroundColor = "#e5ded7";
       catEyeSelect.value = "指定單色貓眼";
@@ -837,7 +861,6 @@
     const mainColorVal = document.getElementById('mainColor').value;
     const isMainColorSelected = mainColorVal !== "";
 
-    // 防呆驗證 1：加購跳色勾選但未選色系
     if (showJumpColor) {
       const jumpColorVal = document.getElementById('jumpColor').value;
       if (jumpColorVal === "") {
@@ -846,7 +869,6 @@
       }
     }
 
-    // 防呆驗證 2：加購款式勾選但未選具體項目
     if (showStyle) {
       const selectedStyles = document.querySelectorAll('input[name="style"]:checked');
       if (selectedStyles.length === 0) {
@@ -908,7 +930,6 @@
     window.location.href = lineUrl;
   }
 
-  // 初始化頁面時間、預設選項與金額
   document.addEventListener('DOMContentLoaded', function() {
     initDatePicker();
     onMainColorChange();
