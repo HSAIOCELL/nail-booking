@@ -28,7 +28,6 @@
       overflow-x: hidden;
     }
 
-    /* 背景水印裝飾 */
     body::before {
       content: "NT$   $   NT$   $\n$   NT$   $   NT$\nNT$   $   NT$   $\n$NT$   $   NT$";
       white-space: pre-line;
@@ -103,7 +102,6 @@
       transition: opacity 0.3s ease, filter 0.3s ease;
     }
 
-    /* 依賴未滿時的鎖定淡色樣式 */
     .section.disabled-step {
       opacity: 0.4;
       pointer-events: none;
@@ -142,23 +140,10 @@
       box-shadow: 0 0 4px rgba(122, 107, 99, 0.25);
     }
 
-    /* 閃爍提醒動畫 */
     @keyframes selectFlash {
-      0% {
-        border-color: #7a6b63;
-        box-shadow: 0 0 0 3px rgba(122, 107, 99, 0.4);
-        background-color: #ffffff;
-      }
-      50% {
-        border-color: #a8988e;
-        box-shadow: 0 0 0 5px rgba(122, 107, 99, 0.6);
-        background-color: #eae1d7;
-      }
-      100% {
-        border-color: #cfc5bb;
-        box-shadow: none;
-        background-color: #ffffff;
-      }
+      0% { border-color: #7a6b63; box-shadow: 0 0 0 3px rgba(122, 107, 99, 0.4); background-color: #ffffff; }
+      50% { border-color: #a8988e; box-shadow: 0 0 0 5px rgba(122, 107, 99, 0.6); background-color: #eae1d7; }
+      100% { border-color: #cfc5bb; box-shadow: none; background-color: #ffffff; }
     }
 
     .flash-highlight {
@@ -186,38 +171,40 @@
       text-align: center;
     }
 
-    /* Step 4. 色調 - 置中與極淡質感設計 */
+    /* Step 4. 色調 - 恢復原本圓點外框樣式，並將選項靠近 */
     .tone-palette-group {
       display: flex;
-      justify-content: center; /* 改為置中，解決清透亮色調靠右的問題 */
+      justify-content: center; /* 置中對齊 */
       align-items: center;
-      gap: 16px;              /* 精確適中的間距 */
+      gap: 20px;              /* 適度拉近選項間距，不擁擠 */
       margin-top: 10px;
       padding: 6px 4px;
     }
     .tone-option {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       cursor: pointer;
-      padding: 6px 14px;
-      border-radius: 20px;
-      background-color: transparent; /* 未選時無底色 */
-      border: none;                  /* 無框框 */
+      padding: 8px 14px;
+      border-radius: 24px;
+      background-color: #ffffff;      /* 原本的白色底色 */
+      border: 1px solid #dcd3cb;     /* 原本的邊框 */
       transition: all 0.25s ease;
       user-select: none;
       white-space: nowrap;
     }
     .tone-option:hover {
-      background-color: rgba(0, 0, 0, 0.03);
+      background-color: #f7f4f0;
+      border-color: #bcada2;
     }
     .color-dot {
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       box-sizing: border-box;
       transition: all 0.25s ease;
       background-color: #d8cecf; 
+      border: 2px solid #bdafa6;
     }
     .tone-label {
       font-size: 15px;
@@ -225,10 +212,13 @@
       font-weight: 500;
     }
     .tone-option.active {
-      background-color: #f2ebe4; /* 選中時的極淡柔和底色 */
+      background-color: #f5efe8;
+      border-color: #8c7c75;
+      box-shadow: 0 2px 6px rgba(122, 107, 99, 0.1);
     }
     .tone-option.active .color-dot {
       background-color: #7a6b63;
+      border-color: #5c5049;
       transform: scale(1.1);
     }
     .tone-option.active .tone-label {
@@ -330,7 +320,7 @@
       display: none !important;
     }
 
-    /* ===款式造型 Choice Chips：無框無底色、選中為極淡底色=== */
+    /* ===款式造型 Choice Chips：項目為白底、選中為更小、更淡的底色=== */
     .checkbox-grid {
       display: grid;
       grid-template-columns: 0.85fr 1.15fr;
@@ -342,10 +332,10 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 7px 12px;
+      padding: 6px 12px;
       border-radius: 20px;
-      background-color: transparent; /* 原本不用底色 */
-      border: none;                  /* 不用框框 */
+      background-color: #ffffff;       /* 項目本身維持白底 */
+      border: 1px solid #dcd3cb;      /* 細緻邊框 */
       color: #524741;
       font-size: 14.5px;
       font-weight: 500;
@@ -360,25 +350,25 @@
       display: none;
     }
 
-    /* 未選時懸停提示 */
     .chip-item:hover {
-      background-color: rgba(0, 0, 0, 0.03);
+      background-color: #f7f4f0;
+      border-color: #bcada2;
     }
 
-    /* 已選取的項目：極淡圓底色、無框框、維持勾勾 */
+    /* 已選取的項目：縮小佔位感、極淡底色、保留勾勾 */
     .chip-item:has(input:checked) {
-      background-color: #f2ebe4; /* 極淡柔和底色 */
-      border: none;              /* 完全無框框 */
-      color: #4a423d;            /* 質感文字深色 */
+      background-color: #f8f5f2; /* 更淡的柔和底色 */
+      border: 1px solid #c9bebc; /* 輕柔邊框 */
+      color: #4a423d;
       font-weight: bold;
     }
 
     .chip-item:has(input:checked)::before {
       content: "✓";
       display: inline-block;
-      margin-right: 5px;
+      margin-right: 4px;
       font-weight: bold;
-      color: #7a6b63;           /* 勾勾顏色 */
+      color: #7a6b63;
     }
     
     .total-box {
@@ -603,7 +593,6 @@
 <script>
   const LINE_OFFICIAL_ACCOUNT_ID = "@344gjuzg"; 
 
-  // 防側錄/保護軟體防護
   document.addEventListener('keydown', function(e) {
     if (
       e.keyCode === 123 || 
