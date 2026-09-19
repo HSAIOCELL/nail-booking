@@ -205,6 +205,56 @@
       color: #ffffff;
     }
 
+    /* 高級感：輕奢雙欄卡片式切換按鈕 (Step 5 卸甲) */
+    .removal-card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 6px;
+    }
+    .removal-card {
+      border: 1.5px solid #dcd3ca;
+      background: #fdfbf7;
+      border-radius: 12px;
+      padding: 14px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    .removal-card:hover {
+      border-color: #a89a90;
+      background: #f8f3ed;
+      transform: translateY(-1px);
+    }
+    .removal-card.active {
+      border-color: #7a6b63;
+      background: #7a6b63;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(122, 107, 99, 0.22);
+    }
+    .removal-card-title {
+      font-size: 16px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .removal-card.active .removal-card-title {
+      color: #ffffff;
+    }
+    .removal-card-sub {
+      font-size: 11.5px;
+      color: #93857c;
+      transition: color 0.25s;
+    }
+    .removal-card.active .removal-card-sub {
+      color: #e8e2dc;
+    }
+
     .draw-btn {
       background-color: #e4dcd3;
       color: #4a423d;
@@ -258,15 +308,6 @@
     }
     .sub-input {
       margin-top: 8px;
-    }
-
-    /* 卸甲服務同色系深淺樣式 */
-    .off-need {
-      color: #5c5049;
-      font-weight: bold;
-    }
-    .off-noneed {
-      color: #a3968e;
     }
   </style>
 </head>
@@ -343,7 +384,7 @@
     <div id="boxJumpColor" class="addon-item-box" onclick="toggleOption('jumpColorSection', event)">
       <div class="addon-header">
         <span>🎨 加購跳色</span>
-        <span id="badgeJumpColor" class="addon-badge">+50 元 ➕</span>
+        <span id="badgeJumpColor" class="addon-badge">50 元 ➕</span>
       </div>
       <div id="jumpColorSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
         <select id="jumpColor" onchange="onSelectionChange()">
@@ -370,7 +411,7 @@
     <div id="boxStyle" class="addon-item-box" onclick="toggleOption('styleSection', event)">
       <div class="addon-header">
         <span>✨ 加購款式造型</span>
-        <span id="badgeStyle" class="addon-badge">+150~200 元 ➕</span>
+        <span id="badgeStyle" class="addon-badge">150~200 元 ➕</span>
       </div>
       <div id="styleSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
@@ -417,12 +458,18 @@
     </div>
   </div>
 
-  <!-- Step 5. 卸甲服務 -->
+  <!-- Step 5. 卸甲服務 (輕奢雙欄卡片) -->
   <div class="section">
     <div class="section-title">Step 5. 卸甲服務</div>
-    <div class="radio-group">
-      <label><input type="radio" name="off" value="yes" onchange="onSelectionChange()"> <span class="off-need">✓ 需要</span></label>
-      <label><input type="radio" name="off" value="no" checked onchange="onSelectionChange()"> <span class="off-noneed">✕ 不需要</span></label>
+    <div class="removal-card-grid">
+      <div id="cardRemovalYes" class="removal-card" onclick="selectRemoval(true)">
+        <div class="removal-card-title">需要卸甲</div>
+        <div class="removal-card-sub">手上有舊光療</div>
+      </div>
+      <div id="cardRemovalNo" class="removal-card active" onclick="selectRemoval(false)">
+        <div class="removal-card-title">我不用唷</div>
+        <div class="removal-card-sub">素甲或不需處理</div>
+      </div>
     </div>
   </div>
 
@@ -449,7 +496,16 @@
   });
 
   let showJumpColor = false, showStyle = false;
+  let needRemoval = false; // 預設不需要卸甲
+
   document.getElementById('bookingDate').valueAsDate = new Date();
+
+  function selectRemoval(status) {
+    needRemoval = status;
+    document.getElementById('cardRemovalYes').classList.toggle('active', needRemoval);
+    document.getElementById('cardRemovalNo').classList.toggle('active', !needRemoval);
+    onSelectionChange();
+  }
 
   function toggleOption(id, event) {
     const el = document.getElementById(id);
@@ -457,13 +513,13 @@
       showJumpColor = !showJumpColor; 
       el.classList.toggle('hidden', !showJumpColor); 
       document.getElementById('boxJumpColor').classList.toggle('active', showJumpColor);
-      document.getElementById('badgeJumpColor').innerText = showJumpColor ? '已加購 ✔' : '+50 元 ➕';
+      document.getElementById('badgeJumpColor').innerText = showJumpColor ? '已加購 ✔' : '50 元 ➕';
     }
     else if (id === 'styleSection') { 
       showStyle = !showStyle; 
       el.classList.toggle('hidden', !showStyle); 
       document.getElementById('boxStyle').classList.toggle('active', showStyle);
-      document.getElementById('badgeStyle').innerText = showStyle ? '已加購 ✔' : '+150~200 元 ➕';
+      document.getElementById('badgeStyle').innerText = showStyle ? '已加購 ✔' : '150~200 元 ➕';
     }
     onSelectionChange();
   }
@@ -546,8 +602,7 @@
     const isStyleSelected = selectedStyles.length > 0;
     const hasNailService = isMainColorSelected || isJumpColorSelected || isStyleSelected;
 
-    const needOff = document.querySelector('input[name="off"]:checked').value === "yes";
-    if (needOff) {
+    if (needRemoval) {
       total += hasNailService ? 150 : 200;
     }
     if (isMainColorSelected) total += 650;
@@ -572,7 +627,6 @@
     const minute = document.getElementById('bookingMinute').value;
     const bookingTime = `${hour}:${minute}`;
 
-    const needOff = document.querySelector('input[name="off"]:checked').value === "yes";
     const mainColorVal = document.getElementById('mainColor').value;
     const isMainColorSelected = mainColorVal !== "";
     
@@ -613,7 +667,7 @@
       details += `• 色調：${toneText}\n`;
     }
 
-    details += `• 卸甲服務：${needOff ? '✓ 需要' : '✕ 不需要'}\n`;
+    details += `• 卸甲服務：${needRemoval ? '需要卸甲' : '我不用唷'}\n`;
 
     const finalPrice = document.getElementById('totalPrice').innerText;
     details += `----------------------------\n`;
