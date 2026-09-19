@@ -3,74 +3,988 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>款式造型選擇欄位</title>
+  <title>美甲服務預約選單</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=ChenYuluoyan&family=Cinzel:wght@600&display=swap" rel="stylesheet">
+  
   <style>
-    /* 容器：保持置中與微調後的緊湊間距 */
-    .color-tone-container {
+    body {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      background-color: #f4f1ea;
+      margin: 0;
+      padding: 20px 15px;
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 14px;
-      width: 100%;
-      padding: 10px 0;
+      min-height: 100vh;
+      color: #4a423d;
+      position: relative;
+      overflow-x: hidden;
     }
 
-    /* 基本選項：無底色、無邊框，增加通透空間感 */
+    /* 背景水印裝飾 */
+    body::before {
+      content: "NT$   $   NT$   $\n$   NT$   $   NT$\nNT$   $   NT$   $\n$NT$   $   NT$";
+      white-space: pre-line;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-12deg);
+      font-family: 'Cinzel', serif;
+      font-size: 38px;
+      font-weight: 600;
+      letter-spacing: 50px;
+      line-height: 2.2;
+      color: #c5a059;
+      opacity: 0.055;
+      pointer-events: none;
+      z-index: 0;
+      width: 140vw;
+      text-align: center;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'ChenYuluoyan', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+    }
+
+    :root {
+      color-scheme: light;
+    }
+
+    input[type="checkbox"], 
+    input[type="radio"],
+    input[type="date"] {
+      accent-color: #7a6b63;
+      cursor: pointer;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+      filter: opacity(0.6) sepia(100%) hue-rotate(330deg);
+    }
+
+    .card {
+      background: #faf8f5;
+      max-width: 440px;
+      width: 100%;
+      border-radius: 16px;
+      box-shadow: 0 6px 18px rgba(120, 108, 100, 0.08);
+      padding: 28px 22px;
+      border: 1px solid #e2dad1;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .title-header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 3px solid #ebdcd3;
+    }
+    .title-header h2 {
+      margin: 0;
+      font-size: 25px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      color: #5c5049;
+    }
+
+    .section {
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #eae3d9;
+      transition: opacity 0.3s ease, filter 0.3s ease;
+    }
+
+    /* 依賴未滿時的鎖定淡色樣式 */
+    .section.disabled-step {
+      opacity: 0.4;
+      pointer-events: none;
+      filter: grayscale(40%);
+    }
+
+    .section-title {
+      font-weight: bold;
+      color: #5c5049;
+      margin-bottom: 10px;
+      font-size: 16.5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    label {
+      font-size: 15.5px;
+      color: #524741;
+      cursor: pointer;
+    }
+    select, input[type="text"], input[type="date"] {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #cfc5bb;
+      border-radius: 8px;
+      outline: none;
+      font-size: 15px;
+      background-color: #ffffff;
+      color: #4a423d;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: border-color 0.2s;
+    }
+    select:focus, input[type="text"]:focus, input[type="date"]:focus {
+      border-color: #7a6b63;
+      box-shadow: 0 0 4px rgba(122, 107, 99, 0.25);
+    }
+
+    /* 閃爍提醒動畫 */
+    @keyframes selectFlash {
+      0% {
+        border-color: #7a6b63;
+        box-shadow: 0 0 0 3px rgba(122, 107, 99, 0.4);
+        background-color: #ffffff;
+      }
+      50% {
+        border-color: #a8988e;
+        box-shadow: 0 0 0 5px rgba(122, 107, 99, 0.6);
+        background-color: #eae1d7;
+      }
+      100% {
+        border-color: #cfc5bb;
+        box-shadow: none;
+        background-color: #ffffff;
+      }
+    }
+
+    .flash-highlight {
+      animation: selectFlash 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      border-radius: 8px;
+    }
+    
+    select option:disabled {
+      color: #c0b5ac;
+      background-color: #f5f2ed;
+    }
+
+    .datetime-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .time-picker-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .time-picker-group select {
+      flex: 1;
+      text-align: center;
+    }
+
+    /* Step 4. 色調 - 置中與極淡質感設計 */
+    .tone-palette-group {
+      display: flex;
+      justify-content: center; /* 改為置中，解決清透亮色調靠右的問題 */
+      align-items: center;
+      gap: 16px;              /* 精確適中的間距 */
+      margin-top: 10px;
+      padding: 6px 4px;
+    }
     .tone-option {
-      display: inline-flex;
+      display: flex;
       align-items: center;
       gap: 6px;
-      padding: 8px 16px;
-      font-size: 14px;
-      color: #4b5563;
-      background-color: transparent; /* 無底色 */
-      border: none;                  /* 無框框 */
-      border-radius: 20px;
       cursor: pointer;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background-color: transparent; /* 未選時無底色 */
+      border: none;                  /* 無框框 */
+      transition: all 0.25s ease;
+      user-select: none;
       white-space: nowrap;
-      transition: all 0.2s ease;
     }
-
-    /* 懸停效果：極微弱的背景提示 */
     .tone-option:hover {
       background-color: rgba(0, 0, 0, 0.03);
     }
-
-    /* 已選擇項目：極淡柔和底色、無框框、保留勾勾 */
-    .tone-option.active {
-      background-color: #f0f3ff; /* 極淡紫色系（淡紫 #f0f3ff / 淡綠 #f0fdf4 / 淡灰 #f4f4f5） */
-      color: #4f46e5;            /* 文字與勾勾顏色調深以維持對比 */
+    .color-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      box-sizing: border-box;
+      transition: all 0.25s ease;
+      background-color: #d8cecf; 
+    }
+    .tone-label {
+      font-size: 15px;
+      color: #786c65;
       font-weight: 500;
-      border: none;              /* 確定無框框 */
+    }
+    .tone-option.active {
+      background-color: #f2ebe4; /* 選中時的極淡柔和底色 */
+    }
+    .tone-option.active .color-dot {
+      background-color: #7a6b63;
+      transform: scale(1.1);
+    }
+    .tone-option.active .tone-label {
+      color: #4a423d;
+      font-weight: 700;
     }
 
-    /* SVG 勾勾圖示樣式 */
-    .check-icon {
-      width: 16px;
-      height: 16px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2.5;
-      stroke-linecap: round;
-      stroke-linejoin: round;
+    .addon-item-box {
+      border: 1.5px dashed #c2b5aa;
+      background-color: #fcfaf7;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .addon-item-box:hover {
+      border-color: #827167;
+      background-color: #f5efe8;
+    }
+    .addon-item-box.active {
+      border-style: solid;
+      border-color: #7a6b63;
+      background-color: #f2ebe4;
+      box-shadow: 0 2px 8px rgba(122, 107, 99, 0.12);
+    }
+    .addon-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 16px;
+      font-weight: bold;
+      color: #5c5049;
+    }
+    .addon-badge {
+      font-size: 13px;
+      background-color: #e5ded7;
+      color: #6e6057;
+      padding: 3px 10px;
+      border-radius: 20px;
+      transition: all 0.2s ease;
+    }
+    .addon-item-box.active .addon-badge {
+      background-color: #7a6b63;
+      color: #ffffff;
+    }
+
+    .removal-card-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .removal-card {
+      flex: 1;
+      border: 1.5px dashed #c2b5aa;
+      background-color: #fcfaf7;
+      border-radius: 12px;
+      padding: 16px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .removal-card:hover {
+      border-color: #827167;
+      background-color: #f5efe8;
+    }
+    .removal-card.active {
+      border-style: solid;
+      border-color: #bdaca2;
+      background-color: #f2ebe4;
+      transform: scale(1.03);
+      box-shadow: 0 4px 12px rgba(122, 107, 99, 0.15);
+    }
+    .removal-card-title {
+      font-size: 16.5px;
+      font-weight: bold;
+      color: #4e423b;
+      margin: 0;
+    }
+
+    .draw-btn {
+      background-color: #e4dcd3;
+      color: #4a423d;
+      border: 1px solid #c9bebc;
+      padding: 3px 10px;
+      border-radius: 12.5px;
+      font-size: 12.5px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .draw-btn:hover {
+      background-color: #d7ccc3;
+    }
+    .hidden {
+      display: none !important;
+    }
+
+    /* ===款式造型 Choice Chips：無框無底色、選中為極淡底色=== */
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: 8px 10px;
+      padding: 10px 4px;
+    }
+
+    .chip-item {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 7px 12px;
+      border-radius: 20px;
+      background-color: transparent; /* 原本不用底色 */
+      border: none;                  /* 不用框框 */
+      color: #524741;
+      font-size: 14.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+      user-select: none;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .chip-item input[type="checkbox"] {
+      display: none;
+    }
+
+    /* 未選時懸停提示 */
+    .chip-item:hover {
+      background-color: rgba(0, 0, 0, 0.03);
+    }
+
+    /* 已選取的項目：極淡圓底色、無框框、維持勾勾 */
+    .chip-item:has(input:checked) {
+      background-color: #f2ebe4; /* 極淡柔和底色 */
+      border: none;              /* 完全無框框 */
+      color: #4a423d;            /* 質感文字深色 */
+      font-weight: bold;
+    }
+
+    .chip-item:has(input:checked)::before {
+      content: "✓";
+      display: inline-block;
+      margin-right: 5px;
+      font-weight: bold;
+      color: #7a6b63;           /* 勾勾顏色 */
+    }
+    
+    .total-box {
+      background-color: #ebdcd3;
+      color: #4e423b;
+      padding: 14px;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 19px;
+      font-weight: bold;
+      margin-top: 10px;
+      margin-bottom: 18px;
+      letter-spacing: 0.5px;
+    }
+    .submit-btn {
+      width: 100%;
+      background-color: #7a6b63;
+      color: #ffffff;
+      border: none;
+      padding: 12px;
+      font-size: 17.5px;
+      font-weight: bold;
+      border-radius: 22px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(122, 107, 99, 0.2);
+      transition: background 0.2s;
+      letter-spacing: 1px;
+    }
+    .submit-btn:hover {
+      background-color: #5c5049;
+    }
+    .sub-input {
+      margin-top: 8px;
     }
   </style>
 </head>
-<body>
+<body oncontextmenu="return false;" ondragstart="return false;">
 
-  <div class="color-tone-container">
-    <button class="tone-option">自然色調</button>
-    
-    <!-- 已選擇的項目 -->
-    <button class="tone-option active">
-      <svg class="check-icon" viewBox="0 0 24 24">
-        <polyline points="20 6 9 17 4 12"></polyline>
-      </svg>
-      清透亮色調
-    </button>
-    
-    <button class="tone-option">暖柔色調</button>
+<div class="card">
+  <div class="title-header">
+    <h2>美甲服務預約選單</h2>
   </div>
+
+  <!-- Step 1. 預約日期與時間 -->
+  <div class="section">
+    <div class="section-title">Step 1. 預約日期與時間</div>
+    <div class="datetime-container">
+      <div>
+        <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #5c5049;">預約日期：</label>
+        <input type="date" id="bookingDate" onchange="validateDateTime()">
+      </div>
+      <div>
+        <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #5c5049;">預約時間：</label>
+        <div class="time-picker-group">
+          <select id="bookingHour" onchange="validateDateTime()">
+            <option value="00">00 時</option><option value="01">01 時</option><option value="02">02 時</option>
+            <option value="03">03 時</option><option value="04">04 時</option><option value="05">05 時</option>
+            <option value="06">06 時</option><option value="07">07 時</option><option value="08">08 時</option>
+            <option value="09">09 時</option><option value="10">10 時</option><option value="11">11 時</option>
+            <option value="12">12 時</option><option value="13">13 時</option><option value="14">14 時</option>
+            <option value="15">15 時</option><option value="16">16 時</option><option value="17">17 時</option>
+            <option value="18">18 時</option><option value="19">19 時</option><option value="20">20 時</option>
+            <option value="21">21 時</option><option value="22">22 時</option><option value="23">23 時</option>
+          </select>
+          <select id="bookingMinute" onchange="validateDateTime()">
+            <option value="00">00 分</option>
+            <option value="15">15 分</option>
+            <option value="30">30 分</option>
+            <option value="45">45 分</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2. 單色款式 -->
+  <div class="section">
+    <div class="section-title">
+      Step 2. 單色款式
+      <button class="draw-btn" onclick="drawMainColor()">🎲 幫我抽色系</button>
+    </div>
+    <select id="mainColor" onchange="onMainColorChange()">
+      <option value="">-- 請選擇色系 (無則留空) --</option>
+      <option value="紅色">紅色</option>
+      <option value="粉色">粉色</option>
+      <option value="橘色">橘色</option>
+      <option value="黃色">黃色</option>
+      <option value="深咖/可可色">深咖/可可色</option>
+      <option value="淺咖色">淺咖色</option>
+      <option value="綠色">綠色</option>
+      <option value="藍色">藍色</option>
+      <option value="紫色">紫色</option>
+      <option value="黑色">黑色</option>
+      <option value="銀色/白色">銀色/白色</option>
+      <option value="灰色">灰色</option>
+      <option value="金色/香檳色">金色/香檳色</option>
+    </select>
+  </div>
+
+  <!-- Step 3. 加購項目 -->
+  <div class="section disabled-step" id="step3Section">
+    <div style="font-weight: bold; color: #5c5049; margin-bottom: 12px; font-size: 16.5px;">
+      Step 3. 加購項目
+    </div>
+
+    <!-- 直覺開關 1：跳色 -->
+    <div id="boxJumpColor" class="addon-item-box" onclick="toggleOption('jumpColorSection', event)">
+      <div class="addon-header">
+        <span>🎨 跳色</span>
+        <span id="badgeJumpColor" class="addon-badge">50 元 ➕</span>
+      </div>
+      <div id="jumpColorSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">選擇色系：</div>
+          <button class="draw-btn" onclick="drawJumpColor(event)">🫯 隨機發揮</button>
+        </div>
+        <select id="jumpColor" onchange="onSelectionChange()">
+          <option value="">--請選擇色系--</option>
+          <option value="隨機發揮">隨機發揮</option>
+          <option value="紅色">紅色</option>
+          <option value="粉色">粉色</option>
+          <option value="橘色">橘色</option>
+          <option value="黃色">黃色</option>
+          <option value="深咖/可可色">深咖/可可色</option>
+          <option value="淺咖色">淺咖色</option>
+          <option value="綠色">綠色</option>
+          <option value="藍色">藍色</option>
+          <option value="紫色">紫色</option>
+          <option value="黑色">黑色</option>
+          <option value="銀色/白色">銀色/白色</option>
+          <option value="灰色">灰色</option>
+          <option value="金色/香檳色">金色/香檳色</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 直覺開關 2：款式造型 -->
+    <div id="boxStyle" class="addon-item-box" onclick="toggleOption('styleSection', event)">
+      <div class="addon-header">
+        <span>✨ 款式造型</span>
+        <span id="badgeStyle" class="addon-badge">150~200 元 ➕</span>
+      </div>
+      <div id="styleSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+          <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">最多選4個</div>
+          <button class="draw-btn" onclick="drawStyle(event)">🎲 幫我抽款式</button>
+        </div>
+        <div style="font-size: 11.5px; color: #8c7c75; margin-bottom: 8px;">(選1個 +150元 / 選2個以上 +200元)</div>
+        
+        <div class="checkbox-grid">
+          <label class="chip-item"><input type="checkbox" name="style" id="catEyeCb" value="貓眼" onchange="checkLimit(this)">貓眼</label>
+          <label class="chip-item"><input type="checkbox" name="style" value="立體不規則造型" onchange="checkLimit(this)">立體不規則造型</label>
+          
+          <label class="chip-item"><input type="checkbox" name="style" value="法式" onchange="checkLimit(this)">法式</label>
+          <label class="chip-item"><input type="checkbox" name="style" value="(全/造型)鏡面銀" onchange="checkLimit(this)">(全/造型)鏡面銀</label>
+
+          <label class="chip-item"><input type="checkbox" name="style" value="漸層" onchange="checkLimit(this)">漸層</label>
+          <label class="chip-item"><input type="checkbox" name="style" value="小飾品/貼紙" onchange="checkLimit(this)">小飾品/貼紙</label>
+
+          <label class="chip-item"><input type="checkbox" name="style" value="格紋" onchange="checkLimit(this)">格紋</label>
+          <label class="chip-item"><input type="checkbox" name="style" value="暈染" onchange="checkLimit(this)">暈染</label>
+
+          <label class="chip-item"><input type="checkbox" name="style" value="海莉款" onchange="checkLimit(this)">海莉款</label>
+          <label class="chip-item"><input type="checkbox" name="style" id="customStyleCb" value="指定圖案" onchange="checkLimit(this)">指定圖案</label>
+        </div>
+
+        <div id="catEyeDetailDiv" class="sub-input hidden">
+          <label style="font-size: 13px; font-weight: bold; color: #5c5049;">貓眼類型：</label>
+          <select id="catEyeType" style="background-color: #ffffff; font-weight: bold;">
+            <option value="指定單色貓眼">指定單色貓眼</option>
+            <option value="雙色貓眼">雙色貓眼</option>
+          </select>
+        </div>
+
+        <div id="customInputDiv" class="sub-input hidden">
+          <input type="text" id="customPattern" placeholder="請填寫指定圖案細節">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4. 色調 -->
+  <div class="section disabled-step" id="step4Section">
+    <div class="section-title">Step 4. 色調</div>
+    <div class="tone-palette-group">
+      <div class="tone-option active" onclick="selectToneDot(this, '隨機')">
+        <span class="color-dot"></span>
+        <span class="tone-label">隨機</span>
+      </div>
+      <div class="tone-option" onclick="selectToneDot(this, '個性暗色調')">
+        <span class="color-dot"></span>
+        <span class="tone-label">個性暗色調</span>
+      </div>
+      <div class="tone-option" onclick="selectToneDot(this, '清透亮色調')">
+        <span class="color-dot"></span>
+        <span class="tone-label">清透亮色調</span>
+      </div>
+    </div>
+    <input type="hidden" id="selectedTone" value="隨機">
+  </div>
+
+  <!-- Step 5. 卸甲服務 -->
+  <div class="section">
+    <div class="section-title">Step 5. 卸甲服務</div>
+    <div class="removal-card-group">
+      <div id="removalYesCard" class="removal-card" onclick="setRemoval(true)">
+        <div class="removal-card-title">需要卸甲</div>
+      </div>
+      <div id="removalNoCard" class="removal-card active" onclick="setRemoval(false)">
+        <div class="removal-card-title">不需要</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="total-box">
+    預計總金額：NT$ <span id="totalPrice">0</span> 元
+  </div>
+
+  <button class="submit-btn" onclick="sendBooking()">送出預約單 (開啟 LINE)</button>
+</div>
+
+<script>
+  const LINE_OFFICIAL_ACCOUNT_ID = "@344gjuzg"; 
+
+  // 防側錄/保護軟體防護
+  document.addEventListener('keydown', function(e) {
+    if (
+      e.keyCode === 123 || 
+      (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 67)) ||
+      (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74))
+    ) {
+      e.preventDefault();
+      return false;
+    }
+  });
+
+  let showJumpColor = false, showStyle = false;
+  let needRemoval = false;
+
+  function getTaipeiDate() {
+    const now = new Date();
+    const taipeiStr = now.toLocaleString("en-US", { timeZone: "Asia/Taipei" });
+    return new Date(taipeiStr);
+  }
+
+  function formatDateToYYYYMMDD(dateObj) {
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  function initDatePicker() {
+    const taipeiNow = getTaipeiDate();
+    const todayStr = formatDateToYYYYMMDD(taipeiNow);
+    const dateInput = document.getElementById("bookingDate");
+    
+    dateInput.min = todayStr;
+    if (!dateInput.value || dateInput.value < todayStr) {
+      dateInput.value = todayStr;
+    }
+    validateDateTime();
+  }
+
+  function validateDateTime() {
+    const dateInput = document.getElementById("bookingDate");
+    const hourSelect = document.getElementById("bookingHour");
+    const minuteSelect = document.getElementById("bookingMinute");
+    const selectedDateStr = dateInput.value;
+
+    if (!selectedDateStr) return;
+
+    const taipeiNow = getTaipeiDate();
+    const todayStr = formatDateToYYYYMMDD(taipeiNow);
+    const currentHour = taipeiNow.getHours();
+    const currentMinute = taipeiNow.getMinutes();
+
+    const isToday = (selectedDateStr === todayStr);
+
+    let firstValidHour = null;
+    Array.from(hourSelect.options).forEach(opt => {
+      const h = parseInt(opt.value, 10);
+      if (isToday && h < currentHour) {
+        opt.disabled = true;
+      } else {
+        opt.disabled = false;
+        if (firstValidHour === null) firstValidHour = opt.value;
+      }
+    });
+
+    if (hourSelect.selectedOptions[0] && hourSelect.selectedOptions[0].disabled) {
+      if (firstValidHour !== null) {
+        hourSelect.value = firstValidHour;
+      }
+    }
+
+    const selectedHour = parseInt(hourSelect.value, 10);
+    let firstValidMinute = null;
+    Array.from(minuteSelect.options).forEach(opt => {
+      const m = parseInt(opt.value, 10);
+      if (isToday && selectedHour === currentHour && m <= currentMinute) {
+        opt.disabled = true;
+      } else {
+        opt.disabled = false;
+        if (firstValidMinute === null) firstValidMinute = opt.value;
+      }
+    });
+
+    if (minuteSelect.selectedOptions[0] && minuteSelect.selectedOptions[0].disabled) {
+      if (firstValidMinute !== null) {
+        minuteSelect.value = firstValidMinute;
+      } else {
+        const nextHourIndex = hourSelect.selectedIndex + 1;
+        if (nextHourIndex < hourSelect.options.length) {
+          hourSelect.selectedIndex = nextHourIndex;
+          validateDateTime();
+        }
+      }
+    }
+  }
+
+  function onMainColorChange() {
+    const mainColorVal = document.getElementById('mainColor').value;
+    const step3 = document.getElementById('step3Section');
+    const step4 = document.getElementById('step4Section');
+
+    if (mainColorVal !== "") {
+      step3.classList.remove('disabled-step');
+      step4.classList.remove('disabled-step');
+    } else {
+      step3.classList.add('disabled-step');
+      step4.classList.add('disabled-step');
+
+      showJumpColor = false;
+      showStyle = false;
+      document.getElementById('jumpColorSection').classList.add('hidden');
+      document.getElementById('styleSection').classList.add('hidden');
+      document.getElementById('boxJumpColor').classList.remove('active');
+      document.getElementById('boxStyle').classList.remove('active');
+      document.getElementById('badgeJumpColor').innerText = '50 元 ➕';
+      document.getElementById('badgeStyle').innerText = '150~200 元 ➕';
+      document.getElementById('jumpColor').value = "";
+      
+      const styleCbs = document.querySelectorAll('input[name="style"]');
+      styleCbs.forEach(cb => cb.checked = false);
+    }
+    onSelectionChange();
+  }
+
+  function selectToneDot(element, value) {
+    const options = document.querySelectorAll('.tone-option');
+    options.forEach(opt => opt.classList.remove('active'));
+    element.classList.add('active');
+    document.getElementById('selectedTone').value = value;
+  }
+
+  function setRemoval(status) {
+    needRemoval = status;
+    const yesCard = document.getElementById('removalYesCard');
+    const noCard = document.getElementById('removalNoCard');
+
+    if (needRemoval) {
+      yesCard.classList.add('active');
+      noCard.classList.remove('active');
+    } else {
+      noCard.classList.add('active');
+      yesCard.classList.remove('active');
+    }
+    onSelectionChange();
+  }
+
+  function toggleOption(id, event) {
+    if (event) event.stopPropagation();
+    const el = document.getElementById(id);
+    if (id === 'jumpColorSection') { 
+      showJumpColor = !showJumpColor; 
+      el.classList.toggle('hidden', !showJumpColor); 
+      document.getElementById('boxJumpColor').classList.toggle('active', showJumpColor);
+      document.getElementById('badgeJumpColor').innerText = showJumpColor ? '已加購 ✔' : '50 元 ➕';
+    }
+    else if (id === 'styleSection') { 
+      showStyle = !showStyle; 
+      el.classList.toggle('hidden', !showStyle); 
+      document.getElementById('boxStyle').classList.toggle('active', showStyle);
+      document.getElementById('badgeStyle').innerText = showStyle ? '已加購 ✔' : '150~200 元 ➕';
+    }
+    onSelectionChange();
+  }
+
+  function drawJumpColor(event) {
+    if (event) event.stopPropagation();
+    const jumpSelect = document.getElementById('jumpColor');
+    
+    jumpSelect.value = "隨機發揮";
+    
+    jumpSelect.classList.remove('flash-highlight');
+    void jumpSelect.offsetWidth;
+    jumpSelect.classList.add('flash-highlight');
+
+    onSelectionChange();
+  }
+
+  function drawMainColor() {
+    const select = document.getElementById('mainColor');
+    const options = select.options;
+    const randomIndex = Math.floor(Math.random() * (options.length - 1)) + 1;
+    select.selectedIndex = randomIndex;
+    
+    select.classList.remove('flash-highlight');
+    void select.offsetWidth;
+    select.classList.add('flash-highlight');
+
+    onMainColorChange();
+  }
+
+  function drawStyle(event) {
+    if (event) event.stopPropagation();
+    if (!showStyle) {
+      showStyle = true;
+      document.getElementById('styleSection').classList.remove('hidden');
+      document.getElementById('boxStyle').classList.add('active');
+      document.getElementById('badgeStyle').innerText = '已加購 ✔';
+    }
+    const checkboxes = document.querySelectorAll('input[name="style"]');
+    checkboxes.forEach(cb => cb.checked = false);
+
+    const pool = [
+      { name: "貓眼", weight: 75 }, { name: "暈染", weight: 30 }, { name: "小飾品/貼紙", weight: 2 },
+      { name: "格紋", weight: 1 }, { name: "法式", weight: 1 }, { name: "立體不規則造型", weight: 1 },
+      { name: "漸層", weight: 0.5 }, { name: "海莉款", weight: 0.5 }, { name: "(全/造型)鏡面銀", weight: 0.5 }
+    ];
+
+    const countToDraw = Math.floor(Math.random() * 3) + 1;
+    let chosenList = [];
+
+    for (let i = 0; i < countToDraw; i++) {
+      const availablePool = pool.filter(item => !chosenList.includes(item.name));
+      if (availablePool.length === 0) break;
+      const totalWeight = availablePool.reduce((sum, item) => sum + item.weight, 0);
+      let randomNum = Math.random() * totalWeight;
+      for (let item of availablePool) {
+        if (randomNum < item.weight) { chosenList.push(item.name); break; }
+        randomNum -= item.weight;
+      }
+    }
+
+    checkboxes.forEach(cb => {
+      if (chosenList.includes(cb.value)) { cb.checked = true; checkLimit(cb); }
+    });
+
+    const gridEl = document.querySelector('.checkbox-grid');
+    if (gridEl) {
+      gridEl.classList.remove('flash-highlight');
+      void gridEl.offsetWidth;
+      gridEl.classList.add('flash-highlight');
+    }
+
+    onSelectionChange();
+  }
+
+  function checkLimit(checkbox) {
+    const checkboxes = document.querySelectorAll('input[name="style"]:checked');
+    if (checkboxes.length > 4) {
+      alert("款式最多只能勾選 4 個喔！");
+      checkbox.checked = false;
+    }
+    const customCb = document.getElementById('customStyleCb');
+    document.getElementById('customInputDiv').classList.toggle('hidden', !customCb.checked);
+    onSelectionChange();
+  }
+
+  function onSelectionChange() {
+    autoDetermineCatEye();
+    calculateTotal();
+  }
+
+  function autoDetermineCatEye() {
+    const catEyeCb = document.getElementById('catEyeCb');
+    const catEyeDetailDiv = document.getElementById('catEyeDetailDiv');
+    const catEyeSelect = document.getElementById('catEyeType');
+    
+    if (!catEyeCb || !catEyeCb.checked || !showStyle) {
+      catEyeDetailDiv.classList.add('hidden');
+      return;
+    }
+    
+    catEyeDetailDiv.classList.remove('hidden');
+
+    const jumpColorVal = document.getElementById('jumpColor').value;
+    const hasJumpColorSelected = showJumpColor && jumpColorVal !== "";
+
+    if (hasJumpColorSelected) {
+      catEyeSelect.disabled = false;
+      catEyeSelect.style.backgroundColor = "#ffffff";
+      if (catEyeSelect.value !== "雙色貓眼" && catEyeSelect.value !== "指定單色貓眼") {
+        catEyeSelect.value = "雙色貓眼";
+      }
+    } else {
+      catEyeSelect.disabled = true;
+      catEyeSelect.style.backgroundColor = "#e5ded7";
+      catEyeSelect.value = "指定單色貓眼";
+    }
+  }
+
+  function calculateTotal() {
+    let total = 0;
+    const mainColorVal = document.getElementById('mainColor').value;
+    const isMainColorSelected = mainColorVal !== "";
+    const isJumpColorSelected = showJumpColor && document.getElementById('jumpColor').value !== "";
+    const selectedStyles = showStyle ? document.querySelectorAll('input[name="style"]:checked') : [];
+    const isStyleSelected = selectedStyles.length > 0;
+    const hasNailService = isMainColorSelected || isJumpColorSelected || isStyleSelected;
+
+    if (needRemoval) {
+      total += hasNailService ? 150 : 200;
+    }
+
+    if (isMainColorSelected) total += 650;
+    if (isJumpColorSelected) total += 50;
+
+    if (isStyleSelected) {
+      total += (selectedStyles.length === 1) ? 150 : 200;
+    }
+
+    document.getElementById('totalPrice').innerText = total;
+  }
+
+  function sendBooking() {
+    const mainColorVal = document.getElementById('mainColor').value;
+    const isMainColorSelected = mainColorVal !== "";
+
+    if (showJumpColor) {
+      const jumpColorVal = document.getElementById('jumpColor').value;
+      if (jumpColorVal === "") {
+        alert("🎨 請選擇跳色色系，或關閉該項目！");
+        return;
+      }
+    }
+
+    if (showStyle) {
+      const selectedStyles = document.querySelectorAll('input[name="style"]:checked');
+      if (selectedStyles.length === 0) {
+        alert("✨ 請勾選造型款式，或關閉該項目！");
+        return;
+      }
+    }
+
+    const bookingDate = document.getElementById('bookingDate').value || '未選擇日期';
+    const hour = document.getElementById('bookingHour').value;
+    const minute = document.getElementById('bookingMinute').value;
+    const bookingTime = `${hour}:${minute}`;
+    
+    let details = `【美甲服務預約單】\n`;
+    details += `----------------------------\n`;
+    details += `• 預約時間：${bookingDate} ${bookingTime}\n`;
+
+    if (isMainColorSelected) {
+      details += `• 單色款式：${mainColorVal}\n`;
+      
+      if (showJumpColor) {
+        const jumpColor = document.getElementById('jumpColor').value || '尚未選擇';
+        details += `• 加購跳色：${jumpColor}\n`;
+      }
+
+      if (showStyle) {
+        const selectedStyles = Array.from(document.querySelectorAll('input[name="style"]:checked')).map(cb => cb.value);
+        if (selectedStyles.length > 0) {
+          if (selectedStyles.includes('貓眼')) {
+            const catType = document.getElementById('catEyeType').value;
+            const idx = selectedStyles.indexOf('貓眼');
+            selectedStyles[idx] = `貓眼(${catType})`;
+          }
+          if (selectedStyles.includes('指定圖案')) {
+            const customText = document.getElementById('customPattern').value || '未填寫';
+            const idx = selectedStyles.indexOf('指定圖案');
+            selectedStyles[idx] = `指定圖案(${customText})`;
+          }
+          details += `• 款式造型：${selectedStyles.join('、')}\n`;
+        }
+      }
+
+      const toneText = document.getElementById('selectedTone').value;
+      details += `• 色調：${toneText}\n`;
+    } else {
+      details += `• 單色美甲：無 (僅純卸甲服務)\n`;
+    }
+
+    details += `• 卸甲服務：${needRemoval ? '需要卸甲' : '不需要'}\n`;
+
+    const finalPrice = document.getElementById('totalPrice').innerText;
+    details += `----------------------------\n`;
+    details += `💰 預計總金額：NT$ ${finalPrice} 元`;
+
+    const encodedMessage = encodeURIComponent(details);
+    const lineUrl = `https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodedMessage}`;
+
+    alert("✨ 即將為您開啟 LINE，請在聊天室按「傳送」送出預約單！");
+    window.location.href = lineUrl;
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    initDatePicker();
+    onMainColorChange();
+    setRemoval(false);
+  });
+</script>
 
 </body>
 </html>
