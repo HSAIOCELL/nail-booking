@@ -164,7 +164,7 @@
       text-align: center;
     }
 
-    /* 🧠 人因工程：直覺式加購選項區塊 */
+    /* 人因工程：直覺式加購選項區塊 */
     .addon-item-box {
       border: 1.5px dashed #c2b5aa;
       background-color: #fcfaf7;
@@ -259,6 +259,15 @@
     .sub-input {
       margin-top: 8px;
     }
+
+    /* 卸甲服務同色系深淺樣式 */
+    .off-need {
+      color: #5c5049;
+      font-weight: bold;
+    }
+    .off-noneed {
+      color: #a3968e;
+    }
   </style>
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;">
@@ -268,9 +277,9 @@
     <h2>美甲服務預約選單</h2>
   </div>
 
-  <!-- 💡 Step 1. 預約日期與時間 -->
+  <!-- Step 1. 預約日期與時間 -->
   <div class="section">
-    <div class="section-title">💡 Step 1. 預約日期與時間</div>
+    <div class="section-title">Step 1. 預約日期與時間</div>
     <div class="datetime-container">
       <div>
         <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #5c5049;">預約日期：</label>
@@ -300,10 +309,10 @@
     </div>
   </div>
 
-  <!-- 💡 Step 2. 單色款式 -->
+  <!-- Step 2. 單色款式 -->
   <div class="section">
     <div class="section-title">
-      💡 Step 2. 單色款式
+      Step 2. 單色款式
       <button class="draw-btn" onclick="drawMainColor()">🎲 幫我抽色系</button>
     </div>
     <select id="mainColor" onchange="onSelectionChange()">
@@ -324,13 +333,13 @@
     </select>
   </div>
 
-  <!-- 💡 Step 3. 加購項目 -->
+  <!-- Step 3. 加購項目 -->
   <div class="section">
     <div style="font-weight: bold; color: #5c5049; margin-bottom: 12px; font-size: 16.5px;">
-      💡 Step 3. 加購項目
+      Step 3. 加購項目
     </div>
 
-    <!-- 🧠 直覺開關 1：跳色 -->
+    <!-- 直覺開關 1：跳色 -->
     <div id="boxJumpColor" class="addon-item-box" onclick="toggleOption('jumpColorSection', event)">
       <div class="addon-header">
         <span>🎨 加購跳色</span>
@@ -357,7 +366,7 @@
       </div>
     </div>
 
-    <!-- 🧠 直覺開關 2：款式造型 -->
+    <!-- 直覺開關 2：款式造型 -->
     <div id="boxStyle" class="addon-item-box" onclick="toggleOption('styleSection', event)">
       <div class="addon-header">
         <span>✨ 加購款式造型</span>
@@ -398,9 +407,9 @@
     </div>
   </div>
 
-  <!-- 💡 Step 4. 色調 -->
+  <!-- Step 4. 色調 -->
   <div class="section" id="toneSection">
-    <div class="section-title">💡 Step 4. 色調</div>
+    <div class="section-title">Step 4. 色調</div>
     <div class="radio-group">
       <label><input type="radio" name="tone" value="不挑選" checked> 不挑選</label>
       <label><input type="radio" name="tone" value="個性暗色調"> 個性暗色調</label>
@@ -408,12 +417,12 @@
     </div>
   </div>
 
-  <!-- 💡 Step 5. 卸甲服務 -->
+  <!-- Step 5. 卸甲服務 -->
   <div class="section">
-    <div class="section-title">💡 Step 5. 卸甲服務</div>
+    <div class="section-title">Step 5. 卸甲服務</div>
     <div class="radio-group">
-      <label><input type="radio" name="off" value="yes" onchange="onSelectionChange()"> 我要卸甲</label>
-      <label><input type="radio" name="off" value="no" checked onchange="onSelectionChange()"> 不需要卸甲</label>
+      <label><input type="radio" name="off" value="yes" onchange="onSelectionChange()"> <span class="off-need">✓ 需要</span></label>
+      <label><input type="radio" name="off" value="no" checked onchange="onSelectionChange()"> <span class="off-noneed">✕ 不需要</span></label>
     </div>
   </div>
 
@@ -553,7 +562,7 @@
     if (showStyle) {
       const selectedStyles = document.querySelectorAll('input[name="style"]:checked');
       if (selectedStyles.length === 0) {
-        alert("✨ 提示：您開啟了「加購款式造型」，但尚未挑選款式喔！\n請勾選您想做的造型，或者再次點擊開啟框將其關閉～");
+        alert("✨ 請勾選造型款式，或關閉該項目！");
         return;
       }
     }
@@ -604,7 +613,7 @@
       details += `• 色調：${toneText}\n`;
     }
 
-    details += `• 卸甲服務：${needOff ? '我要卸甲' : '不需要卸甲'}\n`;
+    details += `• 卸甲服務：${needOff ? '✓ 需要' : '✕ 不需要'}\n`;
 
     const finalPrice = document.getElementById('totalPrice').innerText;
     details += `----------------------------\n`;
