@@ -70,6 +70,7 @@
       width: 16px;
       height: 16px;
       vertical-align: middle;
+      flex-shrink: 0;
     }
 
     input[type="date"]::-webkit-calendar-picker-indicator {
@@ -132,7 +133,7 @@
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
     }
     select, input[type="text"], input[type="date"] {
       width: 100%;
@@ -340,14 +341,29 @@
     .hidden {
       display: none !important;
     }
+
+    /* 重新設計款式造型選單，提升視覺視覺舒適度與整潔度 */
     .checkbox-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px 8px;
-      padding: 8px;
+      grid-template-columns: 0.85fr 1.15fr; /* 左短右長比例分派，避免文字斷行擁擠 */
+      gap: 8px 10px;
+      padding: 10px;
       background-color: #ffffff;
-      border-radius: 8px;
+      border-radius: 10px;
       border: 1px solid #ebdcd3;
+    }
+    .checkbox-grid label {
+      padding: 6px 8px;
+      border-radius: 6px;
+      background-color: #fdfcfb;
+      border: 1px solid #f0e9e1;
+      transition: all 0.2s ease;
+      font-size: 14.5px;
+      white-space: nowrap;
+    }
+    .checkbox-grid label:hover {
+      background-color: #f7f2ed;
+      border-color: #dfd4c8;
     }
     
     .total-box {
@@ -497,16 +513,21 @@
         </div>
         <div style="font-size: 11.5px; color: #8c7c75; margin-bottom: 8px;">(選1個 +150元 / 選2個以上 +200元)</div>
         
+        <!-- 依短字數/長字數左右交錯排版（第一排固定貓眼） -->
         <div class="checkbox-grid">
           <label><input type="checkbox" name="style" id="catEyeCb" value="貓眼" onchange="checkLimit(this)"> 貓眼</label>
-          <label><input type="checkbox" name="style" value="暈染" onchange="checkLimit(this)"> 暈染</label>
           <label><input type="checkbox" name="style" value="立體不規則造型" onchange="checkLimit(this)"> 立體不規則造型</label>
+          
           <label><input type="checkbox" name="style" value="法式" onchange="checkLimit(this)"> 法式</label>
-          <label><input type="checkbox" name="style" value="漸層" onchange="checkLimit(this)"> 漸層</label>
-          <label><input type="checkbox" name="style" value="海莉款" onchange="checkLimit(this)"> 海莉款</label>
           <label><input type="checkbox" name="style" value="(全/造型)鏡面銀" onchange="checkLimit(this)"> (全/造型)鏡面銀</label>
+
+          <label><input type="checkbox" name="style" value="漸層" onchange="checkLimit(this)"> 漸層</label>
           <label><input type="checkbox" name="style" value="小飾品/貼紙" onchange="checkLimit(this)"> 小飾品/貼紙</label>
+
           <label><input type="checkbox" name="style" value="格紋" onchange="checkLimit(this)"> 格紋</label>
+          <label><input type="checkbox" name="style" value="暈染" onchange="checkLimit(this)"> 暈染</label>
+
+          <label><input type="checkbox" name="style" value="海莉款" onchange="checkLimit(this)"> 海莉款</label>
           <label><input type="checkbox" name="style" id="customStyleCb" value="指定圖案" onchange="checkLimit(this)"> 指定圖案</label>
         </div>
 
