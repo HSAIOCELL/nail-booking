@@ -9,7 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=ChenYuluoyan&family=Cinzel:wght@600&display=swap" rel="stylesheet">
   
   <style>
-    /* 防選取與防複製保護 */
     body {
       -webkit-touch-callout: none;
       -webkit-user-select: none;
@@ -153,7 +152,6 @@
       box-shadow: 0 0 4px rgba(122, 107, 99, 0.25);
     }
     
-    /* 下拉選單中被停用的選項淡色顯示 */
     select option:disabled {
       color: #c0b5ac;
       background-color: #f5f2ed;
@@ -174,28 +172,27 @@
       text-align: center;
     }
 
-    /* Step 4 正圓色卡選單樣式 */
     .tone-palette-group {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
       margin-top: 10px;
-      padding: 4px 0;
+      padding: 6px 4px;
     }
     .tone-option {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       cursor: pointer;
-      padding: 6px 8px;
+      padding: 6px 10px;
       border-radius: 20px;
-      transition: all 0.2s ease;
+      transition: all 0.25s ease;
       user-select: none;
-      white-space: nowrap; /* 防文字斷行 */
+      white-space: nowrap;
     }
     .tone-option:hover {
-      background-color: rgba(240, 236, 227, 0.5);
+      background-color: rgba(240, 236, 227, 0.6);
     }
     .color-dot {
       width: 18px;
@@ -205,27 +202,21 @@
       transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
       position: relative;
       flex-shrink: 0;
-      /* 統一圓形內圈核心顏色 */
-      background-color: #7a6b63; 
-    }
-    /* 透過外框展現調性區隔 */
-    .dot-neutral {
-      border: 2px solid #c0b3a7;
-    }
-    .dot-dark {
-      border: 2px solid #3a322d;
-    }
-    .dot-light {
-      border: 2px solid #e8e0d5;
+      /* 預設未選定為溫柔淺色系 */
+      background-color: #e8e0d5; 
+      border: 1.5px solid #d4c7b8;
     }
     .tone-label {
-      font-size: 14.5px;
+      font-size: 15px;
       color: #8c7c75;
       font-weight: 500;
-      white-space: nowrap; /* 確保文字不換行 */
-      transition: color 0.2s ease, font-weight 0.2s ease;
+      white-space: nowrap;
+      transition: color 0.25s ease, font-weight 0.25s ease;
     }
+    /* 選定後圓形變成質感深咖色，外圈加上柔和焦調 Glow */
     .tone-option.active .color-dot {
+      background-color: #7a6b63;
+      border-color: #5c5049;
       transform: scale(1.15);
       box-shadow: 0 0 0 2.5px #faf8f5, 0 0 0 4.5px #7a6b63;
     }
@@ -234,7 +225,6 @@
       font-weight: 700;
     }
 
-    /* 加購項目面板 */
     .addon-item-box {
       border: 1.5px dashed #c2b5aa;
       background-color: #fcfaf7;
@@ -275,54 +265,48 @@
       color: #ffffff;
     }
 
-    /* Step 5 卸甲服務卡片 */
-    .removal-card-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-top: 8px;
-      padding: 4px 0;
+    .removal-card-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
     }
     .removal-card {
-      border: 1px solid #e0d8d0;
-      background: #f8f6f2;
+      flex: 1;
+      border: 1.5px dashed #c2b5aa;
+      background-color: #fcfaf7;
       border-radius: 12px;
       padding: 16px 10px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
-      transform: scale(0.97);
-      opacity: 0.75;
-      box-shadow: none;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .removal-card:hover {
-      opacity: 0.95;
-      border-color: #c5b8ad;
+      border-color: #827167;
+      background-color: #f5efe8;
     }
-    /* 已選擇項目改為與總金額同色系 (#ebdcd3 / #4e423b) */
     .removal-card.active {
-      background-color: #ebdcd3;
-      border: 1.5px solid #bdaca2;
+      border-style: solid;
+      border-color: #bdaca2;
+      background-color: #f2ebe4;
       transform: scale(1.03);
-      opacity: 1;
-      box-shadow: 0 4px 14px rgba(120, 108, 100, 0.15);
+      box-shadow: 0 4px 12px rgba(122, 107, 99, 0.15);
     }
     .removal-card-title {
       font-size: 16.5px;
       font-weight: bold;
-      letter-spacing: 1px;
-      color: #9A8F85;
-      transition: color 0.25s;
-    }
-    .removal-card.active .removal-card-title {
       color: #4e423b;
+      margin: 0;
     }
 
     .draw-btn {
       background-color: #e4dcd3;
       color: #4a423d;
       border: 1px solid #c9bebc;
-      padding: 3px 8px;
+      padding: 3px 10px;
       border-radius: 12.5px;
       font-size: 12.5px;
       cursor: pointer;
@@ -437,7 +421,7 @@
     </select>
   </div>
 
-  <!-- Step 3. 加購項目 (預設淡化，需先選 Step 2) -->
+  <!-- Step 3. 加購項目 -->
   <div class="section disabled-step" id="step3Section">
     <div style="font-weight: bold; color: #5c5049; margin-bottom: 12px; font-size: 16.5px;">
       Step 3. 加購項目
@@ -446,10 +430,14 @@
     <!-- 直覺開關 1：跳色 -->
     <div id="boxJumpColor" class="addon-item-box" onclick="toggleOption('jumpColorSection', event)">
       <div class="addon-header">
-        <span>🎨 加購跳色</span>
+        <span>🎨 跳色</span>
         <span id="badgeJumpColor" class="addon-badge">50 元 ➕</span>
       </div>
       <div id="jumpColorSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">選擇跳色色系：</div>
+          <button class="draw-btn" onclick="drawJumpColor(event)">🫯 隨機發揮</button>
+        </div>
         <select id="jumpColor" onchange="onSelectionChange()">
           <option value="">-- 請選擇跳色色系 --</option>
           <option value="隨機發揮">隨機發揮</option>
@@ -511,34 +499,34 @@
     </div>
   </div>
 
-  <!-- Step 4. 色調（預設淡化，需先選 Step 2） -->
+  <!-- Step 4. 色調 -->
   <div class="section disabled-step" id="step4Section">
     <div class="section-title">Step 4. 色調</div>
     <div class="tone-palette-group">
-      <div class="tone-option active" onclick="selectToneDot(this, '不挑選')">
-        <span class="color-dot dot-neutral"></span>
-        <span class="tone-label">不挑選</span>
+      <div class="tone-option active" onclick="selectToneDot(this, '隨機')">
+        <span class="color-dot"></span>
+        <span class="tone-label">隨機</span>
       </div>
       <div class="tone-option" onclick="selectToneDot(this, '個性暗色調')">
-        <span class="color-dot dot-dark"></span>
+        <span class="color-dot"></span>
         <span class="tone-label">個性暗色調</span>
       </div>
       <div class="tone-option" onclick="selectToneDot(this, '清透亮色調')">
-        <span class="color-dot dot-light"></span>
+        <span class="color-dot"></span>
         <span class="tone-label">清透亮色調</span>
       </div>
     </div>
-    <input type="hidden" id="selectedTone" value="不挑選">
+    <input type="hidden" id="selectedTone" value="隨機">
   </div>
 
-  <!-- Step 5. 卸甲服務 (亮色系激活卡片) -->
+  <!-- Step 5. 卸甲服務（已移除輔助文字） -->
   <div class="section">
     <div class="section-title">Step 5. 卸甲服務</div>
-    <div class="removal-card-grid">
-      <div id="cardRemovalYes" class="removal-card" onclick="selectRemoval(true)">
+    <div class="removal-card-group">
+      <div id="removalYesCard" class="removal-card" onclick="setRemoval(true)">
         <div class="removal-card-title">需要卸甲</div>
       </div>
-      <div id="cardRemovalNo" class="removal-card active" onclick="selectRemoval(false)">
+      <div id="removalNoCard" class="removal-card active" onclick="setRemoval(false)">
         <div class="removal-card-title">不需要</div>
       </div>
     </div>
@@ -569,9 +557,6 @@
   let showJumpColor = false, showStyle = false;
   let needRemoval = false;
 
-  // -------------------------------------------------------------
-  // 台北時間 (Asia/Taipei UTC+8) 精準判定防護邏輯
-  // -------------------------------------------------------------
   function getTaipeiDate() {
     const now = new Date();
     const taipeiStr = now.toLocaleString("en-US", { timeZone: "Asia/Taipei" });
@@ -624,7 +609,6 @@
       }
     });
 
-    // 若選擇的小時已被禁用，幫顧客移至第一個有效小時
     if (hourSelect.selectedOptions[0] && hourSelect.selectedOptions[0].disabled) {
       if (firstValidHour !== null) {
         hourSelect.value = firstValidHour;
@@ -644,7 +628,6 @@
       }
     });
 
-    // 若選擇的分鐘已被禁用，自動選擇第一個有效分鐘
     if (minuteSelect.selectedOptions[0] && minuteSelect.selectedOptions[0].disabled) {
       if (firstValidMinute !== null) {
         minuteSelect.value = firstValidMinute;
@@ -658,24 +641,18 @@
     }
   }
 
-  // -------------------------------------------------------------
-  // Step 2 單色選擇變動連動邏輯
-  // -------------------------------------------------------------
   function onMainColorChange() {
     const mainColorVal = document.getElementById('mainColor').value;
     const step3 = document.getElementById('step3Section');
     const step4 = document.getElementById('step4Section');
 
     if (mainColorVal !== "") {
-      // 顧客選擇了單色：解鎖 Step 3 & Step 4
       step3.classList.remove('disabled-step');
       step4.classList.remove('disabled-step');
     } else {
-      // 顧客未選擇單色：重置並淡化鎖定 Step 3 & Step 4
       step3.classList.add('disabled-step');
       step4.classList.add('disabled-step');
 
-      // 重置 Step 3 狀態
       showJumpColor = false;
       showStyle = false;
       document.getElementById('jumpColorSection').classList.add('hidden');
@@ -699,10 +676,18 @@
     document.getElementById('selectedTone').value = value;
   }
 
-  function selectRemoval(status) {
+  function setRemoval(status) {
     needRemoval = status;
-    document.getElementById('cardRemovalYes').classList.toggle('active', needRemoval);
-    document.getElementById('cardRemovalNo').classList.toggle('active', !needRemoval);
+    const yesCard = document.getElementById('removalYesCard');
+    const noCard = document.getElementById('removalNoCard');
+
+    if (needRemoval) {
+      yesCard.classList.add('active');
+      noCard.classList.remove('active');
+    } else {
+      noCard.classList.add('active');
+      yesCard.classList.remove('active');
+    }
     onSelectionChange();
   }
 
@@ -724,21 +709,12 @@
     onSelectionChange();
   }
 
-  function onSelectionChange() {
-    autoDetermineCatEye();
-    calculateTotal();
-  }
-
-  function autoDetermineCatEye() {
-    const catEyeCb = document.getElementById('catEyeCb');
-    const catEyeDetailDiv = document.getElementById('catEyeDetailDiv');
-    const catEyeSelect = document.getElementById('catEyeType');
-    if (!catEyeCb || !catEyeCb.checked || !showStyle) {
-      catEyeDetailDiv.classList.add('hidden');
-      return;
-    }
-    catEyeDetailDiv.classList.remove('hidden');
-    catEyeSelect.value = (showJumpColor && document.getElementById('jumpColor').value !== "") ? "雙色貓眼" : "指定單色貓眼";
+  function drawJumpColor(event) {
+    if (event) event.stopPropagation();
+    const jumpSelect = document.getElementById('jumpColor');
+    jumpSelect.value = "隨機發揮";
+    alert("🫯 恭喜選擇跳色：【隨機發揮】！");
+    onSelectionChange();
   }
 
   function drawMainColor() {
@@ -799,6 +775,23 @@
     onSelectionChange();
   }
 
+  function onSelectionChange() {
+    autoDetermineCatEye();
+    calculateTotal();
+  }
+
+  function autoDetermineCatEye() {
+    const catEyeCb = document.getElementById('catEyeCb');
+    const catEyeDetailDiv = document.getElementById('catEyeDetailDiv');
+    const catEyeSelect = document.getElementById('catEyeType');
+    if (!catEyeCb || !catEyeCb.checked || !showStyle) {
+      catEyeDetailDiv.classList.add('hidden');
+      return;
+    }
+    catEyeDetailDiv.classList.remove('hidden');
+    catEyeSelect.value = (showJumpColor && document.getElementById('jumpColor').value !== "") ? "雙色貓眼" : "指定單色貓眼";
+  }
+
   function calculateTotal() {
     let total = 0;
     const mainColorVal = document.getElementById('mainColor').value;
@@ -830,7 +823,7 @@
     if (showJumpColor) {
       const jumpColorVal = document.getElementById('jumpColor').value;
       if (jumpColorVal === "") {
-        alert("🎨 請選擇加購跳色色系，或關閉該項目！");
+        alert("🎨 請選擇跳色色系，或關閉該項目！");
         return;
       }
     }
@@ -897,10 +890,11 @@
     window.location.href = lineUrl;
   }
 
-  // 初始化頁面時間、依賴狀態與金額
+  // 初始化頁面時間、預設選項與金額
   document.addEventListener('DOMContentLoaded', function() {
     initDatePicker();
     onMainColorChange();
+    setRemoval(false);
   });
 </script>
 
