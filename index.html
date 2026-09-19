@@ -486,7 +486,7 @@
 
         <div id="catEyeDetailDiv" class="sub-input hidden">
           <label style="font-size: 13px; font-weight: bold; color: #5c5049;">貓眼類型：</label>
-          <select id="catEyeType" disabled style="background-color: #e5ded7; font-weight: bold;">
+          <select id="catEyeType" style="background-color: #fefdfc; font-weight: bold;">
             <option value="指定單色貓眼">指定單色貓眼</option>
             <option value="雙色貓眼">雙色貓眼</option>
           </select>
@@ -784,12 +784,30 @@
     const catEyeCb = document.getElementById('catEyeCb');
     const catEyeDetailDiv = document.getElementById('catEyeDetailDiv');
     const catEyeSelect = document.getElementById('catEyeType');
+    
     if (!catEyeCb || !catEyeCb.checked || !showStyle) {
       catEyeDetailDiv.classList.add('hidden');
       return;
     }
+    
     catEyeDetailDiv.classList.remove('hidden');
-    catEyeSelect.value = (showJumpColor && document.getElementById('jumpColor').value !== "") ? "雙色貓眼" : "指定單色貓眼";
+
+    const jumpColorVal = document.getElementById('jumpColor').value;
+    const hasJumpColorSelected = showJumpColor && jumpColorVal !== "";
+
+    if (hasJumpColorSelected) {
+      // 有選擇跳色：取消鎖定，允許自由下拉選擇，並預設為雙色貓眼
+      catEyeSelect.disabled = false;
+      catEyeSelect.style.backgroundColor = "#fefdfc";
+      if (catEyeSelect.value !== "雙色貓眼" && catEyeSelect.value !== "指定單色貓眼") {
+        catEyeSelect.value = "雙色貓眼";
+      }
+    } else {
+      // 無選擇跳色：鎖定選單並固定為指定單色貓眼
+      catEyeSelect.disabled = true;
+      catEyeSelect.style.backgroundColor = "#e5ded7";
+      catEyeSelect.value = "指定單色貓眼";
+    }
   }
 
   function calculateTotal() {
