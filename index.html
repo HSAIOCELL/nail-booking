@@ -171,25 +171,26 @@
       text-align: center;
     }
 
-    /* Step 4. 色調 - 無邊框、純底色、小圓形外加一圈特效 */
+    /* Step 4. 色調 - 三個選項同排，未被選擇與背景同色，被選擇時小圓形外加一圈特效 */
     .tone-palette-group {
       display: flex;
-      justify-content: center;
+      justify-content: space-between; /* 三個選項平均分配為一排 */
       align-items: center;
-      gap: 12px;
+      gap: 6px;
       margin-top: 10px;
       padding: 6px 2px;
-      flex-wrap: wrap; /* 避免在小螢幕壅擠超出 */
     }
     .tone-option {
+      flex: 1;
       display: flex;
       align-items: center;
-      gap: 7px;
+      justify-content: center;
+      gap: 6px;
       cursor: pointer;
-      padding: 7px 12px;
+      padding: 8px 6px;
       border-radius: 20px;
-      background-color: #ffffff;      /* 預設純白底色 */
-      border: none;                   /* 不要框線 */
+      background-color: #faf8f5;      /* 未被選擇時與背景顏色相同 */
+      border: none;                   /* 無邊框 */
       transition: all 0.25s ease;
       user-select: none;
       white-space: nowrap;
@@ -198,8 +199,8 @@
       background-color: #f2ede6;
     }
     .color-dot {
-      width: 15px;
-      height: 15px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       box-sizing: border-box;
       transition: all 0.25s ease;
@@ -207,19 +208,18 @@
       border: 2px solid #bdafa6;
     }
     .tone-label {
-      font-size: 14.5px;
+      font-size: 14px;
       color: #786c65;
       font-weight: 500;
     }
     .tone-option.active {
-      background-color: #f2ebe4;      /* 被選擇後的柔和底色 */
+      background-color: #f2ebe4;      /* 被選擇後的微幅加深底色 */
       border: none;
     }
-    /* 被選擇後，小圓形外層加一圈圓型特效 */
     .tone-option.active .color-dot {
       background-color: #7a6b63;
       border-color: #5c5049;
-      box-shadow: 0 0 0 3.5px #ded4cc; /* 外層加一圈圓型環繞 */
+      box-shadow: 0 0 0 3px #ded4cc; /* 小圓形外層加一圈圓型環繞 */
       transform: scale(1.05);
     }
     .tone-option.active .tone-label {
@@ -321,7 +321,7 @@
       display: none !important;
     }
 
-    /* ===款式造型 Choice Chips：完全無邊框、純白底、選中為極淡底色+勾勾=== */
+    /* ===款式造型：一體方圓型底座，預設白色，被選擇時微微加深底色=== */
     .checkbox-grid {
       display: grid;
       grid-template-columns: 0.85fr 1.15fr;
@@ -333,10 +333,10 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 6px 12px;
-      border-radius: 20px;
-      background-color: #ffffff;       /* 項目白底 */
-      border: none;                   /* 完全不要框線 */
+      padding: 7px 12px;
+      border-radius: 8px;              /* 微圓角矩形（方圓型） */
+      background-color: #ffffff;       /* 預設為白色底座 */
+      border: none;                   /* 無邊框 */
       color: #524741;
       font-size: 14.5px;
       font-weight: 500;
@@ -352,13 +352,13 @@
     }
 
     .chip-item:hover {
-      background-color: #f2ede6;
+      background-color: #f5efe8;
     }
 
-    /* 已選取的項目：無邊框、極淡底色、保留勾勾 */
+    /* 已選取的項目：微幅加深底色 */
     .chip-item:has(input:checked) {
-      background-color: #f2ebe4; /* 極淡柔和底色 */
-      border: none;             /* 保持無框線 */
+      background-color: #ede4dc; /* 微微加深的柔和底色 */
+      border: none;
       color: #4a423d;
       font-weight: bold;
     }
