@@ -65,14 +65,6 @@
       cursor: pointer;
     }
 
-    input[type="checkbox"], 
-    input[type="radio"] {
-      width: 16px;
-      height: 16px;
-      vertical-align: middle;
-      flex-shrink: 0;
-    }
-
     input[type="date"]::-webkit-calendar-picker-indicator {
       cursor: pointer;
       filter: opacity(0.6) sepia(100%) hue-rotate(330deg);
@@ -131,9 +123,6 @@
       font-size: 15.5px;
       color: #524741;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
     }
     select, input[type="text"], input[type="date"] {
       width: 100%;
@@ -342,32 +331,71 @@
       display: none !important;
     }
 
-    /* 款式造型選單：無預設框線與底色，勾選時才顯示淺底色 */
+    /* ===人因工程 Choice Chips 按鈕化選單=== */
     .checkbox-grid {
       display: grid;
       grid-template-columns: 0.85fr 1.15fr;
-      gap: 6px 10px;
+      gap: 8px 10px;
       padding: 10px;
       background-color: #ffffff;
-      border-radius: 10px;
+      border-radius: 12px;
       border: 1px solid #ebdcd3;
     }
-    .checkbox-grid label {
-      padding: 6px 10px;
-      border-radius: 8px;
-      background-color: transparent;
-      border: none;
-      transition: all 0.2s ease;
+
+    .chip-item {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 10px;
+      border-radius: 20px;
+      background-color: #f9f6f2;
+      border: 1px solid #e3d8ce;
+      color: #524741;
       font-size: 14.5px;
-      white-space: nowrap;
-      user-select: none;
-    }
-    .checkbox-grid label:hover {
-      background-color: #f8f5f0;
-    }
-    .checkbox-grid label:has(input:checked) {
-      background-color: #f0e7df;
       font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+      user-select: none;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    /* 隱藏預設的 checkbox 方框 */
+    .chip-item input[type="checkbox"] {
+      display: none;
+    }
+
+    /* 動態勾選圖標裝飾 */
+    .chip-item::before {
+      content: "";
+      display: inline-block;
+      width: 0;
+      opacity: 0;
+      transition: all 0.2s ease;
+      margin-right: 0;
+    }
+
+    /* 滑鼠微懸停效果 */
+    .chip-item:hover {
+      background-color: #f0e6dd;
+      border-color: #cbbab0;
+    }
+
+    /* 被選取時的高對比顯眼樣式 (主色調背景 + 白字 + 打勾圖標) */
+    .chip-item:has(input:checked) {
+      background-color: #7a6b63;
+      border-color: #5c5049;
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(122, 107, 99, 0.25);
+    }
+
+    .chip-item:has(input:checked)::before {
+      content: "✓";
+      width: 14px;
+      opacity: 1;
+      margin-right: 4px;
+      font-weight: bold;
     }
     
     .total-box {
@@ -518,20 +546,20 @@
         <div style="font-size: 11.5px; color: #8c7c75; margin-bottom: 8px;">(選1個 +150元 / 選2個以上 +200元)</div>
         
         <div class="checkbox-grid">
-          <label><input type="checkbox" name="style" id="catEyeCb" value="貓眼" onchange="checkLimit(this)"> 貓眼</label>
-          <label><input type="checkbox" name="style" value="立體不規則造型" onchange="checkLimit(this)"> 立體不規則造型</label>
+          <label class="chip-item"><input type="checkbox" name="style" id="catEyeCb" value="貓眼" onchange="checkLimit(this)">貓眼</label>
+          <label class="chip-item"><input type="checkbox" name="style" value="立體不規則造型" onchange="checkLimit(this)">立體不規則造型</label>
           
-          <label><input type="checkbox" name="style" value="法式" onchange="checkLimit(this)"> 法式</label>
-          <label><input type="checkbox" name="style" value="(全/造型)鏡面銀" onchange="checkLimit(this)"> (全/造型)鏡面銀</label>
+          <label class="chip-item"><input type="checkbox" name="style" value="法式" onchange="checkLimit(this)">法式</label>
+          <label class="chip-item"><input type="checkbox" name="style" value="(全/造型)鏡面銀" onchange="checkLimit(this)">(全/造型)鏡面銀</label>
 
-          <label><input type="checkbox" name="style" value="漸層" onchange="checkLimit(this)"> 漸層</label>
-          <label><input type="checkbox" name="style" value="小飾品/貼紙" onchange="checkLimit(this)"> 小飾品/貼紙</label>
+          <label class="chip-item"><input type="checkbox" name="style" value="漸層" onchange="checkLimit(this)">漸層</label>
+          <label class="chip-item"><input type="checkbox" name="style" value="小飾品/貼紙" onchange="checkLimit(this)">小飾品/貼紙</label>
 
-          <label><input type="checkbox" name="style" value="格紋" onchange="checkLimit(this)"> 格紋</label>
-          <label><input type="checkbox" name="style" value="暈染" onchange="checkLimit(this)"> 暈染</label>
+          <label class="chip-item"><input type="checkbox" name="style" value="格紋" onchange="checkLimit(this)">格紋</label>
+          <label class="chip-item"><input type="checkbox" name="style" value="暈染" onchange="checkLimit(this)">暈染</label>
 
-          <label><input type="checkbox" name="style" value="海莉款" onchange="checkLimit(this)"> 海莉款</label>
-          <label><input type="checkbox" name="style" id="customStyleCb" value="指定圖案" onchange="checkLimit(this)"> 指定圖案</label>
+          <label class="chip-item"><input type="checkbox" name="style" value="海莉款" onchange="checkLimit(this)">海莉款</label>
+          <label class="chip-item"><input type="checkbox" name="style" id="customStyleCb" value="指定圖案" onchange="checkLimit(this)">指定圖案</label>
         </div>
 
         <div id="catEyeDetailDiv" class="sub-input hidden">
