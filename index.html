@@ -108,7 +108,16 @@
       margin-bottom: 18px;
       padding-bottom: 16px;
       border-bottom: 1px solid #eae3d9;
+      transition: opacity 0.3s ease, filter 0.3s ease;
     }
+
+    /* 依賴未滿時的鎖定淡色樣式 */
+    .section.disabled-step {
+      opacity: 0.4;
+      pointer-events: none;
+      filter: grayscale(40%);
+    }
+
     .section-title {
       font-weight: bold;
       color: #5c5049;
@@ -143,12 +152,13 @@
       border-color: #7a6b63;
       box-shadow: 0 0 4px rgba(122, 107, 99, 0.25);
     }
-    select:disabled {
-      background-color: #eee8e0;
-      color: #a0938a;
-      cursor: not-allowed;
-    }
     
+    /* 下拉選單中被停用的選項淡色顯示 */
+    select option:disabled {
+      color: #c0b5ac;
+      background-color: #f5f2ed;
+    }
+
     .datetime-container {
       display: flex;
       flex-direction: column;
@@ -169,19 +179,20 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
       margin-top: 10px;
       padding: 4px 0;
     }
     .tone-option {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       cursor: pointer;
-      padding: 8px 10px;
+      padding: 6px 8px;
       border-radius: 20px;
       transition: all 0.2s ease;
       user-select: none;
+      white-space: nowrap; /* 防文字斷行 */
     }
     .tone-option:hover {
       background-color: rgba(240, 236, 227, 0.5);
@@ -194,28 +205,29 @@
       transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
       position: relative;
       flex-shrink: 0;
+      /* 統一圓形內圈核心顏色 */
+      background-color: #7a6b63; 
     }
+    /* 透過外框展現調性區隔 */
     .dot-neutral {
-      background-color: #d9cfc5;
-      border: 1px solid #c0b3a7;
+      border: 2px solid #c0b3a7;
     }
     .dot-dark {
-      background-color: #3a322d;
-      border: 1px solid #28221f;
+      border: 2px solid #3a322d;
     }
     .dot-light {
-      background-color: #f0ece3;
-      border: 1px solid #d8cfc4;
+      border: 2px solid #e8e0d5;
     }
     .tone-label {
       font-size: 14.5px;
       color: #8c7c75;
       font-weight: 500;
+      white-space: nowrap; /* 確保文字不換行 */
       transition: color 0.2s ease, font-weight 0.2s ease;
     }
     .tone-option.active .color-dot {
-      transform: scale(1.1);
-      box-shadow: 0 0 0 3.5px #faf8f5, 0 0 0 5.5px #7a6b63;
+      transform: scale(1.15);
+      box-shadow: 0 0 0 2.5px #faf8f5, 0 0 0 4.5px #7a6b63;
     }
     .tone-option.active .tone-label {
       color: #3d3028;
@@ -287,12 +299,13 @@
       opacity: 0.95;
       border-color: #c5b8ad;
     }
+    /* 已選擇項目改為與總金額同色系 (#ebdcd3 / #4e423b) */
     .removal-card.active {
-      background: #EADECB;
-      border: 1.5px solid #8C7355;
+      background-color: #ebdcd3;
+      border: 1.5px solid #bdaca2;
       transform: scale(1.03);
       opacity: 1;
-      box-shadow: 0 4px 14px rgba(140, 115, 85, 0.22);
+      box-shadow: 0 4px 14px rgba(120, 108, 100, 0.15);
     }
     .removal-card-title {
       font-size: 16.5px;
@@ -302,7 +315,7 @@
       transition: color 0.25s;
     }
     .removal-card.active .removal-card-title {
-      color: #3D3028;
+      color: #4e423b;
     }
 
     .draw-btn {
@@ -406,7 +419,7 @@
       Step 2. 單色款式
       <button class="draw-btn" onclick="drawMainColor()">🎲 幫我抽色系</button>
     </div>
-    <select id="mainColor" onchange="onSelectionChange()">
+    <select id="mainColor" onchange="onMainColorChange()">
       <option value="">-- 請選擇色系 (無則留空) --</option>
       <option value="紅色">紅色</option>
       <option value="粉色">粉色</option>
@@ -424,8 +437,8 @@
     </select>
   </div>
 
-  <!-- Step 3. 加購項目 -->
-  <div class="section">
+  <!-- Step 3. 加購項目 (預設淡化，需先選 Step 2) -->
+  <div class="section disabled-step" id="step3Section">
     <div style="font-weight: bold; color: #5c5049; margin-bottom: 12px; font-size: 16.5px;">
       Step 3. 加購項目
     </div>
@@ -498,8 +511,8 @@
     </div>
   </div>
 
-  <!-- Step 4. 色調（正圓美甲色卡選單） -->
-  <div class="section" id="toneSection">
+  <!-- Step 4. 色調（預設淡化，需先選 Step 2） -->
+  <div class="section disabled-step" id="step4Section">
     <div class="section-title">Step 4. 色調</div>
     <div class="tone-palette-group">
       <div class="tone-option active" onclick="selectToneDot(this, '不挑選')">
@@ -557,7 +570,7 @@
   let needRemoval = false;
 
   // -------------------------------------------------------------
-  // 台北時間 (Asia/Taipei UTC+8) 自動判定防護核心邏輯
+  // 台北時間 (Asia/Taipei UTC+8) 精準判定防護邏輯
   // -------------------------------------------------------------
   function getTaipeiDate() {
     const now = new Date();
@@ -577,7 +590,7 @@
     const todayStr = formatDateToYYYYMMDD(taipeiNow);
     const dateInput = document.getElementById("bookingDate");
     
-    dateInput.min = todayStr; // 禁止選擇今天以前的日期
+    dateInput.min = todayStr; // 禁止選擇過去日期
     if (!dateInput.value || dateInput.value < todayStr) {
       dateInput.value = todayStr;
     }
@@ -611,7 +624,7 @@
       }
     });
 
-    // 若選擇的「小時」已遭禁用，自動幫顧客移至第一個合法的小時
+    // 若選擇的小時已被禁用，幫顧客移至第一個有效小時
     if (hourSelect.selectedOptions[0] && hourSelect.selectedOptions[0].disabled) {
       if (firstValidHour !== null) {
         hourSelect.value = firstValidHour;
@@ -631,12 +644,11 @@
       }
     });
 
-    // 若選擇的「分鐘」已遭禁用，自動幫顧客移至第一個合法的分鐘
+    // 若選擇的分鐘已被禁用，自動選擇第一個有效分鐘
     if (minuteSelect.selectedOptions[0] && minuteSelect.selectedOptions[0].disabled) {
       if (firstValidMinute !== null) {
         minuteSelect.value = firstValidMinute;
       } else {
-        // 今日此小時的分鐘均已過，移至下一小時
         const nextHourIndex = hourSelect.selectedIndex + 1;
         if (nextHourIndex < hourSelect.options.length) {
           hourSelect.selectedIndex = nextHourIndex;
@@ -647,8 +659,39 @@
   }
 
   // -------------------------------------------------------------
-  // 色卡與表單互動邏輯
+  // Step 2 單色選擇變動連動邏輯
   // -------------------------------------------------------------
+  function onMainColorChange() {
+    const mainColorVal = document.getElementById('mainColor').value;
+    const step3 = document.getElementById('step3Section');
+    const step4 = document.getElementById('step4Section');
+
+    if (mainColorVal !== "") {
+      // 顧客選擇了單色：解鎖 Step 3 & Step 4
+      step3.classList.remove('disabled-step');
+      step4.classList.remove('disabled-step');
+    } else {
+      // 顧客未選擇單色：重置並淡化鎖定 Step 3 & Step 4
+      step3.classList.add('disabled-step');
+      step4.classList.add('disabled-step');
+
+      // 重置 Step 3 狀態
+      showJumpColor = false;
+      showStyle = false;
+      document.getElementById('jumpColorSection').classList.add('hidden');
+      document.getElementById('styleSection').classList.add('hidden');
+      document.getElementById('boxJumpColor').classList.remove('active');
+      document.getElementById('boxStyle').classList.remove('active');
+      document.getElementById('badgeJumpColor').innerText = '50 元 ➕';
+      document.getElementById('badgeStyle').innerText = '150~200 元 ➕';
+      document.getElementById('jumpColor').value = "";
+      
+      const styleCbs = document.querySelectorAll('input[name="style"]');
+      styleCbs.forEach(cb => cb.checked = false);
+    }
+    onSelectionChange();
+  }
+
   function selectToneDot(element, value) {
     const options = document.querySelectorAll('.tone-option');
     options.forEach(opt => opt.classList.remove('active'));
@@ -704,7 +747,7 @@
     const randomIndex = Math.floor(Math.random() * (options.length - 1)) + 1;
     select.selectedIndex = randomIndex;
     alert(`🎲 恭喜抽中色系：【${options[randomIndex].value}】！`);
-    onSelectionChange();
+    onMainColorChange();
   }
 
   function drawStyle(event) {
@@ -780,6 +823,19 @@
   }
 
   function sendBooking() {
+    const mainColorVal = document.getElementById('mainColor').value;
+    const isMainColorSelected = mainColorVal !== "";
+
+    // 防呆驗證 1：加購跳色勾選但未選色系
+    if (showJumpColor) {
+      const jumpColorVal = document.getElementById('jumpColor').value;
+      if (jumpColorVal === "") {
+        alert("🎨 請選擇加購跳色色系，或關閉該項目！");
+        return;
+      }
+    }
+
+    // 防呆驗證 2：加購款式勾選但未選具體項目
     if (showStyle) {
       const selectedStyles = document.querySelectorAll('input[name="style"]:checked');
       if (selectedStyles.length === 0) {
@@ -792,9 +848,6 @@
     const hour = document.getElementById('bookingHour').value;
     const minute = document.getElementById('bookingMinute').value;
     const bookingTime = `${hour}:${minute}`;
-
-    const mainColorVal = document.getElementById('mainColor').value;
-    const isMainColorSelected = mainColorVal !== "";
     
     let details = `你好！我想預約美甲：\n`;
     details += `----------------------------\n`;
@@ -802,35 +855,33 @@
 
     if (isMainColorSelected) {
       details += `• 單色款式：${mainColorVal}\n`;
-    } else {
-      details += `• 單色美甲：無 (單純卸甲/加購項目)\n`;
-    }
-
-    if (showJumpColor) {
-      const jumpColor = document.getElementById('jumpColor').value || '尚未選擇';
-      details += `• 加購跳色：${jumpColor}\n`;
-    }
-
-    if (showStyle) {
-      const selectedStyles = Array.from(document.querySelectorAll('input[name="style"]:checked')).map(cb => cb.value);
-      if (selectedStyles.length > 0) {
-        if (selectedStyles.includes('貓眼')) {
-          const catType = document.getElementById('catEyeType').value;
-          const idx = selectedStyles.indexOf('貓眼');
-          selectedStyles[idx] = `貓眼(${catType})`;
-        }
-        if (selectedStyles.includes('指定圖案')) {
-          const customText = document.getElementById('customPattern').value || '未填寫';
-          const idx = selectedStyles.indexOf('指定圖案');
-          selectedStyles[idx] = `指定圖案(${customText})`;
-        }
-        details += `• 款式造型：${selectedStyles.join('、')}\n`;
+      
+      if (showJumpColor) {
+        const jumpColor = document.getElementById('jumpColor').value || '尚未選擇';
+        details += `• 加購跳色：${jumpColor}\n`;
       }
-    }
 
-    if (isMainColorSelected) {
+      if (showStyle) {
+        const selectedStyles = Array.from(document.querySelectorAll('input[name="style"]:checked')).map(cb => cb.value);
+        if (selectedStyles.length > 0) {
+          if (selectedStyles.includes('貓眼')) {
+            const catType = document.getElementById('catEyeType').value;
+            const idx = selectedStyles.indexOf('貓眼');
+            selectedStyles[idx] = `貓眼(${catType})`;
+          }
+          if (selectedStyles.includes('指定圖案')) {
+            const customText = document.getElementById('customPattern').value || '未填寫';
+            const idx = selectedStyles.indexOf('指定圖案');
+            selectedStyles[idx] = `指定圖案(${customText})`;
+          }
+          details += `• 款式造型：${selectedStyles.join('、')}\n`;
+        }
+      }
+
       const toneText = document.getElementById('selectedTone').value;
       details += `• 色調：${toneText}\n`;
+    } else {
+      details += `• 單色美甲：無 (僅純卸甲服務)\n`;
     }
 
     details += `• 卸甲服務：${needRemoval ? '需要卸甲' : '不需要'}\n`;
@@ -846,10 +897,10 @@
     window.location.href = lineUrl;
   }
 
-  // 初始化頁面時間與金額
+  // 初始化頁面時間、依賴狀態與金額
   document.addEventListener('DOMContentLoaded', function() {
     initDatePicker();
-    calculateTotal();
+    onMainColorChange();
   });
 </script>
 
