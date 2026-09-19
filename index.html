@@ -112,17 +112,11 @@
     .section-title {
       font-weight: bold;
       color: #5c5049;
-      margin-bottom: 6px;
+      margin-bottom: 10px;
       font-size: 16.5px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-    }
-    .step-hint {
-      font-size: 12.5px;
-      color: #8c7c75;
-      margin-bottom: 10px;
-      line-height: 1.3;
     }
     .radio-group {
       display: flex;
@@ -181,7 +175,6 @@
       font-weight: bold;
       cursor: pointer;
       transition: all 0.2s;
-      margin-left: 6px;
       box-shadow: 0 2px 5px rgba(122, 107, 99, 0.2);
     }
     .add-btn:hover {
@@ -203,11 +196,6 @@
     }
     .hidden {
       display: none;
-    }
-    .checkbox-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px 8px;
     }
     
     .total-box {
@@ -239,9 +227,6 @@
     .submit-btn:hover {
       background-color: #5c5049;
     }
-    .sub-input {
-      margin-top: 8px;
-    }
   </style>
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;">
@@ -251,9 +236,9 @@
     <h2>美甲服務預約選單</h2>
   </div>
 
-  <!-- 1. 預約日期與時間 -->
+  <!-- 💡 Step 1. 預約日期與時間 -->
   <div class="section">
-    <div class="section-title">1. 預約日期與時間</div>
+    <div class="section-title">💡 Step 1. 預約日期與時間</div>
     <div class="datetime-container">
       <div>
         <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #5c5049;">預約日期：</label>
@@ -283,13 +268,12 @@
     </div>
   </div>
 
-  <!-- 2. 單色款式 -->
+  <!-- 💡 Step 2. 單色款式 -->
   <div class="section">
     <div class="section-title">
-      2. 單色款式
+      💡 Step 2. 單色款式
       <button class="draw-btn" onclick="drawMainColor()">🎲 幫我抽色系</button>
     </div>
-    <div class="step-hint">💡 步驟 1：挑選喜歡的主色調，若不想要做單色美甲可保留空白哦！</div>
     <select id="mainColor" onchange="onSelectionChange()">
       <option value="">-- 請選擇色系 (無則留空) --</option>
       <option value="紅色">紅色</option>
@@ -308,89 +292,60 @@
     </select>
   </div>
 
-  <!-- 3. 加購項目 -->
+  <!-- 💡 Step 3. 加購項目 -->
   <div class="section">
-    <div class="section-title">
-      3. 加購項目
-      <div>
-        <button class="add-btn" onclick="toggleOption('jumpColorSection')">+ 跳色</button>
-        <button class="add-btn" onclick="toggleOption('styleSection')">+ 款式造型</button>
-      </div>
-    </div>
-    <div class="step-hint">💡 步驟 2：點選上方按鈕可展開「跳色」或「造型款式」加購選單。</div>
-
-    <!-- 跳色選單 -->
-    <div id="jumpColorSection" class="hidden" style="margin-top: 10px; padding: 10px; background: #f2ebe5; border-radius: 8px;">
-      <div style="font-size: 13.5px; font-weight: bold; margin-bottom: 5px; color: #5c5049;">跳色選擇：</div>
-      <select id="jumpColor" onchange="onSelectionChange()">
-        <option value="">-- 請選擇跳色色系 --</option>
-        <option value="隨機發揮">隨機發揮</option>
-        <option value="紅色">紅色</option>
-        <option value="粉色">粉色</option>
-        <option value="橘色">橘色</option>
-        <option value="黃色">黃色</option>
-        <option value="深咖/可可色">深咖/可可色</option>
-        <option value="淺咖色">淺咖色</option>
-        <option value="綠色">綠色</option>
-        <option value="藍色">藍色</option>
-        <option value="紫色">紫色</option>
-        <option value="黑色">黑色</option>
-        <option value="銀色/白色">銀色/白色</option>
-        <option value="灰色">灰色</option>
-        <option value="金色/香檳色">金色/香檳色</option>
-      </select>
+    <div style="font-weight: bold; color: #5c5049; margin-bottom: 10px; font-size: 16.5px;">
+      💡 Step 3. 加購項目
     </div>
 
-    <!-- 款式勾選區 -->
-    <div id="styleSection" class="hidden" style="margin-top: 10px; padding: 10px; background: #f2ebe5; border-radius: 8px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-        <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">款式類型 (最多選4個)：</div>
-        <button class="draw-btn" onclick="drawStyle()">🎲 幫我抽款式</button>
-      </div>
-      <div style="font-size: 11.5px; color: #8c7c75; margin-bottom: 8px;">(選1個 +150元 / 選2個以上 +200元)</div>
-      
-      <div class="checkbox-grid">
-        <label><input type="checkbox" name="style" id="catEyeCb" value="貓眼" onchange="checkLimit(this)"> 貓眼</label>
-        <label><input type="checkbox" name="style" value="暈染" onchange="checkLimit(this)"> 暈染</label>
-        <label><input type="checkbox" name="style" value="立體不規則造型" onchange="checkLimit(this)"> 立體不規則造型</label>
-        <label><input type="checkbox" name="style" value="法式" onchange="checkLimit(this)"> 法式</label>
-        <label><input type="checkbox" name="style" value="漸層" onchange="checkLimit(this)"> 漸層</label>
-        <label><input type="checkbox" name="style" value="海莉款" onchange="checkLimit(this)"> 海莉款</label>
-        <label><input type="checkbox" name="style" value="(全/造型)鏡面銀" onchange="checkLimit(this)"> (全/造型)鏡面銀</label>
-        <label><input type="checkbox" name="style" value="小飾品/貼紙" onchange="checkLimit(this)"> 小飾品/貼紙</label>
-        <label><input type="checkbox" name="style" value="格紋" onchange="checkLimit(this)"> 格紋</label>
-        <label><input type="checkbox" name="style" id="customStyleCb" value="指定圖案" onchange="checkLimit(this)"> 指定圖案</label>
-      </div>
-
-      <div id="catEyeDetailDiv" class="sub-input hidden">
-        <label style="font-size: 13px; font-weight: bold; color: #5c5049;">貓眼類型：</label>
-        <select id="catEyeType" disabled style="background-color: #e5ded7; font-weight: bold;">
-          <option value="指定單色貓眼">指定單色貓眼</option>
-          <option value="雙色貓眼">雙色貓眼</option>
+    <!-- 按鈕與展開選單 1：跳色 -->
+    <div style="margin-bottom: 12px;">
+      <button class="add-btn" onclick="toggleOption('jumpColorSection')">+ 跳色</button>
+      <div id="jumpColorSection" class="hidden" style="margin-top: 8px; padding: 10px; background: #f2ebe5; border-radius: 8px;">
+        <div style="font-size: 13.5px; font-weight: bold; margin-bottom: 5px; color: #5c5049;">跳色選擇：</div>
+        <select id="jumpColor" onchange="onSelectionChange()">
+          <option value="">-- 請選擇跳色色系 --</option>
+          <option value="隨機發揮">隨機發揮</option>
+          <option value="紅色">紅色</option>
+          <option value="粉色">粉色</option>
+          <option value="橘色">橘色</option>
+          <option value="黃色">黃色</option>
+          <option value="深咖/可可色">深咖/可可色</option>
+          <option value="淺咖色">淺咖色</option>
+          <option value="綠色">綠色</option>
+          <option value="藍色">藍色</option>
+          <option value="紫色">紫色</option>
+          <option value="黑色">黑色</option>
+          <option value="銀色/白色">銀色/白色</option>
+          <option value="灰色">灰色</option>
+          <option value="金色/香檳色">金色/香檳色</option>
         </select>
       </div>
+    </div>
 
-      <div id="customInputDiv" class="sub-input hidden">
-        <input type="text" id="customPattern" placeholder="請填寫指定圖案細節">
+    <!-- 按鈕與展開選單 2：造型 -->
+    <div>
+      <button class="add-btn" onclick="toggleOption('styleSection')">+ 造型</button>
+      <div id="styleSection" class="hidden" style="margin-top: 8px; padding: 10px; background: #f2ebe5; border-radius: 8px;">
+        <div style="font-size: 13.5px; font-weight: bold; margin-bottom: 5px; color: #5c5049;">造型說明：</div>
+        <input type="text" id="styleNote" placeholder="請填寫您想做的造型需求或備註" oninput="onSelectionChange()">
       </div>
     </div>
   </div>
 
-  <!-- 4. 色調選擇 -->
+  <!-- 💡 Step 4. 色調 -->
   <div class="section" id="toneSection">
-    <div class="section-title">4. 色調選擇</div>
-    <div class="step-hint">💡 步驟 3：選擇您偏好的整體視覺氛圍，無特別偏好可選擇不挑選（交給我發揮）。</div>
+    <div class="section-title">💡 Step 4. 色調</div>
     <div class="radio-group">
-      <label><input type="radio" name="tone" value="不挑選 (交給我發揮)" checked> 不挑選 (交給我發揮)</label>
-      <label><input type="radio" name="tone" value="濃郁暗色調"> 濃郁暗色調</label>
+      <label><input type="radio" name="tone" value="不挑選" checked> 不挑選</label>
+      <label><input type="radio" name="tone" value="個性暗色調"> 個性暗色調</label>
       <label><input type="radio" name="tone" value="清透亮色調"> 清透亮色調</label>
     </div>
   </div>
 
-  <!-- 5. 卸甲服務 -->
+  <!-- 💡 Step 5. 卸甲服務 -->
   <div class="section">
-    <div class="section-title">5. 卸甲服務</div>
-    <div class="step-hint">💡 步驟 4：確認您目前手上是否有舊凝膠需要卸除。</div>
+    <div class="section-title">💡 Step 5. 卸甲服務</div>
     <div class="radio-group">
       <label><input type="radio" name="off" value="yes" onchange="onSelectionChange()"> 我要卸甲</label>
       <label><input type="radio" name="off" value="no" checked onchange="onSelectionChange()"> 不需要卸甲</label>
@@ -431,20 +386,7 @@
   }
 
   function onSelectionChange() {
-    autoDetermineCatEye();
     calculateTotal();
-  }
-
-  function autoDetermineCatEye() {
-    const catEyeCb = document.getElementById('catEyeCb');
-    const catEyeDetailDiv = document.getElementById('catEyeDetailDiv');
-    const catEyeSelect = document.getElementById('catEyeType');
-    if (!catEyeCb || !catEyeCb.checked || !showStyle) {
-      catEyeDetailDiv.classList.add('hidden');
-      return;
-    }
-    catEyeDetailDiv.classList.remove('hidden');
-    catEyeSelect.value = showJumpColor ? "雙色貓眼" : "指定單色貓眼";
   }
 
   function drawMainColor() {
@@ -456,56 +398,12 @@
     onSelectionChange();
   }
 
-  function drawStyle() {
-    if (!showStyle) toggleOption('styleSection');
-    const checkboxes = document.querySelectorAll('input[name="style"]');
-    checkboxes.forEach(cb => cb.checked = false);
-
-    const pool = [
-      { name: "貓眼", weight: 75 }, { name: "暈染", weight: 30 }, { name: "小飾品/貼紙", weight: 2 },
-      { name: "格紋", weight: 1 }, { name: "法式", weight: 1 }, { name: "立體不規則造型", weight: 1 },
-      { name: "漸層", weight: 0.5 }, { name: "海莉款", weight: 0.5 }, { name: "(全/造型)鏡面銀", weight: 0.5 }
-    ];
-
-    const countToDraw = Math.floor(Math.random() * 3) + 1;
-    let chosenList = [];
-
-    for (let i = 0; i < countToDraw; i++) {
-      const availablePool = pool.filter(item => !chosenList.includes(item.name));
-      if (availablePool.length === 0) break;
-      const totalWeight = availablePool.reduce((sum, item) => sum + item.weight, 0);
-      let randomNum = Math.random() * totalWeight;
-      for (let item of availablePool) {
-        if (randomNum < item.weight) { chosenList.push(item.name); break; }
-        randomNum -= item.weight;
-      }
-    }
-
-    checkboxes.forEach(cb => {
-      if (chosenList.includes(cb.value)) { cb.checked = true; checkLimit(cb); }
-    });
-    alert(`🎲 恭喜抽中 ${chosenList.length} 個款式：\n【${chosenList.join('、')}】！`);
-    onSelectionChange();
-  }
-
-  function checkLimit(checkbox) {
-    const checkboxes = document.querySelectorAll('input[name="style"]:checked');
-    if (checkboxes.length > 4) {
-      alert("款式類型最多只能勾選 4 個喔！");
-      checkbox.checked = false;
-    }
-    const customCb = document.getElementById('customStyleCb');
-    document.getElementById('customInputDiv').classList.toggle('hidden', !customCb.checked);
-    onSelectionChange();
-  }
-
   function calculateTotal() {
     let total = 0;
     const mainColorVal = document.getElementById('mainColor').value;
     const isMainColorSelected = mainColorVal !== "";
     const isJumpColorSelected = showJumpColor && document.getElementById('jumpColor').value !== "";
-    const selectedStyles = showStyle ? document.querySelectorAll('input[name="style"]:checked') : [];
-    const isStyleSelected = selectedStyles.length > 0;
+    const isStyleSelected = showStyle;
     const hasNailService = isMainColorSelected || isJumpColorSelected || isStyleSelected;
 
     const needOff = document.querySelector('input[name="off"]:checked').value === "yes";
@@ -514,23 +412,13 @@
     }
     if (isMainColorSelected) total += 650;
     if (isJumpColorSelected) total += 50;
-    if (isStyleSelected) {
-      total += (selectedStyles.length === 1) ? 150 : 200;
-    }
+    if (isStyleSelected) total += 200; // 造型預設金額
+
     document.getElementById('totalPrice').innerText = total;
   }
 
   // 自動生成文字並開啟 LINE 官方帳號發送
   function sendBooking() {
-    // 檢查若點開了款式造型，但卻沒有勾選任何項目
-    if (showStyle) {
-      const selectedStyles = document.querySelectorAll('input[name="style"]:checked');
-      if (selectedStyles.length === 0) {
-        alert("✨ 提示：您展開了「+ 款式造型」，但尚未挑選款式喔！\n請勾選您想做的造型，或者再次點擊按鈕將其關閉～");
-        return;
-      }
-    }
-
     const bookingDate = document.getElementById('bookingDate').value || '未選擇日期';
     const hour = document.getElementById('bookingHour').value;
     const minute = document.getElementById('bookingMinute').value;
@@ -556,25 +444,13 @@
     }
 
     if (showStyle) {
-      const selectedStyles = Array.from(document.querySelectorAll('input[name="style"]:checked')).map(cb => cb.value);
-      if (selectedStyles.length > 0) {
-        if (selectedStyles.includes('貓眼')) {
-          const catType = document.getElementById('catEyeType').value;
-          const idx = selectedStyles.indexOf('貓眼');
-          selectedStyles[idx] = `貓眼(${catType})`;
-        }
-        if (selectedStyles.includes('指定圖案')) {
-          const customText = document.getElementById('customPattern').value || '未填寫';
-          const idx = selectedStyles.indexOf('指定圖案');
-          selectedStyles[idx] = `指定圖案(${customText})`;
-        }
-        details += `• 款式造型：${selectedStyles.join('、')}\n`;
-      }
+      const styleNote = document.getElementById('styleNote').value || '無額外備註';
+      details += `• 加購造型：${styleNote}\n`;
     }
 
     if (isMainColorSelected) {
       const toneText = document.querySelector('input[name="tone"]:checked').value;
-      details += `• 色調選擇：${toneText}\n`;
+      details += `• 色調：${toneText}\n`;
     }
 
     details += `• 卸甲服務：${needOff ? '我要卸甲' : '不需要卸甲'}\n`;
@@ -587,7 +463,7 @@
     const encodedMessage = encodeURIComponent(details);
     const lineUrl = `https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodedMessage}`;
 
-    alert("✨ 即將為您開啟 LINE，請在聊天室按「傳送」送出預預單！");
+    alert("✨ 即將為您開啟 LINE，請在聊天室按「傳送」送出預約單！");
     window.location.href = lineUrl;
   }
 
