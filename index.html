@@ -348,8 +348,8 @@
       justify-content: center;
       padding: 8px 10px;
       border-radius: 20px;
-      background-color: transparent; /* 拿掉未選取時的底色 */
-      border: none;                  /* 拿掉未選取時的邊框 */
+      background-color: transparent; 
+      border: none;                  
       color: #524741;
       font-size: 14.5px;
       font-weight: 500;
@@ -360,12 +360,10 @@
       white-space: nowrap;
     }
 
-    /* 隱藏預設的 checkbox 方框 */
     .chip-item input[type="checkbox"] {
       display: none;
     }
 
-    /* 動態勾選圖標裝飾 */
     .chip-item::before {
       content: "";
       display: inline-block;
@@ -375,13 +373,11 @@
       margin-right: 0;
     }
 
-    /* 滑鼠微懸停效果 */
     .chip-item:hover {
-      background-color: #f5efe8; /* 滑鼠懸停時給予極淡的底色提示 */
+      background-color: #f5efe8; 
       border-radius: 20px;
     }
 
-    /* 被選取時的高對比顯眼樣式 (主色調背景 + 白字 + 打勾圖標) */
     .chip-item:has(input:checked) {
       background-color: #7a6b63;
       border-color: #5c5049;
@@ -536,14 +532,13 @@
     <div id="boxStyle" class="addon-item-box" onclick="toggleOption('styleSection', event)">
       <div class="addon-header">
         <span>✨ 款式造型</span>
-        <span id="badgeStyle" class="addon-badge">150~200 元 ➕</span>
+        <span id="badgeStyle" class="addon-badge">100~250 元 ➕</span>
       </div>
       <div id="styleSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">最多選4個</div>
           <button class="draw-btn" onclick="drawStyle(event)">🎲 幫我抽款式</button>
         </div>
-        <div style="font-size: 11.5px; color: #8c7c75; margin-bottom: 8px;">(選1個 +150元 / 選2個以上 +200元)</div>
         
         <div class="checkbox-grid">
           <label class="chip-item"><input type="checkbox" name="style" id="catEyeCb" value="貓眼" onchange="checkLimit(this)">貓眼</label>
@@ -571,7 +566,7 @@
         </div>
 
         <div id="customInputDiv" class="sub-input hidden">
-          <input type="text" id="customPattern" placeholder="請填寫指定圖案細節">
+          <input type="text" id="customPattern" placeholder="請填寫指定圖案細節 (必填)">
         </div>
       </div>
     </div>
@@ -736,11 +731,12 @@
       document.getElementById('boxJumpColor').classList.remove('active');
       document.getElementById('boxStyle').classList.remove('active');
       document.getElementById('badgeJumpColor').innerText = '50 元 ➕';
-      document.getElementById('badgeStyle').innerText = '150~200 元 ➕';
+      document.getElementById('badgeStyle').innerText = '100~250 元 ➕';
       document.getElementById('jumpColor').value = "";
       
       const styleCbs = document.querySelectorAll('input[name="style"]');
       styleCbs.forEach(cb => cb.checked = false);
+      document.getElementById('customPattern').value = "";
     }
     onSelectionChange();
   }
@@ -780,7 +776,7 @@
       showStyle = !showStyle; 
       el.classList.toggle('hidden', !showStyle); 
       document.getElementById('boxStyle').classList.toggle('active', showStyle);
-      document.getElementById('badgeStyle').innerText = showStyle ? '已加購 ✔' : '150~200 元 ➕';
+      document.getElementById('badgeStyle').innerText = showStyle ? '已加購 ✔' : '100~250 元 ➕';
     }
     onSelectionChange();
   }
@@ -821,6 +817,7 @@
     }
     const checkboxes = document.querySelectorAll('input[name="style"]');
     checkboxes.forEach(cb => cb.checked = false);
+    document.getElementById('customPattern').value = "";
 
     const pool = [
       { name: "貓眼", weight: 75 }, { name: "暈染", weight: 30 }, { name: "小飾品/貼紙", weight: 2 },
@@ -864,6 +861,9 @@
     }
     const customCb = document.getElementById('customStyleCb');
     document.getElementById('customInputDiv').classList.toggle('hidden', !customCb.checked);
+    if (!customCb.checked) {
+      document.getElementById('customPattern').value = "";
+    }
     onSelectionChange();
   }
 
@@ -913,11 +913,21 @@
       total += hasNailService ? 150 : 200;
     }
 
-    if (isMainColorSelected) total += 650;
+    if (isMainColorSelected) total += 700;
     if (isJumpColorSelected) total += 50;
 
     if (isStyleSelected) {
-      total += (selectedStyles.length === 1) ? 150 : 200;
+      const count = selectedStyles.length;
+      if (count === 1) total += 100;
+      else if (count === 2) total += 150;
+      else if (count === 3) total += 200;
+      else if (count >= 4) total += 250;
+
+      // 如果有選到指定圖案，額外 +30 元
+      const customCb = document.getElementById('customStyleCb');
+      if (customCb && customCb.checked) {
+        total += 30;
+      }
     }
 
     document.getElementById('totalPrice').innerText = total;
@@ -940,6 +950,26 @@
       if (selectedStyles.length === 0) {
         alert("✨ 請勾選造型款式，或關閉該項目！");
         return;
+      }
+      
+      const customCb = document.getElementById('customStyleCb');
+      if (customCb && customCb.checked) {
+        const customInput = document.getElementById('customPattern');
+        if (!customInput.value.trim()) {
+          alert("✨ 您勾選了指定圖案，請填寫指定圖案細節！");
+          if (!showStyle) {
+            showStyle = true;
+            document.getElementById('styleSection').classList.remove('hidden');
+            document.getElementById('boxStyle').classList.add('active');
+            document.getElementById('badgeStyle').innerText = '已加購 ✔';
+          }
+          document.getElementById('customInputDiv').classList.remove('hidden');
+          customInput.classList.remove('flash-highlight');
+          void customInput.offsetWidth;
+          customInput.classList.add('flash-highlight');
+          customInput.focus();
+          return;
+        }
       }
     }
 
