@@ -819,10 +819,12 @@
     checkboxes.forEach(cb => cb.checked = false);
     document.getElementById('customPattern').value = "";
 
+    // 抽款式加入指定圖案 (機率 10%)
     const pool = [
-      { name: "貓眼", weight: 75 }, { name: "暈染", weight: 30 }, { name: "小飾品/貼紙", weight: 2 },
+      { name: "貓眼", weight: 65 }, { name: "暈染", weight: 25 }, { name: "小飾品/貼紙", weight: 2 },
       { name: "格紋", weight: 1 }, { name: "法式", weight: 1 }, { name: "立體不規則造型", weight: 1 },
-      { name: "漸層", weight: 0.5 }, { name: "海莉款", weight: 0.5 }, { name: "(全/造型)鏡面銀", weight: 0.5 }
+      { name: "漸層", weight: 0.5 }, { name: "海莉款", weight: 0.5 }, { name: "(全/造型)鏡面銀", weight: 0.5 },
+      { name: "指定圖案", weight: 14 } // 總計 100 左右，指定圖案約佔 10%~14% 左右
     ];
 
     const countToDraw = Math.floor(Math.random() * 3) + 1;
@@ -842,6 +844,14 @@
     checkboxes.forEach(cb => {
       if (chosenList.includes(cb.value)) { cb.checked = true; checkLimit(cb); }
     });
+
+    // 如果抽中了「指定圖案」，從三個選項中平均隨機抽一個填入文字框中
+    const customCb = document.getElementById('customStyleCb');
+    if (customCb && customCb.checked) {
+      const subOptions = ["隨機花花", "隨機蝴蝶結", "隨機星星"];
+      const randomSub = subOptions[Math.floor(Math.random() * subOptions.length)];
+      document.getElementById('customPattern').value = randomSub;
+    }
 
     const gridEl = document.querySelector('.checkbox-grid');
     if (gridEl) {
