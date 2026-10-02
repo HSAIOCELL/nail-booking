@@ -356,8 +356,7 @@
       white-space: nowrap;
     }
 
-    .chip-item input[type="checkbox"],
-    .chip-item input[type="radio"] {
+    .chip-item input[type="checkbox"] {
       display: none;
     }
 
@@ -535,44 +534,27 @@
         <span>✨ 款式造型</span>
         <span id="badgeStyle" class="addon-badge">50元起 ➕</span>
       </div>
-      <div id="styleSection" class="hidden" style="margin-top: 12px;" onclick="event.stopPropagation()">
+      <div id="styleSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">最多選4個</div>
           <button class="draw-btn" onclick="drawStyle(event)">🫯 幫我抽款式</button>
         </div>
-
-        <!-- 區塊 A：局部造型 -->
-        <div style="font-size: 14.5px; font-weight: bold; color: #5c5049; margin-bottom: 6px; border-left: 3px solid #7a6b63; padding-left: 6px;">
-          局部造型 <span style="font-size: 12px; font-weight: normal; color: #8c7c75;">(最多選4項，每項+50元)</span>
-        </div>
-        <div class="checkbox-grid" style="margin-bottom: 12px;">
-          <label class="chip-item"><input type="checkbox" name="partialStyle" id="catEyeCb" value="貓眼" onchange="checkPartialLimit(this)">貓眼</label>
-          <label class="chip-item"><input type="checkbox" name="partialStyle" value="立體不規則造型" onchange="checkPartialLimit(this)">立體不規則造型</label>
+        
+        <div class="checkbox-grid">
+          <label class="chip-item"><input type="checkbox" name="style" id="catEyeCb" value="貓眼" onchange="checkLimit(this)">貓眼</label>
+          <label class="chip-item"><input type="checkbox" name="style" value="立體不規則造型" onchange="checkLimit(this)">立體不規則造型</label>
           
-          <label class="chip-item"><input type="checkbox" name="partialStyle" value="法式" onchange="checkPartialLimit(this)">法式</label>
-          <label class="chip-item"><input type="checkbox" name="partialStyle" value="鏡面銀" onchange="checkPartialLimit(this)">鏡面銀</label>
+          <label class="chip-item"><input type="checkbox" name="style" value="法式" onchange="checkLimit(this)">法式</label>
+          <label class="chip-item"><input type="checkbox" name="style" value="鏡面銀" onchange="checkLimit(this)">鏡面銀</label>
 
-          <label class="chip-item"><input type="checkbox" name="partialStyle" value="漸層" onchange="checkPartialLimit(this)">漸層</label>
-          <label class="chip-item"><input type="checkbox" name="partialStyle" value="小飾品/貼紙" onchange="checkPartialLimit(this)">小飾品/貼紙</label>
+          <label class="chip-item"><input type="checkbox" name="style" value="漸層" onchange="checkLimit(this)">漸層</label>
+          <label class="chip-item"><input type="checkbox" name="style" value="小飾品/貼紙" onchange="checkLimit(this)">小飾品/貼紙</label>
 
-          <label class="chip-item"><input type="checkbox" name="partialStyle" value="格紋" onchange="checkPartialLimit(this)">格紋</label>
-          <label class="chip-item"><input type="checkbox" name="partialStyle" value="暈染" onchange="checkPartialLimit(this)">暈染</label>
+          <label class="chip-item"><input type="checkbox" name="style" value="格紋" onchange="checkLimit(this)">格紋</label>
+          <label class="chip-item"><input type="checkbox" name="style" value="暈染" onchange="checkLimit(this)">暈染</label>
 
-          <label class="chip-item"><input type="checkbox" name="partialStyle" value="海莉款" onchange="checkPartialLimit(this)">海莉款</label>
-          <label class="chip-item"><input type="checkbox" name="partialStyle" id="customStyleCb" value="指定圖案" onchange="checkPartialLimit(this)">指定圖案</label>
-        </div>
-
-        <!-- 區塊 B：十指造型 -->
-        <div style="font-size: 14.5px; font-weight: bold; color: #5c5049; margin-bottom: 6px; border-left: 3px solid #7a6b63; padding-left: 6px;">
-          十指造型 <span style="font-size: 12px; font-weight: normal; color: #8c7c75;">(固定 +50元，部分款式另計)</span>
-        </div>
-        <div class="checkbox-grid" style="margin-bottom: 10px; grid-template-columns: 1fr;">
-          <label class="chip-item"><input type="radio" name="fullStyle" value="" checked onchange="onSelectionChange()">無十指造型</label>
-          <label class="chip-item"><input type="radio" name="fullStyle" value="十指貓眼" onchange="onSelectionChange()">十指貓眼 (+50)</label>
-          <label class="chip-item"><input type="radio" name="fullStyle" value="十指立體不規則造型" onchange="onSelectionChange()">十指立體不規則造型 (+100)</label>
-          <label class="chip-item"><input type="radio" name="fullStyle" value="十指小飾品/貼紙" onchange="onSelectionChange()">十指小飾品/貼紙 (+100)</label>
-          <label class="chip-item"><input type="radio" name="fullStyle" value="十指格紋" onchange="onSelectionChange()">十指格紋 (+100)</label>
-          <label class="chip-item"><input type="radio" name="fullStyle" value="十指漸層" onchange="onSelectionChange()">十指漸層 (+100)</label>
-          <label class="chip-item"><input type="radio" name="fullStyle" value="十指鏡面銀" onchange="onSelectionChange()">十指鏡面銀 (+50)</label>
+          <label class="chip-item"><input type="checkbox" name="style" value="海莉款" onchange="checkLimit(this)">海莉款</label>
+          <label class="chip-item"><input type="checkbox" name="style" id="customStyleCb" value="指定圖案" onchange="checkLimit(this)">指定圖案</label>
         </div>
 
         <div id="catEyeDetailDiv" class="sub-input hidden">
@@ -757,10 +739,8 @@
       document.getElementById('badgeStyle').innerText = '50元起 ➕';
       document.getElementById('jumpColor').value = "";
       
-      const partialCbs = document.querySelectorAll('input[name="partialStyle"]');
-      partialCbs.forEach(cb => cb.checked = false);
-      const fullRadios = document.querySelectorAll('input[name="fullStyle"]');
-      fullRadios.forEach(r => r.checked = (r.value === ""));
+      const styleCbs = document.querySelectorAll('input[name="style"]');
+      styleCbs.forEach(cb => cb.checked = false);
       document.getElementById('customPattern').value = "";
     }
     onSelectionChange();
@@ -883,78 +863,56 @@
       document.getElementById('boxStyle').classList.add('active');
       document.getElementById('badgeStyle').innerText = '已加購 ✔';
     }
-
-    // 清空局部造型與指定圖案
-    const partialCbs = document.querySelectorAll('input[name="partialStyle"]');
-    partialCbs.forEach(cb => cb.checked = false);
+    const checkboxes = document.querySelectorAll('input[name="style"]');
+    checkboxes.forEach(cb => cb.checked = false);
     document.getElementById('customPattern').value = "";
-    // 重置十指造型為無
-    document.querySelector('input[name="fullStyle"][value=""]').checked = true;
 
-    // 二擇一：抽局部造型或十指造型
-    const mode = Math.random() < 0.5 ? 'partial' : 'full';
+    const pool = [
+      { name: "貓眼", weight: 65 }, { name: "暈染", weight: 25 }, { name: "小飾品/貼紙", weight: 2 },
+      { name: "格紋", weight: 1 }, { name: "法式", weight: 1 }, { name: "立體不規則造型", weight: 1 },
+      { name: "漸層", weight: 0.5 }, { name: "海莉款", weight: 0.5 }, { name: "鏡面銀", weight: 0.5 },
+      { name: "指定圖案", weight: 14 }
+    ];
 
-    if (mode === 'partial') {
-      const pool = [
-        { name: "貓眼", weight: 65 }, { name: "暈染", weight: 25 }, { name: "小飾品/貼紙", weight: 2 },
-        { name: "格紋", weight: 1 }, { name: "法式", weight: 1 }, { name: "立體不規則造型", weight: 1 },
-        { name: "漸層", weight: 0.5 }, { name: "海莉款", weight: 0.5 }, { name: "鏡面銀", weight: 0.5 },
-        { name: "指定圖案", weight: 14 }
-      ];
+    const countToDraw = Math.floor(Math.random() * 3) + 1;
+    let chosenList = [];
 
-      const countToDraw = Math.floor(Math.random() * 3) + 1;
-      let chosenList = [];
-
-      for (let i = 0; i < countToDraw; i++) {
-        const availablePool = pool.filter(item => !chosenList.includes(item.name));
-        if (availablePool.length === 0) break;
-        const totalWeight = availablePool.reduce((sum, item) => sum + item.weight, 0);
-        let randomNum = Math.random() * totalWeight;
-        for (let item of availablePool) {
-          if (randomNum < item.weight) { chosenList.push(item.name); break; }
-          randomNum -= item.weight;
-        }
+    for (let i = 0; i < countToDraw; i++) {
+      const availablePool = pool.filter(item => !chosenList.includes(item.name));
+      if (availablePool.length === 0) break;
+      const totalWeight = availablePool.reduce((sum, item) => sum + item.weight, 0);
+      let randomNum = Math.random() * totalWeight;
+      for (let item of availablePool) {
+        if (randomNum < item.weight) { chosenList.push(item.name); break; }
+        randomNum -= item.weight;
       }
-
-      partialCbs.forEach(cb => {
-        if (chosenList.includes(cb.value)) { cb.checked = true; checkPartialLimit(cb); }
-      });
-
-      const customCb = document.getElementById('customStyleCb');
-      if (customCb && customCb.checked) {
-        const subOptions = ["隨機花花", "隨機蝴蝶結", "隨機星星"];
-        const randomSub = subOptions[Math.floor(Math.random() * subOptions.length)];
-        document.getElementById('customPattern').value = randomSub;
-      }
-    } else {
-      // 隨機抽十指造型
-      const fullOptions = [
-        "十指貓眼",
-        "十指立體不規則造型",
-        "十指小飾品/貼紙",
-        "十指格紋",
-        "十指漸層",
-        "十指鏡面銀"
-      ];
-      const randomFull = fullOptions[Math.floor(Math.random() * fullOptions.length)];
-      const targetRadio = document.querySelector(`input[name="fullStyle"][value="${randomFull}"]`);
-      if (targetRadio) targetRadio.checked = true;
     }
 
-    const boxEl = document.getElementById('boxStyle');
-    if (boxEl) {
-      boxEl.classList.remove('flash-highlight');
-      void boxEl.offsetWidth;
-      boxEl.classList.add('flash-highlight');
+    checkboxes.forEach(cb => {
+      if (chosenList.includes(cb.value)) { cb.checked = true; checkLimit(cb); }
+    });
+
+    const customCb = document.getElementById('customStyleCb');
+    if (customCb && customCb.checked) {
+      const subOptions = ["隨機花花", "隨機蝴蝶結", "隨機星星"];
+      const randomSub = subOptions[Math.floor(Math.random() * subOptions.length)];
+      document.getElementById('customPattern').value = randomSub;
+    }
+
+    const gridEl = document.querySelector('.checkbox-grid');
+    if (gridEl) {
+      gridEl.classList.remove('flash-highlight');
+      void gridEl.offsetWidth;
+      gridEl.classList.add('flash-highlight');
     }
 
     onSelectionChange();
   }
 
-  function checkPartialLimit(checkbox) {
-    const checkboxes = document.querySelectorAll('input[name="partialStyle"]:checked');
+  function checkLimit(checkbox) {
+    const checkboxes = document.querySelectorAll('input[name="style"]:checked');
     if (checkboxes.length > 4) {
-      alert("局部造型最多只能勾選 4 個喔！");
+      alert("款式最多只能勾選 4 個喔！");
       checkbox.checked = false;
     }
     const customCb = document.getElementById('customStyleCb');
@@ -972,13 +930,10 @@
 
   function autoDetermineCatEye() {
     const catEyeCb = document.getElementById('catEyeCb');
-    const fullCatEyeRadio = document.querySelector('input[name="fullStyle"][value="十指貓眼"]');
     const catEyeDetailDiv = document.getElementById('catEyeDetailDiv');
     const catEyeSelect = document.getElementById('catEyeType');
     
-    const isCatEyeActive = (catEyeCb && catEyeCb.checked) || (fullCatEyeRadio && fullCatEyeRadio.checked);
-
-    if (!isCatEyeActive || !showStyle) {
+    if (!catEyeCb || !catEyeCb.checked || !showStyle) {
       catEyeDetailDiv.classList.add('hidden');
       return;
     }
@@ -1009,10 +964,9 @@
     const jumpColorVal = document.getElementById('jumpColor').value;
     const isJumpSelected = showJumpColor && (jumpColorVal !== "");
 
-    const selectedPartials = showStyle ? document.querySelectorAll('input[name="partialStyle"]:checked' ) : [];
-    const fullStyleRadio = showStyle ? document.querySelector('input[name="fullStyle"]:checked') : null;
+    const selectedStyles = showStyle ? document.querySelectorAll('input[name="style"]:checked') : [];
+    const isStyleSelected = selectedStyles.length > 0;
     
-    const isStyleSelected = (selectedPartials.length > 0) || (fullStyleRadio && fullStyleRadio.value !== "");
     const hasNailService = isMainColorSelected || isJumpSelected || isStyleSelected;
 
     if (needRemoval) {
@@ -1023,25 +977,12 @@
     if (isJumpSelected) total += 50; 
 
     if (isStyleSelected) {
-      // 局部造型計費：每選一個 +50
-      if (selectedPartials.length > 0) {
-        total += selectedPartials.length * 50;
+      const count = selectedStyles.length;
+      total += count * 50;
 
-        const customCb = document.getElementById('customStyleCb');
-        if (customCb && customCb.checked) {
-          total += 30;
-        }
-      }
-
-      // 十指造型計費
-      if (fullStyleRadio && fullStyleRadio.value !== "") {
-        const val = fullStyleRadio.value;
-        if (val === "十指貓眼" || val === "十指鏡面銀") {
-          total += 50;
-        } else {
-          // 立體不規則、小飾品/貼紙、格紋、漸層 +50，且依要求「只要有選到這幾項再幫我多加50元」(總共 +100)
-          total += 100;
-        }
+      const customCb = document.getElementById('customStyleCb');
+      if (customCb && customCb.checked) {
+        total += 30;
       }
     }
 
@@ -1061,12 +1002,9 @@
     }
 
     if (showStyle) {
-      const selectedPartials = document.querySelectorAll('input[name="partialStyle"]:checked');
-      const fullStyleRadio = document.querySelector('input[name="fullStyle"]:checked');
-      const hasFull = fullStyleRadio && fullStyleRadio.value !== "";
-
-      if (selectedPartials.length === 0 && !hasFull) {
-        alert("✨ 請勾選局部造型或十指造型，或關閉該項目！");
+      const selectedStyles = document.querySelectorAll('input[name="style"]:checked');
+      if (selectedStyles.length === 0) {
+        alert("✨ 請勾選造型款式，或關閉該項目！");
         return;
       }
       
@@ -1103,17 +1041,11 @@
     }
 
     if (showStyle) {
-      const partials = Array.from(document.querySelectorAll('input[name="partialStyle"]:checked')).map(cb => cb.value);
-      if (partials.length > 0) {
-        details += `• 局部造型：${partials.join(', ')}\n`;
-        const customCb = document.getElementById('customStyleCb');
-        if (customCb && customCb.checked) {
-          details += `  - 指定圖案細節：${document.getElementById('customPattern').value}\n`;
-        }
-      }
-      const fullStyleRadio = document.querySelector('input[name="fullStyle"]:checked');
-      if (fullStyleRadio && fullStyleRadio.value !== "") {
-        details += `• 十指造型：${fullStyleRadio.value}\n`;
+      const styles = Array.from(document.querySelectorAll('input[name="style"]:checked')).map(cb => cb.value);
+      details += `• 款式造型：${styles.join(', ')}\n`;
+      const customCb = document.getElementById('customStyleCb');
+      if (customCb && customCb.checked) {
+        details += `  - 指定圖案細節：${document.getElementById('customPattern').value}\n`;
       }
     }
 
