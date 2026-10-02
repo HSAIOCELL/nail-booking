@@ -536,7 +536,7 @@
       </div>
       <div id="styleSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">最多選4個</div>
+          <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">局部最多選4個 / 十指最多選2個</div>
           <button class="draw-btn" onclick="drawStyle(event)">🫯 幫我抽款式</button>
         </div>
         
@@ -555,6 +555,18 @@
 
           <label class="chip-item"><input type="checkbox" name="style" value="海莉款" onchange="checkLimit(this)">海莉款</label>
           <label class="chip-item"><input type="checkbox" name="style" id="customStyleCb" value="指定圖案" onchange="checkLimit(this)">指定圖案</label>
+
+          <label class="chip-item"><input type="checkbox" name="fullStyle" id="fullCatEyeCb" value="十指貓眼" onchange="checkFullLimit(this)">十指貓眼</label>
+          <label class="chip-item"><input type="checkbox" name="fullStyle" value="十指立體不規則造型" onchange="checkFullLimit(this)">十指立體不規則</label>
+
+          <label class="chip-item"><input type="checkbox" name="fullStyle" value="十指法式" onchange="checkFullLimit(this)">十指法式</label>
+          <label class="chip-item"><input type="checkbox" name="fullStyle" value="十指鏡面銀" onchange="checkFullLimit(this)">十指鏡面銀</label>
+
+          <label class="chip-item"><input type="checkbox" name="fullStyle" value="十指漸層" onchange="checkFullLimit(this)">十指漸層</label>
+          <label class="chip-item"><input type="checkbox" name="fullStyle" value="十指小飾品/貼紙" onchange="checkFullLimit(this)">十指小飾品/貼紙</label>
+
+          <label class="chip-item"><input type="checkbox" name="fullStyle" value="十指格紋" onchange="checkFullLimit(this)">十指格紋</label>
+          <label class="chip-item"><input type="checkbox" name="fullStyle" value="十指暈染" onchange="checkFullLimit(this)">十指暈染</label>
         </div>
 
         <div id="catEyeDetailDiv" class="sub-input hidden">
@@ -739,8 +751,8 @@
       document.getElementById('badgeStyle').innerText = '50元起 ➕';
       document.getElementById('jumpColor').value = "";
       
-      const styleCbs = document.querySelectorAll('input[name="style"]');
-      styleCbs.forEach(cb => cb.checked = false);
+      document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
+      document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
       document.getElementById('customPattern').value = "";
     }
     onSelectionChange();
@@ -863,8 +875,9 @@
       document.getElementById('boxStyle').classList.add('active');
       document.getElementById('badgeStyle').innerText = '已加購 ✔';
     }
-    const checkboxes = document.querySelectorAll('input[name="style"]');
-    checkboxes.forEach(cb => cb.checked = false);
+    
+    document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
+    document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
     document.getElementById('customPattern').value = "";
 
     const pool = [
@@ -888,7 +901,8 @@
       }
     }
 
-    checkboxes.forEach(cb => {
+    const styleCbs = document.querySelectorAll('input[name="style"]');
+    styleCbs.forEach(cb => {
       if (chosenList.includes(cb.value)) { cb.checked = true; checkLimit(cb); }
     });
 
@@ -912,13 +926,22 @@
   function checkLimit(checkbox) {
     const checkboxes = document.querySelectorAll('input[name="style"]:checked');
     if (checkboxes.length > 4) {
-      alert("款式最多只能勾選 4 個喔！");
+      alert("局部款式最多只能勾選 4 個喔！");
       checkbox.checked = false;
     }
     const customCb = document.getElementById('customStyleCb');
     document.getElementById('customInputDiv').classList.toggle('hidden', !customCb.checked);
     if (!customCb.checked) {
       document.getElementById('customPattern').value = "";
+    }
+    onSelectionChange();
+  }
+
+  function checkFullLimit(checkbox) {
+    const checkboxes = document.querySelectorAll('input[name="fullStyle"]:checked');
+    if (checkboxes.length > 2) {
+      alert("十指造型最多只能勾選 2 項喔！");
+      checkbox.checked = false;
     }
     onSelectionChange();
   }
@@ -930,10 +953,13 @@
 
   function autoDetermineCatEye() {
     const catEyeCb = document.getElementById('catEyeCb');
+    const fullCatEyeCb = document.getElementById('fullCatEyeCb');
     const catEyeDetailDiv = document.getElementById('catEyeDetailDiv');
     const catEyeSelect = document.getElementById('catEyeType');
     
-    if (!catEyeCb || !catEyeCb.checked || !showStyle) {
+    const isCatEyeActive = (catEyeCb && catEyeCb.checked) || (fullCatEyeCb && fullCatEyeCb.checked);
+
+    if (!isCatEyeActive || !showStyle) {
       catEyeDetailDiv.classList.add('hidden');
       return;
     }
@@ -965,8 +991,9 @@
     const isJumpSelected = showJumpColor && (jumpColorVal !== "");
 
     const selectedStyles = showStyle ? document.querySelectorAll('input[name="style"]:checked') : [];
-    const isStyleSelected = selectedStyles.length > 0;
+    const selectedFullStyles = showStyle ? document.querySelectorAll('input[name="fullStyle"]:checked') : [];
     
+    const isStyleSelected = (selectedStyles.length > 0) || (selectedFullStyles.length > 0);
     const hasNailService = isMainColorSelected || isJumpSelected || isStyleSelected;
 
     if (needRemoval) {
@@ -977,6 +1004,7 @@
     if (isJumpSelected) total += 50; 
 
     if (isStyleSelected) {
+      // 局部造型計算
       const count = selectedStyles.length;
       total += count * 50;
 
@@ -984,6 +1012,16 @@
       if (customCb && customCb.checked) {
         total += 30;
       }
+
+      // 十指造型計算
+      selectedFullStyles.forEach(item => {
+        const val = item.value;
+        if (val === "十指貓眼" || val === "十指鏡面銀") {
+          total += 50;
+        } else {
+          total += 100;
+        }
+      });
     }
 
     document.getElementById('totalPrice').innerText = total;
@@ -1003,7 +1041,8 @@
 
     if (showStyle) {
       const selectedStyles = document.querySelectorAll('input[name="style"]:checked');
-      if (selectedStyles.length === 0) {
+      const selectedFullStyles = document.querySelectorAll('input[name="fullStyle"]:checked');
+      if (selectedStyles.length === 0 && selectedFullStyles.length === 0) {
         alert("✨ 請勾選造型款式，或關閉該項目！");
         return;
       }
@@ -1042,7 +1081,13 @@
 
     if (showStyle) {
       const styles = Array.from(document.querySelectorAll('input[name="style"]:checked')).map(cb => cb.value);
-      details += `• 款式造型：${styles.join(', ')}\n`;
+      const fullStyles = Array.from(document.querySelectorAll('input[name="fullStyle"]:checked')).map(cb => cb.value);
+      
+      let allChosenStyles = [...styles, ...fullStyles];
+      if (allChosenStyles.length > 0) {
+        details += `• 款式造型：${allChosenStyles.join(', ')}\n`;
+      }
+
       const customCb = document.getElementById('customStyleCb');
       if (customCb && customCb.checked) {
         details += `  - 指定圖案細節：${document.getElementById('customPattern').value}\n`;
