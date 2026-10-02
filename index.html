@@ -29,7 +29,7 @@
     }
 
     body::before {
-      content: "NT$    $    NT$    $\n$    NT$    $    NT$\nNT$    $    NT$    $\n$NT$    $    NT$";
+      content: "NT$    $    NT$    $\n$    NT$    $    NT$\nNT$    $    NT$    $\n$NT$    $    NT$    $";
       white-space: pre-line;
       position: fixed;
       top: 50%;
@@ -541,7 +541,7 @@
           <button class="draw-btn" onclick="drawStyle(event)">🫯 幫我抽款式</button>
         </div>
 
-        <!-- 局部造型與十指造型按鈕區塊 (靠左對齊，無打勾符號) -->
+        <!-- 局部造型與十指造型按鈕區塊 -->
         <div class="removal-card-group" style="margin-top: 0; margin-bottom: 12px; gap: 8px;">
           <div id="typePartialCard" class="removal-card active" onclick="setStyleType('partial')" style="padding: 10px; font-size: 15px;">
             <div class="removal-card-title" style="font-size: 15px;">局部造型</div>
@@ -553,7 +553,7 @@
         <input type="radio" name="styleType" value="partial" id="radioPartial" checked style="display:none;">
         <input type="radio" name="styleType" value="full" id="radioFull" style="display:none;">
         
-        <!-- 局部造型子選項 (最多選4個) + 無星號備註 -->
+        <!-- 局部造型子選項 (最多選4個) -->
         <div id="partialStyleGroup">
           <div style="font-size: 12px; color: #8c7c75; margin-bottom: 4px; font-weight: 500;">(5指造型 + 5指單色跳色)</div>
           <div class="checkbox-grid" style="margin-bottom: 12px;">
@@ -574,7 +574,7 @@
           </div>
         </div>
 
-        <!-- 十指造型子選項 (最多選4個) + 隱形佔位區保持高度一致 -->
+        <!-- 十指造型子選項 (最多選4個) -->
         <div id="fullStyleGroup" class="hidden">
           <div style="font-size: 12px; color: transparent; margin-bottom: 4px; user-select: none; pointer-events: none;">(佔位)</div>
           <div class="checkbox-grid" style="margin-bottom: 12px;">
@@ -982,7 +982,7 @@
         { name: "十指指定圖案", weight: 14 }
       ];
 
-      const countToDraw = Math.floor(Math.random() * 4) + 1;
+      const countToDraw = Math.floor(Math.random() * 3) + 1;
       let chosenList = [];
 
       for (let i = 0; i < countToDraw; i++) {
@@ -1119,8 +1119,7 @@
           total += 30;
         }
       } else {
-        // 十指造型：只要切換過來就自動 +50，底下每選一項各 +50
-        total += 50;
+        // 十指造型：跟局部造型一樣依勾選數量計價 (每選一項各 +50)
         const count = selectedFullStyles.length;
         total += count * 50;
 
@@ -1148,10 +1147,16 @@
 
     if (showStyle) {
       const selectedStyles = document.querySelectorAll('input[name="style"]:checked');
+      const selectedFullStyles = document.querySelectorAll('input[name="fullStyle"]:checked');
       const currentType = document.querySelector('input[name="styleType"]:checked').value;
 
       if (currentType === 'partial' && selectedStyles.length === 0) {
         alert("✨ 請勾選局部造型款式，或關閉該項目！");
+        return;
+      }
+      
+      if (currentType === 'full' && selectedFullStyles.length === 0) {
+        alert("✨ 請勾選十指造型款式，或關閉該項目！");
         return;
       }
       
