@@ -532,7 +532,7 @@
     <div id="boxStyle" class="addon-item-box" onclick="toggleOption('styleSection', event)">
       <div class="addon-header">
         <span>✨ 款式造型</span>
-        <span id="badgeStyle" class="addon-badge">100~250 元 ➕</span>
+        <span id="badgeStyle" class="addon-badge">每選一個 50 元 ➕</span>
       </div>
       <div id="styleSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -736,7 +736,7 @@
       document.getElementById('boxJumpColor').classList.remove('active');
       document.getElementById('boxStyle').classList.remove('active');
       document.getElementById('badgeJumpColor').innerText = '50 元 ➕';
-      document.getElementById('badgeStyle').innerText = '100~250 元 ➕';
+      document.getElementById('badgeStyle').innerText = '每選一個 50 元 ➕';
       document.getElementById('jumpColor').value = "";
       
       const styleCbs = document.querySelectorAll('input[name="style"]');
@@ -781,7 +781,7 @@
       showStyle = !showStyle; 
       el.classList.toggle('hidden', !showStyle); 
       document.getElementById('boxStyle').classList.toggle('active', showStyle);
-      document.getElementById('badgeStyle').innerText = showStyle ? '已加購 ✔' : '100~250 元 ➕';
+      document.getElementById('badgeStyle').innerText = showStyle ? '已加購 ✔' : '每選一個 50 元 ➕';
     }
     onSelectionChange();
   }
@@ -978,10 +978,7 @@
 
     if (isStyleSelected) {
       const count = selectedStyles.length;
-      if (count === 1) total += 100;
-      else if (count === 2) total += 150;
-      else if (count === 3) total += 200;
-      else if (count >= 4) total += 250;
+      total += count * 50; // 每選一個 +50 元
 
       const customCb = document.getElementById('customStyleCb');
       if (customCb && customCb.checked) {
