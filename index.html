@@ -1119,7 +1119,6 @@
           total += 30;
         }
       } else {
-        // 十指造型：只要切換過來就先加基本 50 元，每勾選一項再加 50 元
         total += 50;
         const count = selectedFullStyles.length;
         total += count * 50;
@@ -1224,7 +1223,8 @@
     details += `預計總金額：NT$ ${document.getElementById('totalPrice').innerText} 元`;
 
     const encodedMessage = encodeURIComponent(details);
-    const lineUrl = `https://line.me/R/ti/p/${LINE_OFFICIAL_ACCOUNT_ID}?text=${encodedMessage}`;
+    // 修正：改用 oaMessage 格式來直接帶入文字到 LINE 聊天對話框
+    const lineUrl = `https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodedMessage}`;
     window.location.href = lineUrl;
   }
 
