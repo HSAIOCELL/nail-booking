@@ -1099,8 +1099,7 @@
     const selectedFullStyles = showStyle ? document.querySelectorAll('input[name="fullStyle"]:checked') : [];
     const currentType = document.querySelector('input[name="styleType"]:checked').value;
     
-    // 只要款式造型已勾選，或者十指造型被選中，就算有樣式服務
-    const isStyleSelected = showStyle && ((selectedStyles.length > 0) || (selectedFullStyles.length > 0) || (currentType === 'full'));
+    const isStyleSelected = showStyle;
     const hasNailService = isMainColorSelected || isJumpSelected || isStyleSelected;
 
     if (needRemoval) {
@@ -1149,10 +1148,8 @@
 
     if (showStyle) {
       const selectedStyles = document.querySelectorAll('input[name="style"]:checked');
-      const selectedFullStyles = document.querySelectorAll('input[name="fullStyle"]:checked');
       const currentType = document.querySelector('input[name="styleType"]:checked').value;
 
-      // 如果是十指造型，允許只選十指造型本身（不一定要勾選子項目）
       if (currentType === 'partial' && selectedStyles.length === 0) {
         alert("✨ 請勾選局部造型款式，或關閉該項目！");
         return;
@@ -1196,7 +1193,14 @@
       const styles = Array.from(document.querySelectorAll('input[name="style"]:checked')).map(cb => cb.value);
       const fullStyles = Array.from(document.querySelectorAll('input[name="fullStyle"]:checked')).map(cb => cb.value);
       
-      let allChosenStyles = currentType === 'full' ? ['十指造型', ...fullStyles] : [...styles];
+      let allChosenStyles = [];
+      if (currentType === 'full') {
+        allChosenStyles.push('十指造型');
+        fullStyles.forEach(s => allChosenStyles.push(s));
+      } else {
+        allChosenStyles = [...styles];
+      }
+
       if (allChosenStyles.length > 0) {
         details += `• 款式造型：${allChosenStyles.join(', ')}\n`;
       }
