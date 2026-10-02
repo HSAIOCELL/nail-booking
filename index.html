@@ -532,11 +532,11 @@
     <div id="boxStyle" class="addon-item-box" onclick="toggleOption('styleSection', event)">
       <div class="addon-header">
         <span>✨ 款式造型</span>
-        <span id="badgeStyle" class="addon-badge"> 50 元起 ➕</span>
+        <span id="badgeStyle" class="addon-badge">50元起 ➕</span>
       </div>
       <div id="styleSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">最多選4個</div>
+          <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">最多選4個 (每選一個+50元)</div>
           <button class="draw-btn" onclick="drawStyle(event)">🫯 幫我抽款式</button>
         </div>
         
@@ -736,7 +736,7 @@
       document.getElementById('boxJumpColor').classList.remove('active');
       document.getElementById('boxStyle').classList.remove('active');
       document.getElementById('badgeJumpColor').innerText = '50 元 ➕';
-      document.getElementById('badgeStyle').innerText = '每選一個 50 元 ➕';
+      document.getElementById('badgeStyle').innerText = '50元起 ➕';
       document.getElementById('jumpColor').value = "";
       
       const styleCbs = document.querySelectorAll('input[name="style"]');
@@ -781,7 +781,7 @@
       showStyle = !showStyle; 
       el.classList.toggle('hidden', !showStyle); 
       document.getElementById('boxStyle').classList.toggle('active', showStyle);
-      document.getElementById('badgeStyle').innerText = showStyle ? '已加購 ✔' : '每選一個 50 元 ➕';
+      document.getElementById('badgeStyle').innerText = showStyle ? '已加購 ✔' : '50元起 ➕';
     }
     onSelectionChange();
   }
@@ -1027,6 +1027,10 @@
     details += `----------------------------\n`;
     details += `• 預約時間：${bookingDate} ${bookingTime}\n`;
 
+    if (needRemoval) {
+      details += `• 卸甲服務：需要卸甲\n`;
+    }
+
     if (isMainColorSelected) {
       details += `• 單色款式：${mainColorVal}\n`;
     }
@@ -1036,7 +1040,23 @@
       if (jColor) details += `• 跳色：${jColor}\n`;
     }
 
-    alert("測試：表單驗證通過！金額計算：" + document.getElementById('totalPrice').innerText);
+    if (showStyle) {
+      const styles = Array.from(document.querySelectorAll('input[name="style"]:checked')).map(cb => cb.value);
+      details += `• 款式造型：${styles.join(', ')}\n`;
+      const customCb = document.getElementById('customStyleCb');
+      if (customCb && customCb.checked) {
+        details += `  - 指定圖案細節：${document.getElementById('customPattern').value}\n`;
+      }
+    }
+
+    const tone = document.getElementById('selectedTone').value;
+    details += `• 色調風格：${tone}\n`;
+    details += `----------------------------\n`;
+    details += `預計總金額：NT$ ${document.getElementById('totalPrice').innerText} 元`;
+
+    const encodedMessage = encodeURIComponent(details);
+    const lineUrl = `https://line.me/R/ti/p/${LINE_OFFICIAL_ACCOUNT_ID}?text=${encodedMessage}`;
+    window.location.href = lineUrl;
   }
 
   window.onload = function() {
