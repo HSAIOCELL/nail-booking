@@ -536,7 +536,7 @@
       </div>
       <div id="styleSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">最多選4個 (每選一個+50元)</div>
+          <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">最多選4個</div>
           <button class="draw-btn" onclick="drawStyle(event)">🫯 幫我抽款式</button>
         </div>
         
@@ -978,7 +978,7 @@
 
     if (isStyleSelected) {
       const count = selectedStyles.length;
-      total += count * 50; // 每選一個 +50 元
+      total += count * 50;
 
       const customCb = document.getElementById('customStyleCb');
       if (customCb && customCb.checked) {
