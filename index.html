@@ -962,7 +962,8 @@
     const isMainColorSelected = mainColorVal !== "";
     
     const jumpColorVal = document.getElementById('jumpColor').value;
-    const isJumpSelected = showJumpColor && jumpColorVal !== "";
+    // 只要有開啟跳色區塊且有選擇跳色色系，即計入 50 元
+    const isJumpSelected = showJumpColor && (jumpColorVal !== "");
 
     const selectedStyles = showStyle ? document.querySelectorAll('input[name="style"]:checked') : [];
     const isStyleSelected = selectedStyles.length > 0;
