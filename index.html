@@ -536,19 +536,18 @@
         <span id="badgeStyle" class="addon-badge">50元起 ➕</span>
       </div>
       <div id="styleSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <button class="draw-btn" onclick="drawStyle(event)">🫯 幫我抽款式</button>
-        </div>
-
-        <!-- 客人可選的主類別：局部造型 vs 十指造型 -->
-        <div style="font-size: 14px; font-weight: bold; color: #5c5049; margin-bottom: 6px;">請選擇款式類型：</div>
-        <div style="display: flex; gap: 10px; margin-bottom: 12px;">
-          <label class="chip-item" style="flex: 1;"><input type="radio" name="styleType" value="partial" checked onchange="switchStyleType()">局部造型</label>
-          <label class="chip-item" style="flex: 1;"><input type="radio" name="styleType" value="full" onchange="switchStyleType()">十指造型</label>
+        <!-- 類別選擇與抽款式按鈕同一列 (按鈕在右側) -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px;">
+          <div style="display: flex; gap: 8px; flex: 1;">
+            <label class="chip-item" style="flex: 1; margin: 0;"><input type="radio" name="styleType" value="partial" checked onchange="switchStyleType()">局部造型</label>
+            <label class="chip-item" style="flex: 1; margin: 0;"><input type="radio" name="styleType" value="full" onchange="switchStyleType()">十指造型</label>
+          </div>
+          <button class="draw-btn" onclick="drawStyle(event)" style="white-space: nowrap;">🫯 幫我抽款式</button>
         </div>
         
-        <!-- 局部造型子選項 (最多選4個) -->
+        <!-- 局部造型子選項 (最多選4個) + 指定備註 -->
         <div id="partialStyleGroup">
+          <div style="font-size: 12px; color: #8c7c75; margin-bottom: 4px; font-weight: 500;">*(5指造型 + 5指單色跳色)*</div>
           <div class="checkbox-grid" style="margin-bottom: 12px;">
             <label class="chip-item"><input type="checkbox" name="style" id="catEyeCb" value="貓眼" onchange="checkLimit(this)">貓眼</label>
             <label class="chip-item"><input type="checkbox" name="style" value="立體不規則造型" onchange="checkLimit(this)">立體不規則造型</label>
@@ -567,7 +566,7 @@
           </div>
         </div>
 
-        <!-- 十指造型子選項 (最多選2個) -->
+        <!-- 十指造型子選項 (最多選4個) -->
         <div id="fullStyleGroup" class="hidden">
           <div class="checkbox-grid" style="margin-bottom: 12px;">
             <label class="chip-item"><input type="checkbox" name="fullStyle" id="fullCatEyeCb" value="十指貓眼" onchange="checkFullLimit(this)">貓眼</label>
@@ -952,7 +951,7 @@
       document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
 
       const fullCbs = document.querySelectorAll('input[name="fullStyle"]');
-      const countToDraw = Math.floor(Math.random() * 2) + 1;
+      const countToDraw = Math.floor(Math.random() * 4) + 1;
       let drawnIndices = [];
       while(drawnIndices.length < countToDraw) {
         let idx = Math.floor(Math.random() * fullCbs.length);
@@ -990,8 +989,8 @@
 
   function checkFullLimit(checkbox) {
     const checkboxes = document.querySelectorAll('input[name="fullStyle"]:checked');
-    if (checkboxes.length > 2) {
-      alert("十指造型最多只能勾選 2 項喔！");
+    if (checkboxes.length > 4) {
+      alert("十指造型最多只能勾選 4 項喔！");
       checkbox.checked = false;
     }
     const fullCustomCb = document.getElementById('fullCustomStyleCb');
