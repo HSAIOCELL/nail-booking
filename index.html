@@ -328,14 +328,6 @@
       display: none !important;
     }
 
-    /* 未解鎖的第二格：淡化、不顯眼、不能點選 */
-    .locked-select-group {
-      opacity: 0.35;
-      pointer-events: none;
-      filter: grayscale(60%);
-      transition: all 0.3s ease;
-    }
-
     .checkbox-grid {
       display: grid;
       grid-template-columns: 0.85fr 1.15fr;
@@ -502,11 +494,11 @@
       Step 3. 加購項目
     </div>
 
-    <!-- 直覺開關 1：跳色 -->
+    <!-- 直覺開關 1：跳色 (恢復單一選單，+50元) -->
     <div id="boxJumpColor" class="addon-item-box" onclick="toggleOption('jumpColorSection', event)">
       <div class="addon-header">
         <span>🎨 跳色</span>
-        <span id="badgeJumpColor" class="addon-badge">40元起 ➕</span>
+        <span id="badgeJumpColor" class="addon-badge">50 元 ➕</span>
       </div>
       <div id="jumpColorSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
@@ -514,31 +506,9 @@
           <button class="draw-btn" onclick="drawSmartJumpColor(event)">🎲 隨機配色</button>
         </div>
         
-        <!-- 第一個跳色欄位 (+40元) -->
-        <div style="margin-bottom: 8px;">
-          <select id="jumpColor1" onchange="onJumpColor1Change()">
-            <option value="">--請選擇第一格色系--</option>
-            <option value="紅色">紅色</option>
-            <option value="粉色">粉色</option>
-            <option value="橘色">橘色</option>
-            <option value="黃色">黃色</option>
-            <option value="紅咖色">紅咖色</option>
-            <option value="深咖/可可色">深咖/可可色</option>
-            <option value="淺咖色">淺咖色</option>
-            <option value="綠色">綠色</option>
-            <option value="藍色">藍色</option>
-            <option value="紫色">紫色</option>
-            <option value="黑色">黑色</option>
-            <option value="銀色/白色">銀色/白色</option>
-            <option value="灰色">灰色</option>
-            <option value="金色/香檳色">金色/香檳色</option>
-          </select>
-        </div>
-
-        <!-- 第二個跳色欄位 (+20元，預設隱藏且淡化不顯眼) -->
-        <div id="jumpColor2Container" class="locked-select-group" style="margin-top: 8px;">
-          <select id="jumpColor2" onchange="onSelectionChange()" disabled>
-            <option value="">--請選擇第二格色系 (選完第一格後解鎖)--</option>
+        <div>
+          <select id="jumpColor" onchange="onSelectionChange()">
+            <option value="">--請選擇跳色色系--</option>
             <option value="紅色">紅色</option>
             <option value="粉色">粉色</option>
             <option value="橘色">橘色</option>
@@ -765,15 +735,9 @@
       document.getElementById('styleSection').classList.add('hidden');
       document.getElementById('boxJumpColor').classList.remove('active');
       document.getElementById('boxStyle').classList.remove('active');
-      document.getElementById('badgeJumpColor').innerText = '40元起 ➕';
+      document.getElementById('badgeJumpColor').innerText = '50 元 ➕';
       document.getElementById('badgeStyle').innerText = '100~250 元 ➕';
-      document.getElementById('jumpColor1').value = "";
-      document.getElementById('jumpColor2').value = "";
-      
-      const container2 = document.getElementById('jumpColor2Container');
-      const select2 = document.getElementById('jumpColor2');
-      container2.classList.add('locked-select-group');
-      select2.disabled = true;
+      document.getElementById('jumpColor').value = "";
       
       const styleCbs = document.querySelectorAll('input[name="style"]');
       styleCbs.forEach(cb => cb.checked = false);
@@ -811,7 +775,7 @@
       showJumpColor = !showJumpColor; 
       el.classList.toggle('hidden', !showJumpColor); 
       document.getElementById('boxJumpColor').classList.toggle('active', showJumpColor);
-      document.getElementById('badgeJumpColor').innerText = showJumpColor ? '已加購 ✔' : '40元起 ➕';
+      document.getElementById('badgeJumpColor').innerText = showJumpColor ? '已加購 ✔' : '50 元 ➕';
     }
     else if (id === 'styleSection') { 
       showStyle = !showStyle; 
@@ -822,29 +786,22 @@
     onSelectionChange();
   }
 
-  // 第一格改變時解鎖/鎖定第二格
-  function onJumpColor1Change() {
-    const val1 = document.getElementById('jumpColor1').value;
-    const container2 = document.getElementById('jumpColor2Container');
-    const select2 = document.getElementById('jumpColor2');
-
-    if (val1 !== "") {
-      container2.classList.remove('locked-select-group');
-      select2.disabled = false; // 解鎖可選擇
-    } else {
-      container2.classList.add('locked-select-group');
-      select2.disabled = true;
-      select2.value = ""; 
-    }
-    onSelectionChange();
-  }
-
-  // 檢查兩個顏色是否為相近色或衝突色
+  // 嚴格色彩互斥與美感防呆檢驗
   function isValidColorPair(c1, c2) {
     if (!c1 || !c2) return true;
     if (c1 === c2) return false;
 
-    // 定義相近色互斥群組
+    // 1. 相近色不要配：藍色與紫色互斥
+    if ((c1 === "藍色" && c2 === "紫色") || (c1 === "紫色" && c2 === "藍色")) {
+      return false;
+    }
+
+    // 2. 綠色不可以配紅色、紫色、粉色 (任何欄位都不可以出現任一個)
+    const greenConflict = ["紅色", "紫色", "粉色"];
+    if (c1 === "綠色" && greenConflict.includes(c2)) return false;
+    if (c2 === "綠色" && greenConflict.includes(c1)) return false;
+
+    // 3. 其他相近色互斥
     const similarGroups = [
       ["紅色", "粉色"],
       ["橘色", "黃色"],
@@ -857,19 +814,6 @@
       }
     }
 
-    // 定義衝突/配不起來的群組
-    const conflicts = [
-      { colors: ["綠色"], avoid: ["紅色", "粉色"] },
-      { colors: ["灰色"], avoid: ["紅色", "粉色"] }
-    ];
-
-    for (let conf of conflicts) {
-      if ((conf.colors.includes(c1) && conf.avoid.includes(c2)) ||
-          (conf.colors.includes(c2) && conf.avoid.includes(c1))) {
-        return false;
-      }
-    }
-
     return true;
   }
 
@@ -878,56 +822,29 @@
     if (event) event.stopPropagation();
 
     const mainColor = document.getElementById('mainColor').value;
-    const jumpSelect1 = document.getElementById('jumpColor1');
-    const jumpSelect2 = document.getElementById('jumpColor2');
-    const container2 = document.getElementById('jumpColor2Container');
-    const select2 = document.getElementById('jumpColor2');
-
-    // 決定要幫第幾格配色 (如果第一格還沒選，先配第一格；否則配第二格)
-    let isTargetFirst = (jumpSelect1.value === "");
+    const jumpSelect = document.getElementById('jumpColor');
     let currentExistingColors = [mainColor];
-    if (!isTargetFirst) {
-      currentExistingColors.push(jumpSelect1.value);
-    }
 
-    // 篩選出符合美感條件的候選顏色池
+    // 篩選符合條件的候選顏色池
     let validPool = ALL_COLORS.filter(color => {
-      // 確保跟現有的顏色都不衝突且不相近
       return currentExistingColors.every(existing => isValidColorPair(existing, color));
     });
 
-    // 如果篩選完剛好空了（機率極低），退回一般不重複池
     if (validPool.length === 0) {
       validPool = ALL_COLORS.filter(c => !currentExistingColors.includes(c));
     }
 
-    // 冷暖色金銀配權重調整 (95% 機率提升)
-    const warmColors = ["紅色", "粉色", "橘色", "黃色", "紅咖色", "金色/香檳色"];
-    const hasWarm = currentExistingColors.some(c => warmColors.includes(c));
-    
-    if (hasWarm && validPool.includes("金色/香檳色") && Math.random() < 0.95) {
-      validPool.push("金色/香檳色", "金色/香檳色", "金色/香檳色"); // 增加權重
-    } else if (!hasWarm && validPool.includes("銀色/白色") && Math.random() < 0.95) {
-      validPool.push("銀色/白色", "銀色/白色", "銀色/白色");
+    // 當跳色出現第二個顏色時（等於有單色也有跳色，總共三個顏色配的時候），白色機率增加
+    if (mainColor && validPool.includes("銀色/白色")) {
+      validPool.push("銀色/白色", "銀色/白色", "銀色/白色", "銀色/白色"); // 大幅增加白色/銀色權重
     }
 
     const pickedColor = validPool[Math.floor(Math.random() * validPool.length)];
 
-    let targetSelect = null;
-    if (isTargetFirst) {
-      jumpSelect1.value = pickedColor;
-      onJumpColor1Change(); // 自動解鎖第二格
-      targetSelect = jumpSelect1;
-    } else {
-      jumpSelect2.value = pickedColor;
-      targetSelect = jumpSelect2;
-    }
-
-    if (targetSelect) {
-      targetSelect.classList.remove('flash-highlight');
-      void targetSelect.offsetWidth;
-      targetSelect.classList.add('flash-highlight');
-    }
+    jumpSelect.value = pickedColor;
+    jumpSelect.classList.remove('flash-highlight');
+    void jumpSelect.offsetWidth;
+    jumpSelect.classList.add('flash-highlight');
 
     onSelectionChange();
   }
@@ -1030,9 +947,8 @@
     
     catEyeDetailDiv.classList.remove('hidden');
 
-    const jumpColor1Val = document.getElementById('jumpColor1').value;
-    const jumpColor2Val = document.getElementById('jumpColor2').value;
-    const hasJumpColorSelected = showJumpColor && (jumpColor1Val !== "" || jumpColor2Val !== "");
+    const jumpColorVal = document.getElementById('jumpColor').value;
+    const hasJumpColorSelected = showJumpColor && (jumpColorVal !== "");
 
     if (hasJumpColorSelected) {
       catEyeSelect.disabled = false;
@@ -1052,22 +968,20 @@
     const mainColorVal = document.getElementById('mainColor').value;
     const isMainColorSelected = mainColorVal !== "";
     
-    const jumpColor1Val = document.getElementById('jumpColor1').value;
-    const jumpColor2Val = document.getElementById('jumpColor2').value;
-    const isJump1Selected = showJumpColor && jumpColor1Val !== "";
-    const isJump2Selected = showJumpColor && jumpColor2Val !== "";
+    const jumpColorVal = document.getElementById('jumpColor').value;
+    const isJumpSelected = showJumpColor && jumpColorVal !== "";
 
     const selectedStyles = showStyle ? document.querySelectorAll('input[name="style"]:checked') : [];
     const isStyleSelected = selectedStyles.length > 0;
-    const hasNailService = isMainColorSelected || isJump1Selected || isStyleSelected;
+    
+    const hasNailService = isMainColorSelected || isJumpSelected || isStyleSelected;
 
     if (needRemoval) {
       total += hasNailService ? 150 : 200;
     }
 
     if (isMainColorSelected) total += 700;
-    if (isJump1Selected) total += 40; 
-    if (isJump2Selected) total += 20; 
+    if (isJumpSelected) total += 50; 
 
     if (isStyleSelected) {
       const count = selectedStyles.length;
@@ -1090,9 +1004,9 @@
     const isMainColorSelected = mainColorVal !== "";
 
     if (showJumpColor) {
-      const jumpColor1Val = document.getElementById('jumpColor1').value;
-      if (jumpColor1Val === "") {
-        alert("🎨 請選擇第一格跳色色系，或關閉該項目！");
+      const jumpColorVal = document.getElementById('jumpColor').value;
+      if (jumpColorVal === "") {
+        alert("🎨 請選擇跳色色系，或關閉該項目！");
         return;
       }
     }
@@ -1128,10 +1042,8 @@
     }
 
     if (showJumpColor) {
-      const j1 = document.getElementById('jumpColor1').value;
-      const j2 = document.getElementById('jumpColor2').value;
-      if (j1) details += `• 跳色第一格：${j1}\n`;
-      if (j2) details += `• 跳色第二格：${j2}\n`;
+      const jColor = document.getElementById('jumpColor').value;
+      if (jColor) details += `• 跳色：${jColor}\n`;
     }
 
     alert("測試：表單驗證通過！金額計算：" + document.getElementById('totalPrice').innerText);
