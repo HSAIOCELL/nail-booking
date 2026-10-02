@@ -328,6 +328,14 @@
       display: none !important;
     }
 
+    /* 未解鎖的第二格：淡化、不顯眼、不能點選 */
+    .locked-select-group {
+      opacity: 0.35;
+      pointer-events: none;
+      filter: grayscale(60%);
+      transition: all 0.3s ease;
+    }
+
     .checkbox-grid {
       display: grid;
       grid-template-columns: 0.85fr 1.15fr;
@@ -475,6 +483,7 @@
       <option value="粉色">粉色</option>
       <option value="橘色">橘色</option>
       <option value="黃色">黃色</option>
+      <option value="紅咖色">紅咖色</option>
       <option value="深咖/可可色">深咖/可可色</option>
       <option value="淺咖色">淺咖色</option>
       <option value="綠色">綠色</option>
@@ -493,28 +502,27 @@
       Step 3. 加購項目
     </div>
 
-    <!-- 直覺開關 1：跳色 (修改為雙欄位) -->
+    <!-- 直覺開關 1：跳色 -->
     <div id="boxJumpColor" class="addon-item-box" onclick="toggleOption('jumpColorSection', event)">
       <div class="addon-header">
         <span>🎨 跳色</span>
-        <span id="badgeJumpColor" class="addon-badge">60 元起 ➕</span>
+        <span id="badgeJumpColor" class="addon-badge">40元起 ➕</span>
       </div>
       <div id="jumpColorSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
           <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">選擇色系：</div>
-          <button class="draw-btn" onclick="drawJumpColor(event)">🫯 隨機發揮</button>
+          <button class="draw-btn" onclick="drawSmartJumpColor(event)">🎲 隨機配色</button>
         </div>
         
         <!-- 第一個跳色欄位 (+40元) -->
         <div style="margin-bottom: 8px;">
-          <label style="font-size: 12.5px; color: #7a6b63; display: block; margin-bottom: 2px;">第一格 (+40元)：</label>
           <select id="jumpColor1" onchange="onJumpColor1Change()">
             <option value="">--請選擇第一格色系--</option>
-            <option value="隨機發揮">隨機發揮</option>
             <option value="紅色">紅色</option>
             <option value="粉色">粉色</option>
             <option value="橘色">橘色</option>
             <option value="黃色">黃色</option>
+            <option value="紅咖色">紅咖色</option>
             <option value="深咖/可可色">深咖/可可色</option>
             <option value="淺咖色">淺咖色</option>
             <option value="綠色">綠色</option>
@@ -527,16 +535,15 @@
           </select>
         </div>
 
-        <!-- 第二個跳色欄位 (+20元，預設隱藏/停用) -->
-        <div id="jumpColor2Container" class="hidden" style="margin-top: 8px;">
-          <label style="font-size: 12.5px; color: #7a6b63; display: block; margin-bottom: 2px;">第二格 (+20元，選完第一格後解鎖)：</label>
-          <select id="jumpColor2" onchange="onSelectionChange()">
-            <option value="">--請選擇第二格色系--</option>
-            <option value="隨機發揮">隨機發揮</option>
+        <!-- 第二個跳色欄位 (+20元，預設隱藏且淡化不顯眼) -->
+        <div id="jumpColor2Container" class="locked-select-group" style="margin-top: 8px;">
+          <select id="jumpColor2" onchange="onSelectionChange()" disabled>
+            <option value="">--請選擇第二格色系 (選完第一格後解鎖)--</option>
             <option value="紅色">紅色</option>
             <option value="粉色">粉色</option>
             <option value="橘色">橘色</option>
             <option value="黃色">黃色</option>
+            <option value="紅咖色">紅咖色</option>
             <option value="深咖/可可色">深咖/可可色</option>
             <option value="淺咖色">淺咖色</option>
             <option value="綠色">綠色</option>
@@ -652,6 +659,12 @@
   let showJumpColor = false, showStyle = false;
   let needRemoval = false;
 
+  const ALL_COLORS = [
+    "紅色", "粉色", "橘色", "黃色", "紅咖色", 
+    "深咖/可可色", "淺咖色", "綠色", "藍色", "紫色", 
+    "黑色", "銀色/白色", "灰色", "金色/香檳色"
+  ];
+
   function getTaipeiDate() {
     const now = new Date();
     const taipeiStr = now.toLocaleString("en-US", { timeZone: "Asia/Taipei" });
@@ -752,11 +765,15 @@
       document.getElementById('styleSection').classList.add('hidden');
       document.getElementById('boxJumpColor').classList.remove('active');
       document.getElementById('boxStyle').classList.remove('active');
-      document.getElementById('badgeJumpColor').innerText = '60 元起 ➕';
+      document.getElementById('badgeJumpColor').innerText = '40元起 ➕';
       document.getElementById('badgeStyle').innerText = '100~250 元 ➕';
       document.getElementById('jumpColor1').value = "";
       document.getElementById('jumpColor2').value = "";
-      document.getElementById('jumpColor2Container').classList.add('hidden');
+      
+      const container2 = document.getElementById('jumpColor2Container');
+      const select2 = document.getElementById('jumpColor2');
+      container2.classList.add('locked-select-group');
+      select2.disabled = true;
       
       const styleCbs = document.querySelectorAll('input[name="style"]');
       styleCbs.forEach(cb => cb.checked = false);
@@ -794,7 +811,7 @@
       showJumpColor = !showJumpColor; 
       el.classList.toggle('hidden', !showJumpColor); 
       document.getElementById('boxJumpColor').classList.toggle('active', showJumpColor);
-      document.getElementById('badgeJumpColor').innerText = showJumpColor ? '已加購 ✔' : '60 元起 ➕';
+      document.getElementById('badgeJumpColor').innerText = showJumpColor ? '已加購 ✔' : '40元起 ➕';
     }
     else if (id === 'styleSection') { 
       showStyle = !showStyle; 
@@ -805,42 +822,104 @@
     onSelectionChange();
   }
 
-  // 跳色第一格改變時，控制第二格的顯示與隱藏
+  // 第一格改變時解鎖/鎖定第二格
   function onJumpColor1Change() {
     const val1 = document.getElementById('jumpColor1').value;
     const container2 = document.getElementById('jumpColor2Container');
     const select2 = document.getElementById('jumpColor2');
 
     if (val1 !== "") {
-      container2.classList.remove('hidden');
+      container2.classList.remove('locked-select-group');
+      select2.disabled = false; // 解鎖可選擇
     } else {
-      container2.classList.add('hidden');
-      select2.value = ""; // 如果清空第一格，第二格也跟著清空隱藏
+      container2.classList.add('locked-select-group');
+      select2.disabled = true;
+      select2.value = ""; 
     }
     onSelectionChange();
   }
 
-  // 共用隨機發揮按鈕
-  function drawJumpColor(event) {
+  // 檢查兩個顏色是否為相近色或衝突色
+  function isValidColorPair(c1, c2) {
+    if (!c1 || !c2) return true;
+    if (c1 === c2) return false;
+
+    // 定義相近色互斥群組
+    const similarGroups = [
+      ["紅色", "粉色"],
+      ["橘色", "黃色"],
+      ["紅咖色", "深咖/可可色", "淺咖色"]
+    ];
+
+    for (let group of similarGroups) {
+      if (group.includes(c1) && group.includes(c2)) {
+        return false;
+      }
+    }
+
+    // 定義衝突/配不起來的群組
+    const conflicts = [
+      { colors: ["綠色"], avoid: ["紅色", "粉色"] },
+      { colors: ["灰色"], avoid: ["紅色", "粉色"] }
+    ];
+
+    for (let conf of conflicts) {
+      if ((conf.colors.includes(c1) && conf.avoid.includes(c2)) ||
+          (conf.colors.includes(c2) && conf.avoid.includes(c1))) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  // 智慧隨機配色主邏輯
+  function drawSmartJumpColor(event) {
     if (event) event.stopPropagation();
+
+    const mainColor = document.getElementById('mainColor').value;
     const jumpSelect1 = document.getElementById('jumpColor1');
     const jumpSelect2 = document.getElementById('jumpColor2');
     const container2 = document.getElementById('jumpColor2Container');
-    const colorOptions = ["紅色", "粉色", "橘色", "黃色", "深咖/可可色", "淺咖色", "綠色", "藍色", "紫色", "黑色", "銀色/白色", "灰色", "金色/香檳色"];
+    const select2 = document.getElementById('jumpColor2');
 
-    // 隨機抽選一個色系（或隨機發揮）
-    const allDrawPool = ["隨機發揮", ...colorOptions];
-    const randomPicked = allDrawPool[Math.floor(Math.random() * allDrawPool.length)];
+    // 決定要幫第幾格配色 (如果第一格還沒選，先配第一格；否則配第二格)
+    let isTargetFirst = (jumpSelect1.value === "");
+    let currentExistingColors = [mainColor];
+    if (!isTargetFirst) {
+      currentExistingColors.push(jumpSelect1.value);
+    }
+
+    // 篩選出符合美感條件的候選顏色池
+    let validPool = ALL_COLORS.filter(color => {
+      // 確保跟現有的顏色都不衝突且不相近
+      return currentExistingColors.every(existing => isValidColorPair(existing, color));
+    });
+
+    // 如果篩選完剛好空了（機率極低），退回一般不重複池
+    if (validPool.length === 0) {
+      validPool = ALL_COLORS.filter(c => !currentExistingColors.includes(c));
+    }
+
+    // 冷暖色金銀配權重調整 (95% 機率提升)
+    const warmColors = ["紅色", "粉色", "橘色", "黃色", "紅咖色", "金色/香檳色"];
+    const hasWarm = currentExistingColors.some(c => warmColors.includes(c));
+    
+    if (hasWarm && validPool.includes("金色/香檳色") && Math.random() < 0.95) {
+      validPool.push("金色/香檳色", "金色/香檳色", "金色/香檳色"); // 增加權重
+    } else if (!hasWarm && validPool.includes("銀色/白色") && Math.random() < 0.95) {
+      validPool.push("銀色/白色", "銀色/白色", "銀色/白色");
+    }
+
+    const pickedColor = validPool[Math.floor(Math.random() * validPool.length)];
 
     let targetSelect = null;
-    if (jumpSelect1.value === "") {
-      // 如果第一格還沒選，先幫第一格選
-      jumpSelect1.value = randomPicked;
+    if (isTargetFirst) {
+      jumpSelect1.value = pickedColor;
+      onJumpColor1Change(); // 自動解鎖第二格
       targetSelect = jumpSelect1;
-      container2.classList.remove('hidden'); // 顯示第二格
     } else {
-      // 如果第一格已經選好不動它，改為幫第二格（或更動第二格）
-      jumpSelect2.value = randomPicked;
+      jumpSelect2.value = pickedColor;
       targetSelect = jumpSelect2;
     }
 
@@ -987,8 +1066,8 @@
     }
 
     if (isMainColorSelected) total += 700;
-    if (isJump1Selected) total += 40; // 第一格跳色 +40
-    if (isJump2Selected) total += 20; // 第二格跳色 +20
+    if (isJump1Selected) total += 40; 
+    if (isJump2Selected) total += 20; 
 
     if (isStyleSelected) {
       const count = selectedStyles.length;
@@ -1055,7 +1134,6 @@
       if (j2) details += `• 跳色第二格：${j2}\n`;
     }
 
-    // 後續 LINE 導向字串可依您原本的邏輯完整串接
     alert("測試：表單驗證通過！金額計算：" + document.getElementById('totalPrice').innerText);
   }
 
