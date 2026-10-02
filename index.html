@@ -467,7 +467,7 @@
   <div class="section">
     <div class="section-title">
       Step 2. 單色款式
-      <button class="draw-btn" onclick="drawMainColor()">🎲 幫我抽色系</button>
+      <button class="draw-btn" onclick="drawMainColor()">🫯 幫我抽色系</button>
     </div>
     <select id="mainColor" onchange="onMainColorChange()">
       <option value="">-- 請選擇色系 (無則留空) --</option>
@@ -494,7 +494,7 @@
       Step 3. 加購項目
     </div>
 
-    <!-- 直覺開關 1：跳色 (恢復單一選單，+50元) -->
+    <!-- 直覺開關 1：跳色 -->
     <div id="boxJumpColor" class="addon-item-box" onclick="toggleOption('jumpColorSection', event)">
       <div class="addon-header">
         <span>🎨 跳色</span>
@@ -503,7 +503,7 @@
       <div id="jumpColorSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
           <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">選擇色系：</div>
-          <button class="draw-btn" onclick="drawSmartJumpColor(event)">🎲 隨機配色</button>
+          <button class="draw-btn" onclick="drawSmartJumpColor(event)">🫯 隨機配色</button>
         </div>
         
         <div>
@@ -537,7 +537,7 @@
       <div id="styleSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">最多選4個</div>
-          <button class="draw-btn" onclick="drawStyle(event)">🎲 幫我抽款式</button>
+          <button class="draw-btn" onclick="drawStyle(event)">🫯 幫我抽款式</button>
         </div>
         
         <div class="checkbox-grid">
@@ -786,22 +786,18 @@
     onSelectionChange();
   }
 
-  // 嚴格色彩互斥與美感防呆檢驗
   function isValidColorPair(c1, c2) {
     if (!c1 || !c2) return true;
     if (c1 === c2) return false;
 
-    // 1. 相近色不要配：藍色與紫色互斥
     if ((c1 === "藍色" && c2 === "紫色") || (c1 === "紫色" && c2 === "藍色")) {
       return false;
     }
 
-    // 2. 綠色不可以配紅色、紫色、粉色 (任何欄位都不可以出現任一個)
     const greenConflict = ["紅色", "紫色", "粉色"];
     if (c1 === "綠色" && greenConflict.includes(c2)) return false;
     if (c2 === "綠色" && greenConflict.includes(c1)) return false;
 
-    // 3. 其他相近色互斥
     const similarGroups = [
       ["紅色", "粉色"],
       ["橘色", "黃色"],
@@ -817,7 +813,6 @@
     return true;
   }
 
-  // 智慧隨機配色主邏輯
   function drawSmartJumpColor(event) {
     if (event) event.stopPropagation();
 
@@ -825,7 +820,6 @@
     const jumpSelect = document.getElementById('jumpColor');
     let currentExistingColors = [mainColor];
 
-    // 篩選符合條件的候選顏色池
     let validPool = ALL_COLORS.filter(color => {
       return currentExistingColors.every(existing => isValidColorPair(existing, color));
     });
@@ -834,9 +828,8 @@
       validPool = ALL_COLORS.filter(c => !currentExistingColors.includes(c));
     }
 
-    // 當跳色出現第二個顏色時（等於有單色也有跳色，總共三個顏色配的時候），白色機率增加
     if (mainColor && validPool.includes("銀色/白色")) {
-      validPool.push("銀色/白色", "銀色/白色", "銀色/白色", "銀色/白色"); // 大幅增加白色/銀色權重
+      validPool.push("銀色/白色", "銀色/白色", "銀色/白色", "銀色/白色");
     }
 
     const pickedColor = validPool[Math.floor(Math.random() * validPool.length)];
