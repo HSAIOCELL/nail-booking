@@ -311,19 +311,23 @@
       margin: 0;
     }
 
+    /* 調整「幫我抽色系 / 隨機配色 / 幫我抽款式」按鈕：稍微加大、保持和諧度 */
     .draw-btn {
       background-color: #e4dcd3;
       color: #4a423d;
       border: 1px solid #c9bebc;
-      padding: 3px 10px;
-      border-radius: 12.5px;
-      font-size: 12.5px;
+      padding: 5px 14px;
+      border-radius: 16px;
+      font-size: 13.5px;
+      font-weight: bold;
       cursor: pointer;
-      transition: 0.2s;
+      transition: all 0.2s;
     }
     .draw-btn:hover {
       background-color: #d7ccc3;
+      transform: translateY(-1px);
     }
+
     .hidden {
       display: none !important;
     }
@@ -578,20 +582,21 @@
         <div id="fullStyleGroup" class="hidden">
           <div style="font-size: 12px; color: transparent; margin-bottom: 4px; user-select: none; pointer-events: none;">(佔位)</div>
           <div class="checkbox-grid" style="margin-bottom: 12px;">
-            <label class="chip-item"><input type="checkbox" name="fullStyle" id="fullCatEyeCb" value="十指貓眼" onchange="checkFullLimit(this)">貓眼</label>
-            <label class="chip-item"><input type="checkbox" name="fullStyle" value="十指立體不規則造型" onchange="checkFullLimit(this)">立體不規則造型</label>
+            <!-- 數值維持原樣，但 value 拿掉十指，避免 Line 訊息重複 -->
+            <label class="chip-item"><input type="checkbox" name="fullStyle" id="fullCatEyeCb" value="貓眼" onchange="checkFullLimit(this)">貓眼</label>
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="立體不規則造型" onchange="checkFullLimit(this)">立體不規則造型</label>
 
-            <label class="chip-item"><input type="checkbox" name="fullStyle" value="十指法式" onchange="checkFullLimit(this)">法式</label>
-            <label class="chip-item"><input type="checkbox" name="fullStyle" value="十指鏡面銀" onchange="checkFullLimit(this)">鏡面銀</label>
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="法式" onchange="checkFullLimit(this)">法式</label>
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="鏡面銀" onchange="checkFullLimit(this)">鏡面銀</label>
 
-            <label class="chip-item"><input type="checkbox" name="fullStyle" value="十指漸層" onchange="checkFullLimit(this)">漸層</label>
-            <label class="chip-item"><input type="checkbox" name="fullStyle" value="十指小飾品/貼紙" onchange="checkFullLimit(this)">小飾品/貼紙</label>
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="漸層" onchange="checkFullLimit(this)">漸層</label>
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="小飾品/貼紙" onchange="checkFullLimit(this)">小飾品/貼紙</label>
 
-            <label class="chip-item"><input type="checkbox" name="fullStyle" value="十指格紋" onchange="checkFullLimit(this)">格紋</label>
-            <label class="chip-item"><input type="checkbox" name="fullStyle" value="十指暈染" onchange="checkFullLimit(this)">暈染</label>
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="格紋" onchange="checkFullLimit(this)">格紋</label>
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="暈染" onchange="checkFullLimit(this)">暈染</label>
 
-            <label class="chip-item"><input type="checkbox" name="fullStyle" value="十指海莉款" onchange="checkFullLimit(this)">海莉款</label>
-            <label class="chip-item"><input type="checkbox" name="fullStyle" id="fullCustomStyleCb" value="十指指定圖案" onchange="checkFullLimit(this)">指定圖案</label>
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="海莉款" onchange="checkFullLimit(this)">海莉款</label>
+            <label class="chip-item"><input type="checkbox" name="fullStyle" id="fullCustomStyleCb" value="指定圖案" onchange="checkFullLimit(this)">指定圖案</label>
           </div>
         </div>
 
@@ -848,10 +853,8 @@
     
     const customCb = document.getElementById('customStyleCb');
     const fullCustomCb = document.getElementById('fullCustomStyleCb');
-    if ((type === 'partial' && (!customCb || !customCb.checked)) || (type === 'full' && (!fullCustomCb || !fullCustomCb.checked))) {
-      if (!((customCb && customCb.checked) || (fullCustomCb && fullCustomCb.checked))) {
-        document.getElementById('customPattern').value = "";
-      }
+    if (!((customCb && customCb.checked) || (fullCustomCb && fullCustomCb.checked))) {
+      document.getElementById('customPattern').value = "";
     }
     onSelectionChange();
   }
@@ -968,18 +971,17 @@
       const customCb = document.getElementById('customStyleCb');
       if (customCb && customCb.checked) {
         const subOptions = ["隨機花花", "隨機蝴蝶結", "隨機星星"];
-        const randomSub = subOptions[Math.floor(Math.random() * subOptions.length)];
-        document.getElementById('customPattern').value = randomSub;
+        document.getElementById('customPattern').value = subOptions[Math.floor(Math.random() * subOptions.length)];
       }
     } else {
       document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
       document.getElementById('customPattern').value = "";
 
       const fullPool = [
-        { name: "十指貓眼", weight: 65 }, { name: "十指暈染", weight: 25 }, { name: "十指小飾品/貼紙", weight: 2 },
-        { name: "十指格紋", weight: 1 }, { name: "十指法式", weight: 1 }, { name: "十指立體不規則造型", weight: 1 },
-        { name: "十指漸層", weight: 0.5 }, { name: "十指海莉款", weight: 0.5 }, { name: "十指鏡面銀", weight: 0.5 },
-        { name: "十指指定圖案", weight: 14 }
+        { name: "貓眼", weight: 65 }, { name: "暈染", weight: 25 }, { name: "小飾品/貼紙", weight: 2 },
+        { name: "格紋", weight: 1 }, { name: "法式", weight: 1 }, { name: "立體不規則造型", weight: 1 },
+        { name: "漸層", weight: 0.5 }, { name: "海莉款", weight: 0.5 }, { name: "鏡面銀", weight: 0.5 },
+        { name: "指定圖案", weight: 14 }
       ];
 
       const countToDraw = Math.floor(Math.random() * 3) + 1;
@@ -996,16 +998,14 @@
         }
       }
 
-      const fullCbs = document.querySelectorAll('input[name="fullStyle"]');
-      fullCbs.forEach(cb => {
+      document.querySelectorAll('input[name="fullStyle"]').forEach(cb => {
         if (chosenList.includes(cb.value)) { cb.checked = true; checkFullLimit(cb); }
       });
 
       const fullCustomCb = document.getElementById('fullCustomStyleCb');
       if (fullCustomCb && fullCustomCb.checked) {
         const subOptions = ["隨機花花", "隨機蝴蝶結", "隨機星星"];
-        const randomSub = subOptions[Math.floor(Math.random() * subOptions.length)];
-        document.getElementById('customPattern').value = randomSub;
+        document.getElementById('customPattern').value = subOptions[Math.floor(Math.random() * subOptions.length)];
       }
     }
 
@@ -1026,8 +1026,7 @@
       checkbox.checked = false;
     }
     const customCb = document.getElementById('customStyleCb');
-    const fullCustomCb = document.getElementById('fullCustomStyleCb');
-    const isCustomActive = (customCb && customCb.checked) || (fullCustomCb && fullCustomCb.checked);
+    const isCustomActive = (customCb && customCb.checked);
     document.getElementById('customInputDiv').classList.toggle('hidden', !isCustomActive);
     if (!isCustomActive) {
       document.getElementById('customPattern').value = "";
@@ -1041,9 +1040,8 @@
       alert("十指造型最多只能勾選 4 項喔！");
       checkbox.checked = false;
     }
-    const customCb = document.getElementById('customStyleCb');
     const fullCustomCb = document.getElementById('fullCustomStyleCb');
-    const isCustomActive = (customCb && customCb.checked) || (fullCustomCb && fullCustomCb.checked);
+    const isCustomActive = (fullCustomCb && fullCustomCb.checked);
     document.getElementById('customInputDiv').classList.toggle('hidden', !isCustomActive);
     if (!isCustomActive) {
       document.getElementById('customPattern').value = "";
@@ -1111,22 +1109,14 @@
 
     if (showStyle) {
       if (currentType === 'partial') {
-        const count = selectedStyles.length;
-        total += count * 50;
-
+        total += selectedStyles.length * 50;
         const customCb = document.getElementById('customStyleCb');
-        if (customCb && customCb.checked) {
-          total += 30;
-        }
+        if (customCb && customCb.checked) total += 30;
       } else {
         total += 50;
-        const count = selectedFullStyles.length;
-        total += count * 50;
-
+        total += selectedFullStyles.length * 50;
         const fullCustomCb = document.getElementById('fullCustomStyleCb');
-        if (fullCustomCb && fullCustomCb.checked) {
-          total += 30;
-        }
+        if (fullCustomCb && fullCustomCb.checked) total += 30;
       }
     }
 
@@ -1193,26 +1183,23 @@
       if (jColor) details += `• 跳色：${jColor}\n`;
     }
 
+    // 格式化調整：乾淨清晰的閱讀排版
     if (showStyle) {
       const currentType = document.querySelector('input[name="styleType"]:checked').value;
+      const typeName = (currentType === 'full') ? '十指造型' : '局部造型';
+      
       const styles = Array.from(document.querySelectorAll('input[name="style"]:checked')).map(cb => cb.value);
       const fullStyles = Array.from(document.querySelectorAll('input[name="fullStyle"]:checked')).map(cb => cb.value);
-      
-      let allChosenStyles = [];
-      if (currentType === 'full') {
-        allChosenStyles.push('十指造型');
-        fullStyles.forEach(s => allChosenStyles.push(s));
-      } else {
-        allChosenStyles = [...styles];
-      }
+      const chosenStyles = (currentType === 'full') ? fullStyles : styles;
 
-      if (allChosenStyles.length > 0) {
-        details += `• 款式造型：${allChosenStyles.join(', ')}\n`;
+      details += `• 款式造型：${typeName}\n`;
+      if (chosenStyles.length > 0) {
+        details += `  - 項目：${chosenStyles.join(', ')}\n`;
       }
 
       const customCb = document.getElementById('customStyleCb');
       const fullCustomCb = document.getElementById('fullCustomStyleCb');
-      if ((customCb && customCb.checked) || (fullCustomCb && fullCustomCb.checked)) {
+      if ((currentType === 'partial' && customCb && customCb.checked) || (currentType === 'full' && fullCustomCb && fullCustomCb.checked)) {
         details += `  - 指定圖案細節：${document.getElementById('customPattern').value}\n`;
       }
     }
@@ -1223,7 +1210,6 @@
     details += `預計總金額：NT$ ${document.getElementById('totalPrice').innerText} 元`;
 
     const encodedMessage = encodeURIComponent(details);
-    // 修正：改用 oaMessage 格式來直接帶入文字到 LINE 聊天對話框
     const lineUrl = `https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodedMessage}`;
     window.location.href = lineUrl;
   }
