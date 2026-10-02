@@ -1109,26 +1109,26 @@
     if (isJumpSelected) total += 50; 
 
     if (isStyleSelected) {
-      const count = selectedStyles.length;
-      total += count * 50;
+      const currentType = document.querySelector('input[name="styleType"]:checked').value;
 
-      const customCb = document.getElementById('customStyleCb');
-      if (customCb && customCb.checked) {
-        total += 30;
-      }
+      if (currentType === 'partial') {
+        const count = selectedStyles.length;
+        total += count * 50;
 
-      selectedFullStyles.forEach(item => {
-        const val = item.value;
-        if (val === "十指貓眼" || val === "十指鏡面銀") {
-          total += 50;
-        } else {
-          total += 100;
+        const customCb = document.getElementById('customStyleCb');
+        if (customCb && customCb.checked) {
+          total += 30;
         }
-      });
+      } else {
+        // 十指造型：選擇十指造型本身 +50元，且底下每個選項 +50元
+        total += 50;
+        const count = selectedFullStyles.length;
+        total += count * 50;
 
-      const fullCustomCb = document.getElementById('fullCustomStyleCb');
-      if (fullCustomCb && fullCustomCb.checked) {
-        total += 30;
+        const fullCustomCb = document.getElementById('fullCustomStyleCb');
+        if (fullCustomCb && fullCustomCb.checked) {
+          total += 30;
+        }
       }
     }
 
