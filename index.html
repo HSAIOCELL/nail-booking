@@ -574,8 +574,9 @@
           </div>
         </div>
 
-        <!-- 十指造型子選項 (最多選4個) -->
+        <!-- 十指造型子選項 (最多選4個) + 隱形佔位區保持高度一致 -->
         <div id="fullStyleGroup" class="hidden">
+          <div style="font-size: 12px; color: transparent; margin-bottom: 4px; user-select: none; pointer-events: none;">(佔位)</div>
           <div class="checkbox-grid" style="margin-bottom: 12px;">
             <label class="chip-item"><input type="checkbox" name="fullStyle" id="fullCatEyeCb" value="十指貓眼" onchange="checkFullLimit(this)">貓眼</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="十指立體不規則造型" onchange="checkFullLimit(this)">立體不規則造型</label>
@@ -845,7 +846,6 @@
       document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
     }
     
-    // 切換類別時若沒有勾選指定圖案，清空自訂輸入
     const customCb = document.getElementById('customStyleCb');
     const fullCustomCb = document.getElementById('fullCustomStyleCb');
     if ((type === 'partial' && (!customCb || !customCb.checked)) || (type === 'full' && (!fullCustomCb || !fullCustomCb.checked))) {
