@@ -311,7 +311,6 @@
       margin: 0;
     }
 
-    /* 調整「幫我抽色系 / 隨機配色 / 幫我抽款式」按鈕：稍微加大、保持和諧度 */
     .draw-btn {
       background-color: #e4dcd3;
       color: #4a423d;
@@ -545,20 +544,20 @@
           <button class="draw-btn" onclick="drawStyle(event)">🫯 幫我抽款式</button>
         </div>
 
-        <!-- 局部造型與十指造型按鈕區塊 -->
+        <!-- 局部造型與十指造型按鈕區塊 (預設不點選，強制客人選擇) -->
         <div class="removal-card-group" style="margin-top: 0; margin-bottom: 12px; gap: 8px;">
-          <div id="typePartialCard" class="removal-card active" onclick="setStyleType('partial')" style="padding: 10px; font-size: 15px;">
+          <div id="typePartialCard" class="removal-card" onclick="setStyleType('partial')" style="padding: 10px; font-size: 15px;">
             <div class="removal-card-title" style="font-size: 15px;">局部造型</div>
           </div>
           <div id="typeFullCard" class="removal-card" onclick="setStyleType('full')" style="padding: 10px; font-size: 15px;">
             <div class="removal-card-title" style="font-size: 15px;">十指造型</div>
           </div>
         </div>
-        <input type="radio" name="styleType" value="partial" id="radioPartial" checked style="display:none;">
+        <input type="radio" name="styleType" value="partial" id="radioPartial" style="display:none;">
         <input type="radio" name="styleType" value="full" id="radioFull" style="display:none;">
         
-        <!-- 局部造型子選項 (最多選4個) -->
-        <div id="partialStyleGroup">
+        <!-- 局部造型子選項 (預設隱藏，必須先點選上方類型才展開) -->
+        <div id="partialStyleGroup" class="hidden">
           <div style="font-size: 12px; color: #8c7c75; margin-bottom: 4px; font-weight: 500;">(5指造型 + 5指單色跳色)</div>
           <div class="checkbox-grid" style="margin-bottom: 12px;">
             <label class="chip-item"><input type="checkbox" name="style" id="catEyeCb" value="貓眼" onchange="checkLimit(this)">貓眼</label>
@@ -578,11 +577,10 @@
           </div>
         </div>
 
-        <!-- 十指造型子選項 (最多選4個) -->
+        <!-- 十指造型子選項 (預設隱藏) -->
         <div id="fullStyleGroup" class="hidden">
           <div style="font-size: 12px; color: transparent; margin-bottom: 4px; user-select: none; pointer-events: none;">(佔位)</div>
           <div class="checkbox-grid" style="margin-bottom: 12px;">
-            <!-- 數值維持原樣，但 value 拿掉十指，避免 Line 訊息重複 -->
             <label class="chip-item"><input type="checkbox" name="fullStyle" id="fullCatEyeCb" value="貓眼" onchange="checkFullLimit(this)">貓眼</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="立體不規則造型" onchange="checkFullLimit(this)">立體不規則造型</label>
 
@@ -782,6 +780,14 @@
       document.getElementById('badgeStyle').innerText = '50元起 ➕';
       document.getElementById('jumpColor').value = "";
       
+      // 重置樣式選項
+      document.getElementById('radioPartial').checked = false;
+      document.getElementById('radioFull').checked = false;
+      document.getElementById('typePartialCard').classList.remove('active');
+      document.getElementById('typeFullCard').classList.remove('active');
+      document.getElementById('partialStyleGroup').classList.add('hidden');
+      document.getElementById('fullStyleGroup').classList.add('hidden');
+
       document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
       document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
       document.getElementById('customPattern').value = "";
@@ -825,6 +831,19 @@
       el.classList.toggle('hidden', !showStyle); 
       document.getElementById('boxStyle').classList.toggle('active', showStyle);
       document.getElementById('badgeStyle').innerText = showStyle ? '已加購 ✔' : '50元起 ➕';
+
+      // 每次「打開」款式造型時，強制清空選擇，逼客人一定要手動點選局部或十指
+      if (showStyle) {
+        document.getElementById('radioPartial').checked = false;
+        document.getElementById('radioFull').checked = false;
+        document.getElementById('typePartialCard').classList.remove('active');
+        document.getElementById('typeFullCard').classList.remove('active');
+        document.getElementById('partialStyleGroup').classList.add('hidden');
+        document.getElementById('fullStyleGroup').classList.add('hidden');
+        document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
+        document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
+        document.getElementById('customPattern').value = "";
+      }
     }
     onSelectionChange();
   }
@@ -937,6 +956,11 @@
       document.getElementById('badgeStyle').innerText = '已加購 ✔';
     }
     
+    // 如果抽款式時還沒選擇局部或十指，預設幫客人隨機抽一種（或預設選局部）
+    let currentTypeInput = document.querySelector('input[name="styleType"]:checked');
+    if (!currentTypeInput) {
+      setStyleType('partial');
+    }
     const currentType = document.querySelector('input[name="styleType"]:checked').value;
 
     if (currentType === 'partial') {
@@ -1095,7 +1119,8 @@
 
     const selectedStyles = showStyle ? document.querySelectorAll('input[name="style"]:checked') : [];
     const selectedFullStyles = showStyle ? document.querySelectorAll('input[name="fullStyle"]:checked') : [];
-    const currentType = document.querySelector('input[name="styleType"]:checked').value;
+    const currentTypeInput = document.querySelector('input[name="styleType"]:checked');
+    const currentType = currentTypeInput ? currentTypeInput.value : '';
     
     const isStyleSelected = showStyle;
     const hasNailService = isMainColorSelected || isJumpSelected || isStyleSelected;
@@ -1107,7 +1132,7 @@
     if (isMainColorSelected) total += 700;
     if (isJumpSelected) total += 50; 
 
-    if (showStyle) {
+    if (showStyle && currentType) {
       if (currentType === 'partial') {
         total += selectedStyles.length * 50;
         const customCb = document.getElementById('customStyleCb');
@@ -1136,9 +1161,15 @@
     }
 
     if (showStyle) {
+      const currentTypeInput = document.querySelector('input[name="styleType"]:checked');
+      if (!currentTypeInput) {
+        alert("✨ 您開啟了「款式造型」，請先選擇是要【局部造型】還是【十指造型】！");
+        return;
+      }
+
+      const currentType = currentTypeInput.value;
       const selectedStyles = document.querySelectorAll('input[name="style"]:checked');
       const selectedFullStyles = document.querySelectorAll('input[name="fullStyle"]:checked');
-      const currentType = document.querySelector('input[name="styleType"]:checked').value;
 
       if (currentType === 'partial' && selectedStyles.length === 0) {
         alert("✨ 請勾選局部造型款式，或關閉該項目！");
@@ -1183,24 +1214,26 @@
       if (jColor) details += `• 跳色：${jColor}\n`;
     }
 
-    // 格式化調整：乾淨清晰的閱讀排版
     if (showStyle) {
-      const currentType = document.querySelector('input[name="styleType"]:checked').value;
-      const typeName = (currentType === 'full') ? '十指造型' : '局部造型';
-      
-      const styles = Array.from(document.querySelectorAll('input[name="style"]:checked')).map(cb => cb.value);
-      const fullStyles = Array.from(document.querySelectorAll('input[name="fullStyle"]:checked')).map(cb => cb.value);
-      const chosenStyles = (currentType === 'full') ? fullStyles : styles;
+      const currentTypeInput = document.querySelector('input[name="styleType"]:checked');
+      if (currentTypeInput) {
+        const currentType = currentTypeInput.value;
+        const typeName = (currentType === 'full') ? '十指造型' : '局部造型';
+        
+        const styles = Array.from(document.querySelectorAll('input[name="style"]:checked')).map(cb => cb.value);
+        const fullStyles = Array.from(document.querySelectorAll('input[name="fullStyle"]:checked')).map(cb => cb.value);
+        const chosenStyles = (currentType === 'full') ? fullStyles : styles;
 
-      details += `• 款式造型：${typeName}\n`;
-      if (chosenStyles.length > 0) {
-        details += `  - 項目：${chosenStyles.join(', ')}\n`;
-      }
+        details += `• 款式造型：${typeName}\n`;
+        if (chosenStyles.length > 0) {
+          details += `  - 項目：${chosenStyles.join(', ')}\n`;
+        }
 
-      const customCb = document.getElementById('customStyleCb');
-      const fullCustomCb = document.getElementById('fullCustomStyleCb');
-      if ((currentType === 'partial' && customCb && customCb.checked) || (currentType === 'full' && fullCustomCb && fullCustomCb.checked)) {
-        details += `  - 指定圖案細節：${document.getElementById('customPattern').value}\n`;
+        const customCb = document.getElementById('customStyleCb');
+        const fullCustomCb = document.getElementById('fullCustomStyleCb');
+        if ((currentType === 'partial' && customCb && customCb.checked) || (currentType === 'full' && fullCustomCb && fullCustomCb.checked)) {
+          details += `  - 指定圖案細節：${document.getElementById('customPattern').value}\n`;
+        }
       }
     }
 
