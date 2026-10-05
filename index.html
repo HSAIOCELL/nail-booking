@@ -1,242 +1,647 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>線上預約系統</title>
-  <!-- 載入 LINE LIFF SDK -->
-  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <style>
-    :root {
-      --primary-color: #d4a373;
-      --bg-color: #faedcd;
-      --card-bg: #ffffff;
-      --text-color: #333333;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background-color: #f8f9fa;
-      color: var(--text-color);
-      margin: 0;
-      padding: 16px;
-      display: flex;
-      justify-content: center;
-    }
-    .booking-card {
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 24px;
-      width: 100%;
-      max-width: 480px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-    h2 {
-      text-align: center;
-      color: #b5838d;
-      margin-top: 0;
-      margin-bottom: 20px;
-    }
-    .user-profile {
-      display: flex;
-      align-items: center;
-      background-color: #f0efeb;
-      padding: 10px 14px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-    }
-    .user-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      margin-right: 12px;
-    }
-    .form-group {
-      margin-bottom: 16px;
-    }
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 6px;
-      font-size: 14px;
-    }
-    input, select, textarea {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      box-sizing: border-box;
-      font-size: 15px;
-    }
-    button {
-      width: 100%;
-      padding: 12px;
-      background-color: #b5838d;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: background 0.2s;
-    }
-    button:disabled {
-      background-color: #cccccc;
-    }
-    #status-msg {
-      margin-top: 15px;
-      text-align: center;
-      font-weight: bold;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美甲服務預約選單</title>
+<style>
+  :root {
+    --primary-color: #d4a373;
+    --primary-hover: #bc8a5f;
+    --bg-color: #fefae0;
+    --card-bg: #ffffff;
+    --text-color: #4a4e69;
+    --accent-color: #e9edc9;
+    --border-color: #e0e0e0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f7f5f0;
+    color: var(--text-color);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 500px;
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    padding: 24px;
+    box-sizing: border-box;
+  }
+
+  h2 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+
+  .section {
+    margin-bottom: 20px;
+  }
+
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+  }
+
+  .sub-label {
+    font-size: 0.85rem;
+    color: #888;
+    font-weight: normal;
+    margin-left: 4px;
+  }
+
+  select, input[type="text"], input[type="date"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  select:focus, input[type="text"]:focus, input[type="date"]:focus {
+    border-color: var(--primary-color);
+  }
+
+  .addon-boxes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .addon-box {
+    border: 2px dashed var(--border-color);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: #fafafa;
+    position: relative;
+  }
+
+  .addon-box:hover {
+    border-color: var(--primary-color);
+  }
+
+  .addon-box.active {
+    border-style: solid;
+    border-color: var(--primary-color);
+    background-color: #fdf8f3;
+  }
+
+  .addon-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .addon-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    background-color: #eee;
+    border-radius: 4px;
+    margin-top: 6px;
+  }
+
+  .addon-box.active .addon-badge {
+    background-color: var(--primary-color);
+    color: #fff;
+  }
+
+  .draw-btn {
+    margin-top: 8px;
+    background-color: #f3d5b5;
+    color: #6b4d2f;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .draw-btn:hover {
+    background-color: #e7bc91;
+  }
+
+  .radio-group, .checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .radio-btn, .checkbox-btn {
+    position: relative;
+  }
+
+  .radio-btn input, .checkbox-btn input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .radio-btn span, .checkbox-btn span {
+    display: inline-block;
+    padding: 6px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    background-color: #fff;
+    transition: all 0.2s;
+  }
+
+  .radio-btn input:checked + span, .checkbox-btn input:checked + span {
+    background-color: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+  }
+
+  .time-selects {
+    display: flex;
+    gap: 8px;
+  }
+
+  .time-selects select {
+    flex: 1;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  .price-bar {
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    padding: 12px 0;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+  }
+
+  .total-price {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+  }
+
+  .submit-btn {
+    background-color: #06c755; /* LINE Green */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .submit-btn:hover {
+    background-color: #05b34c;
+  }
+</style>
 </head>
 <body>
 
-<div class="booking-card">
-  <h2>美甲線上預約系統</h2>
+<div class="container">
+  <h2>💅 美甲服務預約單</h2>
 
-  <!-- 用戶資訊區（自動抓取顧客的 LINE 帳號） -->
-  <div class="user-profile" id="profile-box" style="display: none;">
-    <img id="user-picture" class="user-avatar" src="" alt="頭像">
-    <div>
-      <span style="font-size: 12px; color: #666;">預約人姓名</span>
-      <div id="user-name" style="font-weight: bold;">載入中...</div>
+  <!-- 1. 預約時間 -->
+  <div class="section">
+    <label>📅 預約日期與時間</label>
+    <div style="margin-bottom: 8px;">
+      <input type="date" id="bookingDate">
+    </div>
+    <div class="time-selects">
+      <select id="bookingHour">
+        <option value="10">10 時</option>
+        <option value="11">11 時</option>
+        <option value="12">12 時</option>
+        <option value="13">13 時</option>
+        <option value="14">14 時</option>
+        <option value="15">15 時</option>
+        <option value="16">16 時</option>
+        <option value="17">17 時</option>
+        <option value="18">18 時</option>
+        <option value="19">19 時</option>
+      </select>
+      <select id="bookingMinute">
+        <option value="00">00 分</option>
+        <option value="30">30 分</option>
+      </select>
     </div>
   </div>
 
-  <form id="booking-form">
-    <div class="form-group">
-      <label for="service">美甲服務項目</label>
-      <select id="service" required>
-        <option value="">請選擇預約項目</option>
-        <option value="單色手部凝膠">單色手部凝膠</option>
-        <option value="造型手部凝膠">造型手部凝膠</option>
-        <option value="足部深層保養">足部深層保養</option>
-        <option value="卸甲服務">卸甲服務</option>
+  <!-- 2. 主要單色 -->
+  <div class="section">
+    <label>🎨 主要單色色系 <span class="sub-label">(包含基礎保養 NT$ 500)</span></label>
+    <select id="mainColor" onchange="onSelectionChange()">
+      <option value="">-- 請選擇色系 --</option>
+      <option value="裸粉/裸豆沙">裸粉 / 裸豆沙</option>
+      <option value="大地/奶茶/棕色">大地 / 奶茶 / 棕色</option>
+      <option value="經典紅/葡萄酒紅">經典紅 / 葡萄酒紅</option>
+      <option value="燕麥/奶白色">燕麥 / 奶白色</option>
+      <option value="莫蘭迪藍/灰藍">莫蘭迪藍 / 灰藍</option>
+      <option value="鼠尾草綠/橄欖綠">鼠尾草綠 / 橄欖綠</option>
+      <option value="顯白極致黑/深灰">顯白極致黑 / 深灰</option>
+    </select>
+  </div>
+
+  <!-- 3. 加購服務 (方塊) -->
+  <div class="section">
+    <label>✨ 加購項目 <span class="sub-label">(點擊開啟細節)</span></label>
+    <div class="addon-boxes">
+      <div class="addon-box" id="boxJump" onclick="toggleJumpColor()">
+        <div class="addon-title">加購跳色</div>
+        <div style="font-size: 0.8rem; color: #666; margin-top: 4px;">+ NT$ 50</div>
+        <div class="addon-badge" id="badgeJump">未加購</div>
+      </div>
+      <div class="addon-box" id="boxStyle" onclick="toggleStyle()">
+        <div class="addon-title">款式造型</div>
+        <div style="font-size: 0.8rem; color: #666; margin-top: 4px;">多種精緻造型</div>
+        <div class="addon-badge" id="badgeStyle">未加購</div>
+        <div>
+          <button type="button" class="draw-btn" onclick="drawStyle(event)">🎲 隨機抽造型</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 加購跳色細節 -->
+  <div class="section hidden" id="jumpColorSection">
+    <label>🎨 跳色色系指定</label>
+    <input type="text" id="jumpColor" placeholder="例如：奶茶色跳白色（若未填寫則現場挑選）">
+  </div>
+
+  <!-- 5. 款式造型細節 -->
+  <div class="section hidden" id="styleSection">
+    <label>💅 款式範圍選擇</label>
+    <div class="radio-group" style="margin-bottom: 12px;">
+      <label class="radio-btn">
+        <input type="radio" name="styleType" value="partial" id="radioPartial" checked onchange="switchStyleType()">
+        <span>局部造型 (+NT$ 100/項，最多2項)</span>
+      </label>
+      <label class="radio-btn">
+        <input type="radio" name="styleType" value="full" id="radioFull" onchange="switchStyleType()">
+        <span>十指造型 (+NT$ 200/項，最多2項)</span>
+      </label>
+    </div>
+
+    <!-- 局部造型選項 -->
+    <div id="partialStyleOptions">
+      <label>✨ 選擇局部造型 (最多選擇 2 項)</label>
+      <div class="checkbox-group">
+        <label class="checkbox-btn">
+          <input type="checkbox" name="style" value="貓眼" id="catEyeCb" onchange="checkLimit(this)">
+          <span>貓眼</span>
+        </label>
+        <label class="checkbox-btn">
+          <input type="checkbox" name="style" value="漸層" onchange="checkLimit(this)">
+          <span>漸層</span>
+        </label>
+        <label class="checkbox-btn">
+          <input type="checkbox" name="style" value="法式" onchange="checkLimit(this)">
+          <span>法式</span>
+        </label>
+        <label class="checkbox-btn">
+          <input type="checkbox" name="style" value="鏡面粉" onchange="checkLimit(this)">
+          <span>鏡面粉</span>
+        </label>
+        <label class="checkbox-btn">
+          <input type="checkbox" name="style" value="指定圖案/繪圖" id="customStyleCb" onchange="checkLimit(this)">
+          <span>指定圖案/繪圖</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- 十指造型選項 -->
+    <div id="fullStyleOptions" class="hidden">
+      <label>✨ 選擇十指造型 (最多選擇 2 項)</label>
+      <div class="checkbox-group">
+        <label class="checkbox-btn">
+          <input type="checkbox" name="fullStyle" value="十指貓眼" id="fullCatEyeCb" onchange="checkFullLimit(this)">
+          <span>十指貓眼</span>
+        </label>
+        <label class="checkbox-btn">
+          <input type="checkbox" name="fullStyle" value="十指漸層" onchange="checkFullLimit(this)">
+          <span>十指漸層</span>
+        </label>
+        <label class="checkbox-btn">
+          <input type="checkbox" name="fullStyle" value="十指法式" onchange="checkFullLimit(this)">
+          <span>十指法式</span>
+        </label>
+        <label class="checkbox-btn">
+          <input type="checkbox" name="fullStyle" value="十指鏡面" onchange="checkFullLimit(this)">
+          <span>十指鏡面</span>
+        </label>
+        <label class="checkbox-btn">
+          <input type="checkbox" name="fullStyle" value="十指指定彩繪" id="fullCustomStyleCb" onchange="checkFullLimit(this)">
+          <span>十指指定彩繪</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- 貓眼細節選擇 -->
+    <div id="catEyeDetailDiv" class="hidden" style="margin-top: 12px;">
+      <label>👁️ 貓眼光澤類型</label>
+      <select id="catEyeType">
+        <option value="水晶貓眼">水晶貓眼 (清透高光)</option>
+        <option value="寬貓眼">寬貓眼 (柔和感)</option>
+        <option value="斜線貓眼/玻璃珠">斜線貓眼 / 玻璃珠</option>
+        <option value="由美甲師推薦">由美甲師推薦</option>
       </select>
     </div>
 
-    <div class="form-group">
-      <label for="date">預約日期</label>
-      <input type="date" id="date" required>
+    <!-- 指定圖案輸入 -->
+    <div id="customInputDiv" class="hidden" style="margin-top: 12px;">
+      <label>📝 指定圖案/繪圖說明</label>
+      <input type="text" id="customPattern" placeholder="請簡述您想繪製的圖案風格或主題">
     </div>
+  </div>
 
-    <div class="form-group">
-      <label for="time">預約時段</label>
-      <select id="time" required>
-        <option value="">請選擇時段</option>
-        <option value="10:00">10:00</option>
-        <option value="13:00">13:00</option>
-        <option value="16:00">16:00</option>
-        <option value="19:00">19:00</option>
-      </select>
+  <!-- 6. 色調偏好 -->
+  <div class="section">
+    <label>🌓 色調風格偏好</label>
+    <select id="selectedTone">
+      <option value="暖色調 (顯白溫暖)">暖色調 (顯白溫暖)</option>
+      <option value="冷色調 (清爽俐落)">冷色調 (清爽俐落)</option>
+      <option value="中性色調 (百搭自然)">中性色調 (百搭自然)</option>
+      <option value="現場由美甲師建議">現場由美甲師建議</option>
+    </select>
+  </div>
+
+  <!-- 7. 卸甲服務 -->
+  <div class="section">
+    <label>💅 卸甲服務加購</label>
+    <div class="radio-group">
+      <label class="radio-btn">
+        <input type="radio" name="removal" value="none" checked onchange="toggleRemoval(false)">
+        <span>不需要卸甲</span>
+      </label>
+      <label class="radio-btn">
+        <input type="radio" name="removal" value="need" onchange="toggleRemoval(true)">
+        <span>本項/他店卸甲 (+NT$ 200)</span>
+      </label>
     </div>
+  </div>
 
-    <div class="form-group">
-      <label for="phone">聯絡電話</label>
-      <input type="tel" id="phone" placeholder="請輸入手機號碼" required>
+  <!-- 底部價格與傳送按鈕 -->
+  <div class="price-bar">
+    <div>
+      <span style="font-size:0.85rem; color:#666;">預計總金額</span>
+      <div class="total-price">NT$ <span id="totalPrice">0</span></div>
     </div>
-
-    <div class="form-group">
-      <label for="note">備註需求（可填寫款式想法）</label>
-      <textarea id="note" rows="3" placeholder="例如：需卸甲、欲施作指定款式等"></textarea>
-    </div>
-
-    <button type="submit" id="submit-btn" disabled>初始化 LINE 登入中...</button>
-  </form>
-
-  <div id="status-msg"></div>
+    <button type="button" class="submit-btn" onclick="sendBooking()">傳送預約至 LINE</button>
+  </div>
 </div>
 
 <script>
-  // LIFF ID 與 Google Apps Script Web App URL
-  const LIFF_ID = "2011884932-heTsoGVG";
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
+  const LINE_OFFICIAL_ACCOUNT_ID = "@your_line_id"; // 請替換為您的 LINE 官方帳號 ID
 
-  let currentUser = {
-    userId: "",
-    displayName: ""
-  };
+  let showJumpColor = false;
+  let showStyle = false;
+  let needRemoval = false;
 
-  // 初始化 LIFF
-  async function initLiff() {
-    try {
-      await liff.init({ liffId: LIFF_ID });
-      if (liff.isLoggedIn()) {
-        const profile = await liff.getProfile();
-        currentUser.userId = profile.userId;
-        currentUser.displayName = profile.displayName;
-
-        document.getElementById('user-name').innerText = profile.displayName;
-        if (profile.pictureUrl) {
-          document.getElementById('user-picture').src = profile.pictureUrl;
-        } else {
-          document.getElementById('user-picture').style.display = 'none';
-        }
-        document.getElementById('profile-box').style.display = 'flex';
-        
-        const btn = document.getElementById('submit-btn');
-        btn.innerText = "送出預約";
-        btn.disabled = false;
-      } else {
-        liff.login();
-      }
-    } catch (err) {
-      console.error("LIFF 初始化失敗", err);
-      document.getElementById('status-msg').innerText = "LINE 登入驗證失敗，請重新開啟。";
-    }
+  function initDatePicker() {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    document.getElementById('bookingDate').value = `${yyyy}-${mm}-${dd}`;
   }
 
-  // 監聽表單送出事件
-  document.getElementById('booking-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const submitBtn = document.getElementById('submit-btn');
-    const statusMsg = document.getElementById('status-msg');
-    
-    submitBtn.disabled = true;
-    submitBtn.innerText = "預約處理中...";
-    statusMsg.innerText = "";
+  function toggleJumpColor() {
+    showJumpColor = !showJumpColor;
+    const box = document.getElementById('boxJump');
+    const badge = document.getElementById('badgeJump');
+    const section = document.getElementById('jumpColorSection');
 
-    const payload = {
-      userId: currentUser.userId,
-      name: currentUser.displayName,
-      phone: document.getElementById('phone').value,
-      service: document.getElementById('service').value,
-      date: document.getElementById('date').value,
-      time: document.getElementById('time').value,
-      note: document.getElementById('note').value
-    };
-
-    try {
-      const response = await fetch(GAS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      });
-
-      statusMsg.style.color = "green";
-      statusMsg.innerText = "預約成功！我們將盡快與您確認。";
-      submitBtn.innerText = "已完成預約";
-      
-      setTimeout(() => {
-        if (liff.isInClient()) {
-          liff.closeWindow();
-        }
-      }, 2000);
-
-    } catch (error) {
-      console.error(error);
-      statusMsg.style.color = "red";
-      statusMsg.innerText = "預約送出失敗，請稍後再試。";
-      submitBtn.disabled = false;
-      submitBtn.innerText = "重試送出預約";
+    if (showJumpColor) {
+      box.classList.add('active');
+      badge.innerText = '已加購 ✔';
+      section.classList.remove('hidden');
+    } else {
+      box.classList.remove('active');
+      badge.innerText = '未加購';
+      section.classList.add('hidden');
     }
-  });
+    onSelectionChange();
+  }
 
-  // 網頁載入後執行
-  window.onload = initLiff;
+  function toggleStyle() {
+    showStyle = !showStyle;
+    const box = document.getElementById('boxStyle');
+    const badge = document.getElementById('badgeStyle');
+    const section = document.getElementById('styleSection');
+
+    if (showStyle) {
+      box.classList.add('active');
+      badge.innerText = '已加購 ✔';
+      section.classList.remove('hidden');
+    } else {
+      box.classList.remove('active');
+      badge.innerText = '未加購';
+      section.classList.add('hidden');
+    }
+    onSelectionChange();
+  }
+
+  function toggleRemoval(val) {
+    needRemoval = val;
+    onSelectionChange();
+  }
+
+  function setStyleType(type) {
+    if (type === 'partial') {
+      document.getElementById('radioPartial').checked = true;
+    } else {
+      document.getElementById('radioFull').checked = true;
+    }
+    switchStyleType();
+  }
+
+  function switchStyleType() {
+    const isPartial = document.getElementById('radioPartial').checked;
+    document.getElementById('partialStyleOptions').classList.toggle('hidden', !isPartial);
+    document.getElementById('fullStyleOptions').classList.toggle('hidden', isPartial);
+    onSelectionChange();
+  }
+
+  function drawStyle(event) {
+    if (event) event.stopPropagation();
+    if (!showStyle) {
+      showStyle = true;
+      document.getElementById('styleSection').classList.remove('hidden');
+      document.getElementById('boxStyle').classList.add('active');
+      document.getElementById('badgeStyle').innerText = '已加購 ✔';
+    }
+
+    // 隨機選擇 局部造型 (partial) 或 十指造型 (full)
+    const types = ['partial', 'full'];
+    const chosenType = types[Math.floor(Math.random() * types.length)];
+    setStyleType(chosenType);
+
+    const checkboxes = chosenType === 'partial' 
+      ? document.querySelectorAll('input[name="style"]') 
+      : document.querySelectorAll('input[name="fullStyle"]');
+
+    // 先全部取消勾選
+    checkboxes.forEach(cb => cb.checked = false);
+
+    // 隨機抽取 1~2 項造型
+    const count = Math.floor(Math.random() * 2) + 1;
+    const shuffled = Array.from(checkboxes).sort(() => 0.5 - Math.random());
+
+    for (let i = 0; i < count; i++) {
+      if (shuffled[i]) {
+        shuffled[i].checked = true;
+        if (chosenType === 'partial') checkLimit(shuffled[i]);
+        else checkFullLimit(shuffled[i]);
+      }
+    }
+    onSelectionChange();
+  }
+
+  function checkLimit(el) {
+    const checked = document.querySelectorAll('input[name="style"]:checked');
+    if (checked.length > 2) {
+      el.checked = false;
+      alert('局部造型最多只能選擇 2 項喔！');
+    }
+    onSelectionChange();
+  }
+
+  function checkFullLimit(el) {
+    const checked = document.querySelectorAll('input[name="fullStyle"]:checked');
+    if (checked.length > 2) {
+      el.checked = false;
+      alert('十指造型最多只能選擇 2 項喔！');
+    }
+    onSelectionChange();
+  }
+
+  function onSelectionChange() {
+    let price = 500; // 基礎單色費用
+    const mainColor = document.getElementById('mainColor').value;
+
+    if (!mainColor) {
+      document.getElementById('totalPrice').innerText = '0';
+      return;
+    }
+
+    // 加購跳色
+    if (showJumpColor) {
+      price += 50;
+    }
+
+    // 加購款式造型
+    if (showStyle) {
+      const isPartial = document.getElementById('radioPartial').checked;
+      const partialChecked = document.querySelectorAll('input[name="style"]:checked');
+      const fullChecked = document.querySelectorAll('input[name="fullStyle"]:checked');
+
+      if (isPartial) {
+        price += partialChecked.length * 100;
+      } else {
+        price += fullChecked.length * 200;
+      }
+
+      // 控制貓眼細節與指定圖案輸入框顯示
+      const catEyeCb = isPartial ? document.getElementById('catEyeCb') : document.getElementById('fullCatEyeCb');
+      const customStyleCb = isPartial ? document.getElementById('customStyleCb') : document.getElementById('fullCustomStyleCb');
+
+      document.getElementById('catEyeDetailDiv').classList.toggle('hidden', !(catEyeCb && catEyeCb.checked));
+      document.getElementById('customInputDiv').classList.toggle('hidden', !(customStyleCb && customStyleCb.checked));
+    } else {
+      document.getElementById('catEyeDetailDiv').classList.add('hidden');
+      document.getElementById('customInputDiv').classList.add('hidden');
+    }
+
+    // 卸甲服務
+    if (needRemoval) {
+      price += 200;
+    }
+
+    document.getElementById('totalPrice').innerText = price;
+  }
+
+  function sendBooking() {
+    const mainColor = document.getElementById('mainColor').value;
+    if (!mainColor) {
+      alert('請先選擇主要單色色系！');
+      return;
+    }
+
+    const date = document.getElementById('bookingDate').value;
+    const hour = document.getElementById('bookingHour').value;
+    const minute = document.getElementById('bookingMinute').value;
+    const tone = document.getElementById('selectedTone').value;
+
+    let details = `✨ 美甲服務預約單 ✨\n`;
+    details += `----------------------------\n`;
+    details += `• 預約時間：${date} ${hour}:${minute}\n`;
+    details += `• 主要色系：${mainColor}\n`;
+
+    if (showJumpColor) {
+      const jumpColor = document.getElementById('jumpColor').value || '現場決定/由美甲師搭配';
+      details += `• 加購跳色：${jumpColor}\n`;
+    }
+
+    if (showStyle) {
+      const isPartial = document.getElementById('radioPartial').checked;
+      let selectedStyles = [];
+
+      if (isPartial) {
+        document.querySelectorAll('input[name="style"]:checked').forEach(cb => selectedStyles.push(cb.value));
+        details += `• 款式造型：局部造型 (${selectedStyles.join(', ') || '無'})\n`;
+      } else {
+        document.querySelectorAll('input[name="fullStyle"]:checked').forEach(cb => selectedStyles.push(cb.value));
+        details += `• 款式造型：十指造型 (${selectedStyles.join(', ') || '無'})\n`;
+      }
+
+      const catEyeCb = isPartial ? document.getElementById('catEyeCb') : document.getElementById('fullCatEyeCb');
+      if (catEyeCb && catEyeCb.checked) {
+        details += `• 貓眼類型：${document.getElementById('catEyeType').value}\n`;
+      }
+
+      const customStyleCb = isPartial ? document.getElementById('customStyleCb') : document.getElementById('fullCustomStyleCb');
+      if (customStyleCb && customStyleCb.checked) {
+        const customPattern = document.getElementById('customPattern').value || '未填寫細節';
+        details += `• 指定圖案：${customPattern}\n`;
+      }
+    }
+
+    details += `• 卸甲服務：${needRemoval ? '需要卸甲 (+NT$200)' : '不需要'}\n`;
+    details += `• 色調風格：${tone}\n`;
+    details += `----------------------------\n`;
+    details += `預計總金額：NT$ ${document.getElementById('totalPrice').innerText} 元`;
+
+    const encodedMessage = encodeURIComponent(details);
+    const lineUrl = `https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodedMessage}`;
+    window.location.href = lineUrl;
+  }
+
+  window.onload = function() {
+    initDatePicker();
+  };
 </script>
-
 </body>
 </html>
