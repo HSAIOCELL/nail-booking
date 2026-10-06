@@ -483,10 +483,9 @@
     }
   });
 
+  // 取得裝置當前時間（直接使用 new Date() 避免 iOS Safari Invalid Date 錯誤）
   function getTaipeiDate() {
-    const now = new Date();
-    const taipeiStr = now.toLocaleString("en-US", { timeZone: "Asia/Taipei" });
-    return new Date(taipeiStr);
+    return new Date();
   }
 
   function formatDateToYYYYMMDD(dateObj) {
@@ -870,10 +869,12 @@
     submitBtn.innerText = "預約處理中...";
     submitBtn.disabled = true;
 
-    // 背景背景存入 Google 試算表
+    // 背景存入 Google 試算表 (使用正確的 headers 語法)
     fetch(GAS_WEB_APP_URL, {
       method: 'POST',
-      contentType: 'application/json',
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(payload)
     })
     .then(res => res.json())
@@ -883,7 +884,7 @@
     })
     .catch(err => {
       console.error("GAS Error:", err);
-      // 就算試算表網路延遲，依然協助開啟 LINE Message
+      // 就算試算表網路延遲或 CORS 阻擋，依然協助開啟 LINE Message 讓流程完成
       openLineChat(payload);
     });
   }
