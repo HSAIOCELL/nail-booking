@@ -152,7 +152,6 @@
     .time-picker-group { display: flex; gap: 8px; align-items: center; }
     .time-picker-group select { flex: 1; text-align: center; }
 
-    /* 選項卡片樣式 */
     .option-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -177,7 +176,6 @@
       color: #5c5049;
     }
 
-    /* 顏色色調選項 (單選按鈕組) */
     .tone-group {
       display: flex;
       gap: 12px;
@@ -340,6 +338,7 @@
   // 請填入您的 Google Apps Script 部署網址與 LIFF ID
   const GAS_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
   const MY_LIFF_ID = "YOUR_LIFF_ID_HERE";
+  const LINE_OFFICIAL_ACCOUNT_ID = "@344gjuzg"; 
 
   let selectedAddons = {
     Jump: false,
@@ -403,7 +402,7 @@
 
     let addonTotal = 0;
     if (selectedAddons.Jump) addonTotal += 50;
-    if (selectedAddons.Art) addonTotal += 50; // 可依實際造型加價調整
+    if (selectedAddons.Art) addonTotal += 50;
 
     const total = basePrice + addonTotal + removalPrice;
     document.getElementById("totalPriceText").innerText = total;
@@ -415,7 +414,10 @@
     const hour = document.getElementById("bookingHour").value;
     const minute = document.getElementById("bookingMinute").value;
     const time = `${hour}:${minute}`;
+    const styleVal = document.getElementById("colorStyle").value || "未選擇";
+    const toneVal = document.querySelector('input[name="tone"]:checked').value;
     const totalPrice = parseInt(document.getElementById("totalPriceText").innerText);
+    const removalStr = removalPrice > 0 ? "需要卸甲 (+300元)" : "不需要卸甲";
 
     if (!date) {
       alert("請先選擇預約日期！");
@@ -426,36 +428,42 @@
     btn.disabled = true;
     btn.innerText = "預約送出中...";
 
-    // 對應您 Google 試算表 A~E 欄：
-    // A: LINE暱稱, B: 預約日期, C: 預約時間, D: 預計總金額, E: 狀態
+    // 1. Google 試算表 Payload
     const payload = {
       displayName: name,
       bookingDate: date,
       bookingTime: time,
+      colorStyle: styleVal,
       totalPrice: totalPrice,
       status: "已預約"
     };
 
+    // 2. 同步寫入 Google 試算表
     fetch(GAS_URL, {
       method: "POST",
       mode: "no-cors",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
-    })
-    .then(() => {
-      alert("預約成功！");
-      if (typeof liff !== "undefined" && liff.isInClient()) {
-        liff.closeWindow();
-      } else {
-        location.reload();
-      }
-    })
-    .catch(error => {
-      console.error("Error:", error);
-      alert("送出失敗，請再試一次。");
-      btn.disabled = false;
-      btn.innerText = "送出預約單 (開啟 LINE)";
-    });
+    }).catch(error => console.error("GAS Error:", error));
+
+    // 3. 組合 LINE 訊息並導向 LINE 官方帳號
+    let detailsText = `【晞予美甲線上預約】\n`;
+    detailsText += `👤 預約貴賓：${name}\n`;
+    detailsText += `📅 預約時間：${date} ${time}\n`;
+    detailsText += `🎨 主色系/款式：${styleVal}\n`;
+    detailsText += `✨ 色調風格：${toneVal}\n`;
+    detailsText += `🎨 加購跳色：${selectedAddons.Jump ? '有 (+50元)' : '無'}\n`;
+    detailsText += `✨ 加購造型：${selectedAddons.Art ? '有 (+50元)' : '無'}\n`;
+    detailsText += `💅 卸甲服務：${removalStr}\n`;
+    detailsText += `💰 預計總金額：NT$ ${totalPrice} 元`;
+
+    const encodedMessage = encodeURIComponent(detailsText);
+    const lineUrl = `https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodedMessage}`;
+
+    setTimeout(() => {
+      alert("預約資料已送出！即將為您開啟 LINE 傳送預約單。");
+      window.location.href = lineUrl;
+    }, 500);
   }
 </script>
 
