@@ -177,6 +177,20 @@
       color: #5c5049;
     }
 
+    /* 顏色色調選項 (單選按鈕組) */
+    .tone-group {
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+    }
+    .tone-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 14.5px;
+      cursor: pointer;
+    }
+
     .total-box { 
       background-color: #ebdcd3; 
       color: #4e423b; 
@@ -278,20 +292,30 @@
   <div class="section">
     <div class="section-title">Step 3. 加購項目</div>
     <div class="option-grid">
-      <div class="selectable-box" id="addonJump" onclick="toggleAddon('Jump', 100)">
+      <div class="selectable-box" id="addonJump" onclick="toggleAddon('Jump', 50)">
         <span>跳色</span>
-        <span style="font-size: 13px; color: #8c7c75;">+NT$ 100</span>
+        <span style="font-size: 13px; color: #8c7c75;">50 元 +</span>
       </div>
-      <div class="selectable-box" id="addonArt" onclick="toggleAddon('Art', 250)">
+      <div class="selectable-box" id="addonArt" onclick="toggleAddon('Art', 50)">
         <span>款式造型</span>
-        <span style="font-size: 13px; color: #8c7c75;">+NT$ 250起</span>
+        <span style="font-size: 13px; color: #8c7c75;">50元起 +</span>
       </div>
     </div>
   </div>
 
-  <!-- Step 4. 卸甲服務 -->
+  <!-- Step 4. 色調 -->
   <div class="section">
-    <div class="section-title">Step 4. 卸甲服務</div>
+    <div class="section-title">Step 4. 色調</div>
+    <div class="tone-group">
+      <label class="tone-item"><input type="radio" name="tone" value="隨機" checked> 隨機</label>
+      <label class="tone-item"><input type="radio" name="tone" value="個性暗色調"> 個性暗色調</label>
+      <label class="tone-item"><input type="radio" name="tone" value="清透亮色調"> 清透亮色調</label>
+    </div>
+  </div>
+
+  <!-- Step 5. 卸甲服務 -->
+  <div class="section">
+    <div class="section-title">Step 5. 卸甲服務</div>
     <div class="option-grid">
       <div class="selectable-box selected" id="removalNo" onclick="selectRemoval(0)">
         <span>不需要卸甲</span>
@@ -313,6 +337,7 @@
 </div>
 
 <script>
+  // 請填入您的 Google Apps Script 部署網址與 LIFF ID
   const GAS_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
   const MY_LIFF_ID = "YOUR_LIFF_ID_HERE";
 
@@ -377,8 +402,8 @@
     if (styleVal.includes("小香風")) basePrice = 1000;
 
     let addonTotal = 0;
-    if (selectedAddons.Jump) addonTotal += 100;
-    if (selectedAddons.Art) addonTotal += 250;
+    if (selectedAddons.Jump) addonTotal += 50;
+    if (selectedAddons.Art) addonTotal += 50; // 可依實際造型加價調整
 
     const total = basePrice + addonTotal + removalPrice;
     document.getElementById("totalPriceText").innerText = total;
@@ -401,6 +426,8 @@
     btn.disabled = true;
     btn.innerText = "預約送出中...";
 
+    // 對應您 Google 試算表 A~E 欄：
+    // A: LINE暱稱, B: 預約日期, C: 預約時間, D: 預計總金額, E: 狀態
     const payload = {
       displayName: name,
       bookingDate: date,
