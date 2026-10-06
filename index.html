@@ -456,7 +456,7 @@
 
   const ALL_COLORS = [
     "紅色", "粉色", "橘色", "黃色", "紅咖色", 
-    "深咖/可可色", "浅咖色", "綠色", "藍色", "紫色", 
+    "深咖/可可色", "淺咖色", "綠色", "藍色", "紫色", 
     "黑色", "銀色/白色", "灰色", "金色/香檳色"
   ];
 
@@ -649,3 +649,282 @@
       }
     }
     onSelectionChange();
+  }
+
+  // 設定造型類型 (局部 vs 十指)
+  function setStyleType(type) {
+    const partialCard = document.getElementById('typePartialCard');
+    const fullCard = document.getElementById('typeFullCard');
+    const radioPartial = document.getElementById('radioPartial');
+    const radioFull = document.getElementById('radioFull');
+    const partialGroup = document.getElementById('partialStyleGroup');
+    const fullGroup = document.getElementById('fullStyleGroup');
+
+    if (type === 'partial') {
+      radioPartial.checked = true;
+      radioFull.checked = false;
+      partialCard.classList.add('active');
+      fullCard.classList.remove('active');
+      partialGroup.classList.remove('hidden');
+      fullGroup.classList.add('hidden');
+      document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
+    } else {
+      radioFull.checked = true;
+      radioPartial.checked = false;
+      fullCard.classList.add('active');
+      partialCard.classList.remove('active');
+      fullGroup.classList.remove('hidden');
+      partialGroup.classList.add('hidden');
+      document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
+    }
+    checkSubInputs();
+    onSelectionChange();
+  }
+
+  // 隨機抽主要色系
+  function drawMainColor() {
+    const select = document.getElementById('mainColor');
+    const randomIndex = Math.floor(Math.random() * ALL_COLORS.length);
+    select.value = ALL_COLORS[randomIndex];
+    select.classList.remove('flash-highlight');
+    void select.offsetWidth;
+    select.classList.add('flash-highlight');
+    onMainColorChange();
+  }
+
+  // 隨機配色 (跳色)
+  function drawSmartJumpColor(event) {
+    if (event) event.stopPropagation();
+    const mainVal = document.getElementById('mainColor').value;
+    let availableColors = ALL_COLORS.filter(c => c !== mainVal);
+    const select = document.getElementById('jumpColor');
+    const randomIndex = Math.floor(Math.random() * availableColors.length);
+    select.value = availableColors[randomIndex];
+    select.classList.remove('flash-highlight');
+    void select.offsetWidth;
+    select.classList.add('flash-highlight');
+    onSelectionChange();
+  }
+
+  // 隨機抽造型
+  function drawStyle(event) {
+    if (event) event.stopPropagation();
+    const isFull = Math.random() < 0.5;
+    setStyleType(isFull ? 'full' : 'partial');
+
+    const checkboxes = document.querySelectorAll(isFull ? 'input[name="fullStyle"]' : 'input[name="style"]');
+    checkboxes.forEach(cb => cb.checked = false);
+
+    const count = isFull ? Math.floor(Math.random() * 2) + 1 : Math.floor(Math.random() * 3) + 1;
+    const shuffled = Array.from(checkboxes).sort(() => 0.5 - Math.random());
+    for (let i = 0; i < count; i++) {
+      shuffled[i].checked = true;
+    }
+    checkSubInputs();
+    onSelectionChange();
+  }
+
+  // 數量限制機制
+  function checkLimit(element) {
+    const checked = document.querySelectorAll('input[name="style"]:checked');
+    if (checked.length > 3) {
+      alert("局部造型最多只能選擇 3 項喔！");
+      element.checked = false;
+    }
+    checkSubInputs();
+    onSelectionChange();
+  }
+
+  function checkFullLimit(element) {
+    const checked = document.querySelectorAll('input[name="fullStyle"]:checked');
+    if (checked.length > 2) {
+      alert("十指造型最多只能選擇 2 項喔！");
+      element.checked = false;
+    }
+    checkSubInputs();
+    onSelectionChange();
+  }
+
+  // 檢查子選項 (貓眼細節/指定圖案輸入框)
+  function checkSubInputs() {
+    const isPartial = document.getElementById('radioPartial').checked;
+    const isFull = document.getElementById('radioFull').checked;
+
+    let catEyeChecked = false;
+    let customChecked = false;
+
+    if (isPartial) {
+      catEyeChecked = document.getElementById('catEyeCb').checked;
+      customChecked = document.getElementById('customStyleCb').checked;
+    } else if (isFull) {
+      catEyeChecked = document.getElementById('fullCatEyeCb').checked;
+      customChecked = document.getElementById('fullCustomStyleCb').checked;
+    }
+
+    document.getElementById('catEyeDetailDiv').classList.toggle('hidden', !catEyeChecked);
+    document.getElementById('customInputDiv').classList.toggle('hidden', !customChecked);
+  }
+
+  // 計價與試算邏輯
+  function onSelectionChange() {
+    let total = 0;
+    const mainColor = document.getElementById('mainColor').value;
+
+    if (mainColor !== "") {
+      total += 499; // 單色基礎價
+    }
+
+    if (showJumpColor && document.getElementById('jumpColor').value !== "") {
+      total += 50;
+    }
+
+    if (showStyle) {
+      const isPartial = document.getElementById('radioPartial').checked;
+      const isFull = document.getElementById('radioFull').checked;
+
+      if (isPartial) {
+        const styleCount = document.querySelectorAll('input[name="style"]:checked').length;
+        if (styleCount > 0) total += 150 + (styleCount - 1) * 50;
+      } else if (isFull) {
+        const fullStyleCount = document.querySelectorAll('input[name="fullStyle"]:checked').length;
+        if (fullStyleCount > 0) total += 300 + (fullStyleCount - 1) * 100;
+      }
+    }
+
+    if (needRemoval) {
+      total += 200;
+    }
+
+    document.getElementById('totalPrice').innerText = total;
+  }
+
+  // 送出預約單
+  function sendBooking() {
+    const date = document.getElementById('bookingDate').value;
+    const hour = document.getElementById('bookingHour').value;
+    const minute = document.getElementById('bookingMinute').value;
+    const mainColor = document.getElementById('mainColor').value;
+
+    if (!date) { alert("請選擇預約日期！"); return; }
+    if (!mainColor) { alert("請選擇單色款式色系！"); return; }
+
+    const isPartial = document.getElementById('radioPartial').checked;
+    const isFull = document.getElementById('radioFull').checked;
+
+    if (showStyle && !isPartial && !isFull) {
+      alert("您勾選了加購『款式造型』，請選擇【局部造型】或【十指造型】！");
+      return;
+    }
+
+    let selectedStyles = [];
+    if (showStyle) {
+      if (isPartial) {
+        document.querySelectorAll('input[name="style"]:checked').forEach(cb => {
+          if (cb.value === '貓眼') {
+            selectedStyles.push(`貓眼(${document.getElementById('catEyeType').value})`);
+          } else {
+            selectedStyles.push(cb.value);
+          }
+        });
+      } else if (isFull) {
+        document.querySelectorAll('input[name="fullStyle"]:checked').forEach(cb => {
+          if (cb.value === '貓眼') {
+            selectedStyles.push(`十指貓眼(${document.getElementById('catEyeType').value})`);
+          } else {
+            selectedStyles.push(`十指${cb.value}`);
+          }
+        });
+      }
+
+      if ((document.getElementById('customStyleCb').checked || document.getElementById('fullCustomStyleCb').checked)) {
+        const customText = document.getElementById('customPattern').value.trim();
+        if (!customText) {
+          alert("請填寫指定圖案細節！");
+          return;
+        }
+      }
+    }
+
+    const jumpColorVal = showJumpColor ? document.getElementById('jumpColor').value : '';
+    const customPatternVal = document.getElementById('customPattern').value.trim();
+    const toneVal = document.getElementById('selectedTone').value;
+    const totalPriceVal = document.getElementById('totalPrice').innerText;
+
+    // 準備傳送至 Google 試算表 (GAS)
+    const payload = {
+      userId: userProfile.userId || '',
+      displayName: userProfile.displayName || '未知顧客',
+      bookingDate: date,
+      bookingTime: `${hour}:${minute}`,
+      mainColor: mainColor,
+      jumpColor: jumpColorVal,
+      styleType: isPartial ? '局部造型' : (isFull ? '十指造型' : '無'),
+      styles: selectedStyles.join(', '),
+      customPattern: customPatternVal,
+      tone: toneVal,
+      needRemoval: needRemoval ? '需要' : '不需要',
+      totalPrice: totalPriceVal
+    };
+
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.innerText = "預約處理中...";
+    submitBtn.disabled = true;
+
+    // 背景背景存入 Google 試算表
+    fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      contentType: 'application/json',
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+      console.log("GAS Response:", data);
+      openLineChat(payload);
+    })
+    .catch(err => {
+      console.error("GAS Error:", err);
+      // 就算試算表網路延遲，依然協助開啟 LINE Message
+      openLineChat(payload);
+    });
+  }
+
+  // 組合 LINE 官方帳號對話訊息並送出
+  function openLineChat(data) {
+    let msg = `🌸 【晞予美甲】線上預約單 🌸\n`;
+    msg += `----------------------------\n`;
+    msg += `👤 預約姓名：${data.displayName}\n`;
+    msg += `📅 預約時間：${data.bookingDate} ${data.bookingTime}\n`;
+    msg += `🎨 主色系：${data.mainColor}\n`;
+    if (data.jumpColor) msg += `➕ 跳色：${data.jumpColor}\n`;
+    if (data.styles) msg += `✨ 造型類型：${data.styleType} (${data.styles})\n`;
+    if (data.customPattern) msg += `✏️ 指定圖案：${data.customPattern}\n`;
+    msg += `🌗 色調風格：${data.tone}\n`;
+    msg += `💅 卸甲服務：${data.needRemoval}\n`;
+    msg += `----------------------------\n`;
+    msg += `💰 預計總金額：NT$ ${data.totalPrice} 元\n\n`;
+    msg += `請點擊發送將此預約訊息傳送給美甲師！`;
+
+    // 開啟 LINE Message，自動帶入文字給用戶傳送
+    if (liff.isInClient()) {
+      liff.sendMessages([{
+        type: 'text',
+        text: msg
+      }]).then(() => {
+        liff.closeWindow();
+      }).catch((err) => {
+        console.error('Send message failed:', err);
+        fallbackLineUrl(msg);
+      });
+    } else {
+      fallbackLineUrl(msg);
+    }
+  }
+
+  function fallbackLineUrl(msg) {
+    const lineOaId = '@038xsnpl'; // 您的 LINE 官方帳號 ID
+    const encodedMsg = encodeURIComponent(msg);
+    window.location.href = `https://line.me/R/oaMessage/${lineOaId}/?${encodedMsg}`;
+  }
+</script>
+</body>
+</html>
