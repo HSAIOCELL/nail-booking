@@ -63,6 +63,11 @@
       cursor: pointer;
     }
 
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+      filter: opacity(0.6) sepia(100%) hue-rotate(330deg);
+    }
+
     .card {
       background: #faf8f5;
       max-width: 440px;
@@ -89,7 +94,6 @@
       color: #5c5049;
     }
 
-    /* 顧客資訊區塊：秒開顯示 */
     .user-profile {
       display: flex;
       align-items: center;
@@ -128,8 +132,10 @@
       color: #5c5049;
       margin-bottom: 10px;
       font-size: 16.5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    label { font-size: 15.5px; color: #524741; cursor: pointer; }
 
     select, input[type="text"], input[type="date"] {
       width: 100%;
@@ -142,6 +148,48 @@
       color: #4a423d;
     }
 
+    .datetime-container { display: flex; flex-direction: column; gap: 10px; }
+    .time-picker-group { display: flex; gap: 8px; align-items: center; }
+    .time-picker-group select { flex: 1; text-align: center; }
+
+    /* 選項卡片樣式 */
+    .option-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .selectable-box {
+      border: 1px solid #cfc5bb;
+      background: #ffffff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s;
+      font-size: 15px;
+    }
+    .selectable-box.selected {
+      border-color: #7a6b63;
+      background-color: #f3eee6;
+      font-weight: bold;
+      color: #5c5049;
+    }
+
+    .total-box { 
+      background-color: #ebdcd3; 
+      color: #4e423b; 
+      padding: 14px; 
+      border-radius: 12px; 
+      text-align: center; 
+      font-size: 19px; 
+      font-weight: bold; 
+      margin-top: 15px; 
+      margin-bottom: 18px; 
+      letter-spacing: 0.5px; 
+    }
+    
     .submit-btn { 
       width: 100%; 
       background-color: #7a6b63; 
@@ -153,9 +201,21 @@
       border-radius: 22px; 
       cursor: pointer; 
       box-shadow: 0 4px 10px rgba(122, 107, 99, 0.2); 
-      margin-top: 15px;
+      letter-spacing: 1px;
+      transition: background 0.2s;
     }
     .submit-btn:hover { background-color: #5c5049; }
+    .submit-btn:disabled { background-color: #aaa; cursor: not-allowed; }
+
+    .random-btn {
+      font-size: 12.5px;
+      background: #ebdcd3;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 12px;
+      color: #5c5049;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -170,60 +230,205 @@
     <img id="avatar" class="user-avatar" src="https://via.placeholder.com/40" alt="頭像">
     <div>
       <div id="displayName" class="user-name">預約貴賓</div>
-      <div class="user-status" id="loginStatusText">歡迎預約美甲服務</div>
+      <div class="user-status" id="loginStatusText">LINE 帳號連動中...</div>
     </div>
   </div>
 
-  <!-- Step 1. 預約日期 -->
+  <!-- Step 1. 預約日期與時間 -->
   <div class="section">
     <div class="section-title">Step 1. 預約日期與時間</div>
-    <input type="date" id="bookingDate">
+    <div class="datetime-container">
+      <div>
+        <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #5c5049;">預約日期：</label>
+        <input type="date" id="bookingDate">
+      </div>
+      <div>
+        <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #5c5049;">預約時間：</label>
+        <div class="time-picker-group">
+          <select id="bookingHour">
+            <option value="10">10 時</option><option value="11">11 時</option><option value="12">12 時</option>
+            <option value="13">13 時</option><option value="14">14 時</option><option value="15">15 時</option>
+            <option value="16">16 時</option><option value="17">17 時</option><option value="18">18 時</option>
+            <option value="19">19 時</option><option value="20">20 時</option>
+          </select>
+          <select id="bookingMinute">
+            <option value="00">00 分</option>
+            <option value="30">30 分</option>
+          </select>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <button class="submit-btn" onclick="submitBooking()">確認送出預約</button>
+  <!-- Step 2. 單色款式 -->
+  <div class="section">
+    <div class="section-title">
+      Step 2. 單色款式
+      <button class="random-btn" onclick="randomColorStyle()">✨ 幫我抽色系</button>
+    </div>
+    <select id="colorStyle" onchange="calculateTotal()">
+      <option value="">-- 請選擇色系 (無則留空) --</option>
+      <option value="經典裸色系">經典裸色系 (NT$ 800)</option>
+      <option value="質感莫蘭迪">質感莫蘭迪 (NT$ 900)</option>
+      <option value="氣質小香風">氣質小香風 (NT$ 1000)</option>
+    </select>
+  </div>
+
+  <!-- Step 3. 加購項目 -->
+  <div class="section">
+    <div class="section-title">Step 3. 加購項目</div>
+    <div class="option-grid">
+      <div class="selectable-box" id="addonJump" onclick="toggleAddon('Jump', 100)">
+        <span>跳色</span>
+        <span style="font-size: 13px; color: #8c7c75;">+NT$ 100</span>
+      </div>
+      <div class="selectable-box" id="addonArt" onclick="toggleAddon('Art', 250)">
+        <span>款式造型</span>
+        <span style="font-size: 13px; color: #8c7c75;">+NT$ 250起</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4. 卸甲服務 -->
+  <div class="section">
+    <div class="section-title">Step 4. 卸甲服務</div>
+    <div class="option-grid">
+      <div class="selectable-box selected" id="removalNo" onclick="selectRemoval(0)">
+        <span>不需要卸甲</span>
+        <span>NT$ 0</span>
+      </div>
+      <div class="selectable-box" id="removalYes" onclick="selectRemoval(300)">
+        <span>需要卸甲</span>
+        <span>+NT$ 300</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 金額顯示 -->
+  <div class="total-box">
+    預計總金額：NT$ <span id="totalPriceText">800</span> 元
+  </div>
+
+  <button id="submitBtn" class="submit-btn" onclick="submitBooking()">送出預約單 (開啟 LINE)</button>
 </div>
 
 <script>
-  // 1. 網頁一打開，畫面所有元件是直接解鎖且可互動的（絕不封鎖）
-  
-  // 2. 在背景非同步初始化 LIFF，抓取使用者身分
-  document.addEventListener("DOMContentLoaded", function() {
-    // 您的 LIFF ID 請填入這裡
-    const myLiffId = "YOUR_LIFF_ID"; 
+  const GAS_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+  const MY_LIFF_ID = "YOUR_LIFF_ID_HERE";
 
+  let selectedAddons = {
+    Jump: false,
+    Art: false
+  };
+  let removalPrice = 0;
+
+  document.addEventListener("DOMContentLoaded", function() {
+    calculateTotal();
     if (typeof liff !== "undefined") {
-      liff.init({ liffId: myLiffId })
+      liff.init({ liffId: MY_LIFF_ID })
         .then(() => {
           if (liff.isLoggedIn()) {
             liff.getProfile().then(profile => {
-              // 成功抓到 LINE 名字與頭像，立刻更新畫面
               document.getElementById("displayName").innerText = profile.displayName;
               document.getElementById("avatar").src = profile.pictureUrl;
-              document.getElementById("loginStatusText").innerText = "已連動 LINE 帳號";
-            }).catch(err => {
-              console.log("取得個人資料失敗", err);
-            });
-          } else {
-            // 如果沒登入，自動引導登入或維持訪客狀態，不影響填寫
-            // liff.login(); // 依需求決定是否強制跳轉登入
+              document.getElementById("loginStatusText").innerText = "已成功連動 LINE";
+            }).catch(err => console.log("取得個人資料失敗", err));
           }
         })
-        .catch(err => {
-          console.log("LIFF 初始化失敗（可能在外部瀏覽器開啟）", err);
-        });
+        .catch(err => console.log("LIFF 初始化失敗", err));
     }
   });
+
+  function toggleAddon(type, price) {
+    selectedAddons[type] = !selectedAddons[type];
+    const el = document.getElementById(type === 'Jump' ? 'addonJump' : 'addonArt');
+    if (selectedAddons[type]) {
+      el.classList.add('selected');
+    } else {
+      el.classList.remove('selected');
+    }
+    calculateTotal();
+  }
+
+  function selectRemoval(price) {
+    removalPrice = price;
+    if (price === 0) {
+      document.getElementById('removalNo').classList.add('selected');
+      document.getElementById('removalYes').classList.remove('selected');
+    } else {
+      document.getElementById('removalYes').classList.add('selected');
+      document.getElementById('removalNo').classList.remove('selected');
+    }
+    calculateTotal();
+  }
+
+  function randomColorStyle() {
+    const select = document.getElementById("colorStyle");
+    const options = select.options;
+    const randomIndex = Math.floor(Math.random() * (options.length - 1)) + 1;
+    select.selectedIndex = randomIndex;
+    calculateTotal();
+  }
+
+  function calculateTotal() {
+    let basePrice = 800; // 預設底價
+    const styleVal = document.getElementById("colorStyle").value;
+    if (styleVal.includes("莫蘭迪")) basePrice = 900;
+    if (styleVal.includes("小香風")) basePrice = 1000;
+
+    let addonTotal = 0;
+    if (selectedAddons.Jump) addonTotal += 100;
+    if (selectedAddons.Art) addonTotal += 250;
+
+    const total = basePrice + addonTotal + removalPrice;
+    document.getElementById("totalPriceText").innerText = total;
+  }
 
   function submitBooking() {
     const name = document.getElementById("displayName").innerText;
     const date = document.getElementById("bookingDate").value;
-    
-    if(!date) {
+    const hour = document.getElementById("bookingHour").value;
+    const minute = document.getElementById("bookingMinute").value;
+    const time = `${hour}:${minute}`;
+    const totalPrice = parseInt(document.getElementById("totalPriceText").innerText);
+
+    if (!date) {
       alert("請先選擇預約日期！");
       return;
     }
-    
-    alert(`感謝 ${name}！您的預約日期 ${date} 已送出！`);
+
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = true;
+    btn.innerText = "預約送出中...";
+
+    const payload = {
+      displayName: name,
+      bookingDate: date,
+      bookingTime: time,
+      totalPrice: totalPrice,
+      status: "已預約"
+    };
+
+    fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+    .then(() => {
+      alert("預約成功！");
+      if (typeof liff !== "undefined" && liff.isInClient()) {
+        liff.closeWindow();
+      } else {
+        location.reload();
+      }
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      alert("送出失敗，請再試一次。");
+      btn.disabled = false;
+      btn.innerText = "送出預約單 (開啟 LINE)";
+    });
   }
 </script>
 
