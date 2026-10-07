@@ -3,14 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>晞予美甲線上預約</title>
+  <title>美甲服務預約選單</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=ChenYuluoyan&family=Cinzel:wght@600&display=swap" rel="stylesheet">
   
-  <!-- LIFF SDK -->
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-
   <style>
     body {
       -webkit-touch-callout: none;
@@ -56,9 +53,13 @@
       font-family: 'ChenYuluoyan', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
     }
 
-    :root { color-scheme: light; }
+    :root {
+      color-scheme: light;
+    }
 
-    input[type="checkbox"], input[type="radio"], input[type="date"] {
+    input[type="checkbox"], 
+    input[type="radio"],
+    input[type="date"] {
       accent-color: #7a6b63;
       cursor: pointer;
     }
@@ -79,10 +80,10 @@
       position: relative;
       z-index: 1;
     }
-
+    
     .title-header {
       text-align: center;
-      margin-bottom: 16px;
+      margin-bottom: 24px;
       padding-bottom: 12px;
       border-bottom: 3px solid #ebdcd3;
     }
@@ -94,37 +95,17 @@
       color: #5c5049;
     }
 
-    .user-profile {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: #ffffff;
-      padding: 10px 14px;
-      border-radius: 12px;
-      border: 1px solid #ebdcd3;
-      margin-bottom: 22px;
-    }
-    .user-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 1px solid #d4c7b8;
-    }
-    .user-name {
-      font-weight: bold;
-      font-size: 15.5px;
-      color: #5c5049;
-    }
-    .user-status {
-      font-size: 11.5px;
-      color: #8c7c75;
-    }
-
     .section {
       margin-bottom: 18px;
       padding-bottom: 16px;
       border-bottom: 1px solid #eae3d9;
+      transition: opacity 0.3s ease, filter 0.3s ease;
+    }
+
+    .section.disabled-step {
+      opacity: 0.4;
+      pointer-events: none;
+      filter: grayscale(40%);
     }
 
     .section-title {
@@ -136,7 +117,11 @@
       justify-content: space-between;
       align-items: center;
     }
-
+    label {
+      font-size: 15.5px;
+      color: #524741;
+      cursor: pointer;
+    }
     select, input[type="text"], input[type="date"] {
       width: 100%;
       padding: 9px 12px;
@@ -146,104 +131,308 @@
       font-size: 15px;
       background-color: #ffffff;
       color: #4a423d;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: border-color 0.2s;
+    }
+    select:focus, input[type="text"]:focus, input[type="date"]:focus {
+      border-color: #7a6b63;
+      box-shadow: 0 0 4px rgba(122, 107, 99, 0.25);
     }
 
-    .datetime-container { display: flex; flex-direction: column; gap: 10px; }
-    .time-picker-group { display: flex; gap: 8px; align-items: center; }
-    .time-picker-group select { flex: 1; text-align: center; }
+    @keyframes selectFlash {
+      0% {
+        border-color: #7a6b63;
+        box-shadow: 0 0 0 3px rgba(122, 107, 99, 0.4);
+        background-color: #ffffff;
+      }
+      50% {
+        border-color: #a8988e;
+        box-shadow: 0 0 0 5px rgba(122, 107, 99, 0.6);
+        background-color: #eae1d7;
+      }
+      100% {
+        border-color: #cfc5bb;
+        box-shadow: none;
+        background-color: #ffffff;
+      }
+    }
 
-    .option-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    .flash-highlight {
+      animation: selectFlash 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      border-radius: 8px;
+    }
+    
+    select option:disabled {
+      color: #c0b5ac;
+      background-color: #f5f2ed;
+    }
+
+    .datetime-container {
+      display: flex;
+      flex-direction: column;
       gap: 10px;
     }
-    .selectable-box {
-      border: 1px solid #cfc5bb;
-      background: #ffffff;
-      padding: 10px 12px;
-      border-radius: 10px;
-      cursor: pointer;
+    .time-picker-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .time-picker-group select {
+      flex: 1;
+      text-align: center;
+    }
+
+    .tone-palette-group {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      transition: all 0.2s;
-      font-size: 15px;
+      gap: 12px;
+      margin-top: 10px;
+      padding: 6px 4px;
     }
-    .selectable-box.selected {
+    .tone-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 20px;
+      transition: all 0.25s ease;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .tone-option:hover {
+      background-color: rgba(240, 236, 227, 0.6);
+    }
+    .color-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      box-sizing: border-box;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      flex-shrink: 0;
+      background-color: #e8e0d5; 
+      border: 1.5px solid #d4c7b8;
+    }
+    .tone-label {
+      font-size: 15px;
+      color: #8c7c75;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: color 0.25s ease, font-weight 0.25s ease;
+    }
+    .tone-option.active .color-dot {
+      background-color: #7a6b63;
+      border-color: #5c5049;
+      transform: scale(1.15);
+      box-shadow: 0 0 0 2.5px #faf8f5, 0 0 0 4.5px #7a6b63;
+    }
+    .tone-option.active .tone-label {
+      color: #3d3028;
+      font-weight: 700;
+    }
+
+    .addon-item-box {
+      border: 1.5px dashed #c2b5aa;
+      background-color: #fcfaf7;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .addon-item-box:hover {
+      border-color: #827167;
+      background-color: #f5efe8;
+    }
+    .addon-item-box.active {
+      border-style: solid;
       border-color: #7a6b63;
-      background-color: #f3eee6;
+      background-color: #f2ebe4;
+      box-shadow: 0 2px 8px rgba(122, 107, 99, 0.12);
+    }
+    .addon-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 16px;
       font-weight: bold;
       color: #5c5049;
     }
+    .addon-badge {
+      font-size: 13px;
+      background-color: #e5ded7;
+      color: #6e6057;
+      padding: 3px 10px;
+      border-radius: 20px;
+      transition: all 0.2s ease;
+    }
+    .addon-item-box.active .addon-badge {
+      background-color: #7a6b63;
+      color: #ffffff;
+    }
 
-    .tone-group {
+    .removal-card-group {
       display: flex;
       gap: 12px;
-      justify-content: space-between;
+      margin-top: 10px;
     }
-    .tone-item {
+    .removal-card {
+      flex: 1;
+      border: 1.5px dashed #c2b5aa;
+      background-color: #fcfaf7;
+      border-radius: 12px;
+      padding: 16px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      user-select: none;
       display: flex;
       align-items: center;
-      gap: 5px;
-      font-size: 14.5px;
-      cursor: pointer;
+      justify-content: center;
+    }
+    .removal-card:hover {
+      border-color: #827167;
+      background-color: #f5efe8;
+    }
+    .removal-card.active {
+      border-style: solid;
+      border-color: #bdaca2;
+      background-color: #f2ebe4;
+      transform: scale(1.03);
+      box-shadow: 0 4px 12px rgba(122, 107, 99, 0.15);
+    }
+    .removal-card-title {
+      font-size: 16.5px;
+      font-weight: bold;
+      color: #4e423b;
+      margin: 0;
     }
 
-    .total-box { 
-      background-color: #ebdcd3; 
-      color: #4e423b; 
-      padding: 14px; 
-      border-radius: 12px; 
-      text-align: center; 
-      font-size: 19px; 
-      font-weight: bold; 
-      margin-top: 15px; 
-      margin-bottom: 18px; 
-      letter-spacing: 0.5px; 
+    .draw-btn {
+      background-color: #e4dcd3;
+      color: #4a423d;
+      border: 1px solid #c9bebc;
+      padding: 5px 14px;
+      border-radius: 16px;
+      font-size: 13.5px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .draw-btn:hover {
+      background-color: #d7ccc3;
+      transform: translateY(-1px);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: 8px 10px;
+      padding: 10px;
+      background-color: #ffffff;
+      border-radius: 12px;
+      border: 1px solid #ebdcd3;
+    }
+
+    .chip-item {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 10px;
+      border-radius: 20px;
+      background-color: transparent; 
+      border: none;                 
+      color: #524741;
+      font-size: 14.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+      user-select: none;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .chip-item input[type="checkbox"],
+    .chip-item input[type="radio"] {
+      display: none;
+    }
+
+    .chip-item::before {
+      content: "";
+      display: inline-block;
+      width: 0;
+      opacity: 0;
+      transition: all 0.2s ease;
+      margin-right: 0;
+    }
+
+    .chip-item:hover {
+      background-color: #f5efe8; 
+      border-radius: 20px;
+    }
+
+    .chip-item:has(input:checked) {
+      background-color: #7a6b63;
+      border-color: #5c5049;
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(122, 107, 99, 0.25);
+    }
+
+    .chip-item:has(input:checked)::before {
+      content: "✓";
+      width: 14px;
+      opacity: 1;
+      margin-right: 4px;
+      font-weight: bold;
     }
     
-    .submit-btn { 
-      width: 100%; 
-      background-color: #7a6b63; 
-      color: #ffffff; 
-      border: none; 
-      padding: 12px; 
-      font-size: 17.5px; 
-      font-weight: bold; 
-      border-radius: 22px; 
-      cursor: pointer; 
-      box-shadow: 0 4px 10px rgba(122, 107, 99, 0.2); 
-      letter-spacing: 1px;
-      transition: background 0.2s;
-    }
-    .submit-btn:hover { background-color: #5c5049; }
-    .submit-btn:disabled { background-color: #aaa; cursor: not-allowed; }
-
-    .random-btn {
-      font-size: 12.5px;
-      background: #ebdcd3;
-      border: none;
-      padding: 4px 10px;
+    .total-box {
+      background-color: #ebdcd3;
+      color: #4e423b;
+      padding: 14px;
       border-radius: 12px;
-      color: #5c5049;
+      text-align: center;
+      font-size: 19px;
+      font-weight: bold;
+      margin-top: 10px;
+      margin-bottom: 18px;
+      letter-spacing: 0.5px;
+    }
+    .submit-btn {
+      width: 100%;
+      background-color: #7a6b63;
+      color: #ffffff;
+      border: none;
+      padding: 12px;
+      font-size: 17.5px;
+      font-weight: bold;
+      border-radius: 22px;
       cursor: pointer;
+      box-shadow: 0 4px 10px rgba(122, 107, 99, 0.2);
+      transition: background 0.2s;
+      letter-spacing: 1px;
+    }
+    .submit-btn:hover {
+      background-color: #5c5049;
+    }
+    .sub-input {
+      margin-top: 8px;
     }
   </style>
 </head>
-<body>
+<body oncontextmenu="return false;" ondragstart="return false;">
 
 <div class="card">
   <div class="title-header">
-    <h2>晞予美甲線上預約</h2>
-  </div>
-
-  <!-- 顧客身分顯示區 -->
-  <div class="user-profile">
-    <img id="avatar" class="user-avatar" src="https://via.placeholder.com/40" alt="頭像">
-    <div>
-      <div id="displayName" class="user-name">預約貴賓</div>
-      <div class="user-status" id="loginStatusText">LINE 帳號連動中...</div>
-    </div>
+    <h2>美甲服務預約選單</h2>
   </div>
 
   <!-- Step 1. 預約日期與時間 -->
@@ -252,20 +441,26 @@
     <div class="datetime-container">
       <div>
         <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #5c5049;">預約日期：</label>
-        <input type="date" id="bookingDate">
+        <input type="date" id="bookingDate" onchange="validateDateTime()">
       </div>
       <div>
         <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #5c5049;">預約時間：</label>
         <div class="time-picker-group">
-          <select id="bookingHour">
-            <option value="10">10 時</option><option value="11">11 時</option><option value="12">12 時</option>
-            <option value="13">13 時</option><option value="14">14 時</option><option value="15">15 時</option>
-            <option value="16">16 時</option><option value="17">17 時</option><option value="18">18 時</option>
-            <option value="19">19 時</option><option value="20">20 時</option>
+          <select id="bookingHour" onchange="validateDateTime()">
+            <option value="00">00 時</option><option value="01">01 時</option><option value="02">02 時</option>
+            <option value="03">03 時</option><option value="04">04 時</option><option value="05">05 時</option>
+            <option value="06">06 時</option><option value="07">07 時</option><option value="08">08 時</option>
+            <option value="09">09 時</option><option value="10">10 時</option><option value="11">11 時</option>
+            <option value="12">12 時</option><option value="13">13 時</option><option value="14">14 時</option>
+            <option value="15">15 時</option><option value="16">16 時</option><option value="17">17 時</option>
+            <option value="18">18 時</option><option value="19">19 時</option><option value="20">20 時</option>
+            <option value="21">21 時</option><option value="22">22 時</option><option value="23">23 時</option>
           </select>
-          <select id="bookingMinute">
+          <select id="bookingMinute" onchange="validateDateTime()">
             <option value="00">00 分</option>
+            <option value="15">15 分</option>
             <option value="30">30 分</option>
+            <option value="45">45 分</option>
           </select>
         </div>
       </div>
@@ -276,196 +471,781 @@
   <div class="section">
     <div class="section-title">
       Step 2. 單色款式
-      <button class="random-btn" onclick="randomColorStyle()">✨ 幫我抽色系</button>
+      <button class="draw-btn" onclick="drawMainColor()">🫯 幫我抽色系</button>
     </div>
-    <select id="colorStyle" onchange="calculateTotal()">
+    <select id="mainColor" onchange="onMainColorChange()">
       <option value="">-- 請選擇色系 (無則留空) --</option>
-      <option value="經典裸色系">經典裸色系 (NT$ 800)</option>
-      <option value="質感莫蘭迪">質感莫蘭迪 (NT$ 900)</option>
-      <option value="氣質小香風">氣質小香風 (NT$ 1000)</option>
+      <option value="紅色">紅色</option>
+      <option value="粉色">粉色</option>
+      <option value="橘色">橘色</option>
+      <option value="黃色">黃色</option>
+      <option value="紅咖色">紅咖色</option>
+      <option value="深咖/可可色">深咖/可可色</option>
+      <option value="淺咖色">淺咖色</option>
+      <option value="綠色">綠色</option>
+      <option value="藍色">藍色</option>
+      <option value="紫色">紫色</option>
+      <option value="黑色">黑色</option>
+      <option value="銀色/白色">銀色/白色</option>
+      <option value="灰色">灰色</option>
+      <option value="金色/香檳色">金色/香檳色</option>
     </select>
   </div>
 
   <!-- Step 3. 加購項目 -->
-  <div class="section">
-    <div class="section-title">Step 3. 加購項目</div>
-    <div class="option-grid">
-      <div class="selectable-box" id="addonJump" onclick="toggleAddon('Jump', 50)">
-        <span>跳色</span>
-        <span style="font-size: 13px; color: #8c7c75;">50 元 +</span>
+  <div class="section disabled-step" id="step3Section">
+    <div style="font-weight: bold; color: #5c5049; margin-bottom: 12px; font-size: 16.5px;">
+      Step 3. 加購項目
+    </div>
+
+    <!-- 直覺開關 1：跳色 -->
+    <div id="boxJumpColor" class="addon-item-box" onclick="toggleOption('jumpColorSection', event)">
+      <div class="addon-header">
+        <span>🎨 跳色</span>
+        <span id="badgeJumpColor" class="addon-badge">50 元 ➕</span>
       </div>
-      <div class="selectable-box" id="addonArt" onclick="toggleAddon('Art', 50)">
-        <span>款式造型</span>
-        <span style="font-size: 13px; color: #8c7c75;">50元起 +</span>
+      <div id="jumpColorSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">選擇色系：</div>
+          <button class="draw-btn" onclick="drawSmartJumpColor(event)">🫯 隨機配色</button>
+        </div>
+        
+        <div>
+          <select id="jumpColor" onchange="onSelectionChange()">
+            <option value="">--請選擇跳色色系--</option>
+            <option value="紅色">紅色</option>
+            <option value="粉色">粉色</option>
+            <option value="橘色">橘色</option>
+            <option value="黃色">黃色</option>
+            <option value="紅咖色">紅咖色</option>
+            <option value="深咖/可可色">深咖/可可色</option>
+            <option value="淺咖色">淺咖色</option>
+            <option value="綠色">綠色</option>
+            <option value="藍色">藍色</option>
+            <option value="紫色">紫色</option>
+            <option value="黑色">黑色</option>
+            <option value="銀色/白色">銀色/白色</option>
+            <option value="灰色">灰色</option>
+            <option value="金色/香檳色">金色/香檳色</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 直覺開關 2：款式造型 -->
+    <div id="boxStyle" class="addon-item-box" onclick="toggleOption('styleSection', event)">
+      <div class="addon-header">
+        <span>✨ 款式造型</span>
+        <span id="badgeStyle" class="addon-badge">50元起 ➕</span>
+      </div>
+      <div id="styleSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
+        <!-- 幫我抽款式在右側 -->
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
+          <button class="draw-btn" onclick="drawStyle(event)">🫯 幫我抽款式</button>
+        </div>
+
+        <!-- 局部造型與十指造型按鈕區塊 -->
+        <div class="removal-card-group" style="margin-top: 0; margin-bottom: 12px; gap: 8px;">
+          <div id="typePartialCard" class="removal-card" onclick="setStyleType('partial')" style="padding: 10px; font-size: 15px;">
+            <div class="removal-card-title" style="font-size: 15px;">局部造型</div>
+          </div>
+          <div id="typeFullCard" class="removal-card" onclick="setStyleType('full')" style="padding: 10px; font-size: 15px;">
+            <div class="removal-card-title" style="font-size: 15px;">十指造型</div>
+          </div>
+        </div>
+        <input type="radio" name="styleType" value="partial" id="radioPartial" style="display:none;">
+        <input type="radio" name="styleType" value="full" id="radioFull" style="display:none;">
+        
+        <!-- 局部造型子選項 -->
+        <div id="partialStyleGroup" class="hidden">
+          <div style="font-size: 12px; color: #8c7c75; margin-bottom: 4px; font-weight: 500;">(至多5指造型+5指以上單色/跳色)</div>
+          <div class="checkbox-grid" style="margin-bottom: 12px;">
+            <label class="chip-item"><input type="checkbox" name="style" id="catEyeCb" value="貓眼" onchange="checkLimit(this)">貓眼</label>
+            <label class="chip-item"><input type="checkbox" name="style" value="立體不規則造型" onchange="checkLimit(this)">立體不規則造型</label>
+            
+            <label class="chip-item"><input type="checkbox" name="style" value="法式" onchange="checkLimit(this)">法式</label>
+            <label class="chip-item"><input type="checkbox" name="style" value="鏡面銀" onchange="checkLimit(this)">鏡面銀</label>
+
+            <label class="chip-item"><input type="checkbox" name="style" value="漸層" onchange="checkLimit(this)">漸層</label>
+            <label class="chip-item"><input type="checkbox" name="style" value="小飾品/貼紙" onchange="checkLimit(this)">小飾品/貼紙</label>
+
+            <label class="chip-item"><input type="checkbox" name="style" value="格紋" onchange="checkLimit(this)">格紋</label>
+            <label class="chip-item"><input type="checkbox" name="style" value="暈染" onchange="checkLimit(this)">暈染</label>
+
+            <label class="chip-item"><input type="checkbox" name="style" value="海莉款" onchange="checkLimit(this)">海莉款</label>
+            <label class="chip-item"><input type="checkbox" name="style" id="customStyleCb" value="指定圖案" onchange="checkLimit(this)">指定圖案</label>
+          </div>
+        </div>
+
+        <!-- 十指造型子選項 -->
+        <div id="fullStyleGroup" class="hidden">
+          <div style="font-size: 12px; color: transparent; margin-bottom: 4px; user-select: none; pointer-events: none;">(佔位)</div>
+          <div class="checkbox-grid" style="margin-bottom: 12px;">
+            <label class="chip-item"><input type="checkbox" name="fullStyle" id="fullCatEyeCb" value="貓眼" onchange="checkFullLimit(this)">貓眼</label>
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="立體不規則造型" onchange="checkFullLimit(this)">立體不規則造型</label>
+
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="法式" onchange="checkFullLimit(this)">法式</label>
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="鏡面銀" onchange="checkFullLimit(this)">鏡面銀</label>
+
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="漸層" onchange="checkFullLimit(this)">漸層</label>
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="小飾品/貼紙" onchange="checkFullLimit(this)">小飾品/貼紙</label>
+
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="格紋" onchange="checkFullLimit(this)">格紋</label>
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="暈染" onchange="checkFullLimit(this)">暈染</label>
+
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="海莉款" onchange="checkFullLimit(this)">海莉款</label>
+            <label class="chip-item"><input type="checkbox" name="fullStyle" id="fullCustomStyleCb" value="指定圖案" onchange="checkFullLimit(this)">指定圖案</label>
+          </div>
+        </div>
+
+        <div id="catEyeDetailDiv" class="sub-input hidden">
+          <label style="font-size: 13px; font-weight: bold; color: #5c5049;">貓眼類型：</label>
+          <select id="catEyeType" style="background-color: #ffffff; font-weight: bold;">
+            <option value="指定單色貓眼">指定單色貓眼</option>
+            <option value="雙色貓眼">雙色貓眼</option>
+          </select>
+        </div>
+
+        <div id="customInputDiv" class="sub-input hidden">
+          <input type="text" id="customPattern" placeholder="請填寫指定圖案細節 (必填)">
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Step 4. 色調 -->
-  <div class="section">
+  <div class="section disabled-step" id="step4Section">
     <div class="section-title">Step 4. 色調</div>
-    <div class="tone-group">
-      <label class="tone-item"><input type="radio" name="tone" value="隨機" checked> 隨機</label>
-      <label class="tone-item"><input type="radio" name="tone" value="個性暗色調"> 個性暗色調</label>
-      <label class="tone-item"><input type="radio" name="tone" value="清透亮色調"> 清透亮色調</label>
+    <div class="tone-palette-group">
+      <div class="tone-option active" onclick="selectToneDot(this, '隨機')">
+        <span class="color-dot"></span>
+        <span class="tone-label">隨機</span>
+      </div>
+      <div class="tone-option" onclick="selectToneDot(this, '個性暗色調')">
+        <span class="color-dot"></span>
+        <span class="tone-label">個性暗色調</span>
+      </div>
+      <div class="tone-option" onclick="selectToneDot(this, '清透亮色調')">
+        <span class="color-dot"></span>
+        <span class="tone-label">清透亮色調</span>
+      </div>
     </div>
+    <input type="hidden" id="selectedTone" value="隨機">
   </div>
 
   <!-- Step 5. 卸甲服務 -->
   <div class="section">
     <div class="section-title">Step 5. 卸甲服務</div>
-    <div class="option-grid">
-      <div class="selectable-box selected" id="removalNo" onclick="selectRemoval(0)">
-        <span>不需要卸甲</span>
-        <span>NT$ 0</span>
+    <div class="removal-card-group">
+      <div id="removalYesCard" class="removal-card" onclick="setRemoval(true)">
+        <div class="removal-card-title">需要卸甲</div>
       </div>
-      <div class="selectable-box" id="removalYes" onclick="selectRemoval(300)">
-        <span>需要卸甲</span>
-        <span>+NT$ 300</span>
+      <div id="removalNoCard" class="removal-card active" onclick="setRemoval(false)">
+        <div class="removal-card-title">不需要</div>
       </div>
     </div>
   </div>
 
-  <!-- 金額顯示 -->
   <div class="total-box">
-    預計總金額：NT$ <span id="totalPriceText">800</span> 元
+    預計總金額：NT$ <span id="totalPrice">0</span> 元
   </div>
 
-  <button id="submitBtn" class="submit-btn" onclick="submitBooking()">送出預約單 (開啟 LINE)</button>
+  <button class="submit-btn" onclick="sendBooking()">送出預約單 (開啟 LINE)</button>
 </div>
 
 <script>
-  // 請填入您的 Google Apps Script 部署網址與 LIFF ID
-  const GAS_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
-  const MY_LIFF_ID = "YOUR_LIFF_ID_HERE";
   const LINE_OFFICIAL_ACCOUNT_ID = "@344gjuzg"; 
 
-  let selectedAddons = {
-    Jump: false,
-    Art: false
-  };
-  let removalPrice = 0;
-
-  document.addEventListener("DOMContentLoaded", function() {
-    calculateTotal();
-    if (typeof liff !== "undefined") {
-      liff.init({ liffId: MY_LIFF_ID })
-        .then(() => {
-          if (liff.isLoggedIn()) {
-            liff.getProfile().then(profile => {
-              document.getElementById("displayName").innerText = profile.displayName;
-              document.getElementById("avatar").src = profile.pictureUrl;
-              document.getElementById("loginStatusText").innerText = "已成功連動 LINE";
-            }).catch(err => console.log("取得個人資料失敗", err));
-          }
-        })
-        .catch(err => console.log("LIFF 初始化失敗", err));
+  document.addEventListener('keydown', function(e) {
+    if (
+      e.keyCode === 123 || 
+      (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 67)) ||
+      (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74))
+    ) {
+      e.preventDefault();
+      return false;
     }
   });
 
-  function toggleAddon(type, price) {
-    selectedAddons[type] = !selectedAddons[type];
-    const el = document.getElementById(type === 'Jump' ? 'addonJump' : 'addonArt');
-    if (selectedAddons[type]) {
-      el.classList.add('selected');
-    } else {
-      el.classList.remove('selected');
-    }
-    calculateTotal();
+  let showJumpColor = false, showStyle = false;
+  let needRemoval = false;
+
+  const ALL_COLORS = [
+    "紅色", "粉色", "橘色", "黃色", "紅咖色", 
+    "深咖/可可色", "淺咖色", "綠色", "藍色", "紫色", 
+    "黑色", "銀色/白色", "灰色", "金色/香檳色"
+  ];
+
+  function getTaipeiDate() {
+    const now = new Date();
+    const taipeiStr = now.toLocaleString("en-US", { timeZone: "Asia/Taipei" });
+    return new Date(taipeiStr);
   }
 
-  function selectRemoval(price) {
-    removalPrice = price;
-    if (price === 0) {
-      document.getElementById('removalNo').classList.add('selected');
-      document.getElementById('removalYes').classList.remove('selected');
-    } else {
-      document.getElementById('removalYes').classList.add('selected');
-      document.getElementById('removalNo').classList.remove('selected');
-    }
-    calculateTotal();
+  function formatDateToYYYYMMDD(dateObj) {
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
-  function randomColorStyle() {
-    const select = document.getElementById("colorStyle");
+  function initDatePicker() {
+    const taipeiNow = getTaipeiDate();
+    const todayStr = formatDateToYYYYMMDD(taipeiNow);
+    const dateInput = document.getElementById("bookingDate");
+    
+    dateInput.min = todayStr;
+    if (!dateInput.value || dateInput.value < todayStr) {
+      dateInput.value = todayStr;
+    }
+    validateDateTime();
+  }
+
+  function validateDateTime() {
+    const dateInput = document.getElementById("bookingDate");
+    const hourSelect = document.getElementById("bookingHour");
+    const minuteSelect = document.getElementById("bookingMinute");
+    const selectedDateStr = dateInput.value;
+
+    if (!selectedDateStr) return;
+
+    const taipeiNow = getTaipeiDate();
+    const todayStr = formatDateToYYYYMMDD(taipeiNow);
+    const currentHour = taipeiNow.getHours();
+    const currentMinute = taipeiNow.getMinutes();
+
+    const isToday = (selectedDateStr === todayStr);
+
+    let firstValidHour = null;
+    Array.from(hourSelect.options).forEach(opt => {
+      const h = parseInt(opt.value, 10);
+      if (isToday && h < currentHour) {
+        opt.disabled = true;
+      } else {
+        opt.disabled = false;
+        if (firstValidHour === null) firstValidHour = opt.value;
+      }
+    });
+
+    if (hourSelect.selectedOptions[0] && hourSelect.selectedOptions[0].disabled) {
+      if (firstValidHour !== null) {
+        hourSelect.value = firstValidHour;
+      }
+    }
+
+    const selectedHour = parseInt(hourSelect.value, 10);
+    let firstValidMinute = null;
+    Array.from(minuteSelect.options).forEach(opt => {
+      const m = parseInt(opt.value, 10);
+      if (isToday && selectedHour === currentHour && m <= currentMinute) {
+        opt.disabled = true;
+      } else {
+        opt.disabled = false;
+        if (firstValidMinute === null) firstValidMinute = opt.value;
+      }
+    });
+
+    if (minuteSelect.selectedOptions[0] && minuteSelect.selectedOptions[0].disabled) {
+      if (firstValidMinute !== null) {
+        minuteSelect.value = firstValidMinute;
+      } else {
+        const nextHourIndex = hourSelect.selectedIndex + 1;
+        if (nextHourIndex < hourSelect.options.length) {
+          hourSelect.selectedIndex = nextHourIndex;
+          validateDateTime();
+        }
+      }
+    }
+  }
+
+  function onMainColorChange() {
+    const mainColorVal = document.getElementById('mainColor').value;
+    const step3 = document.getElementById('step3Section');
+    const step4 = document.getElementById('step4Section');
+
+    if (mainColorVal !== "") {
+      step3.classList.remove('disabled-step');
+      step4.classList.remove('disabled-step');
+    } else {
+      step3.classList.add('disabled-step');
+      step4.classList.add('disabled-step');
+
+      showJumpColor = false;
+      showStyle = false;
+      document.getElementById('jumpColorSection').classList.add('hidden');
+      document.getElementById('styleSection').classList.add('hidden');
+      document.getElementById('boxJumpColor').classList.remove('active');
+      document.getElementById('boxStyle').classList.remove('active');
+      document.getElementById('badgeJumpColor').innerText = '50 元 ➕';
+      document.getElementById('badgeStyle').innerText = '50元起 ➕';
+      document.getElementById('jumpColor').value = "";
+      
+      document.getElementById('radioPartial').checked = false;
+      document.getElementById('radioFull').checked = false;
+      document.getElementById('typePartialCard').classList.remove('active');
+      document.getElementById('typeFullCard').classList.remove('active');
+      document.getElementById('partialStyleGroup').classList.add('hidden');
+      document.getElementById('fullStyleGroup').classList.add('hidden');
+
+      document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
+      document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
+      document.getElementById('customPattern').value = "";
+    }
+    onSelectionChange();
+  }
+
+  function selectToneDot(element, value) {
+    const options = document.querySelectorAll('.tone-option');
+    options.forEach(opt => opt.classList.remove('active'));
+    element.classList.add('active');
+    document.getElementById('selectedTone').value = value;
+  }
+
+  function setRemoval(status) {
+    needRemoval = status;
+    const yesCard = document.getElementById('removalYesCard');
+    const noCard = document.getElementById('removalNoCard');
+
+    if (needRemoval) {
+      yesCard.classList.add('active');
+      noCard.classList.remove('active');
+    } else {
+      noCard.classList.add('active');
+      yesCard.classList.remove('active');
+    }
+    onSelectionChange();
+  }
+
+  function toggleOption(id, event) {
+    if (event) event.stopPropagation();
+    const el = document.getElementById(id);
+    if (id === 'jumpColorSection') { 
+      showJumpColor = !showJumpColor; 
+      el.classList.toggle('hidden', !showJumpColor); 
+      document.getElementById('boxJumpColor').classList.toggle('active', showJumpColor);
+      document.getElementById('badgeJumpColor').innerText = showJumpColor ? '已加購 ✔' : '50 元 ➕';
+    }
+    else if (id === 'styleSection') { 
+      showStyle = !showStyle; 
+      el.classList.toggle('hidden', !showStyle); 
+      document.getElementById('boxStyle').classList.toggle('active', showStyle);
+      document.getElementById('badgeStyle').innerText = showStyle ? '已加購 ✔' : '50元起 ➕';
+
+      if (showStyle) {
+        document.getElementById('radioPartial').checked = false;
+        document.getElementById('radioFull').checked = false;
+        document.getElementById('typePartialCard').classList.remove('active');
+        document.getElementById('typeFullCard').classList.remove('active');
+        document.getElementById('partialStyleGroup').classList.add('hidden');
+        document.getElementById('fullStyleGroup').classList.add('hidden');
+        document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
+        document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
+        document.getElementById('customPattern').value = "";
+      }
+    }
+    onSelectionChange();
+  }
+
+  function setStyleType(type) {
+    const partialCard = document.getElementById('typePartialCard');
+    const fullCard = document.getElementById('typeFullCard');
+    const partialGroup = document.getElementById('partialStyleGroup');
+    const fullGroup = document.getElementById('fullStyleGroup');
+
+    if (type === 'partial') {
+      document.getElementById('radioPartial').checked = true;
+      partialCard.classList.add('active');
+      fullCard.classList.remove('active');
+      partialGroup.classList.remove('hidden');
+      fullGroup.classList.add('hidden');
+      document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
+    } else {
+      document.getElementById('radioFull').checked = true;
+      fullCard.classList.add('active');
+      partialCard.classList.remove('active');
+      partialGroup.classList.add('hidden');
+      fullGroup.classList.remove('hidden');
+      document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
+    }
+    
+    const customCb = document.getElementById('customStyleCb');
+    const fullCustomCb = document.getElementById('fullCustomStyleCb');
+    if (!((customCb && customCb.checked) || (fullCustomCb && fullCustomCb.checked))) {
+      document.getElementById('customPattern').value = "";
+    }
+    onSelectionChange();
+  }
+
+  function isValidColorPair(c1, c2) {
+    if (!c1 || !c2) return true;
+    if (c1 === c2) return false;
+
+    if ((c1 === "藍色" && c2 === "紫色") || (c1 === "紫色" && c2 === "藍色")) {
+      return false;
+    }
+
+    const greenConflict = ["紅色", "紫色", "粉色"];
+    if (c1 === "綠色" && greenConflict.includes(c2)) return false;
+    if (c2 === "綠色" && greenConflict.includes(c1)) return false;
+
+    const similarGroups = [
+      ["紅色", "粉色"],
+      ["橘色", "黃色"],
+      ["紅咖色", "深咖/可可色", "淺咖色"]
+    ];
+
+    for (let group of similarGroups) {
+      if (group.includes(c1) && group.includes(c2)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  function drawSmartJumpColor(event) {
+    if (event) event.stopPropagation();
+
+    const mainColor = document.getElementById('mainColor').value;
+    const jumpSelect = document.getElementById('jumpColor');
+    let currentExistingColors = [mainColor];
+
+    let validPool = ALL_COLORS.filter(color => {
+      return currentExistingColors.every(existing => isValidColorPair(existing, color));
+    });
+
+    if (validPool.length === 0) {
+      validPool = ALL_COLORS.filter(c => !currentExistingColors.includes(c));
+    }
+
+    if (mainColor && validPool.includes("銀色/白色")) {
+      validPool.push("銀色/白色", "銀色/白色", "銀色/白色", "銀色/白色");
+    }
+
+    const pickedColor = validPool[Math.floor(Math.random() * validPool.length)];
+
+    jumpSelect.value = pickedColor;
+    jumpSelect.classList.remove('flash-highlight');
+    void jumpSelect.offsetWidth;
+    jumpSelect.classList.add('flash-highlight');
+
+    onSelectionChange();
+  }
+
+  function drawMainColor() {
+    const select = document.getElementById('mainColor');
     const options = select.options;
     const randomIndex = Math.floor(Math.random() * (options.length - 1)) + 1;
     select.selectedIndex = randomIndex;
+    
+    select.classList.remove('flash-highlight');
+    void select.offsetWidth;
+    select.classList.add('flash-highlight');
+
+    onMainColorChange();
+  }
+
+  function drawStyle(event) {
+    if (event) event.stopPropagation();
+    if (!showStyle) {
+      showStyle = true;
+      document.getElementById('styleSection').classList.remove('hidden');
+      document.getElementById('boxStyle').classList.add('active');
+      document.getElementById('badgeStyle').innerText = '已加購 ✔';
+    }
+    
+    // 十指 70%、局部 30% 機率隨機決定款式類型
+    const randomTypeChance = Math.random();
+    const chosenType = randomTypeChance < 0.7 ? 'full' : 'partial';
+    setStyleType(chosenType);
+
+    if (chosenType === 'partial') {
+      document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
+      document.getElementById('customPattern').value = "";
+
+      const pool = [
+        { name: "貓眼", weight: 65 }, { name: "暈染", weight: 25 }, { name: "小飾品/貼紙", weight: 2 },
+        { name: "格紋", weight: 1 }, { name: "法式", weight: 1 }, { name: "立體不規則造型", weight: 1 },
+        { name: "漸層", weight: 0.5 }, { name: "海莉款", weight: 0.5 }, { name: "鏡面銀", weight: 0.5 },
+        { name: "指定圖案", weight: 14 }
+      ];
+
+      const countToDraw = Math.floor(Math.random() * 3) + 1;
+      let chosenList = [];
+
+      for (let i = 0; i < countToDraw; i++) {
+        const availablePool = pool.filter(item => !chosenList.includes(item.name));
+        if (availablePool.length === 0) break;
+        const totalWeight = availablePool.reduce((sum, item) => sum + item.weight, 0);
+        let randomNum = Math.random() * totalWeight;
+        for (let item of availablePool) {
+          if (randomNum < item.weight) { chosenList.push(item.name); break; }
+          randomNum -= item.weight;
+        }
+      }
+
+      document.querySelectorAll('input[name="style"]').forEach(cb => {
+        if (chosenList.includes(cb.value)) { cb.checked = true; checkLimit(cb); }
+      });
+
+      const customCb = document.getElementById('customStyleCb');
+      if (customCb && customCb.checked) {
+        const subOptions = ["隨機花花", "隨機蝴蝶結", "隨機星星"];
+        document.getElementById('customPattern').value = subOptions[Math.floor(Math.random() * subOptions.length)];
+      }
+    } else {
+      document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
+      document.getElementById('customPattern').value = "";
+
+      const fullPool = [
+        { name: "貓眼", weight: 65 }, { name: "暈染", weight: 25 }, { name: "小飾品/貼紙", weight: 2 },
+        { name: "格紋", weight: 1 }, { name: "法式", weight: 1 }, { name: "立體不規則造型", weight: 1 },
+        { name: "漸層", weight: 0.5 }, { name: "海莉款", weight: 0.5 }, { name: "鏡面銀", weight: 0.5 },
+        { name: "指定圖案", weight: 14 }
+      ];
+
+      const countToDraw = Math.floor(Math.random() * 3) + 1;
+      let chosenList = [];
+
+      for (let i = 0; i < countToDraw; i++) {
+        const availablePool = fullPool.filter(item => !chosenList.includes(item.name));
+        if (availablePool.length === 0) break;
+        const totalWeight = availablePool.reduce((sum, item) => sum + item.weight, 0);
+        let randomNum = Math.random() * totalWeight;
+        for (let item of availablePool) {
+          if (randomNum < item.weight) { chosenList.push(item.name); break; }
+          randomNum -= item.weight;
+        }
+      }
+
+      document.querySelectorAll('input[name="fullStyle"]').forEach(cb => {
+        if (chosenList.includes(cb.value)) { cb.checked = true; checkFullLimit(cb); }
+      });
+
+      const fullCustomCb = document.getElementById('fullCustomStyleCb');
+      if (fullCustomCb && fullCustomCb.checked) {
+        const subOptions = ["隨機花花", "隨機蝴蝶結", "隨機星星"];
+        document.getElementById('customPattern').value = subOptions[Math.floor(Math.random() * subOptions.length)];
+      }
+    }
+
+    const boxEl = document.getElementById('boxStyle');
+    if (boxEl) {
+      boxEl.classList.remove('flash-highlight');
+      void boxEl.offsetWidth;
+      boxEl.classList.add('flash-highlight');
+    }
+
+    onSelectionChange();
+  }
+
+  function checkLimit(checkbox) {
+    const checkboxes = document.querySelectorAll('input[name="style"]:checked');
+    if (checkboxes.length > 4) {
+      alert("局部造型最多只能勾選 4 個喔！");
+      checkbox.checked = false;
+    }
+    const customCb = document.getElementById('customStyleCb');
+    const isCustomActive = (customCb && customCb.checked);
+    document.getElementById('customInputDiv').classList.toggle('hidden', !isCustomActive);
+    if (!isCustomActive) {
+      document.getElementById('customPattern').value = "";
+    }
+    onSelectionChange();
+  }
+
+  function checkFullLimit(checkbox) {
+    const checkboxes = document.querySelectorAll('input[name="fullStyle"]:checked');
+    if (checkboxes.length > 4) {
+      alert("十指造型最多只能勾選 4 項喔！");
+      checkbox.checked = false;
+    }
+    const fullCustomCb = document.getElementById('fullCustomStyleCb');
+    const isCustomActive = (fullCustomCb && fullCustomCb.checked);
+    document.getElementById('customInputDiv').classList.toggle('hidden', !isCustomActive);
+    if (!isCustomActive) {
+      document.getElementById('customPattern').value = "";
+    }
+    onSelectionChange();
+  }
+
+  function onSelectionChange() {
+    autoDetermineCatEye();
     calculateTotal();
   }
 
-  function calculateTotal() {
-    let basePrice = 800; // 預設底價
-    const styleVal = document.getElementById("colorStyle").value;
-    if (styleVal.includes("莫蘭迪")) basePrice = 900;
-    if (styleVal.includes("小香風")) basePrice = 1000;
+  function autoDetermineCatEye() {
+    const catEyeCb = document.getElementById('catEyeCb');
+    const fullCatEyeCb = document.getElementById('fullCatEyeCb');
+    const catEyeDetailDiv = document.getElementById('catEyeDetailDiv');
+    const catEyeSelect = document.getElementById('catEyeType');
+    
+    const isCatEyeActive = (catEyeCb && catEyeCb.checked) || (fullCatEyeCb && fullCatEyeCb.checked);
 
-    let addonTotal = 0;
-    if (selectedAddons.Jump) addonTotal += 50;
-    if (selectedAddons.Art) addonTotal += 50;
-
-    const total = basePrice + addonTotal + removalPrice;
-    document.getElementById("totalPriceText").innerText = total;
-  }
-
-  function submitBooking() {
-    const name = document.getElementById("displayName").innerText;
-    const date = document.getElementById("bookingDate").value;
-    const hour = document.getElementById("bookingHour").value;
-    const minute = document.getElementById("bookingMinute").value;
-    const time = `${hour}:${minute}`;
-    const styleVal = document.getElementById("colorStyle").value || "未選擇";
-    const toneVal = document.querySelector('input[name="tone"]:checked').value;
-    const totalPrice = parseInt(document.getElementById("totalPriceText").innerText);
-    const removalStr = removalPrice > 0 ? "需要卸甲 (+300元)" : "不需要卸甲";
-
-    if (!date) {
-      alert("請先選擇預約日期！");
+    if (!isCatEyeActive || !showStyle) {
+      catEyeDetailDiv.classList.add('hidden');
       return;
     }
+    
+    catEyeDetailDiv.classList.remove('hidden');
 
-    const btn = document.getElementById("submitBtn");
-    btn.disabled = true;
-    btn.innerText = "預約送出中...";
+    const jumpColorVal = document.getElementById('jumpColor').value;
+    const hasJumpColorSelected = showJumpColor && (jumpColorVal !== "");
 
-    // 1. Google 試算表 Payload
-    const payload = {
-      displayName: name,
-      bookingDate: date,
-      bookingTime: time,
-      colorStyle: styleVal,
-      totalPrice: totalPrice,
-      status: "已預約"
-    };
-
-    // 2. 同步寫入 Google 試算表
-    fetch(GAS_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    }).catch(error => console.error("GAS Error:", error));
-
-    // 3. 組合 LINE 訊息並導向 LINE 官方帳號
-    let detailsText = `【晞予美甲線上預約】\n`;
-    detailsText += `👤 預約貴賓：${name}\n`;
-    detailsText += `📅 預約時間：${date} ${time}\n`;
-    detailsText += `🎨 主色系/款式：${styleVal}\n`;
-    detailsText += `✨ 色調風格：${toneVal}\n`;
-    detailsText += `🎨 加購跳色：${selectedAddons.Jump ? '有 (+50元)' : '無'}\n`;
-    detailsText += `✨ 加購造型：${selectedAddons.Art ? '有 (+50元)' : '無'}\n`;
-    detailsText += `💅 卸甲服務：${removalStr}\n`;
-    detailsText += `💰 預計總金額：NT$ ${totalPrice} 元`;
-
-    const encodedMessage = encodeURIComponent(detailsText);
-    const lineUrl = `https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodedMessage}`;
-
-    setTimeout(() => {
-      alert("預約資料已送出！即將為您開啟 LINE 傳送預約單。");
-      window.location.href = lineUrl;
-    }, 500);
+    if (hasJumpColorSelected) {
+      catEyeSelect.disabled = false;
+      catEyeSelect.style.backgroundColor = "#ffffff";
+      if (catEyeSelect.value !== "雙色貓眼" && catEyeSelect.value !== "指定單色貓眼") {
+        catEyeSelect.value = "雙色貓眼";
+      }
+    } else {
+      catEyeSelect.disabled = true;
+      catEyeSelect.style.backgroundColor = "#e5ded7";
+      catEyeSelect.value = "指定單色貓眼";
+    }
   }
-</script>
 
+  function calculateTotal() {
+    let total = 0;
+    const mainColorVal = document.getElementById('mainColor').value;
+    const isMainColorSelected = mainColorVal !== "";
+    
+    const jumpColorVal = document.getElementById('jumpColor').value;
+    const isJumpSelected = showJumpColor && (jumpColorVal !== "");
+
+    const selectedStyles = showStyle ? document.querySelectorAll('input[name="style"]:checked') : [];
+    const selectedFullStyles = showStyle ? document.querySelectorAll('input[name="fullStyle"]:checked') : [];
+    const currentTypeInput = document.querySelector('input[name="styleType"]:checked');
+    const currentType = currentTypeInput ? currentTypeInput.value : '';
+    
+    const isStyleSelected = showStyle;
+    const hasNailService = isMainColorSelected || isJumpSelected || isStyleSelected;
+
+    if (needRemoval) {
+      total += hasNailService ? 150 : 200;
+    }
+
+    if (isMainColorSelected) total += 700;
+    if (isJumpSelected) total += 50; 
+
+    if (showStyle && currentType) {
+      if (currentType === 'partial') {
+        total += selectedStyles.length * 50;
+        const customCb = document.getElementById('customStyleCb');
+        if (customCb && customCb.checked) total += 30;
+      } else {
+        total += 50;
+        total += selectedFullStyles.length * 50;
+        const fullCustomCb = document.getElementById('fullCustomStyleCb');
+        if (fullCustomCb && fullCustomCb.checked) total += 30;
+      }
+    }
+
+    document.getElementById('totalPrice').innerText = total;
+  }
+
+  function sendBooking() {
+    const mainColorVal = document.getElementById('mainColor').value;
+    const isMainColorSelected = mainColorVal !== "";
+
+    if (showJumpColor) {
+      const jumpColorVal = document.getElementById('jumpColor').value;
+      if (jumpColorVal === "") {
+        alert("🎨 請選擇跳色色系，或關閉該項目！");
+        return;
+      }
+    }
+
+    if (showStyle) {
+      const currentTypeInput = document.querySelector('input[name="styleType"]:checked');
+      if (!currentTypeInput) {
+        alert("✨ 您開啟了「款式造型」，請先選擇是要【局部造型】還是【十指造型】！");
+        return;
+      }
+
+      const currentType = currentTypeInput.value;
+      const selectedStyles = document.querySelectorAll('input[name="style"]:checked');
+      const selectedFullStyles = document.querySelectorAll('input[name="fullStyle"]:checked');
+
+      if (currentType === 'partial' && selectedStyles.length === 0) {
+        alert("✨ 請勾選局部造型款式，或關閉該項目！");
+        return;
+      }
+      
+      if (currentType === 'full' && selectedFullStyles.length === 0) {
+        alert("✨ 請勾選十指造型款式，或關閉該項目！");
+        return;
+      }
+      
+      const customCb = document.getElementById('customStyleCb');
+      const fullCustomCb = document.getElementById('fullCustomStyleCb');
+      if ((customCb && customCb.checked) || (fullCustomCb && fullCustomCb.checked)) {
+        const customInput = document.getElementById('customPattern');
+        if (!customInput.value.trim()) {
+          alert("✨ 您勾選了指定圖案，請填寫指定圖案細節！");
+          return;
+        }
+      }
+    }
+
+    const bookingDate = document.getElementById('bookingDate').value || '未選擇日期';
+    const hour = document.getElementById('bookingHour').value;
+    const minute = document.getElementById('bookingMinute').value;
+    const bookingTime = `${hour}:${minute}`;
+    
+    let details = `【美甲服務預約單】\n`;
+    details += `----------------------------\n`;
+    details += `• 預約時間：${bookingDate} ${bookingTime}\n`;
+
+    if (needRemoval) {
+      details += `• 卸甲服務：需要卸甲\n`;
+    }
+
+    if (isMainColorSelected) {
+      details += `• 單色款式：${mainColorVal}\n`;
+    }
+
+    if (showJumpColor) {
+      const jColor = document.getElementById('jumpColor').value;
+      if (jColor) details += `• 跳色：${jColor}\n`;
+    }
+
+    if (showStyle) {
+      const currentTypeInput = document.querySelector('input[name="styleType"]:checked');
+      if (currentTypeInput) {
+        const currentType = currentTypeInput.value;
+        const typeName = (currentType === 'full') ? '十指造型' : '局部造型';
+        
+        const styles = Array.from(document.querySelectorAll('input[name="style"]:checked')).map(cb => cb.value);
+        const fullStyles = Array.from(document.querySelectorAll('input[name="fullStyle"]:checked')).map(cb => cb.value);
+        const chosenStyles = (currentType === 'full') ? fullStyles : styles;
+
+        details += `• 款式造型：${typeName}\n`;
+        if (chosenStyles.length > 0) {
+          details += `  - 項目：${chosenStyles.join(', ')}\n`;
+        }
+
+        const customCb = document.getElementById('customStyleCb');
+        const fullCustomCb = document.getElementById('fullCustomStyleCb');
+        if ((currentType === 'partial' && customCb && customCb.checked) || (currentType === 'full' && fullCustomCb && fullCustomCb.checked)) {
+          details += `  - 指定圖案細節：${document.getElementById('customPattern').value}\n`;
+        }
+      }
+    }
+
+    const tone = document.getElementById('selectedTone').value;
+    details += `• 色調風格：${tone}\n`;
+    details += `----------------------------\n`;
+    details += `預計總金額：NT$ ${document.getElementById('totalPrice').innerText} 元`;
+
+    const encodedMessage = encodeURIComponent(details);
+    const lineUrl = `https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodedMessage}`;
+    window.location.href = lineUrl;
+  }
+
+  window.onload = function() {
+    initDatePicker();
+  };
+</script>
 </body>
 </html>
