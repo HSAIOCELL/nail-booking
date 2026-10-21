@@ -5,7 +5,7 @@
   <title>美甲預約系統 - 後台管理</title>
   <style>
     body { font-family: Arial, sans-serif; background: #fdfbf7; margin: 0; padding: 20px; color: #333; }
-    .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .container { max-width: 1050px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
     h2 { text-align: center; color: #d4a373; }
     
     /* 統計卡片樣式 */
@@ -15,12 +15,17 @@
     .stat-card p { margin: 0; font-size: 20px; font-weight: bold; color: #bc6c25; }
 
     table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { border: 1px solid #e0e0e0; padding: 12px; text-align: center; font-size: 14px; }
+    th, td { border: 1px solid #e0e0e0; padding: 10px; text-align: center; font-size: 14px; }
     th { background: #fefae0; color: #555; }
     tr:nth-child(even) { background: #f9f9f9; }
     .loading { text-align: center; padding: 20px; color: #888; }
     .btn-refresh { background: #d4a373; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-bottom: 15px; }
     .btn-refresh:hover { background: #bc6c25; }
+    
+    /* 互動表單樣式 */
+    select, input[type="number"] { padding: 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 13px; text-align: center; }
+    .btn-save { background: #606c38; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+    .btn-save:hover { background: #283618; }
   </style>
 </head>
 <body>
@@ -35,7 +40,7 @@
       <p id="totalRevenue">NT$ 0</p>
     </div>
     <div class="stat-card">
-      <h3>總材料成本 (手動填寫)</h3>
+      <h3>總材料成本</h3>
       <p id="totalCost">NT$ 0</p>
     </div>
     <div class="stat-card">
@@ -55,23 +60,23 @@
         <th>時間</th>
         <th>項目</th>
         <th>預估金額</th>
-        <th>狀態</th>
-        <th>成本</th>
+        <th>狀態 (可修改)</th>
+        <th>成本 (可修改)</th>
+        <th>操作</th>
       </tr>
     </thead>
     <tbody id="bookingTableBody">
-      <tr><td colspan="8" class="loading">正在讀取最新資料...</td></tr>
+      <tr><td colspan="9" class="loading">正在讀取最新資料...</td></tr>
     </tbody>
   </table>
 </div>
 
 <script>
-  // 🔗 你的最新 Google Apps Script 部署網址
   const scriptUrl = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
 
   function fetchBookings() {
     const tableBody = document.getElementById('bookingTableBody');
-    tableBody.innerHTML = `<tr><td colspan="8" class="loading">正在讀取最新資料...</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="9" class="loading">正在讀取最新資料...</td></tr>`;
 
     fetch(scriptUrl)
       .then(response => response.json())
@@ -79,7 +84,7 @@
         tableBody.innerHTML = "";
         
         if (!data || data.length === 0) {
-          tableBody.innerHTML = `<tr><td colspan="8" class="loading">目前沒有預約資料</td></tr>`;
+          tableBody.innerHTML = `<tr><td colspan="9" class="loading">目前沒有預約資料</td></tr>`;
           updateFinance(0, 0);
           return;
         }
@@ -88,9 +93,6 @@
         let totalCost = 0;
 
         data.forEach(row => {
-          // 確保欄位依序對應：
-          // row[0]: 預約編號, row[1]: 客戶名稱, row[2]: 日期, row[3]: 時間, 
-          // row[4]: 項目, row[5]: 預估金額, row[6]: 狀態, row[7]: 成本
           const bookingId = row[0] || "";
           const customerName = row[1] || "";
           const date = row[2] || "";
@@ -100,7 +102,6 @@
           const status = row[6] || "預約中";
           const cost = parseInt(row[7], 10) || 0;
 
-          // 若非「已取消」，則計入營收與成本計算
           if (status !== "已取消") {
             totalRev += price;
             totalCost += cost;
@@ -114,8 +115,19 @@
             <td>${time}</td>
             <td>${items}</td>
             <td>NT$ ${price}</td>
-            <td style="color: ${status === '已取消' ? 'red' : 'green'}; font-weight: bold;">${status}</td>
-            <td>NT$ ${cost}</td>
+            <td>
+              <select id="status_${bookingId}">
+                <option value="預約中" ${status === '預約中' ? 'selected' : ''}>預約中</option>
+                <option value="已完成" ${status === '已完成' ? 'selected' : ''}>已完成</option>
+                <option value="已取消" ${status === '已取消' ? 'selected' : ''}>已取消</option>
+              </select>
+            </td>
+            <td>
+              <input type="number" id="cost_${bookingId}" value="${cost}" style="width: 80px;" min="0">
+            </td>
+            <td>
+              <button class="btn-save" onclick="updateBooking('${bookingId}')">儲存</button>
+            </td>
           `;
           tableBody.appendChild(tr);
         });
@@ -124,8 +136,46 @@
       })
       .catch(err => {
         console.error("讀取失敗", err);
-        tableBody.innerHTML = `<tr><td colspan="8" class="loading" style="color: red;">讀取失敗，請確認 Apps Script 權限或網址是否正確！</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="9" class="loading" style="color: red;">讀取失敗，請確認 Apps Script 權限或網址是否正確！</td></tr>`;
       });
+  }
+
+  function updateBooking(bookingId) {
+    const newStatus = document.getElementById(`status_${bookingId}`).value;
+    const newCost = document.getElementById(`cost_${bookingId}`).value;
+
+    const payload = {
+      action: "update",
+      bookingId: bookingId,
+      status: newStatus,
+      cost: Number(newCost)
+    };
+
+    const btn = event.target;
+    btn.innerText = "儲存中...";
+    btn.disabled = true;
+
+    fetch(scriptUrl, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(res => {
+      if (res.status === "success") {
+        alert(`預約 #${bookingId} 更新成功！`);
+        fetchBookings(); // 重新整理表格與財務統計
+      } else {
+        alert("更新失敗：" + res.message);
+        btn.innerText = "儲存";
+        btn.disabled = false;
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert("連線發生錯誤！");
+      btn.innerText = "儲存";
+      btn.disabled = false;
+    });
   }
 
   function updateFinance(rev, cost) {
@@ -135,7 +185,6 @@
     document.getElementById('netProfit').innerText = `NT$ ${profit}`;
   }
 
-  // 頁面載入時自動抓取一次資料
   window.onload = function() {
     fetchBookings();
   };
