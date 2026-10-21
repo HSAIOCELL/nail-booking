@@ -672,15 +672,13 @@
 <script>
   const LINE_OFFICIAL_ACCOUNT_ID = "@344gjuzg"; 
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
-  let bookedTimes = [];
 
   document.addEventListener('DOMContentLoaded', () => {
     initDatePicker();
-    fetchBookedSlots();
     initLiffLogin(); // 自動抓取 LINE 暱稱
   });
 
-  // 1. 自動抓取 LINE 暱稱
+  // 自動抓取 LINE 暱稱
   async function initLiffLogin() {
     const nameInput = document.getElementById('customerName');
     try {
@@ -694,14 +692,14 @@
         nameInput.placeholder = "請輸入您的稱呼";
       }
     } catch (err) {
-      console.log("LIFF 初始化失敗或在一般瀏覽器中", err);
+      console.log("非 LINE 環境或 LIFF 初始化失敗", err);
       nameInput.removeAttribute('readonly');
       nameInput.value = "";
-      nameInput.placeholder = "請輸入您的稱呼";
+      nameInput.placeholder = "請輸入您的稱呼 (測試用)";
     }
   }
 
-  // 2. 做二休二排班判斷 (10/23 夜班基準日)
+  // 做二休二排班判斷 (10/23 夜班基準日)
   function getShiftStatus(dateStr) {
     const anchorDate = new Date("2026-10-23"); 
     const targetDate = new Date(dateStr);
@@ -713,18 +711,7 @@
     if (isWorkDay) {
       return { type: "上班", desc: "🔒 當日為上班日，不開放預約" };
     } else {
-      // 本月為夜班循環：夜班休假全時段開放
       return { type: "休假_夜班", desc: "✨ 當日為夜班休假，全時段開放預約" };
-    }
-  }
-
-  async function fetchBookedSlots() {
-    try {
-      const res = await fetch(SCRIPT_URL);
-      bookedTimes = await res.json();
-      validateDateTime();
-    } catch (err) {
-      console.error("無法取得預約資料", err);
     }
   }
 
@@ -773,7 +760,6 @@
     validateDateTime();
   }
 
-  // 3. 結合班表、防撞期與時間檢核
   function validateDateTime() {
     const dateInput = document.getElementById("bookingDate");
     const hourSelect = document.getElementById("bookingHour");
@@ -791,39 +777,21 @@
     const todayStr = formatDateToYYYYMMDD(taipeiNow);
     const currentHour = taipeiNow.getHours();
     const currentMinute = taipeiNow.getMinutes();
-    const isToday = (selectedDateStr === todayStr);
 
-    let occupiedHoursToday = [];
-    if (Array.isArray(bookedTimes)) {
-      bookedTimes.forEach(row => {
-        if (row[2] === selectedDateStr && row[6] !== "已取消") {
-          occupiedHoursToday.push(row[3]); 
-        }
-      });
-    }
+    const isToday = (selectedDateStr === todayStr);
 
     let firstValidHour = null;
     Array.from(hourSelect.options).forEach(opt => {
-      const hStr = opt.value; 
-      const h = parseInt(hStr, 10);
+      const h = parseInt(opt.value, 10);
       let isDisabled = false;
 
-      // 上班日全天禁止
+      // 若為上班日，全面停用
       if (shiftInfo.type === "上班") {
         isDisabled = true;
       }
 
       if (isToday && h < currentHour) {
         isDisabled = true;
-      }
-
-      if (occupiedHoursToday.includes(hStr) || occupiedHoursToday.includes(hStr + ":00")) {
-        isDisabled = true;
-        opt.text = `${hStr} 時 (已被預約)`;
-      } else {
-        if (!opt.text.includes("已被預約")) {
-          opt.text = `${hStr} 時`;
-        }
       }
 
       opt.disabled = isDisabled;
