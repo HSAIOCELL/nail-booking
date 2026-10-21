@@ -10,7 +10,7 @@
         h1 { font-size: 24px; color: #d56062; text-align: center; margin-bottom: 25px; }
         .form-group { margin-bottom: 20px; }
         label { display: block; font-weight: bold; margin-bottom: 8px; color: #333; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
         .checkbox-group { display: flex; flex-direction: column; gap: 8px; margin-top: 5px; }
         .checkbox-label { display: flex; align-items: center; font-weight: normal; cursor: pointer; }
         .checkbox-label input { width: auto; margin-right: 10px; }
@@ -57,21 +57,21 @@
             <label for="mainColor">單色款式 (選填/主項目)</label>
             <select id="mainColor" onchange="calculateTotal()">
                 <option value="">不選擇單色</option>
-                <option value="經典單色 (NT$ 1000)">經典單色 - NT$ 1,000</option>
-                <option value="貓眼/鏡面 (NT$ 1200)">貓眼 / 鏡面 - NT$ 1,200</option>
+                <option value="經典單色">經典單色</option>
+                <option value="貓眼/鏡面">貓眼 / 鏡面</option>
             </select>
         </div>
 
         <!-- 跳色開關 -->
         <div class="form-group">
             <label class="checkbox-label">
-                <input type="checkbox" id="jumpColorToggle" onclick="toggleJumpColor()"> 加購跳色 (+NT$ 100)
+                <input type="checkbox" id="jumpColorToggle" onclick="toggleJumpColor()"> 加購跳色 (+NT$ 50)
             </label>
             <div id="jumpColorSection" class="sub-section">
                 <select id="jumpColor" onchange="calculateTotal()">
                     <option value="">請選擇跳色色系</option>
-                    <option value="粉嫩色系">粉嫩色系 (+NT$ 100)</option>
-                    <option value="個性深色系">個性深色系 (+NT$ 100)</option>
+                    <option value="粉嫩色系">粉嫩色系</option>
+                    <option value="個性深色系">個性深色系</option>
                 </select>
             </div>
         </div>
@@ -79,12 +79,35 @@
         <!-- 造型開關 -->
         <div class="form-group">
             <label class="checkbox-label">
-                <input type="checkbox" id="styleToggle" onclick="toggleStyle()"> 加購造型設計
+                <input type="checkbox" id="styleToggle" onclick="toggleStyle()"> 加購款式造型
             </label>
             <div id="styleSection" class="sub-section">
-                <div class="checkbox-group">
-                    <label class="checkbox-label"><input type="checkbox" name="style" value="貼鑽 (NT$ 200)" onclick="calculateTotal()"> 貼鑽 (+NT$ 200)</label>
-                    <label class="checkbox-label"><input type="checkbox" name="style" value="暈染 (NT$ 300)" onclick="calculateTotal()"> 暈染 (+NT$ 300)</label>
+                <div style="margin-bottom: 10px;">
+                    <label class="checkbox-label"><input type="radio" name="styleType" value="partial" onclick="toggleStyleType()"> 局部造型</label>
+                    <label class="checkbox-label"><input type="radio" name="styleType" value="full" onclick="toggleStyleType()"> 十指造型</label>
+                </div>
+                
+                <!-- 局部造型選項 -->
+                <div id="partialStyleContainer" style="display:none; margin-top: 10px;">
+                    <div class="checkbox-group">
+                        <label class="checkbox-label"><input type="checkbox" name="style" value="貼鑽" onclick="calculateTotal()"> 貼鑽</label>
+                        <label class="checkbox-label"><input type="checkbox" name="style" value="暈染" onclick="calculateTotal()"> 暈染</label>
+                        <label class="checkbox-label"><input type="checkbox" id="customStyleCb" onclick="toggleCustomInput(); calculateTotal()"> 指定圖案</label>
+                    </div>
+                </div>
+
+                <!-- 十指造型選項 -->
+                <div id="fullStyleContainer" style="display:none; margin-top: 10px;">
+                    <div class="checkbox-group">
+                        <label class="checkbox-label"><input type="checkbox" name="fullStyle" value="法式" onclick="calculateTotal()"> 法式</label>
+                        <label class="checkbox-label"><input type="checkbox" name="fullStyle" value="漸層" onclick="calculateTotal()"> 漸層</label>
+                        <label class="checkbox-label"><input type="checkbox" id="fullCustomStyleCb" onclick="toggleCustomInput(); calculateTotal()"> 指定圖案</label>
+                    </div>
+                </div>
+
+                <!-- 指定圖案細節輸入框 -->
+                <div id="customInputContainer" style="display:none; margin-top: 10px;">
+                    <input type="text" id="customPattern" placeholder="請輸入您想做的指定圖案細節...">
                 </div>
             </div>
         </div>
@@ -92,13 +115,23 @@
         <!-- 卸甲需求 -->
         <div class="form-group">
             <label class="checkbox-label">
-                <input type="checkbox" id="removal" value="需要卸甲 (NT$ 300)" onclick="calculateTotal()"> 需要卸甲 (+NT$ 300)
+                <input type="checkbox" id="removal" onclick="calculateTotal()"> 需要卸甲
             </label>
+        </div>
+
+        <!-- 色調風格選擇 -->
+        <div class="form-group">
+            <label for="selectedTone">偏好色調風格</label>
+            <select id="selectedTone">
+                <option value="溫柔氣質風">溫柔氣質風</option>
+                <option value="個性簡約風">個性簡約風</option>
+                <option value="華麗精緻風">華麗精緻風</option>
+            </select>
         </div>
 
         <!-- 總金額顯示 -->
         <div class="price-card">
-            預估總金額：<span id="totalPrice">0</span> 元
+            預計總金額：NT$ <span id="totalPrice">0</span> 元
         </div>
 
         <!-- 送出按鈕 -->
@@ -106,11 +139,16 @@
     </div>
 
     <script>
-        // 設定你的 LINE 官方帳號 ID (如有需要可替換)
         const LINE_OFFICIAL_ACCOUNT_ID = "@your_line_id";
 
         let showJumpColor = false;
         let showStyle = false;
+        let needRemoval = false;
+
+        function initDatePicker() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('bookingDate').min = today;
+        }
 
         function toggleJumpColor() {
             showJumpColor = document.getElementById('jumpColorToggle').checked;
@@ -123,70 +161,182 @@
             showStyle = document.getElementById('styleToggle').checked;
             document.getElementById('styleSection').style.display = showStyle ? 'block' : 'none';
             if (!showStyle) {
+                document.querySelectorAll('input[name="styleType"]').forEach(r => r.checked = false);
                 document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
+                document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
+                document.getElementById('customStyleCb').checked = false;
+                document.getElementById('fullCustomStyleCb').checked = false;
+                document.getElementById('partialStyleContainer').style.display = 'none';
+                document.getElementById('fullStyleContainer').style.display = 'none';
+                document.getElementById('customInputContainer').style.display = 'none';
             }
             calculateTotal();
         }
 
+        function toggleStyleType() {
+            const currentType = document.querySelector('input[name="styleType"]:checked').value;
+            if (currentType === 'partial') {
+                document.getElementById('partialStyleContainer').style.display = 'block';
+                document.getElementById('fullStyleContainer').style.display = 'none';
+                document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
+                document.getElementById('fullCustomStyleCb').checked = false;
+            } else {
+                document.getElementById('partialStyleContainer').style.display = 'none';
+                document.getElementById('fullStyleContainer').style.display = 'block';
+                document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
+                document.getElementById('customStyleCb').checked = false;
+            }
+            toggleCustomInput();
+            calculateTotal();
+        }
+
+        function toggleCustomInput() {
+            const customCb = document.getElementById('customStyleCb');
+            const fullCustomCb = document.getElementById('fullCustomStyleCb');
+            const isCustomChecked = (customCb && customCb.checked) || (fullCustomCb && fullCustomCb.checked);
+            document.getElementById('customInputContainer').style.display = isCustomChecked ? 'block' : 'none';
+        }
+
         function calculateTotal() {
             let total = 0;
-            const mainColor = document.getElementById('mainColor').value;
-            if (mainColor.includes('1000')) total += 1000;
-            if (mainColor.includes('1200')) total += 1200;
+            const mainColorVal = document.getElementById('mainColor').value;
+            const isMainColorSelected = mainColorVal !== "";
+            const isJumpSelected = showJumpColor && document.getElementById('jumpColor').value !== "";
+            needRemoval = document.getElementById('removal').checked;
 
-            if (showJumpColor && document.getElementById('jumpColor').value !== "") {
-                total += 100;
+            const selectedStyles = showStyle ? document.querySelectorAll('input[name="style"]:checked') : [];
+            const selectedFullStyles = showStyle ? document.querySelectorAll('input[name="fullStyle"]:checked') : [];
+            const currentTypeInput = document.querySelector('input[name="styleType"]:checked');
+            const currentType = currentTypeInput ? currentTypeInput.value : '';
+            
+            const isStyleSelected = showStyle;
+            const hasNailService = isMainColorSelected || isJumpSelected || isStyleSelected;
+
+            if (needRemoval) {
+                total += hasNailService ? 150 : 200;
             }
 
-            if (showStyle) {
-                document.querySelectorAll('input[name="style"]:checked').forEach(cb => {
-                    if (cb.value.includes('200')) total += 200;
-                    if (cb.value.includes('300')) total += 300;
-                });
-            }
+            if (isMainColorSelected) total += 700;
+            if (isJumpSelected) total += 50; 
 
-            if (document.getElementById('removal').checked) {
-                total += 300;
+            if (showStyle && currentType) {
+                if (currentType === 'partial') {
+                    total += selectedStyles.length * 50;
+                    const customCb = document.getElementById('customStyleCb');
+                    if (customCb && customCb.checked) total += 30;
+                } else {
+                    total += 50;
+                    total += selectedFullStyles.length * 50;
+                    const fullCustomCb = document.getElementById('fullCustomStyleCb');
+                    if (fullCustomCb && fullCustomCb.checked) total += 30;
+                }
             }
 
             document.getElementById('totalPrice').innerText = total;
         }
 
         function sendBooking() {
-            const bookingDate = document.getElementById('bookingDate').value;
-            if (!bookingDate) {
-                alert("請先選擇預約日期！");
-                return;
-            }
-
             const mainColorVal = document.getElementById('mainColor').value;
             const isMainColorSelected = mainColorVal !== "";
 
-            if (showJumpColor && document.getElementById('jumpColor').value === "") {
-                alert("🎨 請選擇跳色色系，或關閉該項目！");
-                return;
+            if (showJumpColor) {
+                const jumpColorVal = document.getElementById('jumpColor').value;
+                if (jumpColorVal === "") {
+                    alert("🎨 請選擇跳色色系，或關閉該項目！");
+                    return;
+                }
             }
 
-            const bookingHour = document.getElementById('bookingHour').value;
-            const bookingMinute = document.getElementById('bookingMinute').value;
-            const timeStr = `${bookingHour}:${bookingMinute}`;
-            const totalPrice = document.getElementById('totalPrice').innerText;
-            
-            let items = [];
-            if (isMainColorSelected) items.push(mainColorVal);
-            if (showJumpColor) items.push(`跳色: ${document.getElementById('jumpColor').value}`);
             if (showStyle) {
-                document.querySelectorAll('input[name="style"]:checked').forEach(cb => items.push(cb.value));
+                const currentTypeInput = document.querySelector('input[name="styleType"]:checked');
+                if (!currentTypeInput) {
+                    alert("✨ 您開啟了「款式造型」，請先選擇是要【局部造型】還是【十指造型】！");
+                    return;
+                }
+
+                const currentType = currentTypeInput.value;
+                const selectedStyles = document.querySelectorAll('input[name="style"]:checked');
+                const selectedFullStyles = document.querySelectorAll('input[name="fullStyle"]:checked');
+
+                if (currentType === 'partial' && selectedStyles.length === 0 && !document.getElementById('customStyleCb').checked) {
+                    alert("✨ 請勾選局部造型款式，或關閉該項目！");
+                    return;
+                }
+                
+                if (currentType === 'full' && selectedFullStyles.length === 0 && !document.getElementById('fullCustomStyleCb').checked) {
+                    alert("✨ 請勾選十指造型款式，或關閉該項目！");
+                    return;
+                }
+                
+                const customCb = document.getElementById('customStyleCb');
+                const fullCustomCb = document.getElementById('fullCustomStyleCb');
+                if ((customCb && customCb.checked) || (fullCustomCb && fullCustomCb.checked)) {
+                    const customInput = document.getElementById('customPattern');
+                    if (!customInput.value.trim()) {
+                        alert("✨ 您勾選了指定圖案，請填寫指定圖案細節！");
+                        return;
+                    }
+                }
             }
-            if (document.getElementById('removal').checked) items.push("需要卸甲");
 
-            const bookingData = {
-                bookingId: 'M' + Date.now().toString().slice(-6),
-                customerName: "LINE 貴賓",
-                date: bookingDate,
-                time: timeStr,
-                items: items.length > 0 ? items.join(' / ') : '無特定項目',
-                totalPrice: parseInt(totalPrice, 10)
-            };
+            const bookingDate = document.getElementById('bookingDate').value || '未選擇日期';
+            const hour = document.getElementById('bookingHour').value;
+            const minute = document.getElementById('bookingMinute').value;
+            const bookingTime = `${hour}:${minute}`;
+            
+            let details = `【美甲服務預約單】\n`;
+            details += `----------------------------\n`;
+            details += `• 預約時間：${bookingDate} ${bookingTime}\n`;
 
-            const scriptUrl = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEkIg/exec";
+            if (needRemoval) {
+                details += `• 卸甲服務：需要卸甲\n`;
+            }
+
+            if (isMainColorSelected) {
+                details += `• 單色款式：${mainColorVal}\n`;
+            }
+
+            if (showJumpColor) {
+                const jColor = document.getElementById('jumpColor').value;
+                if (jColor) details += `• 跳色：${jColor}\n`;
+            }
+
+            if (showStyle) {
+                const currentTypeInput = document.querySelector('input[name="styleType"]:checked');
+                if (currentTypeInput) {
+                    const currentType = currentTypeInput.value;
+                    const typeName = (currentType === 'full') ? '十指造型' : '局部造型';
+                    
+                    const styles = Array.from(document.querySelectorAll('input[name="style"]:checked')).map(cb => cb.value);
+                    const fullStyles = Array.from(document.querySelectorAll('input[name="fullStyle"]:checked')).map(cb => cb.value);
+                    const chosenStyles = (currentType === 'full') ? fullStyles : styles;
+
+                    details += `• 款式造型：${typeName}\n`;
+                    if (chosenStyles.length > 0) {
+                        details += `  - 項目：${chosenStyles.join(', ')}\n`;
+                    }
+
+                    const customCb = document.getElementById('customStyleCb');
+                    const fullCustomCb = document.getElementById('fullCustomStyleCb');
+                    if ((currentType === 'partial' && customCb && customCb.checked) || (currentType === 'full' && fullCustomCb && fullCustomCb.checked)) {
+                        details += `  - 指定圖案細節：${document.getElementById('customPattern').value}\n`;
+                    }
+                }
+            }
+
+            const tone = document.getElementById('selectedTone').value;
+            details += `• 色調風格：${tone}\n`;
+            details += `----------------------------\n`;
+            details += `預計總金額：NT$ ${document.getElementById('totalPrice').innerText} 元`;
+
+            const encodedMessage = encodeURIComponent(details);
+            const lineUrl = `https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodedMessage}`;
+            window.location.href = lineUrl;
+        }
+
+        window.onload = function() {
+            initDatePicker();
+        };
+    </script>
+</body>
+</html>
