@@ -1,77 +1,192 @@
-function sendBooking() {
-    const mainColorVal = document.getElementById('mainColor').value;
-    const isMainColorSelected = mainColorVal !== "";
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美甲工作室線上預約</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #fcf6f9; margin: 0; padding: 20px; color: #4a4a4a; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1 { font-size: 24px; color: #d56062; text-align: center; margin-bottom: 25px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 8px; color: #333; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        .checkbox-group { display: flex; flex-direction: column; gap: 8px; margin-top: 5px; }
+        .checkbox-label { display: flex; align-items: center; font-weight: normal; cursor: pointer; }
+        .checkbox-label input { width: auto; margin-right: 10px; }
+        .price-card { background: #fff5f5; padding: 15px; border-radius: 8px; text-align: center; font-size: 18px; color: #d56062; font-weight: bold; margin-bottom: 25px; }
+        .submit-btn { background-color: #d56062; color: white; border: none; width: 100%; padding: 15px; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        .submit-btn:hover { background-color: #bf4d4f; }
+        .sub-section { background: #fafafa; padding: 15px; border-radius: 8px; margin-top: 10px; border: 1px solid #eee; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💅 美甲工作室線上預約</h1>
+        
+        <!-- 預約日期 -->
+        <div class="form-group">
+            <label for="bookingDate">選擇預約日期</label>
+            <input type="date" id="bookingDate">
+        </div>
 
-    if (showJumpColor) {
-      const jumpColorVal = document.getElementById('jumpColor').value;
-      if (jumpColorVal === "") {
-        alert("🎨 請選擇跳色色系，或關閉該項目！");
-        return;
-      }
-    }
+        <!-- 預約時間 -->
+        <div class="form-group">
+            <label>選擇預約時間</label>
+            <div style="display: flex; gap: 10px;">
+                <select id="bookingHour">
+                    <option value="10">10 點</option>
+                    <option value="11">11 點</option>
+                    <option value="13">13 點</option>
+                    <option value="14">14 點</option>
+                    <option value="15">15 點</option>
+                    <option value="16">16 點</option>
+                    <option value="17">17 點</option>
+                    <option value="18">18 點</option>
+                    <option value="19">19 點</option>
+                </select>
+                <select id="bookingMinute">
+                    <option value="00">00 分</option>
+                    <option value="30">30 分</option>
+                </select>
+            </div>
+        </div>
 
-    // 收集所有預約資料
-    const bookingDate = document.getElementById('bookingDate').value;
-    const bookingHour = document.getElementById('bookingHour').value;
-    const bookingMinute = document.getElementById('bookingMinute').value;
-    const timeStr = `${bookingHour}:${bookingMinute}`;
-    const totalPrice = document.getElementById('totalPrice').innerText;
-    
-    // 收集項目細節
-    let items = [];
-    if (isMainColorSelected) items.push(`單色款式: ${mainColorVal}`);
-    if (showJumpColor) items.push(`跳色: ${document.getElementById('jumpColor').value}`);
-    if (showStyle) {
-      const currentType = document.querySelector('input[name="styleType"]:checked');
-      if (currentType) {
-        if (currentType.value === 'partial') {
-          let styles = [];
-          document.querySelectorAll('input[name="style"]:checked').forEach(cb => styles.push(cb.value));
-          items.push(`局部造型(${styles.join(',')})`);
-        } else {
-          let fullStyles = [];
-          document.querySelectorAll('input[name="fullStyle"]:checked').forEach(cb => fullStyles.push(cb.value));
-          items.push(`十指造型(${fullStyles.join(',')})`);
+        <!-- 單色款式 -->
+        <div class="form-group">
+            <label for="mainColor">單色款式 (選填/主項目)</label>
+            <select id="mainColor" onchange="calculateTotal()">
+                <option value="">不選擇單色</option>
+                <option value="經典單色 (NT$ 1000)">經典單色 - NT$ 1,000</option>
+                <option value="貓眼/鏡面 (NT$ 1200)">貓眼 / 鏡面 - NT$ 1,200</option>
+            </select>
+        </div>
+
+        <!-- 跳色開關 -->
+        <div class="form-group">
+            <label class="checkbox-label">
+                <input type="checkbox" id="jumpColorToggle" onclick="toggleJumpColor()"> 加購跳色 (+NT$ 100)
+            </label>
+            <div id="jumpColorSection" class="sub-section">
+                <select id="jumpColor" onchange="calculateTotal()">
+                    <option value="">請選擇跳色色系</option>
+                    <option value="粉嫩色系">粉嫩色系 (+NT$ 100)</option>
+                    <option value="個性深色系">個性深色系 (+NT$ 100)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 造型開關 -->
+        <div class="form-group">
+            <label class="checkbox-label">
+                <input type="checkbox" id="styleToggle" onclick="toggleStyle()"> 加購造型設計
+            </label>
+            <div id="styleSection" class="sub-section">
+                <div class="checkbox-group">
+                    <label class="checkbox-label"><input type="checkbox" name="style" value="貼鑽 (NT$ 200)" onclick="calculateTotal()"> 貼鑽 (+NT$ 200)</label>
+                    <label class="checkbox-label"><input type="checkbox" name="style" value="暈染 (NT$ 300)" onclick="calculateTotal()"> 暈染 (+NT$ 300)</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- 卸甲需求 -->
+        <div class="form-group">
+            <label class="checkbox-label">
+                <input type="checkbox" id="removal" value="需要卸甲 (NT$ 300)" onclick="calculateTotal()"> 需要卸甲 (+NT$ 300)
+            </label>
+        </div>
+
+        <!-- 總金額顯示 -->
+        <div class="price-card">
+            預估總金額：<span id="totalPrice">0</span> 元
+        </div>
+
+        <!-- 送出按鈕 -->
+        <button class="submit-btn" onclick="sendBooking()">送出預約單 (開啟 LINE)</button>
+    </div>
+
+    <script>
+        // 設定你的 LINE 官方帳號 ID (如有需要可替換)
+        const LINE_OFFICIAL_ACCOUNT_ID = "@your_line_id";
+
+        let showJumpColor = false;
+        let showStyle = false;
+
+        function toggleJumpColor() {
+            showJumpColor = document.getElementById('jumpColorToggle').checked;
+            document.getElementById('jumpColorSection').style.display = showJumpColor ? 'block' : 'none';
+            if (!showJumpColor) document.getElementById('jumpColor').value = "";
+            calculateTotal();
         }
-      }
-    }
-    if (needRemoval) items.push("需要卸甲");
 
-    // 準備要送往 Google 試算表的資料
-    const bookingData = {
-      bookingId: 'M' + Date.now().toString().slice(-6),
-      customerName: "LINE 貴賓", // 之後串接 LIFF 後會自動帶入真實 LINE 名字
-      date: bookingDate,
-      time: timeStr,
-      items: items.join(' / '),
-      totalPrice: parseInt(totalPrice, 10)
-    };
+        function toggleStyle() {
+            showStyle = document.getElementById('styleToggle').checked;
+            document.getElementById('styleSection').style.display = showStyle ? 'block' : 'none';
+            if (!showStyle) {
+                document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
+            }
+            calculateTotal();
+        }
 
-    // 發送至 Google 試算表後端
-    const scriptUrl = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
-    
-    // 顯示送出中提示
-    const submitBtn = document.querySelector('.submit-btn');
-    submitBtn.innerText = "預約送出中...";
-    submitBtn.disabled = true;
+        function calculateTotal() {
+            let total = 0;
+            const mainColor = document.getElementById('mainColor').value;
+            if (mainColor.includes('1000')) total += 1000;
+            if (mainColor.includes('1200')) total += 1200;
 
-    fetch(scriptUrl, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(bookingData)
-    })
-    .then(() => {
-      alert("預約成功！資料已自動存入系統。");
-      // 同時引導開啟 LINE 官方帳號進行確認
-      const lineMessage = encodeURIComponent(`您好，我剛剛送出了預約：\n日期：${bookingDate} ${timeStr}\n金額：NT$ ${totalPrice}`);
-      window.open(`https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${lineMessage}`, '_blank');
-      location.reload();
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert("送出失敗，請再試一次或直接聯繫官方 LINE。");
-      submitBtn.innerText = "送出預約單 (開啟 LINE)";
-      submitBtn.disabled = false;
-    });
-  }
+            if (showJumpColor && document.getElementById('jumpColor').value !== "") {
+                total += 100;
+            }
+
+            if (showStyle) {
+                document.querySelectorAll('input[name="style"]:checked').forEach(cb => {
+                    if (cb.value.includes('200')) total += 200;
+                    if (cb.value.includes('300')) total += 300;
+                });
+            }
+
+            if (document.getElementById('removal').checked) {
+                total += 300;
+            }
+
+            document.getElementById('totalPrice').innerText = total;
+        }
+
+        function sendBooking() {
+            const bookingDate = document.getElementById('bookingDate').value;
+            if (!bookingDate) {
+                alert("請先選擇預約日期！");
+                return;
+            }
+
+            const mainColorVal = document.getElementById('mainColor').value;
+            const isMainColorSelected = mainColorVal !== "";
+
+            if (showJumpColor && document.getElementById('jumpColor').value === "") {
+                alert("🎨 請選擇跳色色系，或關閉該項目！");
+                return;
+            }
+
+            const bookingHour = document.getElementById('bookingHour').value;
+            const bookingMinute = document.getElementById('bookingMinute').value;
+            const timeStr = `${bookingHour}:${bookingMinute}`;
+            const totalPrice = document.getElementById('totalPrice').innerText;
+            
+            let items = [];
+            if (isMainColorSelected) items.push(mainColorVal);
+            if (showJumpColor) items.push(`跳色: ${document.getElementById('jumpColor').value}`);
+            if (showStyle) {
+                document.querySelectorAll('input[name="style"]:checked').forEach(cb => items.push(cb.value));
+            }
+            if (document.getElementById('removal').checked) items.push("需要卸甲");
+
+            const bookingData = {
+                bookingId: 'M' + Date.now().toString().slice(-6),
+                customerName: "LINE 貴賓",
+                date: bookingDate,
+                time: timeStr,
+                items: items.length > 0 ? items.join(' / ') : '無特定項目',
+                totalPrice: parseInt(totalPrice, 10)
+            };
+
+            const scriptUrl = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEkIg/exec";
