@@ -8,6 +8,9 @@
     .container { max-width: 1050px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
     h2 { text-align: center; color: #d4a373; }
     
+    /* 15號提醒橫幅 */
+    #reminderBanner { display: none; background: #fffae6; border: 1px solid #ffe58f; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center; color: #d48806; font-weight: bold; }
+
     /* 統計卡片樣式 */
     .stats-container { display: flex; gap: 15px; margin-bottom: 20px; }
     .stat-card { background: #faedcd; padding: 15px; border-radius: 8px; flex: 1; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
@@ -22,7 +25,6 @@
     .btn-refresh { background: #d4a373; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-bottom: 15px; }
     .btn-refresh:hover { background: #bc6c25; }
     
-    /* 互動表單樣式 */
     select, input[type="number"] { padding: 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 13px; text-align: center; }
     .btn-save { background: #606c38; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; }
     .btn-save:hover { background: #283618; }
@@ -32,10 +34,12 @@
 
 <div class="container">
   <h2>美甲預約管理後台</h2>
+
   <!-- 15號提醒通知區塊 -->
-<div id="reminderBanner" style="display: none; background: #fffae6; border: 1px solid #ffe58f; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center; color: #d48806; font-weight: bold;">
-  ⚠️ 貼心提醒：今天是 15 號！請記得檢查並準備於 20 號上傳下個月的預約班表喔！
-</div>
+  <div id="reminderBanner">
+    ⚠️ 貼心提醒：目前正值 15 號至 20 號期間，請記得檢查並準備上傳下個月的預約班表喔！
+  </div>
+  
   <!-- 財務統計看板 -->
   <div class="stats-container">
     <div class="stat-card">
@@ -76,6 +80,14 @@
 
 <script>
   const scriptUrl = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
+
+  // 檢查是否為 15~20 號，自動顯示提醒
+  function checkReminder() {
+    const today = new Date().getDate();
+    if (today >= 15 && today <= 20) {
+      document.getElementById('reminderBanner').style.display = "block";
+    }
+  }
 
   function fetchBookings() {
     const tableBody = document.getElementById('bookingTableBody');
@@ -166,7 +178,7 @@
     .then(res => {
       if (res.status === "success") {
         alert(`預約 #${bookingId} 更新成功！`);
-        fetchBookings(); // 重新整理表格與財務統計
+        fetchBookings();
       } else {
         alert("更新失敗：" + res.message);
         btn.innerText = "儲存";
@@ -189,6 +201,7 @@
   }
 
   window.onload = function() {
+    checkReminder();
     fetchBookings();
   };
 </script>
