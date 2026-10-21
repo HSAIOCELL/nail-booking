@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=ChenYuluoyan&family=Cinzel:wght@600&display=swap" rel="stylesheet">
   
-  <!-- 引入 Flatpickr 視覺化月曆套件套件與風格 -->
+  <!-- 引入 Flatpickr 視覺化月曆套件 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
@@ -152,7 +152,7 @@
       cursor: pointer;
     }
 
-    /* Flatpickr 小月曆自訂極簡優雅樣式 */
+    /* Flatpickr 小月曆自訂優雅樣式 (修改 1: 綠色改為黃色圈圈) */
     .flatpickr-calendar {
       background: #faf8f5 !important;
       border: 1px solid #e2dad1 !important;
@@ -161,11 +161,11 @@
       font-family: inherit !important;
     }
     .flatpickr-day.available-day {
-      background-color: #eaf2ed !important;
-      color: #2e623a !important;
+      background-color: #fdf6e2 !important;
+      color: #a37512 !important;
       font-weight: bold !important;
       border-radius: 50% !important;
-      border: 1px solid #c2e0cb !important;
+      border: 1px solid #f2d896 !important;
     }
     .flatpickr-day.available-day.selected {
       background-color: #7a6b63 !important;
@@ -474,12 +474,17 @@
     <h2>美甲服務預約選單</h2>
   </div>
 
-  <!-- 貴賓稱呼 (支援外部瀏覽器 LINE 登入按鈕) -->
+  <!-- 貴賓稱呼 (輸入 admin 可開啟隱藏式後台解鎖功能) -->
   <div class="section">
     <div class="section-title">您的稱呼</div>
     <div style="display: flex; gap: 8px;">
-      <input type="text" id="customerName" placeholder="請輸入您的稱呼" style="flex: 1;">
+      <input type="text" id="customerName" placeholder="請輸入您的稱呼" oninput="checkAdminMode(this.value)" style="flex: 1;">
       <button type="button" class="draw-btn" onclick="loginWithLine()" style="white-space: nowrap; background: #06c755; color: #fff; border: none;">連動 LINE 暱稱</button>
+    </div>
+    <!-- 隱藏式管理者手動解鎖模式控制器 (修改 2) -->
+    <div id="adminPanel" class="hidden" style="margin-top: 8px; padding: 8px; background: #fff3cd; border-radius: 8px; border: 1px solid #ffeeba; text-align: center;">
+      <span style="font-size: 13px; font-weight: bold; color: #856404;">🔧 管理者模式：</span>
+      <button type="button" onclick="enableAdminOverride()" style="padding: 4px 10px; font-size: 12px; background: #856404; color: #fff; border: none; border-radius: 6px; cursor: pointer;">手動解鎖所有日曆日期 (加班/換班)</button>
     </div>
   </div>
 
@@ -694,7 +699,7 @@
     預計總金額：NT$ <span id="totalPrice">0</span> 元
   </div>
 
-  <button class="submit-btn" onclick="sendBooking()">送出預預單 (開啟 LINE)</button>
+  <button class="submit-btn" onclick="sendBooking()">送出預約單 (開啟 LINE)</button>
 </div>
 
 <!-- 引入 LINE LIFF SDK -->
@@ -703,10 +708,28 @@
   const LINE_OFFICIAL_ACCOUNT_ID = "@344gjuzg"; 
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
 
+  let adminOverride = false; // 是否開啟手動覆寫/解鎖模式
+
   document.addEventListener('DOMContentLoaded', () => {
     initLiffLogin();
     initFlatpickr();
   });
+
+  // 管理者解鎖模式觸發與切換
+  function checkAdminMode(val) {
+    const adminPanel = document.getElementById("adminPanel");
+    if (val.trim().toLowerCase() === "admin") {
+      adminPanel.classList.remove("hidden");
+    } else {
+      adminPanel.classList.add("hidden");
+    }
+  }
+
+  function enableAdminOverride() {
+    adminOverride = true;
+    alert("🔓 管理者已強制解鎖！月曆所有日期現已開放手動點選預約。");
+    initFlatpickr();
+  }
 
   // LINE LIFF 自動授權登入
   async function initLiffLogin() {
@@ -735,14 +758,20 @@
     }
   }
 
-  // 做二休二排班判斷 (2026-10-23 為基準日)
-  function isWorkDay(dateObj) {
+  // 做二休二班別詳細資訊計算 (2026-10-23 為夜班基準日)
+  function getShiftCycleInfo(dateObj) {
     const anchorDate = new Date("2026-10-23T00:00:00"); 
     const targetDate = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
     const diffDays = Math.round((targetDate - anchorDate) / (1000 * 60 * 60 * 24));
     
     const cycleDay = ((diffDays % 4) + 4) % 4;
-    return (cycleDay === 0 || cycleDay === 1); // 0與1為上班日，2與3為休假日
+    
+    // 0, 1 為夜班休假 / 上班；2, 3 為白班休假 / 上班
+    return {
+      cycleDay: cycleDay,
+      isWorkDay: (cycleDay === 0 || cycleDay === 1),
+      isDayShiftOff: (cycleDay === 2 || cycleDay === 3) // 是否為白班循環的休假日
+    };
   }
 
   function getTaipeiDate() {
@@ -762,7 +791,8 @@
   function findFirstAvailableDate(startDate) {
     let checkDate = new Date(startDate);
     for (let i = 0; i < 14; i++) {
-      if (!isWorkDay(checkDate)) {
+      const shiftInfo = getShiftCycleInfo(checkDate);
+      if (!shiftInfo.isWorkDay) {
         return checkDate;
       }
       checkDate.setDate(checkDate.getDate() + 1);
@@ -772,7 +802,7 @@
 
   let pickerInstance = null;
 
-  // 初始化具備「視覺化圈圈」與「自動反灰鎖死」的小月曆
+  // 初始化具備「黃色圈圈標註」與「白班休假夜間管制」的小月曆
   function initFlatpickr() {
     const taipeiNow = getTaipeiDate();
     const defaultAvailableDate = findFirstAvailableDate(taipeiNow);
@@ -784,12 +814,15 @@
       defaultDate: defaultAvailableDate,
       disable: [
         function(date) {
-          return isWorkDay(date); // 上班日直接在小月曆上反灰且禁止點選
+          if (adminOverride) return false; // 管理者解鎖模式下不封鎖任何日期
+          const shiftInfo = getShiftCycleInfo(date);
+          return shiftInfo.isWorkDay; // 上班日反灰禁止點選
         }
       ],
       onDayCreate: function(dObj, dStr, fp, dayElement) {
-        // 在「休假可預約日」標上極簡綠圈
-        if (!isWorkDay(dayElement.dateObj) && dayElement.dateObj >= taipeiNow) {
+        const shiftInfo = getShiftCycleInfo(dayElement.dateObj);
+        // 在休假日標上黃色圈圈 (修改 1)
+        if (!shiftInfo.isWorkDay && dayElement.dateObj >= taipeiNow) {
           dayElement.classList.add("available-day");
         }
       },
@@ -801,12 +834,17 @@
     validateTime();
   }
 
+  // 時間選單驗證邏輯 (修改 3: 白班休假日 00:00 - 06:00 時段關閉)
   function validateTime() {
     const hourSelect = document.getElementById("bookingHour");
     const minuteSelect = document.getElementById("bookingMinute");
     const dateInputVal = document.getElementById("bookingDate").value;
 
     if (!dateInputVal) return;
+
+    const selectedDateParts = dateInputVal.split('-');
+    const selectedDateObj = new Date(selectedDateParts[0], selectedDateParts[1] - 1, selectedDateParts[2]);
+    const shiftInfo = getShiftCycleInfo(selectedDateObj);
 
     const taipeiNow = getTaipeiDate();
     const todayStr = formatDateToYYYYMMDD(taipeiNow);
@@ -818,7 +856,17 @@
     let firstValidHour = null;
     Array.from(hourSelect.options).forEach(opt => {
       const h = parseInt(opt.value, 10);
-      let isDisabled = (isToday && h < currentHour);
+      let isDisabled = false;
+
+      // 1. 若為當天，過期小時數關閉
+      if (isToday && h < currentHour) {
+        isDisabled = true;
+      }
+
+      // 2. 白班休假日 00:00 - 06:00 關閉時段限制 (修改 3)
+      if (!adminOverride && shiftInfo.isDayShiftOff && h < 6) {
+        isDisabled = true;
+      }
 
       opt.disabled = isDisabled;
       if (!isDisabled && firstValidHour === null) {
@@ -1351,7 +1399,7 @@
       body: JSON.stringify(bookingData)
     })
     .then(() => {
-      let details = `【美甲服務預預單】\n`;
+      let details = `【美甲服務預約單】\n`;
       details += `----------------------------\n`;
       details += `• 貴賓稱呼：${customerName}\n`;
       details += `• 預約時間：${bookingDate} ${bookingTime}\n`;
