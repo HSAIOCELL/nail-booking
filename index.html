@@ -184,14 +184,15 @@
     }
 
     #shiftNotice {
-      font-size: 13px;
+      font-size: 13.5px;
       margin-top: 4px;
-      padding: 6px 10px;
+      padding: 8px 12px;
       border-radius: 6px;
       background: #fdf6ec;
       color: #b8860b;
       border: 1px solid #faedcd;
       display: none;
+      font-weight: 600;
     }
 
     .tone-palette-group {
@@ -278,7 +279,7 @@
       color: #6e6057;
       padding: 3px 10px;
       border-radius: 20px;
-      transition: all 0.2s ease;
+      transition: all 0.22s ease;
     }
     .addon-item-box.active .addon-badge {
       background-color: #7a6b63;
@@ -295,7 +296,7 @@
       border: 1.5px dashed #c2b5aa;
       background-color: #fcfaf7;
       border-radius: 12px;
-      padding: 16px 10px;
+      padding: 14px 10px;
       text-align: center;
       cursor: pointer;
       transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -310,10 +311,10 @@
     }
     .removal-card.active {
       border-style: solid;
-      border-color: #bdaca2;
+      border-color: #7a6b63;
       background-color: #f2ebe4;
-      transform: scale(1.03);
-      box-shadow: 0 4px 12px rgba(122, 107, 99, 0.15);
+      transform: scale(1.02);
+      box-shadow: 0 3px 10px rgba(122, 107, 99, 0.15);
     }
     .removal-card-title {
       font-size: 16.5px;
@@ -344,7 +345,7 @@
 
     .checkbox-grid {
       display: grid;
-      grid-template-columns: 0.85fr 1.15fr;
+      grid-template-columns: 1fr 1fr;
       gap: 8px 10px;
       padding: 10px;
       background-color: #ffffff;
@@ -355,7 +356,7 @@
     .chip-item {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       padding: 8px 10px;
       border-radius: 20px;
       background-color: transparent; 
@@ -366,7 +367,6 @@
       cursor: pointer;
       transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
       user-select: none;
-      text-align: center;
       white-space: nowrap;
     }
 
@@ -386,7 +386,6 @@
 
     .chip-item:hover {
       background-color: #f5efe8; 
-      border-radius: 20px;
     }
 
     .chip-item:has(input:checked) {
@@ -448,7 +447,7 @@
 
   <!-- 貴賓稱呼 (自動帶入 LINE 暱稱) -->
   <div class="section">
-    <div class="section-title">您的稱呼 (已自動帶入 LINE 暱稱)</div>
+    <div class="section-title">您的稱呼 (自動帶入 LINE 暱稱)</div>
     <input type="text" id="customerName" placeholder="載入中..." readonly style="background: #f5f2ed; font-weight: bold;">
   </div>
 
@@ -465,14 +464,11 @@
         <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #5c5049;">預約時間：</label>
         <div class="time-picker-group">
           <select id="bookingHour" onchange="validateDateTime()">
-            <option value="00">00 時</option><option value="01">01 時</option><option value="02">02 時</option>
-            <option value="03">03 時</option><option value="04">04 時</option><option value="05">05 時</option>
-            <option value="06">06 時</option><option value="07">07 時</option><option value="08">08 時</option>
             <option value="09">09 時</option><option value="10">10 時</option><option value="11">11 時</option>
             <option value="12">12 時</option><option value="13">13 時</option><option value="14">14 時</option>
             <option value="15">15 時</option><option value="16">16 時</option><option value="17">17 時</option>
             <option value="18">18 時</option><option value="19">19 時</option><option value="20">20 時</option>
-            <option value="21">21 時</option><option value="22">22 時</option><option value="23">23 時</option>
+            <option value="21">21 時</option>
           </select>
           <select id="bookingMinute" onchange="validateDateTime()">
             <option value="00">00 分</option>
@@ -489,7 +485,7 @@
   <div class="section">
     <div class="section-title">
       Step 2. 單色款式
-      <button class="draw-btn" onclick="drawMainColor()">🫯 幫我抽色系</button>
+      <button class="draw-btn" type="button" onclick="drawMainColor()">🫯 幫我抽色系</button>
     </div>
     <select id="mainColor" onchange="onMainColorChange()">
       <option value="">-- 請選擇色系 (無則留空) --</option>
@@ -516,7 +512,7 @@
       Step 3. 加購項目
     </div>
 
-    <!-- 直覺開關 1：跳色 -->
+    <!-- 1. 跳色 -->
     <div id="boxJumpColor" class="addon-item-box" onclick="toggleOption('jumpColorSection', event)">
       <div class="addon-header">
         <span>🎨 跳色</span>
@@ -525,7 +521,7 @@
       <div id="jumpColorSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
           <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">選擇色系：</div>
-          <button class="draw-btn" onclick="drawSmartJumpColor(event)">🫯 隨機配色</button>
+          <button class="draw-btn" type="button" onclick="drawSmartJumpColor(event)">🫯 隨機配色</button>
         </div>
         
         <div>
@@ -550,7 +546,7 @@
       </div>
     </div>
 
-    <!-- 直覺開關 2：款式造型 -->
+    <!-- 2. 款式造型 -->
     <div id="boxStyle" class="addon-item-box" onclick="toggleOption('styleSection', event)">
       <div class="addon-header">
         <span>✨ 款式造型</span>
@@ -558,7 +554,7 @@
       </div>
       <div id="styleSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
-          <button class="draw-btn" onclick="drawStyle(event)">🫯 幫我抽款式</button>
+          <button class="draw-btn" type="button" onclick="drawStyle(event)">🫯 幫我抽款式</button>
         </div>
 
         <div class="removal-card-group" style="margin-top: 0; margin-bottom: 12px; gap: 8px;">
@@ -573,16 +569,16 @@
         <input type="radio" name="styleType" value="full" id="radioFull" style="display:none;">
         
         <div id="partialStyleGroup" class="hidden">
-          <div style="font-size: 12px; color: #8c7c75; margin-bottom: 4px; font-weight: 500;">(至多5指造型+5指以上單色/跳色)</div>
+          <div style="font-size: 12px; color: #8c7c75; margin-bottom: 6px; font-weight: 500;">(至多4指造型)</div>
           <div class="checkbox-grid" style="margin-bottom: 12px;">
             <label class="chip-item"><input type="checkbox" name="style" id="catEyeCb" value="貓眼" onchange="checkLimit(this)">貓眼</label>
-            <label class="chip-item"><input type="checkbox" name="style" value="立體不規則造型" onchange="checkLimit(this)">立體不規則造型</label>
-            
+            <label class="chip-item"><input type="checkbox" name="style" value="立體不規則造型" onchange="checkLimit(this)">立體不規則</label>
+
             <label class="chip-item"><input type="checkbox" name="style" value="法式" onchange="checkLimit(this)">法式</label>
             <label class="chip-item"><input type="checkbox" name="style" value="鏡面銀" onchange="checkLimit(this)">鏡面銀</label>
 
             <label class="chip-item"><input type="checkbox" name="style" value="漸層" onchange="checkLimit(this)">漸層</label>
-            <label class="chip-item"><input type="checkbox" name="style" value="小飾品/貼紙" onchange="checkLimit(this)">小飾品/貼紙</label>
+            <label class="chip-item"><input type="checkbox" name="style" value="小飾品/貼紙" onchange="checkLimit(this)">飾品/貼紙</label>
 
             <label class="chip-item"><input type="checkbox" name="style" value="格紋" onchange="checkLimit(this)">格紋</label>
             <label class="chip-item"><input type="checkbox" name="style" value="暈染" onchange="checkLimit(this)">暈染</label>
@@ -593,16 +589,16 @@
         </div>
 
         <div id="fullStyleGroup" class="hidden">
-          <div style="font-size: 12px; color: transparent; margin-bottom: 4px; user-select: none; pointer-events: none;">(佔位)</div>
+          <div style="font-size: 12px; color: #8c7c75; margin-bottom: 6px; font-weight: 500;">(全指整體造型)</div>
           <div class="checkbox-grid" style="margin-bottom: 12px;">
             <label class="chip-item"><input type="checkbox" name="fullStyle" id="fullCatEyeCb" value="貓眼" onchange="checkFullLimit(this)">貓眼</label>
-            <label class="chip-item"><input type="checkbox" name="fullStyle" value="立體不規則造型" onchange="checkFullLimit(this)">立體不規則造型</label>
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="立體不規則造型" onchange="checkFullLimit(this)">立體不規則</label>
 
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="法式" onchange="checkFullLimit(this)">法式</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="鏡面銀" onchange="checkFullLimit(this)">鏡面銀</label>
 
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="漸層" onchange="checkFullLimit(this)">漸層</label>
-            <label class="chip-item"><input type="checkbox" name="fullStyle" value="小飾品/貼紙" onchange="checkFullLimit(this)">小飾品/貼紙</label>
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="小飾品/貼紙" onchange="checkFullLimit(this)">飾品/貼紙</label>
 
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="格紋" onchange="checkFullLimit(this)">格紋</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="暈染" onchange="checkFullLimit(this)">暈染</label>
@@ -629,7 +625,7 @@
 
   <!-- Step 4. 色調 -->
   <div class="section disabled-step" id="step4Section">
-    <div class="section-title">Step 4. 色調</div>
+    <div class="section-title">Step 4. 色調風格</div>
     <div class="tone-palette-group">
       <div class="tone-option active" onclick="selectToneDot(this, '隨機')">
         <span class="color-dot"></span>
@@ -652,10 +648,10 @@
     <div class="section-title">Step 5. 卸甲服務</div>
     <div class="removal-card-group">
       <div id="removalYesCard" class="removal-card" onclick="setRemoval(true)">
-        <div class="removal-card-title">需要卸甲</div>
+        <div class="removal-card-title">需要卸甲 (+150~200)</div>
       </div>
       <div id="removalNoCard" class="removal-card active" onclick="setRemoval(false)">
-        <div class="removal-card-title">不需要</div>
+        <div class="removal-card-title">不需要卸甲</div>
       </div>
     </div>
   </div>
@@ -664,25 +660,35 @@
     預計總金額：NT$ <span id="totalPrice">0</span> 元
   </div>
 
-  <button class="submit-btn" onclick="sendBooking()">送出預約單 (開啟 LINE)</button>
+  <button class="submit-btn" type="button" onclick="sendBooking()">送出預約單 (開啟 LINE)</button>
 </div>
 
-<!-- 引入 LINE LIFF SDK -->
+<!-- LINE LIFF SDK -->
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
   const LINE_OFFICIAL_ACCOUNT_ID = "@344gjuzg"; 
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
 
+  let showJumpColor = false;
+  let showStyle = false;
+  let needRemoval = false;
+
+  const ALL_COLORS = [
+    "紅色", "粉色", "橘色", "黃色", "紅咖色", 
+    "深咖/可可色", "淺咖色", "綠色", "藍色", "紫色", 
+    "黑色", "銀色/白色", "灰色", "金色/香檳色"
+  ];
+
   document.addEventListener('DOMContentLoaded', () => {
     initDatePicker();
-    initLiffLogin(); // 自動抓取 LINE 暱稱
+    initLiffLogin();
   });
 
-  // 自動抓取 LINE 暱稱
+  // 初始化 LINE LIFF 抓取暱稱
   async function initLiffLogin() {
     const nameInput = document.getElementById('customerName');
     try {
-      await liff.init({ liffId: "2011884932-heTsoGVG" });[cite: 1]
+      await liff.init({ liffId: "2011884932-heTsoGVG" });
       if (liff.isLoggedIn()) {
         const profile = await liff.getProfile();
         nameInput.value = profile.displayName; 
@@ -692,14 +698,14 @@
         nameInput.placeholder = "請輸入您的稱呼";
       }
     } catch (err) {
-      console.log("非 LINE 環境或 LIFF 初始化失敗", err);
+      console.log("非 LIFF 環境或初始化問題：", err);
       nameInput.removeAttribute('readonly');
       nameInput.value = "";
-      nameInput.placeholder = "請輸入您的稱呼 (測試用)";
+      nameInput.placeholder = "請輸入您的稱呼";
     }
   }
 
-  // 做二休二排班判斷 (10/23 夜班基準日)
+  // 做二休二排班計算（2026-10-23 夜班基準日）
   function getShiftStatus(dateStr) {
     const anchorDate = new Date("2026-10-23"); 
     const targetDate = new Date(dateStr);
@@ -709,31 +715,11 @@
     const isWorkDay = (cycleDay === 0 || cycleDay === 1);
 
     if (isWorkDay) {
-      return { type: "上班", desc: "🔒 當日為上班日，不開放預約" };
+      return { type: "上班", desc: "🔒 當日為工作日，暫不開放預約" };
     } else {
-      return { type: "休假_夜班", desc: "✨ 當日為夜班休假，全時段開放預約" };
+      return { type: "休假_夜班", desc: "✨ 當日為休假，開放時段預約" };
     }
   }
-
-  document.addEventListener('keydown', function(e) {
-    if (
-      e.keyCode === 123 || 
-      (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 67)) ||
-      (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74))
-    ) {
-      e.preventDefault();
-      return false;
-    }
-  });
-
-  let showJumpColor = false, showStyle = false;
-  let needRemoval = false;
-
-  const ALL_COLORS = [
-    "紅色", "粉色", "橘色", "黃色", "紅咖色", 
-    "深咖/可可色", "淺咖色", "綠色", "藍色", "紫色", 
-    "黑色", "銀色/白色", "灰色", "金色/香檳色"
-  ];
 
   function getTaipeiDate() {
     const now = new Date();
@@ -820,12 +806,6 @@
     if (minuteSelect.selectedOptions[0] && minuteSelect.selectedOptions[0].disabled) {
       if (firstValidMinute !== null) {
         minuteSelect.value = firstValidMinute;
-      } else {
-        const nextHourIndex = hourSelect.selectedIndex + 1;
-        if (nextHourIndex < hourSelect.options.length) {
-          hourSelect.selectedIndex = nextHourIndex;
-          validateDateTime();
-        }
       }
     }
   }
@@ -1029,74 +1009,42 @@
     const typeRandom = Math.random() < 0.5 ? 'partial' : 'full';
     setStyleType(typeRandom);
 
-    if (typeRandom === 'partial') {
-      document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
-      document.getElementById('customPattern').value = "";
+    const stylePool = [
+      { name: "貓眼", weight: 65 }, { name: "暈染", weight: 25 }, { name: "小飾品/貼紙", weight: 2 },
+      { name: "格紋", weight: 1 }, { name: "法式", weight: 1 }, { name: "立體不規則造型", weight: 1 },
+      { name: "漸層", weight: 0.5 }, { name: "海莉款", weight: 0.5 }, { name: "鏡面銀", weight: 0.5 },
+      { name: "指定圖案", weight: 14 }
+    ];
 
-      const pool = [
-        { name: "貓眼", weight: 65 }, { name: "暈染", weight: 25 }, { name: "小飾品/貼紙", weight: 2 },
-        { name: "格紋", weight: 1 }, { name: "法式", weight: 1 }, { name: "立體不規則造型", weight: 1 },
-        { name: "漸層", weight: 0.5 }, { name: "海莉款", weight: 0.5 }, { name: "鏡面銀", weight: 0.5 },
-        { name: "指定圖案", weight: 14 }
-      ];
+    const targetInputName = (typeRandom === 'partial') ? 'style' : 'fullStyle';
+    document.querySelectorAll(`input[name="${targetInputName}"]`).forEach(cb => cb.checked = false);
+    document.getElementById('customPattern').value = "";
 
-      const countToDraw = Math.floor(Math.random() * 3) + 1;
-      let chosenList = [];
+    const countToDraw = Math.floor(Math.random() * 3) + 1;
+    let chosenList = [];
 
-      for (let i = 0; i < countToDraw; i++) {
-        const availablePool = pool.filter(item => !chosenList.includes(item.name));
-        if (availablePool.length === 0) break;
-        const totalWeight = availablePool.reduce((sum, item) => sum + item.weight, 0);
-        let randomNum = Math.random() * totalWeight;
-        for (let item of availablePool) {
-          if (randomNum < item.weight) { chosenList.push(item.name); break; }
-          randomNum -= item.weight;
-        }
+    for (let i = 0; i < countToDraw; i++) {
+      const availablePool = stylePool.filter(item => !chosenList.includes(item.name));
+      if (availablePool.length === 0) break;
+      const totalWeight = availablePool.reduce((sum, item) => sum + item.weight, 0);
+      let randomNum = Math.random() * totalWeight;
+      for (let item of availablePool) {
+        if (randomNum < item.weight) { chosenList.push(item.name); break; }
+        randomNum -= item.weight;
       }
+    }
 
-      document.querySelectorAll('input[name="style"]').forEach(cb => {
-        if (chosenList.includes(cb.value)) { cb.checked = true; checkLimit(cb); }
-      });
-
-      const customCb = document.getElementById('customStyleCb');
-      if (customCb && customCb.checked) {
-        const subOptions = ["隨機花花", "隨機蝴蝶結", "隨機星星"];
-        document.getElementById('customPattern').value = subOptions[Math.floor(Math.random() * subOptions.length)];
+    document.querySelectorAll(`input[name="${targetInputName}"]`).forEach(cb => {
+      if (chosenList.includes(cb.value)) { 
+        cb.checked = true; 
+        if (typeRandom === 'partial') checkLimit(cb); else checkFullLimit(cb);
       }
-    } else {
-      document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
-      document.getElementById('customPattern').value = "";
+    });
 
-      const fullPool = [
-        { name: "貓眼", weight: 65 }, { name: "暈染", weight: 25 }, { name: "小飾品/貼紙", weight: 2 },
-        { name: "格紋", weight: 1 }, { name: "法式", weight: 1 }, { name: "立體不規則造型", weight: 1 },
-        { name: "漸層", weight: 0.5 }, { name: "海莉款", weight: 0.5 }, { name: "鏡面銀", weight: 0.5 },
-        { name: "指定圖案", weight: 14 }
-      ];
-
-      const countToDraw = Math.floor(Math.random() * 3) + 1;
-      let chosenList = [];
-
-      for (let i = 0; i < countToDraw; i++) {
-        const availablePool = fullPool.filter(item => !chosenList.includes(item.name));
-        if (availablePool.length === 0) break;
-        const totalWeight = availablePool.reduce((sum, item) => sum + item.weight, 0);
-        let randomNum = Math.random() * totalWeight;
-        for (let item of availablePool) {
-          if (randomNum < item.weight) { chosenList.push(item.name); break; }
-          randomNum -= item.weight;
-        }
-      }
-
-      document.querySelectorAll('input[name="fullStyle"]').forEach(cb => {
-        if (chosenList.includes(cb.value)) { cb.checked = true; checkFullLimit(cb); }
-      });
-
-      const fullCustomCb = document.getElementById('fullCustomStyleCb');
-      if (fullCustomCb && fullCustomCb.checked) {
-        const subOptions = ["隨機花花", "隨機蝴蝶結", "隨機星星"];
-        document.getElementById('customPattern').value = subOptions[Math.floor(Math.random() * subOptions.length)];
-      }
+    const isCustomChosen = chosenList.includes("指定圖案");
+    if (isCustomChosen) {
+      const subOptions = ["隨機花花", "隨機蝴蝶結", "隨機星星"];
+      document.getElementById('customPattern').value = subOptions[Math.floor(Math.random() * subOptions.length)];
     }
 
     const boxEl = document.getElementById('boxStyle');
@@ -1165,9 +1113,6 @@
     if (hasJumpColorSelected) {
       catEyeSelect.disabled = false;
       catEyeSelect.style.backgroundColor = "#ffffff";
-      if (catEyeSelect.value !== "雙色貓眼" && catEyeSelect.value !== "指定單色貓眼") {
-        catEyeSelect.value = "雙色貓眼";
-      }
     } else {
       catEyeSelect.disabled = true;
       catEyeSelect.style.backgroundColor = "#e5ded7";
