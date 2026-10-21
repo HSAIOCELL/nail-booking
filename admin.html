@@ -17,6 +17,14 @@
     .stat-card h3 { margin: 0 0 5px 0; font-size: 14px; color: #666; }
     .stat-card p { margin: 0; font-size: 20px; font-weight: bold; color: #bc6c25; }
 
+    /* 手動新增表單區塊樣式 */
+    .add-section { background: #fefae0; border: 1px solid #faedcd; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    .add-section h3 { margin-top: 0; color: #bc6c25; font-size: 16px; margin-bottom: 10px; }
+    .form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .form-row input, .form-row select { padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; flex: 1; min-width: 120px; }
+    .btn-add { background: #606c38; color: white; border: none; padding: 9px 18px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; }
+    .btn-add:hover { background: #283618; }
+
     table { width: 100%; border-collapse: collapse; margin-top: 15px; }
     th, td { border: 1px solid #e0e0e0; padding: 10px; text-align: center; font-size: 14px; }
     th { background: #fefae0; color: #555; }
@@ -56,6 +64,20 @@
     </div>
   </div>
 
+  <!-- 手動新增預約/記帳區塊 -->
+  <div class="add-section">
+    <h3>➕ 手動新增預約 / 記帳</h3>
+    <div class="form-row">
+      <input type="text" id="newName" placeholder="客戶名稱" required>
+      <input type="date" id="newDate" required>
+      <input type="text" id="newTime" placeholder="時間 (例: 14:00)" required>
+      <input type="text" id="newItems" placeholder="項目 (例: 單色光療)" required>
+      <input type="number" id="newPrice" placeholder="金額 (NT$)" required min="0">
+      <input type="number" id="newCost" placeholder="成本 (NT$)" required min="0" value="0">
+      <button class="btn-add" onclick="manualAddBooking()">新增紀錄</button>
+    </div>
+  </div>
+
   <button class="btn-refresh" onclick="fetchBookings()">重新整理資料</button>
 
   <table>
@@ -81,7 +103,14 @@
 <script>
   const scriptUrl = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
 
-  // 檢查是否為 15~20 號，自動顯示提醒
+  // 自動設定新增表單的預設日期為今天
+  document.addEventListener('DOMContentLoaded', () => {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('newDate').value = today;
+    checkReminder();
+    fetchBookings();
+  });
+
   function checkReminder() {
     const today = new Date().getDate();
     if (today >= 15 && today <= 20) {
@@ -155,6 +184,54 @@
       });
   }
 
+  // 手動新增預約/記帳
+  function manualAddBooking() {
+    const customerName = document.getElementById('newName').value;
+    const date = document.getElementById('newDate').value;
+    const time = document.getElementById('newTime').value;
+    const items = document.getElementById('newItems').value;
+    const totalPrice = document.getElementById('newPrice').value;
+    const cost = document.getElementById('newCost').value;
+
+    if (!customerName || !date || !time || !items || !totalPrice) {
+      alert("請將必填欄位（名稱、日期、時間、項目、金額）填寫完整！");
+      return;
+    }
+
+    const payload = {
+      customerName: customerName,
+      date: date,
+      time: time,
+      items: items,
+      totalPrice: Number(totalPrice),
+      cost: Number(cost) // 支援手動新增時直接寫入成本
+    };
+
+    fetch(scriptUrl, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(res => {
+      if (res.status === "success") {
+        alert("手動新增紀錄成功！");
+        // 清空輸入框
+        document.getElementById('newName').value = "";
+        document.getElementById('newTime').value = "";
+        document.getElementById('newItems').value = "";
+        document.getElementById('newPrice').value = "";
+        document.getElementById('newCost').value = "0";
+        fetchBookings(); // 重新整理列表與財務看板
+      } else {
+        alert("新增失敗：" + res.message);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert("連線發生錯誤！");
+    });
+  }
+
   function updateBooking(bookingId) {
     const newStatus = document.getElementById(`status_${bookingId}`).value;
     const newCost = document.getElementById(`cost_${bookingId}`).value;
@@ -199,11 +276,6 @@
     document.getElementById('totalCost').innerText = `NT$ ${cost}`;
     document.getElementById('netProfit').innerText = `NT$ ${profit}`;
   }
-
-  window.onload = function() {
-    checkReminder();
-    fetchBookings();
-  };
 </script>
 
 </body>
