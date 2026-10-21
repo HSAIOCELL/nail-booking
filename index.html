@@ -655,6 +655,7 @@
 
 <script>
   const LINE_OFFICIAL_ACCOUNT_ID = "@344gjuzg"; 
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
 
   document.addEventListener('keydown', function(e) {
     if (
@@ -953,13 +954,11 @@
       document.getElementById('boxStyle').classList.add('active');
       document.getElementById('badgeStyle').innerText = '已加購 ✔';
     }
-    
-    // 十指 70%、局部 30% 機率隨機決定款式類型
-    const randomTypeChance = Math.random();
-    const chosenType = randomTypeChance < 0.7 ? 'full' : 'partial';
-    setStyleType(chosenType);
 
-    if (chosenType === 'partial') {
+    const typeRandom = Math.random() < 0.5 ? 'partial' : 'full';
+    setStyleType(typeRandom);
+
+    if (typeRandom === 'partial') {
       document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
       document.getElementById('customPattern').value = "";
 
@@ -1145,6 +1144,12 @@
   }
 
   function sendBooking() {
+    const bookingDate = document.getElementById('bookingDate').value;
+    if (!bookingDate) {
+      alert("請先選擇預約日期！");
+      return;
+    }
+
     const mainColorVal = document.getElementById('mainColor').value;
     const isMainColorSelected = mainColorVal !== "";
 
@@ -1167,12 +1172,12 @@
       const selectedStyles = document.querySelectorAll('input[name="style"]:checked');
       const selectedFullStyles = document.querySelectorAll('input[name="fullStyle"]:checked');
 
-      if (currentType === 'partial' && selectedStyles.length === 0) {
+      if (currentType === 'partial' && selectedStyles.length === 0 && !document.getElementById('customStyleCb').checked) {
         alert("✨ 請勾選局部造型款式，或關閉該項目！");
         return;
       }
       
-      if (currentType === 'full' && selectedFullStyles.length === 0) {
+      if (currentType === 'full' && selectedFullStyles.length === 0 && !document.getElementById('fullCustomStyleCb').checked) {
         alert("✨ 請勾選十指造型款式，或關閉該項目！");
         return;
       }
@@ -1188,59 +1193,104 @@
       }
     }
 
-    const bookingDate = document.getElementById('bookingDate').value || '未選擇日期';
     const hour = document.getElementById('bookingHour').value;
     const minute = document.getElementById('bookingMinute').value;
     const bookingTime = `${hour}:${minute}`;
+    const totalPrice = document.getElementById('totalPrice').innerText;
     
-    let details = `【美甲服務預約單】\n`;
-    details += `----------------------------\n`;
-    details += `• 預約時間：${bookingDate} ${bookingTime}\n`;
-
-    if (needRemoval) {
-      details += `• 卸甲服務：需要卸甲\n`;
-    }
-
-    if (isMainColorSelected) {
-      details += `• 單色款式：${mainColorVal}\n`;
-    }
-
+    // 組裝項目與細節清單
+    let itemsArr = [];
+    if (needRemoval) itemsArr.push("需要卸甲");
+    if (isMainColorSelected) itemsArr.push(`單色款式: ${mainColorVal}`);
     if (showJumpColor) {
       const jColor = document.getElementById('jumpColor').value;
-      if (jColor) details += `• 跳色：${jColor}\n`;
+      if (jColor) itemsArr.push(`跳色: ${jColor}`);
     }
-
     if (showStyle) {
       const currentTypeInput = document.querySelector('input[name="styleType"]:checked');
       if (currentTypeInput) {
         const currentType = currentTypeInput.value;
         const typeName = (currentType === 'full') ? '十指造型' : '局部造型';
-        
         const styles = Array.from(document.querySelectorAll('input[name="style"]:checked')).map(cb => cb.value);
         const fullStyles = Array.from(document.querySelectorAll('input[name="fullStyle"]:checked')).map(cb => cb.value);
         const chosenStyles = (currentType === 'full') ? fullStyles : styles;
-
-        details += `• 款式造型：${typeName}\n`;
-        if (chosenStyles.length > 0) {
-          details += `  - 項目：${chosenStyles.join(', ')}\n`;
-        }
-
+        if (chosenStyles.length > 0) itemsArr.push(`${typeName}: ${chosenStyles.join(', ')}`);
+        
         const customCb = document.getElementById('customStyleCb');
         const fullCustomCb = document.getElementById('fullCustomStyleCb');
         if ((currentType === 'partial' && customCb && customCb.checked) || (currentType === 'full' && fullCustomCb && fullCustomCb.checked)) {
-          details += `  - 指定圖案細節：${document.getElementById('customPattern').value}\n`;
+          itemsArr.push(`指定圖案細節: ${document.getElementById('customPattern').value}`);
         }
       }
     }
-
     const tone = document.getElementById('selectedTone').value;
-    details += `• 色調風格：${tone}\n`;
-    details += `----------------------------\n`;
-    details += `預計總金額：NT$ ${document.getElementById('totalPrice').innerText} 元`;
+    itemsArr.push(`色調風格: ${tone}`);
 
-    const encodedMessage = encodeURIComponent(details);
-    const lineUrl = `https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodedMessage}`;
-    window.location.href = lineUrl;
+    // 準備傳送至 Google 試算表的資料
+    const bookingData = {
+      bookingId: 'M' + Date.now().toString().slice(-6),
+      customerName: "LINE 貴賓",
+      date: bookingDate,
+      time: bookingTime,
+      items: itemsArr.join(' / '),
+      totalPrice: parseInt(totalPrice, 10)
+    };
+
+    const submitBtn = document.querySelector('.submit-btn');
+    submitBtn.innerText = "預約送出中...";
+    submitBtn.disabled = true;
+
+    // 1. 寫入 Google 試算表
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bookingData)
+    })
+    .then(() => {
+      // 2. 開啟 LINE 傳送預約單
+      let details = `【美甲服務預約單】\n`;
+      details += `----------------------------\n`;
+      details += `• 預約時間：${bookingDate} ${bookingTime}\n`;
+      if (needRemoval) details += `• 卸甲服務：需要卸甲\n`;
+      if (isMainColorSelected) details += `• 單色款式：${mainColorVal}\n`;
+      if (showJumpColor) {
+        const jColor = document.getElementById('jumpColor').value;
+        if (jColor) details += `• 跳色：${jColor}\n`;
+      }
+      if (showStyle) {
+        const currentTypeInput = document.querySelector('input[name="styleType"]:checked');
+        if (currentTypeInput) {
+          const currentType = currentTypeInput.value;
+          const typeName = (currentType === 'full') ? '十指造型' : '局部造型';
+          const styles = Array.from(document.querySelectorAll('input[name="style"]:checked')).map(cb => cb.value);
+          const fullStyles = Array.from(document.querySelectorAll('input[name="fullStyle"]:checked')).map(cb => cb.value);
+          const chosenStyles = (currentType === 'full') ? fullStyles : styles;
+          details += `• 款式造型：${typeName}\n`;
+          if (chosenStyles.length > 0) details += `  - 項目：${chosenStyles.join(', ')}\n`;
+          const customCb = document.getElementById('customStyleCb');
+          const fullCustomCb = document.getElementById('fullCustomStyleCb');
+          if ((currentType === 'partial' && customCb && customCb.checked) || (currentType === 'full' && fullCustomCb && fullCustomCb.checked)) {
+            details += `  - 指定圖案細節：${document.getElementById('customPattern').value}\n`;
+          }
+        }
+      }
+      details += `• 色調風格：${tone}\n`;
+      details += `----------------------------\n`;
+      details += `預計總金額：NT$ ${totalPrice} 元`;
+
+      const encodedMessage = encodeURIComponent(details);
+      const lineUrl = `https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodedMessage}`;
+      
+      alert("預約成功！資料已同步存入後台系統。");
+      window.location.href = lineUrl;
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert("送出失敗，請再試一次或直接聯繫官方 LINE。");
+      submitBtn.innerText = "送出預約單 (開啟 LINE)";
+      submitBtn.disabled = false;
+    });
   }
 
   window.onload = function() {
