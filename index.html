@@ -483,7 +483,6 @@
     ⚠️ 提醒：目前正值 15 號至 20 號期間，請留意下兩個月的最新班表與預約動態！
   </div>
 
-  <!-- 預約暱稱 -->
   <div class="section">
     <div class="section-title">預約暱稱</div>
     <div style="display: flex; gap: 8px;">
@@ -710,7 +709,7 @@
   let adminOverride = false; 
   let backendShiftGroup = "B";
   let backendShiftType = "夜班"; 
-  let backendMonthlyShiftTypes = {}; // 新增：記憶每個月獨立設定
+  let backendMonthlyShiftTypes = {}; 
   let backendSchedules = {};
 
   const ALL_COLORS = [
@@ -750,7 +749,7 @@
       if (data.shiftGroup) backendShiftGroup = data.shiftGroup;
       if (data.shiftType) backendShiftType = data.shiftType;
       if (data.schedules) backendSchedules = data.schedules;
-      if (data.monthlyShiftTypes) backendMonthlyShiftTypes = data.monthlyShiftTypes; // 載入每個月獨立設定
+      if (data.monthlyShiftTypes) backendMonthlyShiftTypes = data.monthlyShiftTypes; 
     } catch (e) {
       console.error("無法取得後端排班設定", e);
     }
@@ -798,13 +797,11 @@
     }
   }
 
-  // 核心修改：動態讀取「該日期所屬月份」的獨立設定來計算排班
   function getShiftCycleInfo(dateObj) {
     const year = dateObj.getFullYear();
     const month = String(dateObj.getMonth() + 1).padStart(2, '0');
     const yearMonth = `${year}-${month}`;
 
-    // 優先讀取該月份在後台獨立設定的組別與班別類型，若無則用預設值
     const monthConfig = backendMonthlyShiftTypes[yearMonth];
     const currentGroup = monthConfig ? monthConfig.shiftGroup : backendShiftGroup;
     const currentType = monthConfig ? monthConfig.shiftType : backendShiftType;
@@ -822,7 +819,7 @@
       cycleDay: cycleDay,
       isWorkDay: (cycleDay === 0 || cycleDay === 1),
       isDayShiftOff: (cycleDay === 2 || cycleDay === 3),
-      shiftType: currentType // 回傳該月份的日班/夜班設定
+      shiftType: currentType 
     };
   }
 
@@ -892,7 +889,6 @@
         }
 
         if (isAvailable && dayElement.dateObj >= taipeiNow) {
-          // 依據該日期所屬月份的班別類型動態決定顏色（日班=黃色，夜班=藍灰色）
           const shiftInfo = getShiftCycleInfo(dayElement.dateObj);
           const availableClassName = (shiftInfo.shiftType === "日班") ? "available-day-yellow" : "available-day-blue";
           dayElement.classList.add(availableClassName);
@@ -1500,7 +1496,7 @@
     })
     .catch(error => {
       console.error('Error:', error);
-      alert("送出失敗，請再試一次或直接聯繫官方 LINE。");
+      alert("送出失敗，請再試自動重試或直接聯繫官方 LINE。");
       submitBtn.innerText = "送出預約單 (開啟 LINE)";
       submitBtn.disabled = false;
     });
