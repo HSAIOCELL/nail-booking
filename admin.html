@@ -1,4 +1,297 @@
-<!-- 分頁 3: 單日營業狀態微調 -->
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=no">
+  <title>美甲預約系統 - 後台管理</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg-color: #f4f2ee;
+      --card-bg: #ffffff;
+      --primary: #8a7968;
+      --primary-dark: #6e5f50;
+      --accent-green: #738276;
+      --accent-sand: #d4c5b9;
+      --text-main: #4a4541;
+      --text-muted: #8c827a;
+      --border-color: #e6e0d8;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg-color);
+      margin: 0;
+      padding: 12px;
+      color: var(--text-main);
+    }
+
+    .container {
+      max-width: 1050px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      padding: 20px 16px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(138, 121, 104, 0.06);
+      border: 1px solid var(--border-color);
+    }
+
+    h2 {
+      text-align: center;
+      color: var(--primary-dark);
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin: 0 0 18px 0;
+      font-size: 20px;
+    }
+    
+    #reminderBanner {
+      display: none;
+      background: #fdf6ec;
+      border: 1px solid #f2e3d1;
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      text-align: center;
+      color: #b88654;
+      font-size: 13.5px;
+      font-weight: 500;
+    }
+
+    /* 手機友善：分頁 (Tabs) 設計 */
+    .tab-nav {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 18px;
+      border-bottom: 1.5px solid var(--border-color);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-btn {
+      flex: 0 0 auto;
+      padding: 8px 14px;
+      background: #eee8e0;
+      color: var(--text-muted);
+      border: none;
+      border-radius: 20px;
+      font-size: 13.5px;
+      font-weight: bold;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(138, 121, 104, 0.25);
+    }
+
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+    /* 統計卡片 */
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    @media (min-width: 600px) {
+      .stats-container { grid-template-columns: repeat(4, 1fr); gap: 15px; }
+    }
+
+    .stat-card {
+      background: #f7f5f0;
+      padding: 14px 10px;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+    }
+    .stat-card h3 { margin: 0 0 6px 0; font-size: 12.5px; color: var(--text-muted); font-weight: normal; }
+    .stat-card p { margin: 0; font-size: 18px; font-weight: bold; color: var(--primary-dark); }
+
+    /* 表單區塊 */
+    .add-section {
+      background: #faf8f5;
+      border: 1px solid var(--border-color);
+      padding: 16px 12px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+    }
+    .add-section h3 { margin-top: 0; color: var(--primary-dark); font-size: 14.5px; margin-bottom: 12px; font-weight: 600; }
+    
+    .form-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    @media (min-width: 600px) {
+      .form-row { flex-direction: row; align-items: center; }
+    }
+
+    .form-row input, .form-row select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      font-size: 14px;
+      background: #fff;
+      color: var(--text-main);
+      outline: none;
+    }
+    
+    .btn-action {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 11px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    @media (min-width: 600px) {
+      .btn-action { width: auto; }
+    }
+
+    /* 排班月曆小預覽 */
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .calendar-day {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 6px 2px;
+      text-align: center;
+      min-height: 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .calendar-day .day-num { font-size: 11px; color: var(--text-muted); font-weight: bold; }
+    .calendar-day .day-status { font-size: 10px; padding: 2px 2px; border-radius: 3px; font-weight: 500; white-space: nowrap; overflow: hidden; }
+    
+    .status-work { background: #f2e9e4; color: #9a7b70; } 
+    .status-off { background: #e8ede9; color: var(--accent-green); } 
+    .status-overtime { background: #faedcd; color: #bc6c25; } 
+    .status-closed { background: #f5f5f5; color: #aaa; text-decoration: line-through; } 
+
+    /* 表格 (支援手機橫向滑動) */
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    th, td { border: 1px solid var(--border-color); padding: 10px 8px; text-align: center; font-size: 13px; }
+    th { background: #f7f5f0; color: var(--text-muted); font-weight: 500; white-space: nowrap; }
+    tr:nth-child(even) { background: #faf9f6; }
+    .loading { text-align: center; padding: 20px; color: var(--text-muted); }
+    
+    .btn-refresh {
+      background: var(--accent-sand);
+      color: var(--primary-dark);
+      border: none;
+      padding: 9px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13.5px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      width: 100%;
+    }
+
+    /* 彈窗 */
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(74, 69, 65, 0.4); justify-content: center; align-items: center; }
+    .modal-content { background: var(--card-bg); padding: 20px; border-radius: 16px; width: 92%; max-width: 650px; position: relative; }
+    .close-btn { position: absolute; right: 15px; top: 12px; font-size: 22px; cursor: pointer; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>美甲預約系統</h2>
+
+  <div id="reminderBanner">
+    ⚠️ 提醒：目前正值 15 號至 20 號，請規劃下兩個月班表！
+  </div>
+
+  <!-- 分頁選單 (Tab Navigation) -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('tab-stats')">📊 營運統計</button>
+    <button class="tab-btn" onclick="switchTab('tab-schedule')">🔄 班別與月曆</button>
+    <button class="tab-btn" onclick="switchTab('tab-override')">✨ 營業微調</button>
+    <button class="tab-btn" onclick="switchTab('tab-add')">➕ 新增預約</button>
+    <button class="tab-btn" onclick="switchTab('tab-list')">📋 預約紀錄</button>
+  </div>
+
+  <!-- 分頁 1: 營運統計 -->
+  <div id="tab-stats" class="tab-content active">
+    <div class="stats-container">
+      <div class="stat-card" onclick="openModal('revenue')">
+        <h3>當月預估營收</h3>
+        <p id="currentMonthRevenue">NT$ 0</p>
+      </div>
+      <div class="stat-card" onclick="openModal('revenue')">
+        <h3>總累計營收</h3>
+        <p id="totalRevenue">NT$ 0</p>
+      </div>
+      <div class="stat-card">
+        <h3>總材料成本</h3>
+        <p id="totalCost">NT$ 0</p>
+      </div>
+      <div class="stat-card" onclick="openModal('profit')">
+        <h3>淨利 (利潤)</h3>
+        <p id="netProfit">NT$ 0</p>
+      </div>
+    </div>
+    <p style="font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 5px;">💡 點擊營收或淨利卡片可看【年度趨勢折線圖】</p>
+  </div>
+
+  <!-- 分頁 2: 班別設定與小月曆 -->
+  <div id="tab-schedule" class="tab-content">
+    <div class="add-section">
+      <h3>🔄 班別與月份設定</h3>
+      <div class="form-row">
+        <input type="month" id="targetMonth" onchange="renderSchedulePreview()">
+        <select id="shiftGroup" onchange="renderSchedulePreview()">
+          <option value="B">B 班</option>
+          <option value="A">A 班</option>
+        </select>
+        <select id="shiftType" onchange="renderSchedulePreview()">
+          <option value="夜班">夜班</option>
+          <option value="日班">日班</option>
+        </select>
+        <button class="btn-action" onclick="updateBaseShift()">儲存設定</button>
+      </div>
+    </div>
+
+    <div class="add-section" style="background: #f4f2ee;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h3 style="margin: 0;">📅 當月狀態預覽</h3>
+        <span id="previewMonthTitle" style="font-size: 12.5px; color: var(--text-muted); font-weight: bold;"></span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-weight: bold;">
+        <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+      </div>
+      <div id="calendarPreviewGrid" class="calendar-grid"></div>
+    </div>
+  </div>
+
+  <!-- 分頁 3: 單日營業狀態微調 -->
   <div id="tab-override" class="tab-content">
     <div class="add-section">
       <h3>✨ 特定日期營業狀態微調</h3>
@@ -21,3 +314,371 @@
       </div>
     </div>
   </div>
+
+  <!-- 分頁 4: 新增預約紀錄 -->
+  <div id="tab-add" class="tab-content">
+    <div class="add-section">
+      <h3>➕ 手動新增預約 / 記帳</h3>
+      <div class="form-row">
+        <input type="text" id="newName" placeholder="客戶名稱" required>
+        <input type="date" id="newDate" required>
+        <input type="text" id="newTime" placeholder="時間 (例: 14:00)" required>
+        <input type="text" id="newItems" placeholder="項目 (例: 單色光療)" required>
+        <input type="number" id="newPrice" placeholder="金額 (NT$)" required min="0">
+        <input type="number" id="newCost" placeholder="成本 (NT$)" required min="0" value="0">
+        <button class="btn-action" onclick="manualAddBooking()">新增紀錄</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 分頁 5: 預約紀錄列表 -->
+  <div id="tab-list" class="tab-content">
+    <button class="btn-refresh" onclick="fetchBookings()">🔄 重新整理資料</button>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>編號</th>
+            <th>客戶</th>
+            <th>日期</th>
+            <th>時間</th>
+            <th>項目</th>
+            <th>預估金額</th>
+            <th>狀態</th>
+            <th>成本</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="bookingTableBody">
+          <tr><td colspan="9" class="loading">正在讀取最新資料...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 趨勢圖彈窗 -->
+<div id="chartModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModal()">&times;</span>
+    <h3 id="modalTitle" style="color: var(--primary-dark); text-align: center; margin-top: 0; font-size: 16px;">📈 年度趨勢折線圖</h3>
+    <div style="margin-bottom: 12px; text-align: center;">
+      <select id="selectYear" onchange="renderChart()" style="padding: 6px; border-radius: 6px; font-size: 13px;"></select>
+    </div>
+    <div style="position: relative; height: 260px; width: 100%;">
+      <canvas id="trendChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+  const scriptUrl = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
+  let globalBookings = []; 
+  let globalSchedules = {};
+  let trendChartInstance = null;
+  let currentChartType = 'revenue';
+  const anchorBaseDate = "2026-10-23"; 
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const currentYearMonth = today.toISOString().slice(0, 7);
+    
+    document.getElementById('newDate').value = todayStr;
+    document.getElementById('scheduleDate').value = todayStr;
+    document.getElementById('targetMonth').value = currentYearMonth;
+    
+    checkReminder();
+    fetchBookings();
+  });
+
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    
+    event.target.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+  }
+
+  function checkReminder() {
+    const todayDay = new Date().getDate();
+    if (todayDay >= 15 && todayDay <= 20) {
+      document.getElementById('reminderBanner').style.display = "block";
+    }
+  }
+
+  function fetchBookings() {
+    const tableBody = document.getElementById('bookingTableBody');
+    tableBody.innerHTML = `<tr><td colspan="9" class="loading">正在讀取最新資料...</td></tr>`;
+
+    fetch(scriptUrl, { method: 'GET', mode: 'cors' })
+      .then(response => response.json())
+      .then(resData => {
+        tableBody.innerHTML = "";
+        globalBookings = resData.bookings || [];
+        globalSchedules = resData.schedules || {};
+        
+        if (resData.shiftGroup) document.getElementById('shiftGroup').value = resData.shiftGroup;
+        if (resData.shiftType) document.getElementById('shiftType').value = resData.shiftType;
+
+        renderSchedulePreview();
+
+        if (globalBookings.length === 0) {
+          tableBody.innerHTML = `<tr><td colspan="9" class="loading">目前沒有預約資料</td></tr>`;
+          updateFinance(0, 0, 0);
+          return;
+        }
+
+        let totalRev = 0, totalCost = 0;
+        const now = new Date();
+        const currentYearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        let currentMonthRev = 0;
+
+        globalBookings.forEach(row => {
+          const bookingId = row.bookingId || "";
+          const customerName = row.customerName || "";
+          const date = row.date || "";
+          const time = row.time || "";
+          const items = row.items || "";
+          const price = Number(row.totalPrice) || 0;
+          const status = row.status || "預約中";
+          const cost = Number(row.cost) || 0;
+
+          if (status !== "已取消") {
+            totalRev += price;
+            totalCost += cost;
+            if (date.startsWith(currentYearMonth)) currentMonthRev += price;
+          }
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>#${bookingId}</td>
+            <td>${customerName}</td>
+            <td>${date}</td>
+            <td>${time}</td>
+            <td>${items}</td>
+            <td>NT$ ${price}</td>
+            <td>
+              <select id="status_${bookingId}">
+                <option value="有效" ${status === '有效' ? 'selected' : ''}>有效</option>
+                <option value="預約中" ${status === '預約中' ? 'selected' : ''}>預約中</option>
+                <option value="已完成" ${status === '已完成' ? 'selected' : ''}>已完成</option>
+                <option value="已取消" ${status === '已取消' ? 'selected' : ''}>已取消</option>
+              </select>
+            </td>
+            <td><input type="number" id="cost_${bookingId}" value="${cost}" style="width: 65px;" min="0"></td>
+            <td><button class="btn-action" style="padding: 4px 8px; font-size: 12px; background: var(--accent-green);" onclick="updateBooking('${bookingId}')">儲存</button></td>
+          `;
+          tableBody.appendChild(tr);
+        });
+
+        updateFinance(totalRev, totalCost, currentMonthRev);
+      })
+      .catch(err => {
+        tableBody.innerHTML = `<tr><td colspan="9" class="loading" style="color: red;">連線失敗！</td></tr>`;
+      });
+  }
+
+  function renderSchedulePreview() {
+    const targetMonthVal = document.getElementById('targetMonth').value;
+    if (!targetMonthVal) return;
+
+    const [year, month] = targetMonthVal.split('-').map(Number);
+    document.getElementById('previewMonthTitle').innerText = `${year} 年 ${month} 月`;
+
+    const grid = document.getElementById('calendarPreviewGrid');
+    grid.innerHTML = "";
+
+    const firstDayIndex = new Date(year, month - 1, 1).getDay();
+    const totalDays = new Date(year, month, 0).getDate();
+
+    const anchorDate = new Date(anchorBaseDate + "T00:00:00");
+    const shiftGroup = document.getElementById('shiftGroup').value;
+
+    for (let i = 0; i < firstDayIndex; i++) {
+      const emptyCell = document.createElement('div');
+      emptyCell.className = 'calendar-day';
+      emptyCell.style.background = 'transparent';
+      emptyCell.style.border = 'none';
+      grid.appendChild(emptyCell);
+    }
+
+    for (let day = 1; day <= totalDays; day++) {
+      const dateObj = new Date(year, month - 1, day);
+      const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      
+      const cell = document.createElement('div');
+      cell.className = 'calendar-day';
+
+      let statusText = "";
+      let statusClass = "";
+
+      if (globalSchedules[dateStr]) {
+        const s = globalSchedules[dateStr];
+        if (s.status === "開放") {
+          statusText = s.slots ? `營業(${s.slots})` : "營業";
+          statusClass = "status-overtime";
+        } else if (s.status === "關閉") {
+          statusText = "店休";
+          statusClass = "status-closed";
+        }
+      } else {
+        const diffDays = Math.round((dateObj - anchorDate) / (1000 * 60 * 60 * 24));
+        let cycleDay = ((diffDays % 4) + 4) % 4;
+        if (shiftGroup === "A") cycleDay = (cycleDay + 2) % 4;
+
+        const isWorkDay = (cycleDay === 0 || cycleDay === 1);
+        if (isWorkDay) {
+          statusText = "營業";
+          statusClass = "status-work";
+        } else {
+          statusText = "店休";
+          statusClass = "status-off";
+        }
+      }
+
+      cell.innerHTML = `
+        <span class="day-num">${day}</span>
+        <span class="day-status ${statusClass}">${statusText}</span>
+      `;
+      grid.appendChild(cell);
+    }
+  }
+
+  function updateBaseShift() {
+    const targetMonth = document.getElementById('targetMonth').value;
+    const shiftGroup = document.getElementById('shiftGroup').value;
+    const shiftType = document.getElementById('shiftType').value;
+
+    if (!targetMonth) return alert("請選擇月份！");
+
+    fetch(scriptUrl, { 
+      method: "POST", 
+      body: JSON.stringify({ action: "updateBaseShift", targetMonth, shiftGroup, shiftType }) 
+    })
+      .then(res => res.json())
+      .then(res => {
+        if (res.result === "success") {
+          alert(`【${targetMonth}】設定成功！`);
+          renderSchedulePreview();
+        } else alert("設定失敗");
+      });
+  }
+
+  function updateScheduleOverride() {
+    const targetDate = document.getElementById('scheduleDate').value;
+    const status = document.getElementById('scheduleStatus').value;
+    const slots = document.getElementById('scheduleSlots').value;
+
+    if (!targetDate) return alert("請選擇日期！");
+
+    fetch(scriptUrl, { method: "POST", body: JSON.stringify({ action: "updateSchedule", targetDate, status, slots }) })
+      .then(res => res.json())
+      .then(res => {
+        if (res.result === "success") { 
+          alert(`日期 ${targetDate} 更新成功！`); 
+          fetchBookings(); 
+        } else alert("更新失敗");
+      });
+  }
+
+  function updateFinance(rev, cost, monthRev = 0) {
+    document.getElementById('currentMonthRevenue').innerText = `NT$ ${monthRev}`;
+    document.getElementById('totalRevenue').innerText = `NT$ ${rev}`;
+    document.getElementById('totalCost').innerText = `NT$ ${cost}`;
+    document.getElementById('netProfit').innerText = `NT$ ${rev - cost}`;
+  }
+
+  function openModal(type) {
+    currentChartType = type;
+    document.getElementById('modalTitle').innerText = (type === 'revenue') ? "📈 年度每月營收趨勢" : "📈 年度每月淨利趨勢";
+    document.getElementById('chartModal').style.display = 'flex';
+    setYearDropdown();
+    renderChart();
+  }
+
+  function closeModal() { document.getElementById('chartModal').style.display = 'none'; }
+
+  function setYearDropdown() {
+    const yearSelect = document.getElementById('selectYear');
+    let years = new Set([new Date().getFullYear()]);
+    globalBookings.forEach(row => { if (row.date) years.add(row.date.split('-')[0]); });
+    yearSelect.innerHTML = "";
+    Array.from(years).sort().reverse().forEach(y => {
+      const opt = document.createElement('option');
+      opt.value = y; opt.innerText = `${y} 年`;
+      yearSelect.appendChild(opt);
+    });
+  }
+
+  function renderChart() {
+    const selectedYear = document.getElementById('selectYear').value || new Date().getFullYear();
+    let monthlyData = new Array(12).fill(0);
+
+    globalBookings.forEach(row => {
+      if (row.date && row.status !== "已取消") {
+        const parts = row.date.split('-');
+        if (parts.length === 3 && parts[0] === String(selectedYear)) {
+          const monthIdx = parseInt(parts[1], 10) - 1;
+          if (monthIdx >= 0 && monthIdx < 12) {
+            const price = Number(row.totalPrice) || 0;
+            const cost = Number(row.cost) || 0;
+            monthlyData[monthIdx] += (currentChartType === 'revenue') ? price : (price - cost);
+          }
+        }
+      }
+    });
+
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    if (trendChartInstance) trendChartInstance.destroy();
+
+    const chartColor = currentChartType === 'revenue' ? '#8a7968' : '#738276';
+    trendChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+        datasets: [{
+          label: `${selectedYear} 年 (${currentChartType === 'revenue' ? '營收' : '淨利'})`,
+          data: monthlyData,
+          borderColor: chartColor,
+          backgroundColor: currentChartType === 'revenue' ? 'rgba(138, 121, 104, 0.08)' : 'rgba(115, 130, 118, 0.08)',
+          borderWidth: 2.5, fill: true, tension: 0.3
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  function manualAddBooking() {
+    const customerName = document.getElementById('newName').value;
+    const date = document.getElementById('newDate').value;
+    const time = document.getElementById('newTime').value;
+    const items = document.getElementById('newItems').value;
+    const totalPrice = document.getElementById('newPrice').value;
+    const cost = document.getElementById('newCost').value;
+
+    if (!customerName || !date || !time || !items || !totalPrice) return alert("請填寫完整！");
+
+    fetch(scriptUrl, { method: "POST", body: JSON.stringify({ customerName, date, time, items, totalPrice: Number(totalPrice), cost: Number(cost) }) })
+      .then(res => res.json())
+      .then(res => {
+        if (res.result === "success") { alert("新增成功！"); fetchBookings(); }
+        else alert("新增失敗");
+      });
+  }
+
+  function updateBooking(bookingId) {
+    const newStatus = document.getElementById(`status_${bookingId}`).value;
+    const newCost = document.getElementById(`cost_${bookingId}`).value;
+
+    fetch(scriptUrl, { method: "POST", body: JSON.stringify({ action: "update", bookingId, status: newStatus, cost: Number(newCost) }) })
+      .then(res => res.json())
+      .then(res => {
+        if (res.result === "success") { alert(`更新成功！`); fetchBookings(); }
+        else alert("更新失敗");
+      });
+  }
+</script>
+
+</body>
+</html>
