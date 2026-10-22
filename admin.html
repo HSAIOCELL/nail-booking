@@ -20,7 +20,7 @@
     /* 區塊通用樣式 */
     .add-section { background: #fefae0; border: 1px solid #faedcd; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
     .add-section h3 { margin-top: 0; color: #bc6c25; font-size: 16px; margin-bottom: 10px; }
-    .form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
     .form-row input, .form-row select { padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; flex: 1; min-width: 120px; }
     .btn-add { background: #606c38; color: white; border: none; padding: 9px 18px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; }
     .btn-add:hover { background: #283618; }
@@ -45,10 +45,11 @@
 
   <!-- 15號提醒通知區塊 -->
   <div id="reminderBanner">
-    ⚠️ 貼心提醒：目前正值 15 號至 20 號期間，請記得檢查並準備上傳下個月的預約班表喔！
+    ⚠️ 貼心提醒：目前正值 15 號至 20 號期間，請記得檢查並準備規劃與更新下兩個月的班表喔！
   </div>
   
   <!-- 財務統計看板 -->
+  .stats-container { display: flex; gap: 15px; margin-bottom: 20px; }
   <div class="stats-container">
     <div class="stat-card">
       <h3>總預估營收</h3>
@@ -64,16 +65,19 @@
     </div>
   </div>
 
-  <!-- 【新增】手動排班調整區塊 (加班/臨時休假) -->
+  <!-- 手動排班與時段微調區塊 -->
   <div class="add-section" style="background: #eef2ed; border-color: #d8e2dc;">
-    <h3 style="color: #3a5a40;">📅 手動排班調整 (加班 / 臨時休假)</h3>
+    <h3 style="color: #3a5a40;">📅 手動排班與時段微調 (加班 / 臨時休假)</h3>
     <div class="form-row">
       <input type="date" id="scheduleDate" required>
       <select id="scheduleStatus">
         <option value="開放">強制開放預約 (加班)</option>
         <option value="關閉">強制關閉預約 (休假)</option>
       </select>
-      <button class="btn-add" style="background: #3a5a40;" onclick="updateScheduleOverride()">更新排班狀態</button>
+    </div>
+    <div class="form-row">
+      <input type="text" id="scheduleSlots" placeholder="指定開放時段 (選填，多個請用逗號隔開，例: 14:00,16:00)" style="flex: 3;">
+      <button class="btn-add" style="background: #3a5a40; flex: 1;" onclick="updateScheduleOverride()">儲存排班設定</button>
     </div>
   </div>
 
@@ -125,8 +129,8 @@
   });
 
   function checkReminder() {
-    const today = new Date().getDate();
-    if (today >= 15 && today <= 20) {
+    const todayDay = new Date().getDate();
+    if (todayDay >= 15 && todayDay <= 20) {
       document.getElementById('reminderBanner').style.display = "block";
     }
   }
@@ -199,10 +203,11 @@
       });
   }
 
-  // 更新手動排班覆寫
+  // 儲存手動排班與時段設定
   function updateScheduleOverride() {
     const targetDate = document.getElementById('scheduleDate').value;
     const status = document.getElementById('scheduleStatus').value;
+    const slots = document.getElementById('scheduleSlots').value;
 
     if (!targetDate) {
       alert("請選擇要調整的日期！");
@@ -212,7 +217,8 @@
     const payload = {
       action: "updateSchedule",
       targetDate: targetDate,
-      status: status
+      status: status,
+      slots: slots
     };
 
     fetch(scriptUrl, {
@@ -222,7 +228,7 @@
     .then(res => res.json())
     .then(res => {
       if (res.result === "success") {
-        alert(`日期 ${targetDate} 已成功設為「${status}」預約！前台將會自動同步。`);
+        alert(`日期 ${targetDate} 已成功更新排班狀態為「${status}」！`);
       } else {
         alert("更新失敗：" + (res.error || "未知錯誤"));
       }
@@ -281,7 +287,7 @@
 
   function updateBooking(bookingId) {
     const newStatus = document.getElementById(`status_${bookingId}`).value;
-    const newCost = document.getElementById(`cost_${bookingId}`).value;
+    const newCost = document.getElementById(`cost_${bookingId}` ).value;
 
     const payload = {
       action: "update",
