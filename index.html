@@ -169,7 +169,7 @@
       font-family: inherit !important;
     }
 
-    /* 班別動態標記：白班=黃色 / 夜班=莫蘭迪藍灰色 */
+    /* 各月動態班別標記：白班=黃色 / 夜班=莫蘭迪藍灰色 */
     .flatpickr-day.available-day-yellow {
       background-color: #fdf6e2 !important;
       color: #a37512 !important;
@@ -480,7 +480,7 @@
   </div>
 
   <div id="frontendReminder">
-    ⚠️ 提醒：目前正值 15 號至 20 號期間，請留意下兩個月的最新班表與預約動態！
+    ⚠️ 提醒：目前正值 15 號至 20 號期間，請留意下個月的最新班表與預約動態！
   </div>
 
   <!-- 預約暱稱 (輸入 admin 可開啟隱藏式後台解鎖功能) -->
@@ -719,7 +719,7 @@
 
   let adminOverride = false; 
   let backendShiftGroup = "B";
-  let backendShiftType = "夜班"; 
+  let backendMonthlyShiftTypes = {}; // 接收後台設定的各月獨立班別對照表
   let backendSchedules = {};
 
   const ALL_COLORS = [
@@ -737,7 +737,6 @@
     fetchBackendConfigAndInit();
   });
 
-  // 從 LINE 返回頁面時，自動復原送出按鈕狀態
   window.addEventListener('pageshow', (event) => {
     const submitBtn = document.querySelector('.submit-btn');
     if (submitBtn) {
@@ -746,7 +745,6 @@
     }
   });
 
-  // 15號至20號前台自動跳出下兩個月班表更新提醒
   function checkFrontendReminder() {
     const todayDay = new Date().getDate();
     if (todayDay >= 15 && todayDay <= 20) {
@@ -759,7 +757,7 @@
       const res = await fetch(SCRIPT_URL, { method: 'GET', mode: 'cors' });
       const data = await res.json();
       if (data.shiftGroup) backendShiftGroup = data.shiftGroup;
-      if (data.shiftType) backendShiftType = data.shiftType;
+      if (data.monthlyShiftTypes) backendMonthlyShiftTypes = data.monthlyShiftTypes; // 接收各月獨立班別
       if (data.schedules) backendSchedules = data.schedules;
     } catch (e) {
       console.error("無法取得後端排班設定", e);
@@ -806,6 +804,16 @@
     } else {
       alert("目前已在 LINE 環境或已完成登入！");
     }
+  }
+
+  // 核心：根據日期動態對應後台的各月獨立班別設定
+  function getShiftTypeForDate(dateObj) {
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const yearMonthKey = `${year}-${month}`; // 格式如 "2026-10", "2026-11"
+
+    // 如果後台有設定該月份的班別，直接採用；若無則預設為 "夜班"
+    return backendMonthlyShiftTypes[yearMonthKey] || "夜班";
   }
 
   function getShiftCycleInfo(dateObj) {
@@ -858,13 +866,8 @@
 
   function initFlatpickr() {
     const taipeiNow = getTaipeiDate();
-    // 設定最大可選擇日期為「近兩個月」（當月及下個月月底）
-    const maxDate = new Date(taipeiNow.getFullYear(), taipeiNow.getMonth() + 2, 0);
-
+    const maxDate = new Date(taipeiNow.getFullYear(), taipeiNow.getMonth() + 2, 0); // 支援顯示當月與下個月共兩個月
     const defaultAvailableDate = findFirstAvailableDate(taipeiNow);
-
-    // 依據後端班別類型設定顏色：日班＝黃色，夜班＝莫蘭迪藍灰色
-    const availableClassName = (backendShiftType === "日班") ? "available-day-yellow" : "available-day-blue";
 
     pickerInstance = flatpickr("#bookingDate", {
       locale: "zh",
@@ -885,18 +888,22 @@
         }
       ],
       onDayCreate: function(dObj, dStr, fp, dayElement) {
-        const dateStr = formatDateToYYYYMMDD(dayElement.dateObj);
+        const dateObj = dayElement.dateObj;
+        const dateStr = formatDateToYYYYMMDD(dateObj);
         let isAvailable = false;
 
         if (backendSchedules[dateStr]) {
           if (backendSchedules[dateStr].status === "開放") isAvailable = true;
         } else {
-          const shiftInfo = getShiftCycleInfo(dayElement.dateObj);
+          const shiftInfo = getShiftCycleInfo(dateObj);
           if (!shiftInfo.isWorkDay) isAvailable = true;
         }
 
-        if (isAvailable && dayElement.dateObj >= taipeiNow) {
-          dayElement.classList.add(availableClassName);
+        if (isAvailable && dateObj >= taipeiNow) {
+          // 動態抓取該日期所屬月份在後台設定的班別（日班=黃色 / 夜班=藍灰色）
+          const shiftTypeForThisMonth = getShiftTypeForDate(dateObj);
+          const className = (shiftTypeForThisMonth === "日班") ? "available-day-yellow" : "available-day-blue";
+          dayElement.classList.add(className);
         }
       },
       onChange: function(selectedDates, dateStr, instance) {
