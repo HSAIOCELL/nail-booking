@@ -719,6 +719,15 @@
     fetchBackendConfigAndInit();
   });
 
+  // 當使用者從 LINE 點擊返回鍵回到前台頁面時，自動恢復送出按鈕狀態
+  window.addEventListener('pageshow', (event) => {
+    const submitBtn = document.querySelector('.submit-btn');
+    if (submitBtn) {
+      submitBtn.innerText = "送出預約單 (開啟 LINE)";
+      submitBtn.disabled = false;
+    }
+  });
+
   async function fetchBackendConfigAndInit() {
     try {
       const res = await fetch(SCRIPT_URL, { method: 'GET', mode: 'cors' });
@@ -1456,7 +1465,7 @@
       const encodedMessage = encodeURIComponent(details);
       const lineUrl = `https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodedMessage}`;
       
-      alert("預約成功！資料已同步存入後台系統。");
+      alert("預約成功！");
       window.location.href = lineUrl;
     })
     .catch(error => {
