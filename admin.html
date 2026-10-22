@@ -460,4 +460,241 @@
       div.className = 'history-item';
       div.onclick = () => showPreviewCalendar(ym);
       div.innerHTML = `
-        <div class="ym
+        <div class="ym">📅 ${ym}</div>
+        <div class="badge">${item.shiftGroup}組 / ${item.shiftType}</div>
+      `;
+      listEl.appendChild(div);
+    });
+  }
+
+  function showPreviewCalendar(ym) {
+    document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
+    if (event && event.currentTarget) event.currentTarget.classList.add('active');
+
+    const previewContainer = document.getElementById('previewContainer');
+    previewContainer.style.display = 'block';
+    
+    const item = globalMonthlyShiftTypes[ym] || { shiftGroup: 'B', shiftType: '夜班' };
+    document.getElementById('previewTitle').innerText = `🗓️ 預覽 ${ym} 日曆效果 (${item.shiftGroup}組 / ${item.shiftType})`;
+
+    const [year, month] = ym.split('-').map(Number);
+    const defaultDate = new Date(year, month - 1, 1);
+
+    if (previewPicker) {
+      previewPicker.destroy();
+    }
+
+    previewPicker = flatpickr("#inlinePreviewCalendar", {
+      inline: true,
+      locale: "zh",
+      defaultDate: defaultDate,
+      onDayCreate: function(dObj, dStr, fp, dayElement) {
+        const dYM = `${dayElement.dateObj.getFullYear()}-${String(dayElement.dateObj.getMonth() + 1).padStart(2, '0')}`;
+        if (dYM === ym) {
+          const anchorDate = new Date("2026-10-23T00:00:00");
+          const targetDate = new Date(dayElement.dateObj.getFullYear(), dayElement.dateObj.getMonth(), dayElement.dateObj.getDate());
+          const diffDays = Math.round((targetDate - anchorDate) / (1000 * 60 * 60 * 24));
+          let cycleDay = ((diffDays % 4) + 4) % 4;
+          if (item.shiftGroup === "A") cycleDay = (cycleDay + 2) % 4;
+          
+          const isWorkDay = (cycleDay === 0 || cycleDay === 1);
+          if (!isWorkDay) {
+            const className = (item.shiftType === "白班") ? "available-day-yellow" : "available-day-blue";
+            dayElement.classList.add(className);
+          }
+        }
+      }
+    });
+  }
+
+  function renderOverrideRecords() {
+    const container = document.getElementById('overrideRecordContainer');
+    const dates = Object.keys(globalSchedules).sort();
+
+    if (dates.length === 0) {
+      container.innerHTML = `<span style="font-size: 12.5px; color: var(--text-muted);">尚無任何營業微調紀錄</span>`;
+      return;
+    }
+
+    let html = `<table class="mini-table"><tr><th>日期</th><th>微調狀態</th></tr>`;
+    dates.forEach(d => {
+      const info = globalSchedules[d];
+      html += `<tr><td>${d}</td><td>${info.status === '開放' ? '開放預約' : '關閉預約'}</td></tr>`;
+    });
+    html += `</table>`;
+    container.innerHTML = html;
+  }
+
+  function saveMonthlyShift() {
+    const targetMonth = document.getElementById('targetMonth').value;
+    const shiftGroup = document.getElementById('shiftGroup').value;
+    const shiftType = document.getElementById('shiftType').value;
+
+    if (!targetMonth) {
+      alert("請選擇月份！");
+      return;
+    }
+
+    globalMonthlyShiftTypes[targetMonth] = { shiftGroup, shiftType };
+
+    fetch(scriptUrl, { 
+      method: "POST", 
+      mode: "no-cors",
+      body: JSON.stringify({ action: "updateBaseShift", targetMonth, monthlyShiftTypes: globalMonthlyShiftTypes }) 
+    })
+    .then(() => {
+      alert(`【${targetMonth}】[${shiftGroup}組] ${shiftType} 設定已儲存成功！`);
+      renderHistoryList();
+      showPreviewCalendar(targetMonth);
+    })
+    .catch(err => {
+      alert(`【${targetMonth}】設定已送出！`);
+      renderHistoryList();
+      showPreviewCalendar(targetMonth);
+    });
+  }
+
+  function updateScheduleOverride() {
+    const targetDate = document.getElementById('scheduleDate').value;
+    const status = document.getElementById('scheduleStatus').value;
+
+    if (!targetDate) return alert("請選擇日期！");
+
+    fetch(scriptUrl, { 
+      method: "POST", 
+      mode: "no-cors",
+      body: JSON.stringify({ action: "updateSchedule", targetDate, status, slots: "" }) 
+    })
+    .then(() => {
+      globalSchedules[targetDate] = { status, slots: "" };
+      renderOverrideRecords();
+      alert(`日期 ${targetDate} 微調狀態儲存成功！`); 
+    })
+    .catch(err => {
+      globalSchedules[targetDate] = { status, slots: "" };
+      renderOverrideRecords();
+      alert(`日期 ${targetDate} 微調狀態已送出！`); 
+    });
+  }
+
+  function updateFinance(rev, cost, monthRev = 0) {
+    document.getElementById('currentMonthRevenue').innerText = `NT$ ${monthRev}`;
+    document.getElementById('totalRevenue').innerText = `NT$ ${rev}`;
+    document.getElementById('totalCost').innerText = `NT$ ${cost}`;
+    document.getElementById('netProfit').innerText = `NT$ ${rev - cost}`;
+  }
+
+  function toggleChart(type) {
+    const chartSection = document.getElementById('chartSection');
+    if (isChartOpen && currentChartType === type) {
+      chartSection.style.display = 'none';
+      isChartOpen = false;
+      return;
+    }
+
+    currentChartType = type;
+    document.getElementById('chartTitle').innerText = (type === 'revenue') ? "📈 年度每月營收趨勢" : "📈 年度每月淨利趨勢";
+    chartSection.style.display = 'block';
+    isChartOpen = true;
+    
+    setYearDropdown();
+    renderChart();
+  }
+
+  function setYearDropdown() {
+    const yearSelect = document.getElementById('selectYear');
+    let years = new Set([new Date().getFullYear()]);
+    globalBookings.forEach(row => { if (row.date) years.add(row.date.split('-')[0]); });
+    yearSelect.innerHTML = "";
+    Array.from(years).sort().reverse().forEach(y => {
+      const opt = document.createElement('option');
+      opt.value = y; opt.innerText = `${y} 年`;
+      yearSelect.appendChild(opt);
+    });
+  }
+
+  function renderChart() {
+    const selectedYear = document.getElementById('selectYear').value || new Date().getFullYear();
+    let monthlyData = new Array(12).fill(0);
+
+    globalBookings.forEach(row => {
+      if (row.date && row.status !== "已取消") {
+        const parts = row.date.split('-');
+        if (parts.length === 3 && parts[0] === String(selectedYear)) {
+          const monthIdx = parseInt(parts[1], 10) - 1;
+          if (monthIdx >= 0 && monthIdx < 12) {
+            const price = Number(row.totalPrice) || 0;
+            const cost = Number(row.cost) || 0;
+            monthlyData[monthIdx] += (currentChartType === 'revenue') ? price : (price - cost);
+          }
+        }
+      }
+    });
+
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    if (trendChartInstance) trendChartInstance.destroy();
+
+    const chartColor = currentChartType === 'revenue' ? '#8a7968' : '#738276';
+    trendChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+        datasets: [{
+          label: `${selectedYear} 年 (${currentChartType === 'revenue' ? '營收' : '淨利'})`,
+          data: monthlyData,
+          borderColor: chartColor,
+          backgroundColor: currentChartType === 'revenue' ? 'rgba(138, 121, 104, 0.08)' : 'rgba(115, 130, 118, 0.08)',
+          borderWidth: 2.5, fill: true, tension: 0.3
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  function manualAddBooking() {
+    const customerName = document.getElementById('newName').value;
+    const date = document.getElementById('newDate').value;
+    const time = document.getElementById('newTime').value;
+    const items = document.getElementById('newItems').value;
+    const totalPrice = document.getElementById('newPrice').value;
+    const cost = document.getElementById('newCost').value;
+
+    if (!customerName || !date || !time || !items || !totalPrice) return alert("請填寫完整！");
+
+    fetch(scriptUrl, { 
+      method: "POST", 
+      mode: "no-cors",
+      body: JSON.stringify({ customerName, date, time, items, totalPrice: Number(totalPrice), cost: Number(cost) }) 
+    })
+    .then(() => {
+      alert("新增成功！"); 
+      fetchBookings();
+    })
+    .catch(err => {
+      alert("新增已送出！"); 
+      fetchBookings();
+    });
+  }
+
+  function updateBooking(bookingId) {
+    const newStatus = document.getElementById(`status_${bookingId}`).value;
+    const newCost = document.getElementById(`cost_${bookingId}`).value;
+
+    fetch(scriptUrl, { 
+      method: "POST", 
+      mode: "no-cors",
+      body: JSON.stringify({ action: "update", bookingId, status: newStatus, cost: Number(newCost) }) 
+    })
+    .then(() => {
+      alert(`更新成功！`); 
+      fetchBookings();
+    })
+    .catch(err => {
+      alert(`更新已送出！`); 
+      fetchBookings();
+    });
+  }
+</script>
+
+</body>
+</html>
