@@ -7,6 +7,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=ChenYuluoyan&family=Cinzel:wght@600&display=swap" rel="stylesheet">
+  
+  <!-- 引入穩定可靠的 Flatpickr 視覺化月曆套件 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
 
   <style>
     body {
@@ -126,7 +131,7 @@
       color: #524741;
       cursor: pointer;
     }
-    select, input[type="text"], input[type="date"] {
+    select, input[type="text"] {
       width: 100%;
       padding: 9px 12px;
       border: 1px solid #cfc5bb;
@@ -139,31 +144,56 @@
       -webkit-appearance: none;
       transition: border-color 0.2s;
     }
-    select:focus, input[type="text"]:focus, input[type="date"]:focus {
+    select:focus, input[type="text"]:focus {
       border-color: #7a6b63;
       box-shadow: 0 0 4px rgba(122, 107, 99, 0.25);
     }
 
-    /* 班別狀態提示小卡 */
-    .shift-badge-box {
-      margin-top: 6px;
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 13.5px;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+    .flatpickr-input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #cfc5bb;
+      border-radius: 8px;
+      outline: none;
+      font-size: 15px;
+      background-color: #ffffff !important;
+      color: #4a423d;
+      cursor: pointer;
     }
-    .shift-yellow {
-      background-color: #fdf6e2;
-      color: #a37512;
-      border: 1px solid #f2d896;
+
+    .flatpickr-calendar {
+      background: #faf8f5 !important;
+      border: 1px solid #e2dad1 !important;
+      box-shadow: 0 10px 25px rgba(120, 108, 100, 0.15) !important;
+      border-radius: 14px !important;
+      font-family: inherit !important;
     }
-    .shift-blue {
-      background-color: #e5ece9;
-      color: #4c6b61;
-      border: 1px solid #b8c9c4;
+
+    /* 🎯 月曆格子的圓形班別標記：日班=黃色 / 夜班=藍灰色 */
+    .flatpickr-day.available-day-yellow {
+      background-color: #fdf6e2 !important;
+      color: #a37512 !important;
+      font-weight: bold !important;
+      border-radius: 50% !important;
+      border: 1px solid #f2d896 !important;
+    }
+    .flatpickr-day.available-day-blue {
+      background-color: #e5ece9 !important;
+      color: #4c6b61 !important;
+      font-weight: bold !important;
+      border-radius: 50% !important;
+      border: 1px solid #b8c9c4 !important;
+    }
+    .flatpickr-day.available-day-yellow.selected, .flatpickr-day.available-day-blue.selected {
+      background-color: #7a6b63 !important;
+      color: #ffffff !important;
+      border-color: #5c5049 !important;
+    }
+    .flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover {
+      color: #d1c7bd !important;
+      background: transparent !important;
+      text-decoration: line-through;
+      opacity: 0.4;
     }
 
     @keyframes selectFlash {
@@ -462,7 +492,7 @@
     </div>
     <div id="adminPanel" class="hidden" style="margin-top: 8px; padding: 8px; background: #fff3cd; border-radius: 8px; border: 1px solid #ffeeba; text-align: center;">
       <span style="font-size: 13px; font-weight: bold; color: #856404;">🔧 管理者模式：</span>
-      <button type="button" onclick="enableAdminOverride()" style="padding: 4px 10px; font-size: 12px; background: #856404; color: #fff; border: none; border-radius: 6px; cursor: pointer;">強制解鎖日期限制</button>
+      <button type="button" onclick="enableAdminOverride()" style="padding: 4px 10px; font-size: 12px; background: #856404; color: #fff; border: none; border-radius: 6px; cursor: pointer;">手動解鎖所有日曆日期</button>
     </div>
   </div>
 
@@ -472,11 +502,8 @@
     <div class="datetime-container">
       <div>
         <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #5c5049;">預約日期：</label>
-        <input type="date" id="bookingDate" onchange="onDateChange()">
-        <!-- 動態顯示當日班別提示 (黃色=日班 / 藍灰色=夜班) -->
-        <div id="shiftInfoBox" class="shift-badge-box shift-blue hidden">
-          <span>🔵 當日班別：夜班</span>
-        </div>
+        <!-- 恢復活潑的 Flatpickr 視覺化小日曆 -->
+        <input type="text" id="bookingDate" placeholder="請選擇預約日期">
       </div>
       <div>
         <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #5c5049;">預約時間：</label>
@@ -629,6 +656,7 @@
   let backendShiftGroup = "B";
   let backendMonthlyShiftTypes = {}; 
   let backendSchedules = {};
+  let pickerInstance = null;
 
   const ALL_COLORS = ["紅色", "粉色", "橘色", "黃色", "紅咖色", "深咖/可可色", "淺咖色", "綠色", "藍色", "紫色", "黑色", "銀色/白色", "灰色", "金色/香檳色"];
   let showJumpColor = false, showStyle = false, needRemoval = false;
@@ -636,6 +664,11 @@
   document.addEventListener('DOMContentLoaded', () => {
     checkFrontendReminder();
     initLiffLogin();
+    
+    // 【防呆初始化】確保網頁一開就先建立基本月曆
+    initFlatpickr();
+
+    // 非同步從後台抓取最新班表與營業微調
     fetchBackendConfigAndInit();
   });
 
@@ -664,10 +697,11 @@
           backendMonthlyShiftTypes[ym] = { shiftGroup: backendShiftGroup, shiftType: backendMonthlyShiftTypes[ym] };
         }
       }
+      // 成功抓取後台資料後，重新渲染月曆標記與可選日期
+      initFlatpickr();
     } catch (e) {
       console.warn("無法取得後端排班設定，已使用預設邏輯", e);
     }
-    initNativeDatepicker();
   }
 
   function checkAdminMode(val) {
@@ -676,8 +710,8 @@
 
   function enableAdminOverride() {
     adminOverride = true;
-    alert("🔓 管理者已強制解鎖！日期限制已解除。");
-    initNativeDatepicker();
+    alert("🔓 管理者已強制解鎖！月曆所有日期現已開放預約。");
+    initFlatpickr();
   }
 
   async function initLiffLogin() {
@@ -751,59 +785,51 @@
     return startDate;
   }
 
-  function initNativeDatepicker() {
-    const dateInput = document.getElementById('bookingDate');
+  function initFlatpickr() {
     const taipeiNow = getTaipeiDate();
-    const maxDate = new Date(tapeiNow.getFullYear(), taipeiNow.getMonth() + 2, 0);
+    const maxDate = new Date(tapeiNow.getFullYear(), taipeiNow.getMonth() + 2, 0); 
+    const defaultAvailableDate = findFirstAvailableDate(tapeiNow);
 
-    dateInput.min = formatDateToYYYYMMDD(tapeiNow);
-    dateInput.max = formatDateToYYYYMMDD(maxDate);
+    if (pickerInstance) pickerInstance.destroy();
 
-    const defaultDate = findFirstAvailableDate(tapeiNow);
-    dateInput.value = formatDateToYYYYMMDD(defaultDate);
+    pickerInstance = flatpickr("#bookingDate", {
+      locale: "zh",
+      dateFormat: "Y-m-d",
+      minDate: taipeiNow,
+      maxDate: maxDate,
+      defaultDate: defaultAvailableDate,
+      disable: [
+        function(date) {
+          if (adminOverride) return false; 
+          const dateStr = formatDateToYYYYMMDD(date);
+          if (backendSchedules[dateStr]) {
+            if (backendSchedules[dateStr].status === "開放") return false;
+            if (backendSchedules[dateStr].status === "關閉") return true;
+          }
+          return getShiftCycleInfo(date).isWorkDay; 
+        }
+      ],
+      // 🎯 核心：在月曆每個日期格子上動態標上黃色（日班）或藍色（夜班）圓形標記
+      onDayCreate: function(dObj, dStr, fp, dayElement) {
+        const dateObj = dayElement.dateObj;
+        const dateStr = formatDateToYYYYMMDD(dateObj);
+        let isAvailable = false;
 
-    updateShiftDisplay(defaultDate);
-    validateTime();
-  }
+        if (backendSchedules[dateStr]) {
+          if (backendSchedules[dateStr].status === "開放") isAvailable = true;
+          if (backendSchedules[dateStr].status === "關閉") isAvailable = false;
+        } else {
+          if (!getShiftCycleInfo(dateObj).isWorkDay) isAvailable = true;
+        }
 
-  function updateShiftDisplay(dateObj) {
-    const shiftBox = document.getElementById('shiftInfoBox');
-    const shiftType = getShiftTypeForDate(dateObj);
-    
-    shiftBox.classList.remove('hidden', 'shift-yellow', 'shift-blue');
-    if (shiftType === "日班") {
-      shiftBox.classList.add('shift-yellow');
-      shiftBox.innerHTML = `<span>🟡 當日班別：日班</span>`;
-    } else {
-      shiftBox.classList.add('shift-blue');
-      shiftBox.innerHTML = `<span>🔵 當日班別：夜班</span>`;
-    }
-  }
+        if (isAvailable && dateObj >= taipeiNow) {
+          const shiftType = getShiftTypeForDate(dateObj);
+          dayElement.classList.add(shiftType === "日班" ? "available-day-yellow" : "available-day-blue");
+        }
+      },
+      onChange: validateTime
+    });
 
-  function onDateChange() {
-    const dateInput = document.getElementById('bookingDate');
-    const val = dateInput.value;
-    if (!val) return;
-
-    const [y, m, d] = val.split('-');
-    const dateObj = new Date(y, m - 1, d);
-    const dateStr = val;
-    let isAvailable = false;
-
-    if (backendSchedules[dateStr]) {
-      if (backendSchedules[dateStr].status === "開放") isAvailable = true;
-      if (backendSchedules[dateStr].status === "關閉") isAvailable = false;
-    } else {
-      if (!getShiftCycleInfo(dateObj).isWorkDay) isAvailable = true;
-    }
-
-    if (!isAvailable && !adminOverride) {
-      alert("⚠️ 該日期為店休或未開放預約，請重新選擇其他日期！");
-      initNativeDatepicker();
-      return;
-    }
-
-    updateShiftDisplay(dateObj);
     validateTime();
   }
 
