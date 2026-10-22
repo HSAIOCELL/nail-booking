@@ -337,7 +337,7 @@
       </div>
     </div>
 
-    <!-- 特定日期營業狀態微調 (簡化文字：開放預約 / 關閉預約) -->
+    <!-- 特定日期營業狀態微調 -->
     <div class="add-section">
       <h3>✨ 特定日期營業狀態微調</h3>
       <div class="form-row">
@@ -357,7 +357,7 @@
       </div>
     </div>
 
-    <!-- 當月狀態預覽小日曆 (營業統一黃色、店休統一紅色) -->
+    <!-- 當月狀態預覽小日曆 -->
     <div class="add-section" style="background: #f4f2ee;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <h3 style="margin: 0;">📅 當月狀態預覽 (黃色=營業 / 紅色=店休)</h3>
@@ -417,7 +417,7 @@
   const scriptUrl = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
   let globalBookings = []; 
   let globalSchedules = {};
-  let globalMonthlyShiftTypes = {}; // 格式如 {"2026-10": { shiftGroup: "B", shiftType: "夜班" }, "2026-11": { shiftGroup: "A", shiftType: "日班" }}
+  let globalMonthlyShiftTypes = {}; 
   let trendChartInstance = null;
   let currentChartType = 'revenue';
   let isChartOpen = false;
@@ -463,7 +463,6 @@
         globalSchedules = resData.schedules || {};
         globalMonthlyShiftTypes = resData.monthlyShiftTypes || {};
         
-        // 若後台回傳的是舊版純字串，轉為新版物件格式相容
         for (let ym in globalMonthlyShiftTypes) {
           if (typeof globalMonthlyShiftTypes[ym] === 'string') {
             globalMonthlyShiftTypes[ym] = { shiftGroup: resData.shiftGroup || "B", shiftType: globalMonthlyShiftTypes[ym] };
@@ -531,7 +530,7 @@
       });
   }
 
-  // 渲染已設定清單 (顯示 A/B班 與 日夜班)
+  // 渲染已設定清單 (全中文顯示)
   function renderShiftRecordTags() {
     const container = document.getElementById('shiftRecordTags');
     container.innerHTML = "";
@@ -546,11 +545,17 @@
       const config = globalMonthlyShiftTypes[yearMonth];
       const sGroup = config.shiftGroup || "B";
       const sType = config.shiftType || "夜班";
-      const icon = (sType === "日班") ? "☀️" : "🌙";
+      
+      const parts = yearMonth.split('-');
+      const yearText = parts[0] ? `${parts[0]}年` : '';
+      const monthText = parts[1] ? `${parseInt(parts[1], 10)}月` : '';
+      const formattedYM = `${yearText}${monthText}`;
+
+      const icon = (sType === "日班") ? "☀️ 白班" : "🌙 夜班";
 
       const tag = document.createElement('div');
       tag.className = "shift-tag";
-      tag.innerHTML = `<span>📅 ${yearMonth}：[${sGroup}班] ${sType} ${icon}</span>`;
+      tag.innerHTML = `<span>📅 ${formattedYM}：${sGroup}班 (${icon})</span>`;
       container.appendChild(tag);
     });
   }
@@ -574,7 +579,6 @@
     container.innerHTML = html;
   }
 
-  // 當切換月份時，自動帶入該月獨立儲存的 A/B 班與日夜班
   function onTargetMonthChange() {
     const targetMonthVal = document.getElementById('targetMonth').value;
     if (!targetMonthVal) return;
@@ -590,7 +594,6 @@
     renderSchedulePreview();
   }
 
-  // 預覽小日曆：營業統一黃色、店休統一紅色
   function renderSchedulePreview() {
     const targetMonthVal = document.getElementById('targetMonth').value;
     if (!targetMonthVal) return;
@@ -636,7 +639,6 @@
         isWork = (cycleDay === 0 || cycleDay === 1);
       }
 
-      // 顏色統一：營業=黃色(status-work) / 店休=紅色(status-off)
       const statusText = isWork ? "營業" : "店休";
       const statusClass = isWork ? "status-work" : "status-off";
 
@@ -663,7 +665,6 @@
     statusMsg.style.color = "var(--text-muted)";
     statusMsg.innerText = "⏳ 正在儲存設定...";
 
-    // 儲存該月份獨立的 A/B 班與日夜班
     globalMonthlyShiftTypes[targetMonth] = { shiftGroup, shiftType };
 
     fetch(scriptUrl, { 
@@ -690,7 +691,7 @@
 
   function updateScheduleOverride() {
     const targetDate = document.getElementById('scheduleDate').value;
-    const status = document.getElementById('scheduleStatus').value; // 開放 或 關閉
+    const status = document.getElementById('scheduleStatus').value;
 
     if (!targetDate) return alert("請選擇日期！");
 
