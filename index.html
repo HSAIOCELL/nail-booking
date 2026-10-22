@@ -392,7 +392,7 @@
       padding: 8px 10px;
       border-radius: 20px;
       background-color: transparent; 
-      border: none;                 
+      border: none;                     
       color: #524741;
       font-size: 14.5px;
       font-weight: 500;
@@ -483,14 +483,13 @@
     ⚠️ 提醒：目前正值 15 號至 20 號期間，請留意下兩個月的最新班表與預約動態！
   </div>
 
-  <!-- 預約暱稱 (輸入 admin 可開啟隱藏式後台解鎖功能) -->
+  <!-- 預約暱稱 -->
   <div class="section">
     <div class="section-title">預約暱稱</div>
     <div style="display: flex; gap: 8px;">
       <input type="text" id="customerName" placeholder="請輸入您的預約暱稱" oninput="checkAdminMode(this.value)" style="flex: 1;">
       <button type="button" class="draw-btn" onclick="loginWithLine()" style="white-space: nowrap; background: #06c755; color: #fff; border: none;">連動 LINE 暱稱</button>
     </div>
-    <!-- 隱藏式管理者手動解鎖模式控制器 -->
     <div id="adminPanel" class="hidden" style="margin-top: 8px; padding: 8px; background: #fff3cd; border-radius: 8px; border: 1px solid #ffeeba; text-align: center;">
       <span style="font-size: 13px; font-weight: bold; color: #856404;">🔧 管理者模式：</span>
       <button type="button" onclick="enableAdminOverride()" style="padding: 4px 10px; font-size: 12px; background: #856404; color: #fff; border: none; border-radius: 6px; cursor: pointer;">手動解鎖所有日曆日期 (加班/換班)</button>
@@ -560,7 +559,7 @@
       Step 3. 加購項目
     </div>
 
-    <!-- 直覺開關 1：跳色 -->
+    <!-- 跳色 -->
     <div id="boxJumpColor" class="addon-item-box" onclick="toggleOption('jumpColorSection', event)">
       <div class="addon-header">
         <span>🎨 跳色</span>
@@ -571,7 +570,6 @@
           <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">選擇色系：</div>
           <button class="draw-btn" onclick="drawSmartJumpColor(event)">🫯 隨機配色</button>
         </div>
-        
         <div>
           <select id="jumpColor" onchange="onSelectionChange()">
             <option value="">--請選擇跳色色系--</option>
@@ -594,7 +592,7 @@
       </div>
     </div>
 
-    <!-- 直覺開關 2：款式造型 -->
+    <!-- 款式造型 -->
     <div id="boxStyle" class="addon-item-box" onclick="toggleOption('styleSection', event)">
       <div class="addon-header">
         <span>✨ 款式造型</span>
@@ -621,16 +619,12 @@
           <div class="checkbox-grid" style="margin-bottom: 12px;">
             <label class="chip-item"><input type="checkbox" name="style" id="catEyeCb" value="貓眼" onchange="checkLimit(this)">貓眼</label>
             <label class="chip-item"><input type="checkbox" name="style" value="立體不規則造型" onchange="checkLimit(this)">立體不規則造型</label>
-            
             <label class="chip-item"><input type="checkbox" name="style" value="法式" onchange="checkLimit(this)">法式</label>
             <label class="chip-item"><input type="checkbox" name="style" value="鏡面銀" onchange="checkLimit(this)">鏡面銀</label>
-
             <label class="chip-item"><input type="checkbox" name="style" value="漸層" onchange="checkLimit(this)">漸層</label>
             <label class="chip-item"><input type="checkbox" name="style" value="小飾品/貼紙" onchange="checkLimit(this)">小飾品/貼紙</label>
-
             <label class="chip-item"><input type="checkbox" name="style" value="格紋" onchange="checkLimit(this)">格紋</label>
             <label class="chip-item"><input type="checkbox" name="style" value="暈染" onchange="checkLimit(this)">暈染</label>
-
             <label class="chip-item"><input type="checkbox" name="style" value="海莉款" onchange="checkLimit(this)">海莉款</label>
             <label class="chip-item"><input type="checkbox" name="style" id="customStyleCb" value="指定圖案" onchange="checkLimit(this)">指定圖案</label>
           </div>
@@ -641,16 +635,12 @@
           <div class="checkbox-grid" style="margin-bottom: 12px;">
             <label class="chip-item"><input type="checkbox" name="fullStyle" id="fullCatEyeCb" value="貓眼" onchange="checkFullLimit(this)">貓眼</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="立體不規則造型" onchange="checkFullLimit(this)">立體不規則造型</label>
-
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="法式" onchange="checkFullLimit(this)">法式</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="鏡面銀" onchange="checkFullLimit(this)">鏡面銀</label>
-
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="漸層" onchange="checkFullLimit(this)">漸層</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="小飾品/貼紙" onchange="checkFullLimit(this)">小飾品/貼紙</label>
-
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="格紋" onchange="checkFullLimit(this)">格紋</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="暈染" onchange="checkFullLimit(this)">暈染</label>
-
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="海莉款" onchange="checkFullLimit(this)">海莉款</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" id="fullCustomStyleCb" value="指定圖案" onchange="checkFullLimit(this)">指定圖案</label>
           </div>
@@ -720,6 +710,7 @@
   let adminOverride = false; 
   let backendShiftGroup = "B";
   let backendShiftType = "夜班"; 
+  let backendMonthlyShiftTypes = {}; // 新增：記憶每個月獨立設定
   let backendSchedules = {};
 
   const ALL_COLORS = [
@@ -737,7 +728,6 @@
     fetchBackendConfigAndInit();
   });
 
-  // 從 LINE 返回頁面時，自動復原送出按鈕狀態
   window.addEventListener('pageshow', (event) => {
     const submitBtn = document.querySelector('.submit-btn');
     if (submitBtn) {
@@ -746,7 +736,6 @@
     }
   });
 
-  // 15號至20號前台自動跳出下兩個月班表更新提醒
   function checkFrontendReminder() {
     const todayDay = new Date().getDate();
     if (todayDay >= 15 && todayDay <= 20) {
@@ -761,6 +750,7 @@
       if (data.shiftGroup) backendShiftGroup = data.shiftGroup;
       if (data.shiftType) backendShiftType = data.shiftType;
       if (data.schedules) backendSchedules = data.schedules;
+      if (data.monthlyShiftTypes) backendMonthlyShiftTypes = data.monthlyShiftTypes; // 載入每個月獨立設定
     } catch (e) {
       console.error("無法取得後端排班設定", e);
     }
@@ -808,20 +798,31 @@
     }
   }
 
+  // 核心修改：動態讀取「該日期所屬月份」的獨立設定來計算排班
   function getShiftCycleInfo(dateObj) {
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const yearMonth = `${year}-${month}`;
+
+    // 優先讀取該月份在後台獨立設定的組別與班別類型，若無則用預設值
+    const monthConfig = backendMonthlyShiftTypes[yearMonth];
+    const currentGroup = monthConfig ? monthConfig.shiftGroup : backendShiftGroup;
+    const currentType = monthConfig ? monthConfig.shiftType : backendShiftType;
+
     const anchorDate = new Date("2026-10-23T00:00:00"); 
-    const targetDate = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
+    const targetDate = new Date(year, dateObj.getMonth(), dateObj.getDate());
     const diffDays = Math.round((targetDate - anchorDate) / (1000 * 60 * 60 * 24));
     
     let cycleDay = ((diffDays % 4) + 4) % 4;
-    if (backendShiftGroup === "A") {
+    if (currentGroup === "A") {
       cycleDay = (cycleDay + 2) % 4;
     }
     
     return {
       cycleDay: cycleDay,
       isWorkDay: (cycleDay === 0 || cycleDay === 1),
-      isDayShiftOff: (cycleDay === 2 || cycleDay === 3) 
+      isDayShiftOff: (cycleDay === 2 || cycleDay === 3),
+      shiftType: currentType // 回傳該月份的日班/夜班設定
     };
   }
 
@@ -858,13 +859,8 @@
 
   function initFlatpickr() {
     const taipeiNow = getTaipeiDate();
-    // 設定最大可選擇日期為「近兩個月」（當月及下個月月底）
     const maxDate = new Date(taipeiNow.getFullYear(), taipeiNow.getMonth() + 2, 0);
-
     const defaultAvailableDate = findFirstAvailableDate(taipeiNow);
-
-    // 依據後端班別類型設定顏色：日班＝黃色，夜班＝莫蘭迪藍灰色
-    const availableClassName = (backendShiftType === "日班") ? "available-day-yellow" : "available-day-blue";
 
     pickerInstance = flatpickr("#bookingDate", {
       locale: "zh",
@@ -896,6 +892,9 @@
         }
 
         if (isAvailable && dayElement.dateObj >= taipeiNow) {
+          // 依據該日期所屬月份的班別類型動態決定顏色（日班=黃色，夜班=藍灰色）
+          const shiftInfo = getShiftCycleInfo(dayElement.dateObj);
+          const availableClassName = (shiftInfo.shiftType === "日班") ? "available-day-yellow" : "available-day-blue";
           dayElement.classList.add(availableClassName);
         }
       },
