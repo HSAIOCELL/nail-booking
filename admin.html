@@ -60,7 +60,7 @@
       font-weight: 500;
     }
 
-    /* 手機友善：分頁 (Tabs) 設計 (縮減為 3 個精簡頁籤) */
+    /* 3 大分頁 */
     .tab-nav {
       display: flex;
       gap: 6px;
@@ -207,17 +207,17 @@
       border-radius: 20px;
       font-size: 13px;
       font-weight: bold;
-      border: 1px solid transparent;
+      background-color: #f0ebe4;
+      color: var(--primary-dark);
+      border: 1px solid #dcd3cb;
     }
-    .shift-tag.day { background-color: #fdf6e2; color: #a37512; border-color: #f2d896; }
-    .shift-tag.night { background-color: #e5ece9; color: #4c6b61; border-color: #b8c9c4; }
 
     /* 微調紀錄表格 */
     .mini-table { width: 100%; border-collapse: collapse; margin-top: 6px; }
     .mini-table th, .mini-table td { border: 1px solid var(--border-color); padding: 6px; font-size: 12px; text-align: center; }
     .mini-table th { background: #f7f5f0; color: var(--text-muted); }
 
-    /* 排班月曆小預覽 */
+    /* 排班月曆小預覽 (營業統一黃色、店休統一紅色) */
     .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
     .calendar-day {
       background: #ffffff;
@@ -233,10 +233,8 @@
     .calendar-day .day-num { font-size: 11px; color: var(--text-muted); font-weight: bold; }
     .calendar-day .day-status { font-size: 10px; padding: 2px 2px; border-radius: 3px; font-weight: 500; white-space: nowrap; overflow: hidden; }
     
-    .status-work { background: #f2e9e4; color: #9a7b70; } 
-    .status-off { background: #e8ede9; color: var(--accent-green); } 
-    .status-overtime { background: #faedcd; color: #bc6c25; } 
-    .status-closed { background: #f5f5f5; color: #aaa; text-decoration: line-through; } 
+    .status-work { background: #fdf6e2; color: #a37512; border: 1px solid #f2d896; } /* 營業統一黃色 */
+    .status-off { background: #fde8e8; color: #c53030; border: 1px solid #f8b4b4; }  /* 店休統一紅色 */
 
     /* 表格 */
     .table-wrapper {
@@ -274,14 +272,13 @@
     ⚠️ 提醒：目前正值 15 號至 20 號，請規劃下兩個月班表！
   </div>
 
-  <!-- 精簡為 3 大分頁：營運統計、班別與營業微調、預約與記帳管理 -->
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('tab-stats')">📊 營運統計</button>
     <button class="tab-btn" onclick="switchTab('tab-schedule')">🔄 班別與微調</button>
     <button class="tab-btn" onclick="switchTab('tab-bookings')">📋 預約與記帳</button>
   </div>
 
-  <!-- Tab 1: 營運統計 (點擊卡片直接內嵌展開/收合折線圖) -->
+  <!-- Tab 1: 營運統計 -->
   <div id="tab-stats" class="tab-content active">
     <div class="stats-container">
       <div class="stat-card" onclick="toggleChart('revenue')">
@@ -303,7 +300,6 @@
     </div>
     <p style="font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 5px;">💡 點擊營收或淨利卡片可直接在下方展開/收合【年度趨勢折線圖】</p>
 
-    <!-- 內嵌折線圖容器 -->
     <div id="chartSection">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <h3 id="chartTitle" style="margin: 0; color: var(--primary-dark); font-size: 15px;">📈 年度每月營收趨勢</h3>
@@ -315,10 +311,10 @@
     </div>
   </div>
 
-  <!-- Tab 2: 班別與營業微調 (整合在一起 + 微調紀錄) -->
+  <!-- Tab 2: 班別與營業微調 (各月獨立設定 A/B班 與 日夜班) -->
   <div id="tab-schedule" class="tab-content">
     <div class="add-section">
-      <h3>🔄 各月獨立班別設定</h3>
+      <h3>🔄 各月獨立班別設定 (支援 A/B班 與 日夜班按月分開)</h3>
       <div class="form-row">
         <input type="month" id="targetMonth" onchange="onTargetMonthChange()">
         <select id="shiftGroup" onchange="renderSchedulePreview()">
@@ -333,7 +329,6 @@
       </div>
       <div id="saveStatusMsg" style="font-size: 13px; color: var(--accent-green); font-weight: bold; margin-top: 8px; min-height: 18px;"></div>
 
-      <!-- 已設定月份紀錄清單 (顯示 A/B班 與 日夜班) -->
       <div class="shift-record-card">
         <div class="shift-record-title">📋 目前各月班別與組別紀錄：</div>
         <div id="shiftRecordTags" class="shift-tags-container">
@@ -342,28 +337,18 @@
       </div>
     </div>
 
-    <!-- 合併：特定日期營業狀態微調 -->
+    <!-- 特定日期營業狀態微調 (簡化文字：開放預約 / 關閉預約) -->
     <div class="add-section">
       <h3>✨ 特定日期營業狀態微調</h3>
       <div class="form-row">
         <input type="date" id="scheduleDate" required>
         <select id="scheduleStatus">
-          <option value="開放">開放時段 (加班/營業)</option>
-          <option value="關閉">關閉預約 (店休)</option>
-        </select>
-        <select id="scheduleSlots">
-          <option value="">-- 全天開放 (或照常) --</option>
-          <option value="10:00">10:00 時段</option>
-          <option value="12:00">12:00 時段</option>
-          <option value="14:00">14:00 時段</option>
-          <option value="16:00">16:00 時段</option>
-          <option value="18:00">18:00 時段</option>
-          <option value="20:00">20:00 時段</option>
+          <option value="開放">開放預約</option>
+          <option value="關閉">關閉預約</option>
         </select>
         <button class="btn-action" style="background: var(--accent-green);" onclick="updateScheduleOverride()">儲存微調狀態</button>
       </div>
 
-      <!-- 微調紀錄歷史清單 -->
       <div class="override-record-card">
         <div class="shift-record-title">📝 近期營業微調紀錄：</div>
         <div id="overrideRecordContainer" style="max-height: 130px; overflow-y: auto;">
@@ -372,10 +357,10 @@
       </div>
     </div>
 
-    <!-- 當月狀態預覽小日曆 (微調會即時反映在此) -->
+    <!-- 當月狀態預覽小日曆 (營業統一黃色、店休統一紅色) -->
     <div class="add-section" style="background: #f4f2ee;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <h3 style="margin: 0;">📅 當月狀態預覽 (含微調)</h3>
+        <h3 style="margin: 0;">📅 當月狀態預覽 (黃色=營業 / 紅色=店休)</h3>
         <span id="previewMonthTitle" style="font-size: 12.5px; color: var(--text-muted); font-weight: bold;"></span>
       </div>
       <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-weight: bold;">
@@ -385,9 +370,8 @@
     </div>
   </div>
 
-  <!-- Tab 3: 預約與記帳管理 (合併新增預約與預約紀錄) -->
+  <!-- Tab 3: 預約與記帳管理 -->
   <div id="tab-bookings" class="tab-content">
-    <!-- 手動新增預約區塊 -->
     <div class="add-section">
       <h3>➕ 手動新增預約 / 記帳</h3>
       <div class="form-row">
@@ -401,7 +385,6 @@
       </div>
     </div>
 
-    <!-- 預約紀錄清單 -->
     <div class="add-section" style="background: #ffffff; padding: 12px 0;">
       <div style="padding: 0 12px 10px 12px;">
         <button class="btn-refresh" onclick="fetchBookings()">🔄 重新整理資料</button>
@@ -434,8 +417,7 @@
   const scriptUrl = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
   let globalBookings = []; 
   let globalSchedules = {};
-  let globalMonthlyShiftTypes = {}; 
-  let globalShiftGroup = "B";
+  let globalMonthlyShiftTypes = {}; // 格式如 {"2026-10": { shiftGroup: "B", shiftType: "夜班" }, "2026-11": { shiftGroup: "A", shiftType: "日班" }}
   let trendChartInstance = null;
   let currentChartType = 'revenue';
   let isChartOpen = false;
@@ -481,9 +463,11 @@
         globalSchedules = resData.schedules || {};
         globalMonthlyShiftTypes = resData.monthlyShiftTypes || {};
         
-        if (resData.shiftGroup) {
-          globalShiftGroup = resData.shiftGroup;
-          document.getElementById('shiftGroup').value = resData.shiftGroup;
+        // 若後台回傳的是舊版純字串，轉為新版物件格式相容
+        for (let ym in globalMonthlyShiftTypes) {
+          if (typeof globalMonthlyShiftTypes[ym] === 'string') {
+            globalMonthlyShiftTypes[ym] = { shiftGroup: resData.shiftGroup || "B", shiftType: globalMonthlyShiftTypes[ym] };
+          }
         }
         
         onTargetMonthChange();
@@ -547,7 +531,7 @@
       });
   }
 
-  // 渲染已設定清單 (顯示 月份、A/B班、日夜班)
+  // 渲染已設定清單 (顯示 A/B班 與 日夜班)
   function renderShiftRecordTags() {
     const container = document.getElementById('shiftRecordTags');
     container.innerHTML = "";
@@ -559,14 +543,14 @@
     }
 
     keys.forEach(yearMonth => {
-      const shiftType = globalMonthlyShiftTypes[yearMonth];
-      const isDay = (shiftType === "日班");
-      const tagClass = isDay ? "shift-tag day" : "shift-tag night";
-      const icon = isDay ? "☀️" : "🌙";
+      const config = globalMonthlyShiftTypes[yearMonth];
+      const sGroup = config.shiftGroup || "B";
+      const sType = config.shiftType || "夜班";
+      const icon = (sType === "日班") ? "☀️" : "🌙";
 
       const tag = document.createElement('div');
-      tag.className = tagClass;
-      tag.innerHTML = `<span>${yearMonth}：[${globalShiftGroup}班] ${shiftType} ${icon}</span>`;
+      tag.className = "shift-tag";
+      tag.innerHTML = `<span>📅 ${yearMonth}：[${sGroup}班] ${sType} ${icon}</span>`;
       container.appendChild(tag);
     });
   }
@@ -581,27 +565,32 @@
       return;
     }
 
-    let html = `<table class="mini-table"><tr><th>日期</th><th>狀態</th><th>指定時段</th></tr>`;
+    let html = `<table class="mini-table"><tr><th>日期</th><th>微調狀態</th></tr>`;
     dates.forEach(d => {
       const info = globalSchedules[d];
-      html += `<tr><td>${d}</td><td>${info.status}</td><td>${info.slots || '全天'}</td></tr>`;
+      html += `<tr><td>${d}</td><td>${info.status === '開放' ? '開放預約' : '關閉預約'}</td></tr>`;
     });
     html += `</table>`;
     container.innerHTML = html;
   }
 
+  // 當切換月份時，自動帶入該月獨立儲存的 A/B 班與日夜班
   function onTargetMonthChange() {
     const targetMonthVal = document.getElementById('targetMonth').value;
     if (!targetMonthVal) return;
 
     if (globalMonthlyShiftTypes[targetMonthVal]) {
-      document.getElementById('shiftType').value = globalMonthlyShiftTypes[targetMonthVal];
+      const config = globalMonthlyShiftTypes[targetMonthVal];
+      document.getElementById('shiftGroup').value = config.shiftGroup || "B";
+      document.getElementById('shiftType').value = config.shiftType || "夜班";
     } else {
+      document.getElementById('shiftGroup').value = "B";
       document.getElementById('shiftType').value = "夜班"; 
     }
     renderSchedulePreview();
   }
 
+  // 預覽小日曆：營業統一黃色、店休統一紅色
   function renderSchedulePreview() {
     const targetMonthVal = document.getElementById('targetMonth').value;
     if (!targetMonthVal) return;
@@ -633,32 +622,23 @@
       const cell = document.createElement('div');
       cell.className = 'calendar-day';
 
-      let statusText = "";
-      let statusClass = "";
+      let isWork = false;
 
       if (globalSchedules[dateStr]) {
         const s = globalSchedules[dateStr];
-        if (s.status === "開放") {
-          statusText = s.slots ? `營業(${s.slots})` : "營業";
-          statusClass = "status-overtime";
-        } else if (s.status === "關閉") {
-          statusText = "店休";
-          statusClass = "status-closed";
-        }
+        if (s.status === "開放") isWork = true;
+        if (s.status === "關閉") isWork = false;
       } else {
         const diffDays = Math.round((dateObj - anchorDate) / (1000 * 60 * 60 * 24));
         let cycleDay = ((diffDays % 4) + 4) % 4;
         if (shiftGroup === "A") cycleDay = (cycleDay + 2) % 4;
 
-        const isWorkDay = (cycleDay === 0 || cycleDay === 1);
-        if (isWorkDay) {
-          statusText = "營業";
-          statusClass = "status-work";
-        } else {
-          statusText = "店休";
-          statusClass = "status-off";
-        }
+        isWork = (cycleDay === 0 || cycleDay === 1);
       }
+
+      // 顏色統一：營業=黃色(status-work) / 店休=紅色(status-off)
+      const statusText = isWork ? "營業" : "店休";
+      const statusClass = isWork ? "status-work" : "status-off";
 
       cell.innerHTML = `
         <span class="day-num">${day}</span>
@@ -683,12 +663,12 @@
     statusMsg.style.color = "var(--text-muted)";
     statusMsg.innerText = "⏳ 正在儲存設定...";
 
-    globalMonthlyShiftTypes[targetMonth] = shiftType;
-    globalShiftGroup = shiftGroup;
+    // 儲存該月份獨立的 A/B 班與日夜班
+    globalMonthlyShiftTypes[targetMonth] = { shiftGroup, shiftType };
 
     fetch(scriptUrl, { 
       method: "POST", 
-      body: JSON.stringify({ action: "updateBaseShift", targetMonth, shiftGroup, monthlyShiftTypes: globalMonthlyShiftTypes }) 
+      body: JSON.stringify({ action: "updateBaseShift", targetMonth, monthlyShiftTypes: globalMonthlyShiftTypes }) 
     })
       .then(res => res.json())
       .then(res => {
@@ -710,17 +690,15 @@
 
   function updateScheduleOverride() {
     const targetDate = document.getElementById('scheduleDate').value;
-    const status = document.getElementById('scheduleStatus').value;
-    const slots = document.getElementById('scheduleSlots').value;
+    const status = document.getElementById('scheduleStatus').value; // 開放 或 關閉
 
     if (!targetDate) return alert("請選擇日期！");
 
-    fetch(scriptUrl, { method: "POST", body: JSON.stringify({ action: "updateSchedule", targetDate, status, slots }) })
+    fetch(scriptUrl, { method: "POST", body: JSON.stringify({ action: "updateSchedule", targetDate, status, slots: "" }) })
       .then(res => res.json())
       .then(res => {
         if (res.result === "success") { 
-          // 即時更新前端快取並重新渲染月曆與微調紀錄
-          globalSchedules[targetDate] = { status, slots };
+          globalSchedules[targetDate] = { status, slots: "" };
           renderSchedulePreview();
           renderOverrideRecords();
           alert(`日期 ${targetDate} 微調狀態儲存成功！`); 
@@ -735,7 +713,6 @@
     document.getElementById('netProfit').innerText = `NT$ ${rev - cost}`;
   }
 
-  // 營運統計折線圖：點擊展開，再按一次收合
   function toggleChart(type) {
     const chartSection = document.getElementById('chartSection');
     if (isChartOpen && currentChartType === type) {
