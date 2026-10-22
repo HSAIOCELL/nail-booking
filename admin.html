@@ -60,7 +60,7 @@
       font-weight: 500;
     }
 
-    /* 手機友善：分頁 (Tabs) 設計 */
+    /* 手機友善：分頁 (Tabs) 設計 (縮減為 3 個精簡頁籤) */
     .tab-nav {
       display: flex;
       gap: 6px;
@@ -72,17 +72,18 @@
     }
 
     .tab-btn {
-      flex: 0 0 auto;
-      padding: 8px 14px;
+      flex: 1;
+      padding: 9px 14px;
       background: #eee8e0;
       color: var(--text-muted);
       border: none;
       border-radius: 20px;
-      font-size: 13.5px;
+      font-size: 14px;
       font-weight: bold;
       cursor: pointer;
       white-space: nowrap;
       transition: all 0.2s ease;
+      text-align: center;
     }
 
     .tab-btn.active {
@@ -103,7 +104,7 @@
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 10px;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
     }
     @media (min-width: 600px) {
       .stats-container { grid-template-columns: repeat(4, 1fr); gap: 15px; }
@@ -116,9 +117,21 @@
       text-align: center;
       border: 1px solid var(--border-color);
       cursor: pointer;
+      transition: all 0.2s;
     }
+    .stat-card:hover { border-color: var(--primary); background: #f2ece4; }
     .stat-card h3 { margin: 0 0 6px 0; font-size: 12.5px; color: var(--text-muted); font-weight: normal; }
     .stat-card p { margin: 0; font-size: 18px; font-weight: bold; color: var(--primary-dark); }
+
+    /* 內嵌折線圖區塊 */
+    #chartSection {
+      display: none;
+      background: #faf8f5;
+      border: 1px solid var(--border-color);
+      padding: 16px;
+      border-radius: 12px;
+      margin-top: 15px;
+    }
 
     /* 表單區塊 */
     .add-section {
@@ -167,8 +180,8 @@
       .btn-action { width: auto; }
     }
 
-    /* 💡 新增：精緻簡潔的已設定月份紀錄清單樣式 */
-    .shift-record-card {
+    /* 紀錄標籤清單 */
+    .shift-record-card, .override-record-card {
       background: #ffffff;
       border: 1px solid var(--border-color);
       border-radius: 10px;
@@ -180,9 +193,6 @@
       font-weight: bold;
       color: var(--text-muted);
       margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
     }
     .shift-tags-container {
       display: flex;
@@ -199,16 +209,13 @@
       font-weight: bold;
       border: 1px solid transparent;
     }
-    .shift-tag.day {
-      background-color: #fdf6e2;
-      color: #a37512;
-      border-color: #f2d896;
-    }
-    .shift-tag.night {
-      background-color: #e5ece9;
-      color: #4c6b61;
-      border-color: #b8c9c4;
-    }
+    .shift-tag.day { background-color: #fdf6e2; color: #a37512; border-color: #f2d896; }
+    .shift-tag.night { background-color: #e5ece9; color: #4c6b61; border-color: #b8c9c4; }
+
+    /* 微調紀錄表格 */
+    .mini-table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+    .mini-table th, .mini-table td { border: 1px solid var(--border-color); padding: 6px; font-size: 12px; text-align: center; }
+    .mini-table th { background: #f7f5f0; color: var(--text-muted); }
 
     /* 排班月曆小預覽 */
     .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
@@ -256,11 +263,6 @@
       margin-bottom: 12px;
       width: 100%;
     }
-
-    /* 彈窗 */
-    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(74, 69, 65, 0.4); justify-content: center; align-items: center; }
-    .modal-content { background: var(--card-bg); padding: 20px; border-radius: 16px; width: 92%; max-width: 650px; position: relative; }
-    .close-btn { position: absolute; right: 15px; top: 12px; font-size: 22px; cursor: pointer; color: var(--text-muted); }
   </style>
 </head>
 <body>
@@ -272,21 +274,21 @@
     ⚠️ 提醒：目前正值 15 號至 20 號，請規劃下兩個月班表！
   </div>
 
+  <!-- 精簡為 3 大分頁：營運統計、班別與營業微調、預約與記帳管理 -->
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('tab-stats')">📊 營運統計</button>
-    <button class="tab-btn" onclick="switchTab('tab-schedule')">🔄 班別與月曆</button>
-    <button class="tab-btn" onclick="switchTab('tab-override')">✨ 營業微調</button>
-    <button class="tab-btn" onclick="switchTab('tab-add')">➕ 新增預約</button>
-    <button class="tab-btn" onclick="switchTab('tab-list')">📋 預約紀錄</button>
+    <button class="tab-btn" onclick="switchTab('tab-schedule')">🔄 班別與微調</button>
+    <button class="tab-btn" onclick="switchTab('tab-bookings')">📋 預約與記帳</button>
   </div>
 
+  <!-- Tab 1: 營運統計 (點擊卡片直接內嵌展開/收合折線圖) -->
   <div id="tab-stats" class="tab-content active">
     <div class="stats-container">
-      <div class="stat-card" onclick="openModal('revenue')">
+      <div class="stat-card" onclick="toggleChart('revenue')">
         <h3>當月預估營收</h3>
         <p id="currentMonthRevenue">NT$ 0</p>
       </div>
-      <div class="stat-card" onclick="openModal('revenue')">
+      <div class="stat-card" onclick="toggleChart('revenue')">
         <h3>總累計營收</h3>
         <p id="totalRevenue">NT$ 0</p>
       </div>
@@ -294,14 +296,26 @@
         <h3>總材料成本</h3>
         <p id="totalCost">NT$ 0</p>
       </div>
-      <div class="stat-card" onclick="openModal('profit')">
+      <div class="stat-card" onclick="toggleChart('profit')">
         <h3>淨利 (利潤)</h3>
         <p id="netProfit">NT$ 0</p>
       </div>
     </div>
-    <p style="font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 5px;">💡 點擊營收或淨利卡片可看【年度趨勢折線圖】</p>
+    <p style="font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 5px;">💡 點擊營收或淨利卡片可直接在下方展開/收合【年度趨勢折線圖】</p>
+
+    <!-- 內嵌折線圖容器 -->
+    <div id="chartSection">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h3 id="chartTitle" style="margin: 0; color: var(--primary-dark); font-size: 15px;">📈 年度每月營收趨勢</h3>
+        <select id="selectYear" onchange="renderChart()" style="padding: 5px 8px; border-radius: 6px; font-size: 13px;"></select>
+      </div>
+      <div style="position: relative; height: 260px; width: 100%;">
+        <canvas id="trendChart"></canvas>
+      </div>
+    </div>
   </div>
 
+  <!-- Tab 2: 班別與營業微調 (整合在一起 + 微調紀錄) -->
   <div id="tab-schedule" class="tab-content">
     <div class="add-section">
       <h3>🔄 各月獨立班別設定</h3>
@@ -317,39 +331,25 @@
         </select>
         <button class="btn-action" onclick="updateBaseShift()">儲存該月設定</button>
       </div>
-
-      <!-- 即時狀態提示 -->
       <div id="saveStatusMsg" style="font-size: 13px; color: var(--accent-green); font-weight: bold; margin-top: 8px; min-height: 18px;"></div>
 
-      <!-- 💡 新增：已設定的月份與日夜班紀錄總覽清單 -->
+      <!-- 已設定月份紀錄清單 (顯示 A/B班 與 日夜班) -->
       <div class="shift-record-card">
-        <div class="shift-record-title">📋 目前各月班別設定紀錄：</div>
+        <div class="shift-record-title">📋 目前各月班別與組別紀錄：</div>
         <div id="shiftRecordTags" class="shift-tags-container">
           <span style="font-size: 12.5px; color: var(--text-muted);">載入中...</span>
         </div>
       </div>
     </div>
 
-    <div class="add-section" style="background: #f4f2ee;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <h3 style="margin: 0;">📅 當月狀態預覽</h3>
-        <span id="previewMonthTitle" style="font-size: 12.5px; color: var(--text-muted); font-weight: bold;"></span>
-      </div>
-      <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-weight: bold;">
-        <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
-      </div>
-      <div id="calendarPreviewGrid" class="calendar-grid"></div>
-    </div>
-  </div>
-
-  <div id="tab-override" class="tab-content">
+    <!-- 合併：特定日期營業狀態微調 -->
     <div class="add-section">
       <h3>✨ 特定日期營業狀態微調</h3>
       <div class="form-row">
         <input type="date" id="scheduleDate" required>
         <select id="scheduleStatus">
-          <option value="開放">開放時段</option>
-          <option value="關閉">關閉預約</option>
+          <option value="開放">開放時段 (加班/營業)</option>
+          <option value="關閉">關閉預約 (店休)</option>
         </select>
         <select id="scheduleSlots">
           <option value="">-- 全天開放 (或照常) --</option>
@@ -360,12 +360,34 @@
           <option value="18:00">18:00 時段</option>
           <option value="20:00">20:00 時段</option>
         </select>
-        <button class="btn-action" style="background: var(--accent-green);" onclick="updateScheduleOverride()">儲存狀態</button>
+        <button class="btn-action" style="background: var(--accent-green);" onclick="updateScheduleOverride()">儲存微調狀態</button>
       </div>
+
+      <!-- 微調紀錄歷史清單 -->
+      <div class="override-record-card">
+        <div class="shift-record-title">📝 近期營業微調紀錄：</div>
+        <div id="overrideRecordContainer" style="max-height: 130px; overflow-y: auto;">
+          <span style="font-size: 12.5px; color: var(--text-muted);">尚無微調紀錄</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 當月狀態預覽小日曆 (微調會即時反映在此) -->
+    <div class="add-section" style="background: #f4f2ee;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h3 style="margin: 0;">📅 當月狀態預覽 (含微調)</h3>
+        <span id="previewMonthTitle" style="font-size: 12.5px; color: var(--text-muted); font-weight: bold;"></span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-weight: bold;">
+        <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+      </div>
+      <div id="calendarPreviewGrid" class="calendar-grid"></div>
     </div>
   </div>
 
-  <div id="tab-add" class="tab-content">
+  <!-- Tab 3: 預約與記帳管理 (合併新增預約與預約紀錄) -->
+  <div id="tab-bookings" class="tab-content">
+    <!-- 手動新增預約區塊 -->
     <div class="add-section">
       <h3>➕ 手動新增預約 / 記帳</h3>
       <div class="form-row">
@@ -378,42 +400,32 @@
         <button class="btn-action" onclick="manualAddBooking()">新增紀錄</button>
       </div>
     </div>
-  </div>
 
-  <div id="tab-list" class="tab-content">
-    <button class="btn-refresh" onclick="fetchBookings()">🔄 重新整理資料</button>
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>編號</th>
-            <th>客戶</th>
-            <th>日期</th>
-            <th>時間</th>
-            <th>項目</th>
-            <th>預估金額</th>
-            <th>狀態</th>
-            <th>成本</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody id="bookingTableBody">
-          <tr><td colspan="9" class="loading">正在讀取最新資料...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<div id="chartModal" class="modal">
-  <div class="modal-content">
-    <span class="close-btn" onclick="closeModal()">&times;</span>
-    <h3 id="modalTitle" style="color: var(--primary-dark); text-align: center; margin-top: 0; font-size: 16px;">📈 年度趨勢折線圖</h3>
-    <div style="margin-bottom: 12px; text-align: center;">
-      <select id="selectYear" onchange="renderChart()" style="padding: 6px; border-radius: 6px; font-size: 13px;"></select>
-    </div>
-    <div style="position: relative; height: 260px; width: 100%;">
-      <canvas id="trendChart"></canvas>
+    <!-- 預約紀錄清單 -->
+    <div class="add-section" style="background: #ffffff; padding: 12px 0;">
+      <div style="padding: 0 12px 10px 12px;">
+        <button class="btn-refresh" onclick="fetchBookings()">🔄 重新整理資料</button>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>編號</th>
+              <th>客戶</th>
+              <th>日期</th>
+              <th>時間</th>
+              <th>項目</th>
+              <th>預估金額</th>
+              <th>狀態</th>
+              <th>成本</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="bookingTableBody">
+            <tr><td colspan="9" class="loading">正在讀取最新資料...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
@@ -423,8 +435,10 @@
   let globalBookings = []; 
   let globalSchedules = {};
   let globalMonthlyShiftTypes = {}; 
+  let globalShiftGroup = "B";
   let trendChartInstance = null;
   let currentChartType = 'revenue';
+  let isChartOpen = false;
   const anchorBaseDate = "2026-10-23"; 
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -467,10 +481,14 @@
         globalSchedules = resData.schedules || {};
         globalMonthlyShiftTypes = resData.monthlyShiftTypes || {};
         
-        if (resData.shiftGroup) document.getElementById('shiftGroup').value = resData.shiftGroup;
+        if (resData.shiftGroup) {
+          globalShiftGroup = resData.shiftGroup;
+          document.getElementById('shiftGroup').value = resData.shiftGroup;
+        }
         
         onTargetMonthChange();
-        renderShiftRecordTags(); // 渲染已設定的紀錄清單
+        renderShiftRecordTags();
+        renderOverrideRecords();
 
         if (globalBookings.length === 0) {
           tableBody.innerHTML = `<tr><td colspan="9" class="loading">目前沒有預約資料</td></tr>`;
@@ -529,7 +547,7 @@
       });
   }
 
-  // 💡 渲染已儲存的各月班別紀錄標籤
+  // 渲染已設定清單 (顯示 月份、A/B班、日夜班)
   function renderShiftRecordTags() {
     const container = document.getElementById('shiftRecordTags');
     container.innerHTML = "";
@@ -548,9 +566,28 @@
 
       const tag = document.createElement('div');
       tag.className = tagClass;
-      tag.innerHTML = `<span>${yearMonth}：${shiftType} ${icon}</span>`;
+      tag.innerHTML = `<span>${yearMonth}：[${globalShiftGroup}班] ${shiftType} ${icon}</span>`;
       container.appendChild(tag);
     });
+  }
+
+  // 渲染營業微調紀錄
+  function renderOverrideRecords() {
+    const container = document.getElementById('overrideRecordContainer');
+    const dates = Object.keys(globalSchedules).sort();
+
+    if (dates.length === 0) {
+      container.innerHTML = `<span style="font-size: 12.5px; color: var(--text-muted);">尚無任何營業微調紀錄</span>`;
+      return;
+    }
+
+    let html = `<table class="mini-table"><tr><th>日期</th><th>狀態</th><th>指定時段</th></tr>`;
+    dates.forEach(d => {
+      const info = globalSchedules[d];
+      html += `<tr><td>${d}</td><td>${info.status}</td><td>${info.slots || '全天'}</td></tr>`;
+    });
+    html += `</table>`;
+    container.innerHTML = html;
   }
 
   function onTargetMonthChange() {
@@ -647,6 +684,7 @@
     statusMsg.innerText = "⏳ 正在儲存設定...";
 
     globalMonthlyShiftTypes[targetMonth] = shiftType;
+    globalShiftGroup = shiftGroup;
 
     fetch(scriptUrl, { 
       method: "POST", 
@@ -656,9 +694,9 @@
       .then(res => {
         if (res.result === "success") {
           statusMsg.style.color = "var(--accent-green)";
-          statusMsg.innerText = `✓ 【${targetMonth}】班別設定已儲存成功！`;
+          statusMsg.innerText = `✓ 【${targetMonth}】[${shiftGroup}班] ${shiftType} 設定已儲存成功！`;
           renderSchedulePreview();
-          renderShiftRecordTags(); // 儲存後立即更新下方清單
+          renderShiftRecordTags();
         } else {
           statusMsg.style.color = "red";
           statusMsg.innerText = "❌ 設定儲存失敗，請再試一次。";
@@ -681,8 +719,11 @@
       .then(res => res.json())
       .then(res => {
         if (res.result === "success") { 
-          alert(`日期 ${targetDate} 更新成功！`); 
-          fetchBookings(); 
+          // 即時更新前端快取並重新渲染月曆與微調紀錄
+          globalSchedules[targetDate] = { status, slots };
+          renderSchedulePreview();
+          renderOverrideRecords();
+          alert(`日期 ${targetDate} 微調狀態儲存成功！`); 
         } else alert("更新失敗");
       });
   }
@@ -694,15 +735,23 @@
     document.getElementById('netProfit').innerText = `NT$ ${rev - cost}`;
   }
 
-  function openModal(type) {
+  // 營運統計折線圖：點擊展開，再按一次收合
+  function toggleChart(type) {
+    const chartSection = document.getElementById('chartSection');
+    if (isChartOpen && currentChartType === type) {
+      chartSection.style.display = 'none';
+      isChartOpen = false;
+      return;
+    }
+
     currentChartType = type;
-    document.getElementById('modalTitle').innerText = (type === 'revenue') ? "📈 年度每月營收趨勢" : "📈 年度每月淨利趨勢";
-    document.getElementById('chartModal').style.display = 'flex';
+    document.getElementById('chartTitle').innerText = (type === 'revenue') ? "📈 年度每月營收趨勢" : "📈 年度每月淨利趨勢";
+    chartSection.style.display = 'block';
+    isChartOpen = true;
+    
     setYearDropdown();
     renderChart();
   }
-
-  function closeModal() { document.getElementById('chartModal').style.display = 'none'; }
 
   function setYearDropdown() {
     const yearSelect = document.getElementById('selectYear');
@@ -774,7 +823,7 @@
 
   function updateBooking(bookingId) {
     const newStatus = document.getElementById(`status_${bookingId}`).value;
-    const newCost = document.getElementById(`cost_${bookingId}` ).value;
+    const newCost = document.getElementById(`cost_${bookingId}`).value;
 
     fetch(scriptUrl, { method: "POST", body: JSON.stringify({ action: "update", bookingId, status: newStatus, cost: Number(newCost) }) })
       .then(res => res.json())
