@@ -134,7 +134,7 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      margin-bottom: 10px;
+      margin-bottom: 4px;
     }
     @media (min-width: 600px) {
       .form-row { flex-direction: row; align-items: center; }
@@ -274,6 +274,8 @@
         </select>
         <button class="btn-action" onclick="updateBaseShift()">儲存該月設定</button>
       </div>
+      <!-- 不跳出提示框的即時狀態紀錄顯示區 -->
+      <div id="saveStatusMsg" style="font-size: 13px; color: var(--accent-green); font-weight: bold; margin-top: 8px; min-height: 18px;"></div>
     </div>
 
     <div class="add-section" style="background: #f4f2ee;">
@@ -368,7 +370,7 @@
   const scriptUrl = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
   let globalBookings = []; 
   let globalSchedules = {};
-  let globalMonthlyShiftTypes = {}; // 儲存後台回傳的各月班別
+  let globalMonthlyShiftTypes = {}; 
   let trendChartInstance = null;
   let currentChartType = 'revenue';
   const anchorBaseDate = "2026-10-23"; 
@@ -415,7 +417,6 @@
         
         if (resData.shiftGroup) document.getElementById('shiftGroup').value = resData.shiftGroup;
         
-        // 根據目前選擇的月份，自動帶入該月的班別設定
         onTargetMonthChange();
 
         if (globalBookings.length === 0) {
@@ -475,7 +476,6 @@
       });
   }
 
-  // 當使用者在後台切換月份時，自動顯示該月已經設定好的班別 (日班/夜班)
   function onTargetMonthChange() {
     const targetMonthVal = document.getElementById('targetMonth').value;
     if (!targetMonthVal) return;
@@ -483,7 +483,7 @@
     if (globalMonthlyShiftTypes[targetMonthVal]) {
       document.getElementById('shiftType').value = globalMonthlyShiftTypes[targetMonthVal];
     } else {
-      document.getElementById('shiftType').value = "夜班"; // 預設
+      document.getElementById('shiftType').value = "夜班"; 
     }
     renderSchedulePreview();
   }
@@ -558,10 +558,17 @@
     const targetMonth = document.getElementById('targetMonth').value;
     const shiftGroup = document.getElementById('shiftGroup').value;
     const shiftType = document.getElementById('shiftType').value;
+    const statusMsg = document.getElementById('saveStatusMsg');
 
-    if (!targetMonth) return alert("請選擇月份！");
+    if (!targetMonth) {
+      statusMsg.style.color = "red";
+      statusMsg.innerText = "⚠️ 請選擇月份！";
+      return;
+    }
 
-    // 更新前端暫存
+    statusMsg.style.color = "var(--text-muted)";
+    statusMsg.innerText = "⏳ 正在儲存設定...";
+
     globalMonthlyShiftTypes[targetMonth] = shiftType;
 
     fetch(scriptUrl, { 
@@ -571,9 +578,17 @@
       .then(res => res.json())
       .then(res => {
         if (res.result === "success") {
-          alert(`【${targetMonth}】班別設定成功（已同步至前台）！`);
+          statusMsg.style.color = "var(--accent-green)";
+          statusMsg.innerText = `✓ 【${targetMonth}】班別設定已儲存成功！`;
           renderSchedulePreview();
-        } else alert("設定失敗");
+        } else {
+          statusMsg.style.color = "red";
+          statusMsg.innerText = "❌ 設定儲存失敗，請再試一次。";
+        }
+      })
+      .catch(err => {
+        statusMsg.style.color = "red";
+        statusMsg.innerText = "❌ 連線失敗，請檢查網路。";
       });
   }
 
