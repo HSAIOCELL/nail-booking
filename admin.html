@@ -430,78 +430,7 @@
         globalSchedules = resData.schedules || {};
         globalMonthlyShiftTypes = resData.monthlyShiftTypes || {};
         
-        renderHistoryList();
-        renderOverrideRecords();
-        checkMonthlyShiftReminder();
-
-        if (activePreviewYM) {
-          showPreviewCalendar(activePreviewYM);
-        }
-
-        // 1. 渲染客戶預約紀錄 (狀態一律預約中，點擊可切換為已完成，操作欄改為刪除按鈕)
-        if (globalBookings.length === 0) {
-          tableBody.innerHTML = `<tr><td colspan="8" class="loading">目前沒有預約資料</td></tr>`;
-        } else {
-          tableBody.innerHTML = "";
-          globalBookings.forEach((row, index) => {
-            const displayId = String(index + 1).padStart(3, '0');
-            const originalId = row.bookingId || displayId;
-            const customerName = row.customerName || "";
-            const date = row.date || "";
-            const time = row.time || "";
-            const items = row.items || "";
-            const price = Number(row.totalPrice) || 0;
-            let status = row.status || "預約中";
-
-            if (status === "已取消") return; // 已取消的不顯示在預約紀錄中
-
-            let isAutoCompleted = false;
-            const now = new Date();
-            if (status === "預約中" && date && time) {
-              let bookingDT = new Date(`${date}T${time}`);
-              if (!isNaN(bookingDT) && bookingDT < now) isAutoCompleted = true;
-            }
-
-            let displayStatus = (status === "已完成" || isAutoCompleted) ? "已完成" : "預約中";
-
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td>${displayId}</td>
-              <td>${customerName}</td>
-              <td>${date}</td>
-              <td>${time}</td>
-              <td>${items}</td>
-              <td>NT$ ${price}</td>
-              <td>
-                <span style="cursor: pointer; padding: 3px 8px; background: ${displayStatus === '已完成' ? '#e5ece9' : '#fdf6e2'}; border-radius: 6px; font-weight: bold;" onclick="toggleStatus('${originalId}', '${displayStatus}')">
-                  ${displayStatus}${isAutoCompleted ? ' (自動)' : ''}
-                </span>
-              </td>
-              <td><button class="btn-action" style="padding: 4px 8px; font-size: 11.5px; background: #cf1322;" onclick="cancelBooking('${originalId}')">刪除</button></td>
-            `;
-            tableBody.appendChild(tr);
-          });
-        }
-
-        // 2. 渲染記帳紀錄
-        if (globalAccounting.length === 0) {
-          accTableBody.innerHTML = `<tr><td colspan="5" class="loading">尚無記帳紀錄</td></tr>`;
-        } else {
-          accTableBody.innerHTML = "";
-          globalAccounting.forEach((acc, index) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td>${String(index + 1).padStart(3, '0')}</td>
-              <td>${acc.date}</td>
-              <td>${acc.item}</td>
-              <td>NT$ ${acc.cost}</td>
-              <td><button class="btn-action" style="padding: 4px 8px; font-size: 11.5px; background: #cf1322;" onclick="deleteAccounting('${acc.id}')">刪除</button></td>
-            `;
-            accTableBody.appendChild(tr);
-          });
-        }
-
-        calculateFinanceAndRender();
+        renderAllTables();
       })
       .catch(err => {
         tableBody.innerHTML = `<tr><td colspan="8" class="loading" style="color: red;">連線失敗！</td></tr>`;
@@ -509,32 +438,116 @@
       });
   }
 
-  function toggleStatus(bookingId, currentStatus) {
-    const newStatus = (currentStatus.startsWith("已完成") ? "預約中" : "已完成");
+  function renderAllTables() {
+    renderHistoryList();
+    renderOverrideRecords();
+    checkMonthlyShiftReminder();
+
+    if (activePreviewYM) {
+      showPreviewCalendar(activePreviewYM);
+    }
+
+    // 1. 渲染客戶預約紀錄
+    const tableBody = document.getElementById('bookingTableBody');
+    if (globalBookings.length === 0) {
+      tableBody.innerHTML = `<tr><td colspan="8" class="loading">目前沒有預約資料</td></tr>`;
+    } else {
+      tableBody.innerHTML = "";
+      globalBookings.forEach((row, index) => {
+        const displayId = String(index + 1).padStart(3, '0');
+        const originalId = row.bookingId || displayId;
+        const customerName = row.customerName || "";
+        const date = row.date || "";
+        const time = row.time || "";
+        const items = row.items || "";
+        const price = Number(row.totalPrice) || 0;
+        let status = row.status || "預約中";
+
+        if (status === "已取消") return;
+
+        let isAutoCompleted = false;
+        const now = new Date();
+        if (status === "預約中" && date && time) {
+          let bookingDT = new Date(`${date}T${time}`);
+          if (!isNaN(bookingDT) && bookingDT < now) isAutoCompleted = true;
+        }
+
+        let displayStatus = (status === "已完成" || isAutoCompleted) ? "已完成" : "預約中";
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${displayId}</td>
+          <td>${customerName}</td>
+          <td>${date}</td>
+          <td>${time}</td>
+          <td>${items}</td>
+          <td>NT$ ${price}</td>
+          <td>
+            <span style="cursor: pointer; padding: 3px 8px; background: ${displayStatus === '已完成' ? '#e5ece9' : '#fdf6e2'}; border-radius: 6px; font-weight: bold;" onclick="toggleStatus('${originalId}')">
+              ${displayStatus}${isAutoCompleted ? ' (自動)' : ''}
+            </span>
+          </td>
+          <td><button class="btn-action" style="padding: 4px 8px; font-size: 11.5px; background: #cf1322;" onclick="cancelBooking('${originalId}')">刪除</button></td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    // 2. 渲染記帳紀錄
+    const accTableBody = document.getElementById('accountingTableBody');
+    if (globalAccounting.length === 0) {
+      accTableBody.innerHTML = `<tr><td colspan="5" class="loading">尚無記帳紀錄</td></tr>`;
+    } else {
+      accTableBody.innerHTML = "";
+      globalAccounting.forEach((acc, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${String(index + 1).padStart(3, '0')}</td>
+          <td>${acc.date}</td>
+          <td>${acc.item}</td>
+          <td>NT$ ${acc.cost}</td>
+          <td><button class="btn-action" style="padding: 4px 8px; font-size: 11.5px; background: #cf1322;" onclick="deleteAccounting('${acc.id}')">刪除</button></td>
+        `;
+        accTableBody.appendChild(tr);
+      });
+    }
+
+    calculateFinanceAndRender();
+  }
+
+  // ⚡ 點擊即時切換狀態（不重新讀取整個資料庫，速度極快）
+  function toggleStatus(bookingId) {
+    const booking = globalBookings.find(b => (b.bookingId || '') === String(bookingId));
+    if (booking) {
+      booking.status = (booking.status === "已完成" ? "預約中" : "已完成");
+      renderAllTables(); // 畫面立刻重新渲染
+    }
     fetch(scriptUrl.replace('?action=api', ''), { 
       method: "POST", 
       mode: "no-cors",
-      body: JSON.stringify({ action: "update", bookingId, status: newStatus }) 
-    })
-    .then(() => {
-      fetchData();
-    })
-    .catch(() => {
-      fetchData();
+      body: JSON.stringify({ action: "update", bookingId, status: booking ? booking.status : "已完成" }) 
     });
   }
 
+  // ⚡ 點擊即時刪除預約（畫面立刻少一筆，秒完成）
   function cancelBooking(bookingId) {
+    globalBookings = globalBookings.filter(b => (b.bookingId || '') !== String(bookingId));
+    renderAllTables(); // 畫面立刻重新渲染
     fetch(scriptUrl.replace('?action=api', ''), { 
       method: "POST", 
       mode: "no-cors",
       body: JSON.stringify({ action: "update", bookingId, status: "已取消" }) 
-    })
-    .then(() => {
-      fetchData();
-    })
-    .catch(() => {
-      fetchData();
+    });
+  }
+
+  // ⚡ 點擊即時刪除記帳
+  function deleteAccounting(id) {
+    globalAccounting = globalAccounting.filter(acc => acc.id !== String(id));
+    renderAllTables();
+    fetch(scriptUrl.replace('?action=api', ''), { 
+      method: "POST", 
+      mode: "no-cors",
+      body: JSON.stringify({ action: "deleteAccounting", id }) 
     });
   }
 
@@ -673,20 +686,13 @@
   }
 
   function deleteScheduleOverride(targetDate) {
+    delete globalSchedules[targetDate];
+    renderOverrideRecords();
+    if (activePreviewYM) showPreviewCalendar(activePreviewYM);
     fetch(scriptUrl.replace('?action=api', ''), { 
       method: "POST", 
       mode: "no-cors",
       body: JSON.stringify({ action: "deleteSchedule", targetDate }) 
-    })
-    .then(() => {
-      delete globalSchedules[targetDate];
-      renderOverrideRecords();
-      if (activePreviewYM) showPreviewCalendar(activePreviewYM);
-    })
-    .catch(() => {
-      delete globalSchedules[targetDate];
-      renderOverrideRecords();
-      if (activePreviewYM) showPreviewCalendar(activePreviewYM);
     });
   }
 
@@ -698,21 +704,14 @@
     if (!targetMonth) return;
 
     globalMonthlyShiftTypes[targetMonth] = { shiftGroup, shiftType };
+    renderHistoryList();
+    showPreviewCalendar(targetMonth);
+    checkMonthlyShiftReminder();
 
     fetch(scriptUrl.replace('?action=api', ''), { 
       method: "POST", 
       mode: "no-cors",
       body: JSON.stringify({ action: "updateBaseShift", targetMonth, monthlyShiftTypes: globalMonthlyShiftTypes }) 
-    })
-    .then(() => {
-      renderHistoryList();
-      showPreviewCalendar(targetMonth);
-      checkMonthlyShiftReminder();
-    })
-    .catch(() => {
-      renderHistoryList();
-      showPreviewCalendar(targetMonth);
-      checkMonthlyShiftReminder();
     });
   }
 
@@ -722,20 +721,14 @@
 
     if (!targetDate) return;
 
+    globalSchedules[targetDate] = { status, slots: "" };
+    renderOverrideRecords();
+    if (activePreviewYM) showPreviewCalendar(activePreviewYM);
+
     fetch(scriptUrl.replace('?action=api', ''), { 
       method: "POST", 
       mode: "no-cors",
       body: JSON.stringify({ action: "updateSchedule", targetDate, status }) 
-    })
-    .then(() => {
-      globalSchedules[targetDate] = { status, slots: "" };
-      renderOverrideRecords();
-      if (activePreviewYM) showPreviewCalendar(activePreviewYM);
-    })
-    .catch(() => {
-      globalSchedules[targetDate] = { status, slots: "" };
-      renderOverrideRecords();
-      if (activePreviewYM) showPreviewCalendar(activePreviewYM);
     });
   }
 
@@ -842,19 +835,21 @@
 
     if (!customerName || !date || !items || !totalPrice) return;
 
+    // 立即加到本地陣列並刷新畫面
+    globalBookings.push({
+      bookingId: 'M' + Date.now().toString().slice(-6),
+      customerName, date, time, items, totalPrice: Number(totalPrice), status: '預約中', cost: 0
+    });
+    renderAllTables();
+
+    document.getElementById('newName').value = "";
+    document.getElementById('newItems').value = "";
+    document.getElementById('newPrice').value = "";
+
     fetch(scriptUrl.replace('?action=api', ''), { 
       method: "POST", 
       mode: "no-cors",
       body: JSON.stringify({ customerName, date, time, items, totalPrice: Number(totalPrice), cost: 0 }) 
-    })
-    .then(() => {
-      document.getElementById('newName').value = "";
-      document.getElementById('newItems').value = "";
-      document.getElementById('newPrice').value = "";
-      fetchData();
-    })
-    .catch(() => {
-      fetchData();
     });
   }
 
@@ -865,32 +860,30 @@
 
     if (!date || !item) return;
 
+    globalAccounting.push({
+      id: 'ACC' + Date.now().toString().slice(-6),
+      date, item, cost: Number(cost) || 0
+    });
+    renderAllTables();
+
+    document.getElementById('accItem').value = "";
+    document.getElementById('accCost').value = "0";
+
     fetch(scriptUrl.replace('?action=api', ''), { 
       method: "POST", 
       mode: "no-cors",
       body: JSON.stringify({ action: "addAccounting", date, item, cost: Number(cost) || 0 }) 
-    })
-    .then(() => {
-      document.getElementById('accItem').value = "";
-      document.getElementById('accCost').value = "0";
-      fetchData();
-    })
-    .catch(() => {
-      fetchData();
     });
   }
 
+  // ⚡ 點擊即時刪除記帳
   function deleteAccounting(id) {
+    globalAccounting = globalAccounting.filter(acc => acc.id !== String(id));
+    renderAllTables();
     fetch(scriptUrl.replace('?action=api', ''), { 
       method: "POST", 
       mode: "no-cors",
       body: JSON.stringify({ action: "deleteAccounting", id }) 
-    })
-    .then(() => {
-      fetchData();
-    })
-    .catch(() => {
-      fetchData();
     });
   }
 </script>
