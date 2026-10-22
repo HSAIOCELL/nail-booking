@@ -261,9 +261,9 @@
 
   <div id="tab-schedule" class="tab-content">
     <div class="add-section">
-      <h3>🔄 班別與月份設定</h3>
+      <h3>🔄 各月獨立班別設定</h3>
       <div class="form-row">
-        <input type="month" id="targetMonth" onchange="renderSchedulePreview()">
+        <input type="month" id="targetMonth" onchange="onTargetMonthChange()">
         <select id="shiftGroup" onchange="renderSchedulePreview()">
           <option value="B">B 班</option>
           <option value="A">A 班</option>
@@ -272,7 +272,7 @@
           <option value="夜班">夜班</option>
           <option value="日班">日班</option>
         </select>
-        <button class="btn-action" onclick="updateBaseShift()">儲存設定</button>
+        <button class="btn-action" onclick="updateBaseShift()">儲存該月設定</button>
       </div>
     </div>
 
@@ -368,6 +368,7 @@
   const scriptUrl = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
   let globalBookings = []; 
   let globalSchedules = {};
+  let globalMonthlyShiftTypes = {}; // 儲存後台回傳的各月班別
   let trendChartInstance = null;
   let currentChartType = 'revenue';
   const anchorBaseDate = "2026-10-23"; 
@@ -410,11 +411,12 @@
         tableBody.innerHTML = "";
         globalBookings = resData.bookings || [];
         globalSchedules = resData.schedules || {};
+        globalMonthlyShiftTypes = resData.monthlyShiftTypes || {};
         
         if (resData.shiftGroup) document.getElementById('shiftGroup').value = resData.shiftGroup;
-        if (resData.shiftType) document.getElementById('shiftType').value = resData.shiftType;
-
-        renderSchedulePreview();
+        
+        // 根據目前選擇的月份，自動帶入該月的班別設定
+        onTargetMonthChange();
 
         if (globalBookings.length === 0) {
           tableBody.innerHTML = `<tr><td colspan="9" class="loading">目前沒有預約資料</td></tr>`;
@@ -428,7 +430,6 @@
         let currentMonthRev = 0;
 
         globalBookings.forEach((row, index) => {
-          // 直接用流水號 001, 002, 003... 呈現
           const displayId = String(index + 1).padStart(3, '0');
           const originalId = row.bookingId || displayId;
           const customerName = row.customerName || "";
@@ -472,6 +473,19 @@
       .catch(err => {
         tableBody.innerHTML = `<tr><td colspan="9" class="loading" style="color: red;">連線失敗！</td></tr>`;
       });
+  }
+
+  // 當使用者在後台切換月份時，自動顯示該月已經設定好的班別 (日班/夜班)
+  function onTargetMonthChange() {
+    const targetMonthVal = document.getElementById('targetMonth').value;
+    if (!targetMonthVal) return;
+
+    if (globalMonthlyShiftTypes[targetMonthVal]) {
+      document.getElementById('shiftType').value = globalMonthlyShiftTypes[targetMonthVal];
+    } else {
+      document.getElementById('shiftType').value = "夜班"; // 預設
+    }
+    renderSchedulePreview();
   }
 
   function renderSchedulePreview() {
@@ -547,14 +561,17 @@
 
     if (!targetMonth) return alert("請選擇月份！");
 
+    // 更新前端暫存
+    globalMonthlyShiftTypes[targetMonth] = shiftType;
+
     fetch(scriptUrl, { 
       method: "POST", 
-      body: JSON.stringify({ action: "updateBaseShift", targetMonth, shiftGroup, shiftType }) 
+      body: JSON.stringify({ action: "updateBaseShift", targetMonth, shiftGroup, monthlyShiftTypes: globalMonthlyShiftTypes }) 
     })
       .then(res => res.json())
       .then(res => {
         if (res.result === "success") {
-          alert(`【${targetMonth}】設定成功！`);
+          alert(`【${targetMonth}】班別設定成功（已同步至前台）！`);
           renderSchedulePreview();
         } else alert("設定失敗");
       });
