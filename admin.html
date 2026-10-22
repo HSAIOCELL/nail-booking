@@ -167,6 +167,49 @@
       .btn-action { width: auto; }
     }
 
+    /* 💡 新增：精緻簡潔的已設定月份紀錄清單樣式 */
+    .shift-record-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-top: 14px;
+    }
+    .shift-record-title {
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .shift-tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .shift-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
+      border: 1px solid transparent;
+    }
+    .shift-tag.day {
+      background-color: #fdf6e2;
+      color: #a37512;
+      border-color: #f2d896;
+    }
+    .shift-tag.night {
+      background-color: #e5ece9;
+      color: #4c6b61;
+      border-color: #b8c9c4;
+    }
+
     /* 排班月曆小預覽 */
     .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
     .calendar-day {
@@ -274,8 +317,17 @@
         </select>
         <button class="btn-action" onclick="updateBaseShift()">儲存該月設定</button>
       </div>
-      <!-- 不跳出提示框的即時狀態紀錄顯示區 -->
+
+      <!-- 即時狀態提示 -->
       <div id="saveStatusMsg" style="font-size: 13px; color: var(--accent-green); font-weight: bold; margin-top: 8px; min-height: 18px;"></div>
+
+      <!-- 💡 新增：已設定的月份與日夜班紀錄總覽清單 -->
+      <div class="shift-record-card">
+        <div class="shift-record-title">📋 目前各月班別設定紀錄：</div>
+        <div id="shiftRecordTags" class="shift-tags-container">
+          <span style="font-size: 12.5px; color: var(--text-muted);">載入中...</span>
+        </div>
+      </div>
     </div>
 
     <div class="add-section" style="background: #f4f2ee;">
@@ -418,6 +470,7 @@
         if (resData.shiftGroup) document.getElementById('shiftGroup').value = resData.shiftGroup;
         
         onTargetMonthChange();
+        renderShiftRecordTags(); // 渲染已設定的紀錄清單
 
         if (globalBookings.length === 0) {
           tableBody.innerHTML = `<tr><td colspan="9" class="loading">目前沒有預約資料</td></tr>`;
@@ -474,6 +527,30 @@
       .catch(err => {
         tableBody.innerHTML = `<tr><td colspan="9" class="loading" style="color: red;">連線失敗！</td></tr>`;
       });
+  }
+
+  // 💡 渲染已儲存的各月班別紀錄標籤
+  function renderShiftRecordTags() {
+    const container = document.getElementById('shiftRecordTags');
+    container.innerHTML = "";
+
+    const keys = Object.keys(globalMonthlyShiftTypes).sort();
+    if (keys.length === 0) {
+      container.innerHTML = `<span style="font-size: 12.5px; color: var(--text-muted);">尚無任何月份設定紀錄</span>`;
+      return;
+    }
+
+    keys.forEach(yearMonth => {
+      const shiftType = globalMonthlyShiftTypes[yearMonth];
+      const isDay = (shiftType === "日班");
+      const tagClass = isDay ? "shift-tag day" : "shift-tag night";
+      const icon = isDay ? "☀️" : "🌙";
+
+      const tag = document.createElement('div');
+      tag.className = tagClass;
+      tag.innerHTML = `<span>${yearMonth}：${shiftType} ${icon}</span>`;
+      container.appendChild(tag);
+    });
   }
 
   function onTargetMonthChange() {
@@ -581,6 +658,7 @@
           statusMsg.style.color = "var(--accent-green)";
           statusMsg.innerText = `✓ 【${targetMonth}】班別設定已儲存成功！`;
           renderSchedulePreview();
+          renderShiftRecordTags(); // 儲存後立即更新下方清單
         } else {
           statusMsg.style.color = "red";
           statusMsg.innerText = "❌ 設定儲存失敗，請再試一次。";
@@ -696,7 +774,7 @@
 
   function updateBooking(bookingId) {
     const newStatus = document.getElementById(`status_${bookingId}`).value;
-    const newCost = document.getElementById(`cost_${bookingId}`).value;
+    const newCost = document.getElementById(`cost_${bookingId}` ).value;
 
     fetch(scriptUrl, { method: "POST", body: JSON.stringify({ action: "update", bookingId, status: newStatus, cost: Number(newCost) }) })
       .then(res => res.json())
