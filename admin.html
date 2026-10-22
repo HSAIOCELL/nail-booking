@@ -240,7 +240,7 @@
   <!-- Tab 2: 班表 -->
   <div id="tab-schedule" class="tab-content">
     <div class="add-section">
-      <h3>各月獨立班別設定</h3>
+      <h3>月份班別設定</h3>
       <div class="form-row">
         <input type="month" id="targetMonth">
         <select id="shiftGroup">
@@ -248,8 +248,8 @@
           <option value="A">A 組</option>
         </select>
         <select id="shiftType">
-          <option value="夜班">夜班 (藍灰色)</option>
-          <option value="白班">白班 (黃色)</option>
+          <option value="夜班">夜班</option>
+          <option value="白班">白班</option>
         </select>
         <button class="btn-action" onclick="saveMonthlyShift()">💾</button>
       </div>
@@ -348,7 +348,7 @@
     </div>
   </div>
 
-  <!-- Tab 4: 記帳管理 (僅保留支出欄位) -->
+  <!-- Tab 4: 記帳管理 -->
   <div id="tab-accounting" class="tab-content">
     <div class="add-section">
       <h3>手動新增記帳</h3>
@@ -383,7 +383,6 @@
 </div>
 
 <script>
-  // 👇 請確認此處網址是否正確（結尾必須帶有 ?action=api）
   const scriptUrl = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec?action=api";
 
   let globalBookings = []; 
@@ -439,7 +438,7 @@
           showPreviewCalendar(activePreviewYM);
         }
 
-        // 1. 渲染客戶預約紀錄
+        // 1. 渲染客戶預約紀錄 (狀態一律預約中，點擊可切換為已完成，操作欄改為刪除按鈕)
         if (globalBookings.length === 0) {
           tableBody.innerHTML = `<tr><td colspan="8" class="loading">目前沒有預約資料</td></tr>`;
         } else {
@@ -454,12 +453,16 @@
             const price = Number(row.totalPrice) || 0;
             let status = row.status || "預約中";
 
+            if (status === "已取消") return; // 已取消的不顯示在預約紀錄中
+
             let isAutoCompleted = false;
             const now = new Date();
             if (status === "預約中" && date && time) {
               let bookingDT = new Date(`${date}T${time}`);
               if (!isNaN(bookingDT) && bookingDT < now) isAutoCompleted = true;
             }
+
+            let displayStatus = (status === "已完成" || isAutoCompleted) ? "已完成" : "預約中";
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -470,19 +473,17 @@
               <td>${items}</td>
               <td>NT$ ${price}</td>
               <td>
-                <select id="status_${originalId}">
-                  <option value="預約中" ${status === '預約中' ? 'selected' : ''}>預約中${isAutoCompleted ? ' (已過期自動計收)' : ''}</option>
-                  <option value="已完成" ${status === '已完成' ? 'selected' : ''}>已完成</option>
-                  <option value="已取消" ${status === '已取消' ? 'selected' : ''}>已取消</option>
-                </select>
+                <span style="cursor: pointer; padding: 3px 8px; background: ${displayStatus === '已完成' ? '#e5ece9' : '#fdf6e2'}; border-radius: 6px; font-weight: bold;" onclick="toggleStatus('${originalId}', '${displayStatus}')">
+                  ${displayStatus}${isAutoCompleted ? ' (自動)' : ''}
+                </span>
               </td>
-              <td><button class="btn-action" style="padding: 4px 8px; font-size: 11.5px; background: var(--accent-green);" onclick="updateBookingStatus('${originalId}')">儲存</button></td>
+              <td><button class="btn-action" style="padding: 4px 8px; font-size: 11.5px; background: #cf1322;" onclick="cancelBooking('${originalId}')">刪除</button></td>
             `;
             tableBody.appendChild(tr);
           });
         }
 
-        // 2. 渲染記帳永久留存紀錄 (僅支出)
+        // 2. 渲染記帳紀錄
         if (globalAccounting.length === 0) {
           accTableBody.innerHTML = `<tr><td colspan="5" class="loading">尚無記帳紀錄</td></tr>`;
         } else {
@@ -508,6 +509,35 @@
       });
   }
 
+  function toggleStatus(bookingId, currentStatus) {
+    const newStatus = (currentStatus.startsWith("已完成") ? "預約中" : "已完成");
+    fetch(scriptUrl.replace('?action=api', ''), { 
+      method: "POST", 
+      mode: "no-cors",
+      body: JSON.stringify({ action: "update", bookingId, status: newStatus }) 
+    })
+    .then(() => {
+      fetchData();
+    })
+    .catch(() => {
+      fetchData();
+    });
+  }
+
+  function cancelBooking(bookingId) {
+    fetch(scriptUrl.replace('?action=api', ''), { 
+      method: "POST", 
+      mode: "no-cors",
+      body: JSON.stringify({ action: "update", bookingId, status: "已取消" }) 
+    })
+    .then(() => {
+      fetchData();
+    })
+    .catch(() => {
+      fetchData();
+    });
+  }
+
   function calculateFinanceAndRender() {
     let totalRev = 0, totalCost = 0;
     const now = new Date();
@@ -522,12 +552,12 @@
         if (row.status === "已完成" || isAutoCompleted) {
           totalRev += Number(row.totalPrice) || 0;
         }
-        totalCost += Number(row.cost) || 0; // 預約帶有的成本
+        totalCost += Number(row.cost) || 0;
       }
     });
 
     globalAccounting.forEach(acc => {
-      totalCost += Number(acc.cost) || 0; // 手動記帳的支出成本
+      totalCost += Number(acc.cost) || 0;
     });
 
     document.getElementById('totalRevenue').innerText = `NT$ ${totalRev}`;
@@ -624,7 +654,6 @@
     });
   }
 
-  // 帶有刪除按鈕的微調紀錄
   function renderOverrideRecords() {
     const container = document.getElementById('overrideRecordContainer');
     const dates = Object.keys(globalSchedules).sort();
@@ -644,8 +673,6 @@
   }
 
   function deleteScheduleOverride(targetDate) {
-    if (!confirm(`確定要刪除 ${targetDate} 的微調紀錄嗎？`)) return;
-
     fetch(scriptUrl.replace('?action=api', ''), { 
       method: "POST", 
       mode: "no-cors",
@@ -655,13 +682,11 @@
       delete globalSchedules[targetDate];
       renderOverrideRecords();
       if (activePreviewYM) showPreviewCalendar(activePreviewYM);
-      alert("微調紀錄已刪除！"); 
     })
     .catch(() => {
       delete globalSchedules[targetDate];
       renderOverrideRecords();
       if (activePreviewYM) showPreviewCalendar(activePreviewYM);
-      alert("刪除指令已送出！"); 
     });
   }
 
@@ -670,7 +695,7 @@
     const shiftGroup = document.getElementById('shiftGroup').value;
     const shiftType = document.getElementById('shiftType').value;
 
-    if (!targetMonth) return alert("請選擇月份！");
+    if (!targetMonth) return;
 
     globalMonthlyShiftTypes[targetMonth] = { shiftGroup, shiftType };
 
@@ -680,13 +705,11 @@
       body: JSON.stringify({ action: "updateBaseShift", targetMonth, monthlyShiftTypes: globalMonthlyShiftTypes }) 
     })
     .then(() => {
-      alert(`【${targetMonth}】設定已儲存！`);
       renderHistoryList();
       showPreviewCalendar(targetMonth);
       checkMonthlyShiftReminder();
     })
     .catch(() => {
-      alert(`【${targetMonth}】設定已送出！`);
       renderHistoryList();
       showPreviewCalendar(targetMonth);
       checkMonthlyShiftReminder();
@@ -697,7 +720,7 @@
     const targetDate = document.getElementById('scheduleDate').value;
     const status = document.getElementById('scheduleStatus').value;
 
-    if (!targetDate) return alert("請選擇日期！");
+    if (!targetDate) return;
 
     fetch(scriptUrl.replace('?action=api', ''), { 
       method: "POST", 
@@ -708,13 +731,11 @@
       globalSchedules[targetDate] = { status, slots: "" };
       renderOverrideRecords();
       if (activePreviewYM) showPreviewCalendar(activePreviewYM);
-      alert(`日期 ${targetDate} 微調已儲存！`); 
     })
     .catch(() => {
       globalSchedules[targetDate] = { status, slots: "" };
       renderOverrideRecords();
       if (activePreviewYM) showPreviewCalendar(activePreviewYM);
-      alert(`日期 ${targetDate} 微調已送出！`); 
     });
   }
 
@@ -782,7 +803,6 @@
           const monthIdx = parseInt(parts[1], 10) - 1;
           if (monthIdx >= 0 && monthIdx < 12) {
             const cost = Number(acc.cost) || 0;
-            // 淨利圖表扣除手動支出成本
             if (currentChartType === 'profit') {
               monthlyData[monthIdx] -= cost;
             }
@@ -820,7 +840,7 @@
     const items = document.getElementById('newItems').value;
     const totalPrice = document.getElementById('newPrice').value;
 
-    if (!customerName || !date || !items || !totalPrice) return alert("請填寫完整資訊！");
+    if (!customerName || !date || !items || !totalPrice) return;
 
     fetch(scriptUrl.replace('?action=api', ''), { 
       method: "POST", 
@@ -828,14 +848,12 @@
       body: JSON.stringify({ customerName, date, time, items, totalPrice: Number(totalPrice), cost: 0 }) 
     })
     .then(() => {
-      alert("預約新增成功！"); 
       document.getElementById('newName').value = "";
       document.getElementById('newItems').value = "";
       document.getElementById('newPrice').value = "";
       fetchData();
     })
     .catch(() => {
-      alert("預約新增已送出！"); 
       fetchData();
     });
   }
@@ -845,7 +863,7 @@
     const item = document.getElementById('accItem').value;
     const cost = document.getElementById('accCost').value;
 
-    if (!date || !item) return alert("請填寫日期與項目說明！");
+    if (!date || !item) return;
 
     fetch(scriptUrl.replace('?action=api', ''), { 
       method: "POST", 
@@ -853,49 +871,25 @@
       body: JSON.stringify({ action: "addAccounting", date, item, cost: Number(cost) || 0 }) 
     })
     .then(() => {
-      alert("記帳儲存成功！"); 
       document.getElementById('accItem').value = "";
       document.getElementById('accCost').value = "0";
       fetchData();
     })
     .catch(() => {
-      alert("記帳已送出！"); 
       fetchData();
     });
   }
 
   function deleteAccounting(id) {
-    if (!confirm("確定要刪除這筆記帳紀錄嗎？")) return;
-
     fetch(scriptUrl.replace('?action=api', ''), { 
       method: "POST", 
       mode: "no-cors",
       body: JSON.stringify({ action: "deleteAccounting", id }) 
     })
     .then(() => {
-      alert("記帳紀錄已刪除！"); 
       fetchData();
     })
     .catch(() => {
-      alert("刪除指令已送出！"); 
-      fetchData();
-    });
-  }
-
-  function updateBookingStatus(bookingId) {
-    const newStatus = document.getElementById(`status_${bookingId}`).value;
-
-    fetch(scriptUrl.replace('?action=api', ''), { 
-      method: "POST", 
-      mode: "no-cors",
-      body: JSON.stringify({ action: "update", bookingId, status: newStatus }) 
-    })
-    .then(() => {
-      alert(`狀態更新成功！`); 
-      fetchData();
-    })
-    .catch(() => {
-      alert(`狀態更新已送出！`); 
       fetchData();
     });
   }
