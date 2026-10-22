@@ -169,7 +169,7 @@
       font-family: inherit !important;
     }
 
-    /* 班別動態標記：白班=黃色 / 夜班=莫蘭迪藍灰色 */
+    /* 班別動態標記：強制指定顏色與字體 */
     .flatpickr-day.available-day-yellow {
       background-color: #fdf6e2 !important;
       color: #a37512 !important;
@@ -797,6 +797,7 @@
     }
   }
 
+  // 核心：判斷某天是否可預約，並回傳當月的班別類型（白班/夜班）
   function getShiftCycleInfo(dateObj) {
     const year = dateObj.getFullYear();
     const month = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -817,8 +818,7 @@
     
     return {
       cycleDay: cycleDay,
-      isWorkDay: (cycleDay === 0 || cycleDay === 1),
-      isDayShiftOff: (cycleDay === 2 || cycleDay === 3),
+      isWorkDay: (cycleDay === 0 || cycleDay === 1), // 0和1為工作日(店休不能約)，2和3為可預約日
       shiftType: currentType 
     };
   }
@@ -874,7 +874,7 @@
             if (backendSchedules[dateStr].status === "關閉") return true;
           }
           const shiftInfo = getShiftCycleInfo(date);
-          return shiftInfo.isWorkDay; 
+          return shiftInfo.isWorkDay; // 工作日不開放預約
         }
       ],
       onDayCreate: function(dObj, dStr, fp, dayElement) {
@@ -885,12 +885,13 @@
           if (backendSchedules[dateStr].status === "開放") isAvailable = true;
         } else {
           const shiftInfo = getShiftCycleInfo(dayElement.dateObj);
-          if (!shiftInfo.isWorkDay) isAvailable = true;
+          if (!shiftInfo.isWorkDay) isAvailable = true; // 可預約日
         }
 
         if (isAvailable && dayElement.dateObj >= taipeiNow) {
           const shiftInfo = getShiftCycleInfo(dayElement.dateObj);
-          const availableClassName = (shiftInfo.shiftType === "日班") ? "available-day-yellow" : "available-day-blue";
+          // 嚴格判定：只要設定是「白班」就強制給黃色，否則給藍灰色
+          const availableClassName = (shiftInfo.shiftType === "白班") ? "available-day-yellow" : "available-day-blue";
           dayElement.classList.add(availableClassName);
         }
       },
@@ -935,10 +936,6 @@
       }
 
       if (!adminOverride && allowedHours && !allowedHours.includes(opt.value)) {
-        isDisabled = true;
-      }
-
-      if (!adminOverride && !allowedHours && shiftInfo.isDayShiftOff && h < 6) {
         isDisabled = true;
       }
 
@@ -1496,7 +1493,7 @@
     })
     .catch(error => {
       console.error('Error:', error);
-      alert("送出失敗，請再試自動重試或直接聯繫官方 LINE。");
+      alert("送出失敗，請再試一次或直接聯繫官方 LINE。");
       submitBtn.innerText = "送出預約單 (開啟 LINE)";
       submitBtn.disabled = false;
     });
