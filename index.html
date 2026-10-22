@@ -719,7 +719,7 @@
 
   let adminOverride = false; 
   let backendShiftGroup = "B";
-  let backendMonthlyShiftTypes = {}; // 接收後台各月獨立設定 (包含 A/B 班與日夜班)
+  let backendMonthlyShiftTypes = {}; 
   let backendSchedules = {};
 
   const ALL_COLORS = [
@@ -737,7 +737,6 @@
     fetchBackendConfigAndInit();
   });
 
-  // 從 LINE 返回頁面時，自動復原送出按鈕狀態
   window.addEventListener('pageshow', (event) => {
     const submitBtn = document.querySelector('.submit-btn');
     if (submitBtn) {
@@ -746,7 +745,6 @@
     }
   });
 
-  // 15號至20號前台自動跳出下兩個月班表更新提醒
   function checkFrontendReminder() {
     const todayDay = new Date().getDate();
     if (todayDay >= 15 && todayDay <= 20) {
@@ -762,15 +760,15 @@
       if (data.monthlyShiftTypes) backendMonthlyShiftTypes = data.monthlyShiftTypes;
       if (data.schedules) backendSchedules = data.schedules;
 
-      // 相容舊版純字串格式
       for (let ym in backendMonthlyShiftTypes) {
         if (typeof backendMonthlyShiftTypes[ym] === 'string') {
           backendMonthlyShiftTypes[ym] = { shiftGroup: backendShiftGroup, shiftType: backendMonthlyShiftTypes[ym] };
         }
       }
     } catch (e) {
-      console.error("無法取得後端排班設定", e);
+      console.warn("無法取得後端排班設定，已自動啟用預設排班邏輯", e);
     }
+    // 確保無論網路請求成功或失敗，月曆都一定會順利初始化
     initFlatpickr();
   }
 
@@ -815,11 +813,10 @@
     }
   }
 
-  // 核心：根據日期動態對應後台設定的各月班別 (日班=黃色 / 夜班=藍灰色)
   function getShiftTypeForDate(dateObj) {
     const year = dateObj.getFullYear();
     const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const yearMonthKey = `${year}-${month}`; // 格式如 "2026-10"
+    const yearMonthKey = `${year}-${month}`;
 
     if (backendMonthlyShiftTypes[yearMonthKey]) {
       const config = backendMonthlyShiftTypes[yearMonthKey];
@@ -828,7 +825,6 @@
     return "夜班";
   }
 
-  // 核心：依據該月份獨立設定的 A/B 班計算輪班週期
   function getShiftCycleInfo(dateObj) {
     const anchorDate = new Date("2026-10-23T00:00:00"); 
     const targetDate = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
@@ -892,7 +888,7 @@
 
   function initFlatpickr() {
     const taipeiNow = getTaipeiDate();
-    const maxDate = new Date(tapeiNow.getFullYear(), taipeiNow.getMonth() + 2, 0); // 支援顯示當月與下個月共兩個月
+    const maxDate = new Date(tapeiNow.getFullYear(), taipeiNow.getMonth() + 2, 0); 
     const defaultAvailableDate = findFirstAvailableDate(taipeiNow);
 
     pickerInstance = flatpickr("#bookingDate", {
@@ -906,14 +902,13 @@
           if (adminOverride) return false; 
           const dateStr = formatDateToYYYYMMDD(date);
           
-          // 優先讀取後台「營業微調」狀態 (開放預約 / 關閉預約)
           if (backendSchedules[dateStr]) {
             if (backendSchedules[dateStr].status === "開放") return false;
             if (backendSchedules[dateStr].status === "關閉") return true;
           }
 
           const shiftInfo = getShiftCycleInfo(date);
-          return shiftInfo.isWorkDay; // 循環中上班日為店休(disable)
+          return shiftInfo.isWorkDay; 
         }
       ],
       onDayCreate: function(dObj, dStr, fp, dayElement) {
