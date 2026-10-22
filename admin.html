@@ -188,7 +188,7 @@
     .status-overtime { background: #faedcd; color: #bc6c25; } 
     .status-closed { background: #f5f5f5; color: #aaa; text-decoration: line-through; } 
 
-    /* 表格 (支援手機橫向滑動) */
+    /* 表格 */
     .table-wrapper {
       width: 100%;
       overflow-x: auto;
@@ -229,7 +229,6 @@
     ⚠️ 提醒：目前正值 15 號至 20 號，請規劃下兩個月班表！
   </div>
 
-  <!-- 分頁選單 (Tab Navigation) -->
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('tab-stats')">📊 營運統計</button>
     <button class="tab-btn" onclick="switchTab('tab-schedule')">🔄 班別與月曆</button>
@@ -238,7 +237,6 @@
     <button class="tab-btn" onclick="switchTab('tab-list')">📋 預約紀錄</button>
   </div>
 
-  <!-- 分頁 1: 營運統計 -->
   <div id="tab-stats" class="tab-content active">
     <div class="stats-container">
       <div class="stat-card" onclick="openModal('revenue')">
@@ -261,7 +259,6 @@
     <p style="font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 5px;">💡 點擊營收或淨利卡片可看【年度趨勢折線圖】</p>
   </div>
 
-  <!-- 分頁 2: 班別設定與小月曆 -->
   <div id="tab-schedule" class="tab-content">
     <div class="add-section">
       <h3>🔄 班別與月份設定</h3>
@@ -291,7 +288,6 @@
     </div>
   </div>
 
-  <!-- 分頁 3: 單日營業狀態微調 -->
   <div id="tab-override" class="tab-content">
     <div class="add-section">
       <h3>✨ 特定日期營業狀態微調</h3>
@@ -315,7 +311,6 @@
     </div>
   </div>
 
-  <!-- 分頁 4: 新增預約紀錄 -->
   <div id="tab-add" class="tab-content">
     <div class="add-section">
       <h3>➕ 手動新增預約 / 記帳</h3>
@@ -331,7 +326,6 @@
     </div>
   </div>
 
-  <!-- 分頁 5: 預約紀錄列表 -->
   <div id="tab-list" class="tab-content">
     <button class="btn-refresh" onclick="fetchBookings()">🔄 重新整理資料</button>
     <div class="table-wrapper">
@@ -357,7 +351,6 @@
   </div>
 </div>
 
-<!-- 趨勢圖彈窗 -->
 <div id="chartModal" class="modal">
   <div class="modal-content">
     <span class="close-btn" onclick="closeModal()">&times;</span>
@@ -434,8 +427,10 @@
         const currentYearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
         let currentMonthRev = 0;
 
-        globalBookings.forEach(row => {
-          const bookingId = row.bookingId || "";
+        globalBookings.forEach((row, index) => {
+          // 直接用流水號 001, 002, 003... 呈現
+          const displayId = String(index + 1).padStart(3, '0');
+          const originalId = row.bookingId || displayId;
           const customerName = row.customerName || "";
           const date = row.date || "";
           const time = row.time || "";
@@ -452,22 +447,22 @@
 
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td>#${bookingId}</td>
+            <td>${displayId}</td>
             <td>${customerName}</td>
             <td>${date}</td>
             <td>${time}</td>
             <td>${items}</td>
             <td>NT$ ${price}</td>
             <td>
-              <select id="status_${bookingId}">
+              <select id="status_${originalId}">
                 <option value="有效" ${status === '有效' ? 'selected' : ''}>有效</option>
                 <option value="預約中" ${status === '預約中' ? 'selected' : ''}>預約中</option>
                 <option value="已完成" ${status === '已完成' ? 'selected' : ''}>已完成</option>
                 <option value="已取消" ${status === '已取消' ? 'selected' : ''}>已取消</option>
               </select>
             </td>
-            <td><input type="number" id="cost_${bookingId}" value="${cost}" style="width: 65px;" min="0"></td>
-            <td><button class="btn-action" style="padding: 4px 8px; font-size: 12px; background: var(--accent-green);" onclick="updateBooking('${bookingId}')">儲存</button></td>
+            <td><input type="number" id="cost_${originalId}" value="${cost}" style="width: 65px;" min="0"></td>
+            <td><button class="btn-action" style="padding: 4px 8px; font-size: 12px; background: var(--accent-green);" onclick="updateBooking('${originalId}')">儲存</button></td>
           `;
           tableBody.appendChild(tr);
         });
