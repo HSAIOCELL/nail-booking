@@ -124,10 +124,13 @@
 
     fetch(scriptUrl)
       .then(response => response.json())
-      .then(data => {
+      .then(resData => {
         tableBody.innerHTML = "";
         
-        if (!data || data.length === 0) {
+        // 【已修正】從 resData.bookings 抓取陣列資料
+        const data = resData.bookings || [];
+        
+        if (data.length === 0) {
           tableBody.innerHTML = `<tr><td colspan="9" class="loading">目前沒有預約資料</td></tr>`;
           updateFinance(0, 0);
           return;
@@ -137,14 +140,14 @@
         let totalCost = 0;
 
         data.forEach(row => {
-          const bookingId = row[0] || "";
-          const customerName = row[1] || "";
-          const date = row[2] || "";
-          const time = row[3] || "";
-          const items = row[4] || "";
-          const price = parseInt(row[5], 10) || 0;
-          const status = row[6] || "預約中";
-          const cost = parseInt(row[7], 10) || 0;
+          const bookingId = row.bookingId || "";
+          const customerName = row.customerName || "";
+          const date = row.date || "";
+          const time = row.time || "";
+          const items = row.items || "";
+          const price = Number(row.totalPrice) || 0;
+          const status = row.status || "預約中";
+          const cost = Number(row.cost) || 0;
 
           if (status !== "已取消") {
             totalRev += price;
@@ -161,6 +164,7 @@
             <td>NT$ ${price}</td>
             <td>
               <select id="status_${bookingId}">
+                <option value="有效" ${status === '有效' ? 'selected' : ''}>有效</option>
                 <option value="預約中" ${status === '預約中' ? 'selected' : ''}>預約中</option>
                 <option value="已完成" ${status === '已完成' ? 'selected' : ''}>已完成</option>
                 <option value="已取消" ${status === '已取消' ? 'selected' : ''}>已取消</option>
@@ -204,7 +208,7 @@
       time: time,
       items: items,
       totalPrice: Number(totalPrice),
-      cost: Number(cost) // 支援手動新增時直接寫入成本
+      cost: Number(cost)
     };
 
     fetch(scriptUrl, {
@@ -213,17 +217,17 @@
     })
     .then(res => res.json())
     .then(res => {
-      if (res.status === "success") {
+      // 【已修正】對應後端的 result 屬性
+      if (res.result === "success") {
         alert("手動新增紀錄成功！");
-        // 清空輸入框
         document.getElementById('newName').value = "";
         document.getElementById('newTime').value = "";
         document.getElementById('newItems').value = "";
         document.getElementById('newPrice').value = "";
         document.getElementById('newCost').value = "0";
-        fetchBookings(); // 重新整理列表與財務看板
+        fetchBookings();
       } else {
-        alert("新增失敗：" + res.message);
+        alert("新增失敗：" + (res.error || "未知錯誤"));
       }
     })
     .catch(err => {
@@ -253,11 +257,12 @@
     })
     .then(res => res.json())
     .then(res => {
-      if (res.status === "success") {
+      // 【已修正】對應後端的 result 屬性
+      if (res.result === "success") {
         alert(`預約 #${bookingId} 更新成功！`);
         fetchBookings();
       } else {
-        alert("更新失敗：" + res.message);
+        alert("更新失敗：" + (res.error || "未知錯誤"));
         btn.innerText = "儲存";
         btn.disabled = false;
       }
