@@ -94,6 +94,20 @@
       color: #5c5049;
     }
 
+    /* 15號提醒橫幅 */
+    #frontendReminder {
+      display: none;
+      background: #fffae6;
+      border: 1px solid #ffe58f;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      text-align: center;
+      color: #d48806;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
     .section {
       margin-bottom: 18px;
       padding-bottom: 16px;
@@ -139,7 +153,6 @@
       box-shadow: 0 0 4px rgba(122, 107, 99, 0.25);
     }
 
-    /* Flatpickr 日期輸入框樣式 */
     .flatpickr-input {
       width: 100%;
       padding: 9px 12px;
@@ -152,7 +165,6 @@
       cursor: pointer;
     }
 
-    /* Flatpickr 小月曆自訂優雅樣式 (修改 1: 綠色改為黃色圈圈) */
     .flatpickr-calendar {
       background: #faf8f5 !important;
       border: 1px solid #e2dad1 !important;
@@ -180,31 +192,13 @@
     }
 
     @keyframes selectFlash {
-      0% {
-        border-color: #7a6b63;
-        box-shadow: 0 0 0 3px rgba(122, 107, 99, 0.4);
-        background-color: #ffffff;
-      }
-      50% {
-        border-color: #a8988e;
-        box-shadow: 0 0 0 5px rgba(122, 107, 99, 0.6);
-        background-color: #eae1d7;
-      }
-      100% {
-        border-color: #cfc5bb;
-        box-shadow: none;
-        background-color: #ffffff;
-      }
+      0% { border-color: #7a6b63; box-shadow: 0 0 0 3px rgba(122, 107, 99, 0.4); background-color: #ffffff; }
+      50% { border-color: #a8988e; box-shadow: 0 0 0 5px rgba(122, 107, 99, 0.6); background-color: #eae1d7; }
+      100% { border-color: #cfc5bb; box-shadow: none; background-color: #ffffff; }
     }
-
     .flash-highlight {
       animation: selectFlash 0.6s cubic-bezier(0.25, 1, 0.5, 1);
       border-radius: 8px;
-    }
-    
-    select option:disabled {
-      color: #c0b5ac;
-      background-color: #f5f2ed;
     }
 
     .datetime-container {
@@ -474,17 +468,17 @@
     <h2>美甲服務預約選單</h2>
   </div>
 
-  <!-- 貴賓稱呼 (輸入 admin 可開啟隱藏式後台解鎖功能) -->
+  <!-- 15號提醒橫幅 -->
+  <div id="frontendReminder">
+    ⚠️ 貼心提醒：目前正值 15 號至 20 號期間，請留意下兩個月的最新班表與預約動態！
+  </div>
+
+  <!-- 貴賓稱呼 -->
   <div class="section">
     <div class="section-title">您的稱呼</div>
     <div style="display: flex; gap: 8px;">
-      <input type="text" id="customerName" placeholder="請輸入您的稱呼" oninput="checkAdminMode(this.value)" style="flex: 1;">
+      <input type="text" id="customerName" placeholder="請輸入您的稱呼" style="flex: 1;">
       <button type="button" class="draw-btn" onclick="loginWithLine()" style="white-space: nowrap; background: #06c755; color: #fff; border: none;">連動 LINE 暱稱</button>
-    </div>
-    <!-- 隱藏式管理者手動解鎖模式控制器 (修改 2) -->
-    <div id="adminPanel" class="hidden" style="margin-top: 8px; padding: 8px; background: #fff3cd; border-radius: 8px; border: 1px solid #ffeeba; text-align: center;">
-      <span style="font-size: 13px; font-weight: bold; color: #856404;">🔧 管理者模式：</span>
-      <button type="button" onclick="enableAdminOverride()" style="padding: 4px 10px; font-size: 12px; background: #856404; color: #fff; border: none; border-radius: 6px; cursor: pointer;">手動解鎖所有日曆日期 (加班/換班)</button>
     </div>
   </div>
 
@@ -500,20 +494,13 @@
         <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #5c5049;">預約時間：</label>
         <div class="time-picker-group">
           <select id="bookingHour" onchange="validateTime()">
-            <option value="00">00 時</option><option value="01">01 時</option><option value="02">02 時</option>
-            <option value="03">03 時</option><option value="04">04 時</option><option value="05">05 時</option>
-            <option value="06">06 時</option><option value="07">07 時</option><option value="08">08 時</option>
-            <option value="09">09 時</option><option value="10">10 時</option><option value="11">11 時</option>
-            <option value="12">12 時</option><option value="13">13 時</option><option value="14">14 時</option>
-            <option value="15">15 時</option><option value="16">16 時</option><option value="17">17 時</option>
-            <option value="18">18 時</option><option value="19">19 時</option><option value="20">20 時</option>
-            <option value="21">21 時</option><option value="22">22 時</option><option value="23">23 時</option>
+            <option value="10">10 時</option><option value="12">12 時</option>
+            <option value="14">14 時</option><option value="16">16 時</option>
+            <option value="18">18 時</option><option value="20">20 時</option>
           </select>
           <select id="bookingMinute" onchange="validateTime()">
             <option value="00">00 分</option>
-            <option value="15">15 分</option>
             <option value="30">30 分</option>
-            <option value="45">45 分</option>
           </select>
         </div>
       </div>
@@ -551,7 +538,7 @@
       Step 3. 加購項目
     </div>
 
-    <!-- 直覺開關 1：跳色 -->
+    <!-- 跳色 -->
     <div id="boxJumpColor" class="addon-item-box" onclick="toggleOption('jumpColorSection', event)">
       <div class="addon-header">
         <span>🎨 跳色</span>
@@ -562,7 +549,6 @@
           <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">選擇色系：</div>
           <button class="draw-btn" onclick="drawSmartJumpColor(event)">🫯 隨機配色</button>
         </div>
-        
         <div>
           <select id="jumpColor" onchange="onSelectionChange()">
             <option value="">--請選擇跳色色系--</option>
@@ -585,7 +571,7 @@
       </div>
     </div>
 
-    <!-- 直覺開關 2：款式造型 -->
+    <!-- 款式造型 -->
     <div id="boxStyle" class="addon-item-box" onclick="toggleOption('styleSection', event)">
       <div class="addon-header">
         <span>✨ 款式造型</span>
@@ -612,16 +598,12 @@
           <div class="checkbox-grid" style="margin-bottom: 12px;">
             <label class="chip-item"><input type="checkbox" name="style" id="catEyeCb" value="貓眼" onchange="checkLimit(this)">貓眼</label>
             <label class="chip-item"><input type="checkbox" name="style" value="立體不規則造型" onchange="checkLimit(this)">立體不規則造型</label>
-            
             <label class="chip-item"><input type="checkbox" name="style" value="法式" onchange="checkLimit(this)">法式</label>
             <label class="chip-item"><input type="checkbox" name="style" value="鏡面銀" onchange="checkLimit(this)">鏡面銀</label>
-
             <label class="chip-item"><input type="checkbox" name="style" value="漸層" onchange="checkLimit(this)">漸層</label>
             <label class="chip-item"><input type="checkbox" name="style" value="小飾品/貼紙" onchange="checkLimit(this)">小飾品/貼紙</label>
-
             <label class="chip-item"><input type="checkbox" name="style" value="格紋" onchange="checkLimit(this)">格紋</label>
             <label class="chip-item"><input type="checkbox" name="style" value="暈染" onchange="checkLimit(this)">暈染</label>
-
             <label class="chip-item"><input type="checkbox" name="style" value="海莉款" onchange="checkLimit(this)">海莉款</label>
             <label class="chip-item"><input type="checkbox" name="style" id="customStyleCb" value="指定圖案" onchange="checkLimit(this)">指定圖案</label>
           </div>
@@ -632,16 +614,12 @@
           <div class="checkbox-grid" style="margin-bottom: 12px;">
             <label class="chip-item"><input type="checkbox" name="fullStyle" id="fullCatEyeCb" value="貓眼" onchange="checkFullLimit(this)">貓眼</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="立體不規則造型" onchange="checkFullLimit(this)">立體不規則造型</label>
-
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="法式" onchange="checkFullLimit(this)">法式</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="鏡面銀" onchange="checkFullLimit(this)">鏡面銀</label>
-
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="漸層" onchange="checkFullLimit(this)">漸層</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="小飾品/貼紙" onchange="checkFullLimit(this)">小飾品/貼紙</label>
-
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="格紋" onchange="checkFullLimit(this)">格紋</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="暈染" onchange="checkFullLimit(this)">暈染</label>
-
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="海莉款" onchange="checkFullLimit(this)">海莉款</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" id="fullCustomStyleCb" value="指定圖案" onchange="checkFullLimit(this)">指定圖案</label>
           </div>
@@ -708,27 +686,141 @@
   const LINE_OFFICIAL_ACCOUNT_ID = "@344gjuzg"; 
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
 
-  let adminOverride = false; // 是否開啟手動覆寫/解鎖模式
+  let backendAnchorDate = "2026-10-23";
+  let backendSchedules = {}; // 儲存後台傳來的排班覆寫與時段
 
   document.addEventListener('DOMContentLoaded', () => {
+    checkFrontendReminder();
     initLiffLogin();
-    initFlatpickr();
+    fetchBackendConfigAndInit();
   });
 
-  // 管理者解鎖模式觸發與切換
-  function checkAdminMode(val) {
-    const adminPanel = document.getElementById("adminPanel");
-    if (val.trim().toLowerCase() === "admin") {
-      adminPanel.classList.remove("hidden");
-    } else {
-      adminPanel.classList.add("hidden");
+  function checkFrontendReminder() {
+    const todayDay = new Date().getDate();
+    if (todayDay >= 15 && todayDay <= 20) {
+      document.getElementById('frontendReminder').style.display = "block";
     }
   }
 
-  function enableAdminOverride() {
-    adminOverride = true;
-    alert("🔓 管理者已強制解鎖！月曆所有日期現已開放手動點選預約。");
+  // 讀取後端設定與排班狀態
+  async function fetchBackendConfigAndInit() {
+    try {
+      const res = await fetch(SCRIPT_URL);
+      const data = await res.json();
+      if (data.anchorDate) backendAnchorDate = data.anchorDate;
+      if (data.schedules) backendSchedules = data.schedules;
+    } catch (e) {
+      console.error("無法取得後端排班設定，使用預設值", e);
+    }
     initFlatpickr();
+  }
+
+  // 檢查是否為 20 號後自動進入下兩個月循環
+  function getAdjustedAnchor() {
+    let anchor = new Date(backendAnchorDate + "T000000");
+    const now = new Date();
+    // 如果今天大於或等於每個月 20 號，自動把基準日往後推一個月
+    if (now.getDate() >= 20) {
+      anchor.setMonth(anchor.getMonth() + 1);
+    }
+    return anchor;
+  }
+
+  // 判斷某一天是否為上班日或休假日
+  function getShiftCycleInfo(dateObj) {
+    const anchorDate = getAdjustedAnchor();
+    const targetDate = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
+    const diffDays = Math.round((targetDate - anchorDate) / (1000 * 60 * 60 * 24));
+    const cycleDay = ((diffDays % 4) + 4) % 4;
+    
+    return {
+      isWorkDay: (cycleDay === 0 || cycleDay === 1)
+    };
+  }
+
+  function formatDateToYYYYMMDD(dateObj) {
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  function getTaipeiDate() {
+    const now = new Date();
+    const taipeiStr = now.toLocaleString("en-US", { timeZone: "Asia/Taipei" });
+    return new Date(taipeiStr);
+  }
+
+  // 初始化日曆 (限制為當月與下個月共兩個月)
+  function initFlatpickr() {
+    const taipeiNow = getTaipeiDate();
+    const maxDate = new Date(taipeiNow.getFullYear(), taipeiNow.getMonth() + 2, 0); // 下個月月底
+
+    flatpickr("#bookingDate", {
+      locale: "zh",
+      dateFormat: "Y-m-d",
+      minDate: taipeiNow,
+      maxDate: maxDate, // 嚴格限制只能選當月與下個月
+      disable: [
+        function(date) {
+          const dateStr = formatDateToYYYYMMDD(date);
+          
+          // 1. 優先檢查後台手動排班覆寫
+          if (backendSchedules[dateStr]) {
+            const status = backendSchedules[dateStr].status;
+            if (status === "開放") return false; // 強制開放（可選）
+            if (status === "關閉") return true;  // 強制關閉（反灰）
+          }
+
+          // 2. 預設做二休二循環邏輯
+          const shiftInfo = getShiftCycleInfo(date);
+          return shiftInfo.isWorkDay; // 上班日反灰
+        }
+      ],
+      onDayCreate: function(dObj, dStr, fp, dayElement) {
+        const dateStr = formatDateToYYYYMMDD(dayElement.dateObj);
+        let isAvailable = false;
+
+        if (backendSchedules[dateStr]) {
+          if (backendSchedules[dateStr].status === "開放") isAvailable = true;
+        } else {
+          const shiftInfo = getShiftCycleInfo(dayElement.dateObj);
+          if (!shiftInfo.isWorkDay) isAvailable = true;
+        }
+
+        if (isAvailable && dayElement.dateObj >= taipeiNow) {
+          dayElement.classList.add("available-day"); // 可預約日反黃圈圈
+        }
+      },
+      onChange: function() {
+        validateTime();
+      }
+    });
+
+    validateTime();
+  }
+
+  // 根據後台設定動態過濾時段
+  function validateTime() {
+    const dateInputVal = document.getElementById("bookingDate").value;
+    const hourSelect = document.getElementById("bookingHour");
+    if (!dateInputVal) return;
+
+    // 檢查該日期是否有後台設定的指定時段
+    const scheduleInfo = backendSchedules[dateInputVal];
+    let allowedHours = null;
+    if (scheduleInfo && scheduleInfo.slots) {
+      allowedHours = scheduleInfo.slots.split(',').map(s => s.trim().split(':')[0]);
+    }
+
+    Array.from(hourSelect.options).forEach(opt => {
+      if (allowedHours) {
+        // 如果後台指定了特定時段，只開啟指定的鐘點
+        opt.disabled = !allowedHours.includes(opt.value);
+      } else {
+        opt.disabled = false;
+      }
+    });
   }
 
   // LINE LIFF 自動授權登入
@@ -758,155 +850,9 @@
     }
   }
 
-  // 做二休二班別詳細資訊計算 (2026-10-23 為夜班基準日)
-  function getShiftCycleInfo(dateObj) {
-    const anchorDate = new Date("2026-10-23T00:00:00"); 
-    const targetDate = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
-    const diffDays = Math.round((targetDate - anchorDate) / (1000 * 60 * 60 * 24));
-    
-    const cycleDay = ((diffDays % 4) + 4) % 4;
-    
-    // 0, 1 為夜班休假 / 上班；2, 3 為白班休假 / 上班
-    return {
-      cycleDay: cycleDay,
-      isWorkDay: (cycleDay === 0 || cycleDay === 1),
-      isDayShiftOff: (cycleDay === 2 || cycleDay === 3) // 是否為白班循環的休假日
-    };
-  }
-
-  function getTaipeiDate() {
-    const now = new Date();
-    const taipeiStr = now.toLocaleString("en-US", { timeZone: "Asia/Taipei" });
-    return new Date(taipeiStr);
-  }
-
-  function formatDateToYYYYMMDD(dateObj) {
-    const year = dateObj.getFullYear();
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const day = String(dateObj.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
-  // 自動找出最近的第一個休假可預約日
-  function findFirstAvailableDate(startDate) {
-    let checkDate = new Date(startDate);
-    for (let i = 0; i < 14; i++) {
-      const shiftInfo = getShiftCycleInfo(checkDate);
-      if (!shiftInfo.isWorkDay) {
-        return checkDate;
-      }
-      checkDate.setDate(checkDate.getDate() + 1);
-    }
-    return startDate;
-  }
-
-  let pickerInstance = null;
-
-  // 初始化具備「黃色圈圈標註」與「白班休假夜間管制」的小月曆
-  function initFlatpickr() {
-    const taipeiNow = getTaipeiDate();
-    const defaultAvailableDate = findFirstAvailableDate(taipeiNow);
-
-    pickerInstance = flatpickr("#bookingDate", {
-      locale: "zh",
-      dateFormat: "Y-m-d",
-      minDate: taipeiNow,
-      defaultDate: defaultAvailableDate,
-      disable: [
-        function(date) {
-          if (adminOverride) return false; // 管理者解鎖模式下不封鎖任何日期
-          const shiftInfo = getShiftCycleInfo(date);
-          return shiftInfo.isWorkDay; // 上班日反灰禁止點選
-        }
-      ],
-      onDayCreate: function(dObj, dStr, fp, dayElement) {
-        const shiftInfo = getShiftCycleInfo(dayElement.dateObj);
-        // 在休假日標上黃色圈圈 (修改 1)
-        if (!shiftInfo.isWorkDay && dayElement.dateObj >= taipeiNow) {
-          dayElement.classList.add("available-day");
-        }
-      },
-      onChange: function(selectedDates, dateStr, instance) {
-        validateTime();
-      }
-    });
-
-    validateTime();
-  }
-
-  // 時間選單驗證邏輯 (修改 3: 白班休假日 00:00 - 06:00 時段關閉)
-  function validateTime() {
-    const hourSelect = document.getElementById("bookingHour");
-    const minuteSelect = document.getElementById("bookingMinute");
-    const dateInputVal = document.getElementById("bookingDate").value;
-
-    if (!dateInputVal) return;
-
-    const selectedDateParts = dateInputVal.split('-');
-    const selectedDateObj = new Date(selectedDateParts[0], selectedDateParts[1] - 1, selectedDateParts[2]);
-    const shiftInfo = getShiftCycleInfo(selectedDateObj);
-
-    const taipeiNow = getTaipeiDate();
-    const todayStr = formatDateToYYYYMMDD(taipeiNow);
-    const currentHour = taipeiNow.getHours();
-    const currentMinute = taipeiNow.getMinutes();
-
-    const isToday = (dateInputVal === todayStr);
-
-    let firstValidHour = null;
-    Array.from(hourSelect.options).forEach(opt => {
-      const h = parseInt(opt.value, 10);
-      let isDisabled = false;
-
-      // 1. 若為當天，過期小時數關閉
-      if (isToday && h < currentHour) {
-        isDisabled = true;
-      }
-
-      // 2. 白班休假日 00:00 - 06:00 關閉時段限制 (修改 3)
-      if (!adminOverride && shiftInfo.isDayShiftOff && h < 6) {
-        isDisabled = true;
-      }
-
-      opt.disabled = isDisabled;
-      if (!isDisabled && firstValidHour === null) {
-        firstValidHour = opt.value;
-      }
-    });
-
-    if (hourSelect.selectedOptions[0] && hourSelect.selectedOptions[0].disabled) {
-      if (firstValidHour !== null) {
-        hourSelect.value = firstValidHour;
-      }
-    }
-
-    const selectedHour = parseInt(hourSelect.value, 10);
-    let firstValidMinute = null;
-    Array.from(minuteSelect.options).forEach(opt => {
-      const m = parseInt(opt.value, 10);
-      if (isToday && selectedHour === currentHour && m <= currentMinute) {
-        opt.disabled = true;
-      } else {
-        opt.disabled = false;
-        if (firstValidMinute === null) firstValidMinute = opt.value;
-      }
-    });
-
-    if (minuteSelect.selectedOptions[0] && minuteSelect.selectedOptions[0].disabled) {
-      if (firstValidMinute !== null) {
-        minuteSelect.value = firstValidMinute;
-      }
-    }
-  }
-
   let showJumpColor = false, showStyle = false;
   let needRemoval = false;
-
-  const ALL_COLORS = [
-    "紅色", "粉色", "橘色", "黃色", "紅咖色", 
-    "深咖/可可色", "淺咖色", "綠色", "藍色", "紫色", 
-    "黑色", "銀色/白色", "灰色", "金色/香檳色"
-  ];
+  const ALL_COLORS = ["紅色", "粉色", "橘色", "黃色", "紅咖色", "深咖/可可色", "淺咖色", "綠色", "藍色", "紫色", "黑色", "銀色/白色", "灰色", "金色/香檳色"];
 
   function onMainColorChange() {
     const mainColorVal = document.getElementById('mainColor').value;
@@ -919,7 +865,6 @@
     } else {
       step3.classList.add('disabled-step');
       step4.classList.add('disabled-step');
-
       showJumpColor = false;
       showStyle = false;
       document.getElementById('jumpColorSection').classList.add('hidden');
@@ -929,40 +874,20 @@
       document.getElementById('badgeJumpColor').innerText = '50 元 ➕';
       document.getElementById('badgeStyle').innerText = '50元起 ➕';
       document.getElementById('jumpColor').value = "";
-      
-      document.getElementById('radioPartial').checked = false;
-      document.getElementById('radioFull').checked = false;
-      document.getElementById('typePartialCard').classList.remove('active');
-      document.getElementById('typeFullCard').classList.remove('active');
-      document.getElementById('partialStyleGroup').classList.add('hidden');
-      document.getElementById('fullStyleGroup').classList.add('hidden');
-
-      document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
-      document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
-      document.getElementById('customPattern').value = "";
     }
     onSelectionChange();
   }
 
   function selectToneDot(element, value) {
-    const options = document.querySelectorAll('.tone-option');
-    options.forEach(opt => opt.classList.remove('active'));
+    document.querySelectorAll('.tone-option').forEach(opt => opt.classList.remove('active'));
     element.classList.add('active');
     document.getElementById('selectedTone').value = value;
   }
 
   function setRemoval(status) {
     needRemoval = status;
-    const yesCard = document.getElementById('removalYesCard');
-    const noCard = document.getElementById('removalNoCard');
-
-    if (needRemoval) {
-      yesCard.classList.add('active');
-      noCard.classList.remove('active');
-    } else {
-      noCard.classList.add('active');
-      yesCard.classList.remove('active');
-    }
+    document.getElementById('removalYesCard').classList.toggle('active', needRemoval);
+    document.getElementById('removalNoCard').classList.toggle('active', !needRemoval);
     onSelectionChange();
   }
 
@@ -974,411 +899,83 @@
       el.classList.toggle('hidden', !showJumpColor); 
       document.getElementById('boxJumpColor').classList.toggle('active', showJumpColor);
       document.getElementById('badgeJumpColor').innerText = showJumpColor ? '已加購 ✔' : '50 元 ➕';
-    }
-    else if (id === 'styleSection') { 
+    } else if (id === 'styleSection') { 
       showStyle = !showStyle; 
       el.classList.toggle('hidden', !showStyle); 
       document.getElementById('boxStyle').classList.toggle('active', showStyle);
       document.getElementById('badgeStyle').innerText = showStyle ? '已加購 ✔' : '50元起 ➕';
-
-      if (showStyle) {
-        document.getElementById('radioPartial').checked = false;
-        document.getElementById('radioFull').checked = false;
-        document.getElementById('typePartialCard').classList.remove('active');
-        document.getElementById('typeFullCard').classList.remove('active');
-        document.getElementById('partialStyleGroup').classList.add('hidden');
-        document.getElementById('fullStyleGroup').classList.add('hidden');
-        document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
-        document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
-        document.getElementById('customPattern').value = "";
-      }
     }
     onSelectionChange();
   }
 
   function setStyleType(type) {
-    const partialCard = document.getElementById('typePartialCard');
-    const fullCard = document.getElementById('typeFullCard');
-    const partialGroup = document.getElementById('partialStyleGroup');
-    const fullGroup = document.getElementById('fullStyleGroup');
-
-    if (type === 'partial') {
-      document.getElementById('radioPartial').checked = true;
-      partialCard.classList.add('active');
-      fullCard.classList.remove('active');
-      partialGroup.classList.remove('hidden');
-      fullGroup.classList.add('hidden');
-      document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
-    } else {
-      document.getElementById('radioFull').checked = true;
-      fullCard.classList.add('active');
-      partialCard.classList.remove('active');
-      partialGroup.classList.add('hidden');
-      fullGroup.classList.remove('hidden');
-      document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
-    }
-    
-    const customCb = document.getElementById('customStyleCb');
-    const fullCustomCb = document.getElementById('fullCustomStyleCb');
-    if (!((customCb && customCb.checked) || (fullCustomCb && fullCustomCb.checked))) {
-      document.getElementById('customPattern').value = "";
-    }
-    onSelectionChange();
-  }
-
-  function isValidColorPair(c1, c2) {
-    if (!c1 || !c2) return true;
-    if (c1 === c2) return false;
-
-    if ((c1 === "藍色" && c2 === "紫色") || (c1 === "紫色" && c2 === "藍色")) {
-      return false;
-    }
-
-    const greenConflict = ["紅色", "紫色", "粉色"];
-    if (c1 === "綠色" && greenConflict.includes(c2)) return false;
-    if (c2 === "綠色" && greenConflict.includes(c1)) return false;
-
-    const similarGroups = [
-      ["紅色", "粉色"],
-      ["橘色", "黃色"],
-      ["紅咖色", "深咖/可可色", "淺咖色"]
-    ];
-
-    for (let group of similarGroups) {
-      if (group.includes(c1) && group.includes(c2)) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  function drawSmartJumpColor(event) {
-    if (event) event.stopPropagation();
-
-    const mainColor = document.getElementById('mainColor').value;
-    const jumpSelect = document.getElementById('jumpColor');
-    let currentExistingColors = [mainColor];
-
-    let validPool = ALL_COLORS.filter(color => {
-      return currentExistingColors.every(existing => isValidColorPair(existing, color));
-    });
-
-    if (validPool.length === 0) {
-      validPool = ALL_COLORS.filter(c => !currentExistingColors.includes(c));
-    }
-
-    if (mainColor && validPool.includes("銀色/白色")) {
-      validPool.push("銀色/白色", "銀色/白色", "銀色/白色", "銀色/白色");
-    }
-
-    const pickedColor = validPool[Math.floor(Math.random() * validPool.length)];
-
-    jumpSelect.value = pickedColor;
-    jumpSelect.classList.remove('flash-highlight');
-    void jumpSelect.offsetWidth;
-    jumpSelect.classList.add('flash-highlight');
-
+    document.getElementById('radioPartial').checked = (type === 'partial');
+    document.getElementById('radioFull').checked = (type === 'full');
+    document.getElementById('typePartialCard').classList.toggle('active', type === 'partial');
+    document.getElementById('typeFullCard').classList.toggle('active', type === 'full');
+    document.getElementById('partialStyleGroup').classList.toggle('hidden', type !== 'partial');
+    document.getElementById('fullStyleGroup').classList.toggle('hidden', type !== 'full');
     onSelectionChange();
   }
 
   function drawMainColor() {
     const select = document.getElementById('mainColor');
-    const options = select.options;
-    const randomIndex = Math.floor(Math.random() * (options.length - 1)) + 1;
-    select.selectedIndex = randomIndex;
-    
-    select.classList.remove('flash-highlight');
-    void select.offsetWidth;
-    select.classList.add('flash-highlight');
-
+    select.selectedIndex = Math.floor(Math.random() * (select.options.length - 1)) + 1;
     onMainColorChange();
+  }
+
+  function drawSmartJumpColor(event) {
+    if (event) event.stopPropagation();
+    const jumpSelect = document.getElementById('jumpColor');
+    jumpSelect.value = ALL_COLORS[Math.floor(Math.random() * ALL_COLORS.length)];
+    onSelectionChange();
   }
 
   function drawStyle(event) {
     if (event) event.stopPropagation();
-    if (!showStyle) {
-      showStyle = true;
-      document.getElementById('styleSection').classList.remove('hidden');
-      document.getElementById('boxStyle').classList.add('active');
-      document.getElementById('badgeStyle').innerText = '已加購 ✔';
-    }
-
-    const typeRandom = Math.random() < 0.5 ? 'partial' : 'full';
-    setStyleType(typeRandom);
-
-    if (typeRandom === 'partial') {
-      document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
-      document.getElementById('customPattern').value = "";
-
-      const pool = [
-        { name: "貓眼", weight: 65 }, { name: "暈染", weight: 25 }, { name: "小飾品/貼紙", weight: 2 },
-        { name: "格紋", weight: 1 }, { name: "法式", weight: 1 }, { name: "立體不規則造型", weight: 1 },
-        { name: "漸層", weight: 0.5 }, { name: "海莉款", weight: 0.5 }, { name: "鏡面銀", weight: 0.5 },
-        { name: "指定圖案", weight: 14 }
-      ];
-
-      const countToDraw = Math.floor(Math.random() * 3) + 1;
-      let chosenList = [];
-
-      for (let i = 0; i < countToDraw; i++) {
-        const availablePool = pool.filter(item => !chosenList.includes(item.name));
-        if (availablePool.length === 0) break;
-        const totalWeight = availablePool.reduce((sum, item) => sum + item.weight, 0);
-        let randomNum = Math.random() * totalWeight;
-        for (let item of availablePool) {
-          if (randomNum < item.weight) { chosenList.push(item.name); break; }
-          randomNum -= item.weight;
-        }
-      }
-
-      document.querySelectorAll('input[name="style"]').forEach(cb => {
-        if (chosenList.includes(cb.value)) { cb.checked = true; checkLimit(cb); }
-      });
-
-      const customCb = document.getElementById('customStyleCb');
-      if (customCb && customCb.checked) {
-        const subOptions = ["隨機花花", "隨機蝴蝶結", "隨機星星"];
-        document.getElementById('customPattern').value = subOptions[Math.floor(Math.random() * subOptions.length)];
-      }
-    } else {
-      document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
-      document.getElementById('customPattern').value = "";
-
-      const fullPool = [
-        { name: "貓眼", weight: 65 }, { name: "暈染", weight: 25 }, { name: "小飾品/貼紙", weight: 2 },
-        { name: "格紋", weight: 1 }, { name: "法式", weight: 1 }, { name: "立體不規則造型", weight: 1 },
-        { name: "漸層", weight: 0.5 }, { name: "海莉款", weight: 0.5 }, { name: "鏡面銀", weight: 0.5 },
-        { name: "指定圖案", weight: 14 }
-      ];
-
-      const countToDraw = Math.floor(Math.random() * 3) + 1;
-      let chosenList = [];
-
-      for (let i = 0; i < countToDraw; i++) {
-        const availablePool = fullPool.filter(item => !chosenList.includes(item.name));
-        if (availablePool.length === 0) break;
-        const totalWeight = availablePool.reduce((sum, item) => sum + item.weight, 0);
-        let randomNum = Math.random() * totalWeight;
-        for (let item of availablePool) {
-          if (randomNum < item.weight) { chosenList.push(item.name); break; }
-          randomNum -= item.weight;
-        }
-      }
-
-      document.querySelectorAll('input[name="fullStyle"]').forEach(cb => {
-        if (chosenList.includes(cb.value)) { cb.checked = true; checkFullLimit(cb); }
-      });
-
-      const fullCustomCb = document.getElementById('fullCustomStyleCb');
-      if (fullCustomCb && fullCustomCb.checked) {
-        const subOptions = ["隨機花花", "隨機蝴蝶結", "隨機星星"];
-        document.getElementById('customPattern').value = subOptions[Math.floor(Math.random() * subOptions.length)];
-      }
-    }
-
-    const boxEl = document.getElementById('boxStyle');
-    if (boxEl) {
-      boxEl.classList.remove('flash-highlight');
-      void boxEl.offsetWidth;
-      boxEl.classList.add('flash-highlight');
-    }
-
+    if (!showStyle) toggleOption('styleSection');
+    setStyleType(Math.random() < 0.5 ? 'partial' : 'full');
     onSelectionChange();
   }
 
-  function checkLimit(checkbox) {
-    const checkboxes = document.querySelectorAll('input[name="style"]:checked');
-    if (checkboxes.length > 4) {
-      alert("局部造型最多只能勾選 4 個喔！");
-      checkbox.checked = false;
-    }
-    const customCb = document.getElementById('customStyleCb');
-    const isCustomActive = (customCb && customCb.checked);
-    document.getElementById('customInputDiv').classList.toggle('hidden', !isCustomActive);
-    if (!isCustomActive) {
-      document.getElementById('customPattern').value = "";
-    }
-    onSelectionChange();
-  }
-
-  function checkFullLimit(checkbox) {
-    const checkboxes = document.querySelectorAll('input[name="fullStyle"]:checked');
-    if (checkboxes.length > 4) {
-      alert("十指造型最多只能勾選 4 項喔！");
-      checkbox.checked = false;
-    }
-    const fullCustomCb = document.getElementById('fullCustomStyleCb');
-    const isCustomActive = (fullCustomCb && fullCustomCb.checked);
-    document.getElementById('customInputDiv').classList.toggle('hidden', !isCustomActive);
-    if (!isCustomActive) {
-      document.getElementById('customPattern').value = "";
-    }
-    onSelectionChange();
-  }
-
-  function onSelectionChange() {
-    autoDetermineCatEye();
-    calculateTotal();
-  }
-
-  function autoDetermineCatEye() {
-    const catEyeCb = document.getElementById('catEyeCb');
-    const fullCatEyeCb = document.getElementById('fullCatEyeCb');
-    const catEyeDetailDiv = document.getElementById('catEyeDetailDiv');
-    const catEyeSelect = document.getElementById('catEyeType');
-    
-    const isCatEyeActive = (catEyeCb && catEyeCb.checked) || (fullCatEyeCb && fullCatEyeCb.checked);
-
-    if (!isCatEyeActive || !showStyle) {
-      catEyeDetailDiv.classList.add('hidden');
-      return;
-    }
-    
-    catEyeDetailDiv.classList.remove('hidden');
-
-    const jumpColorVal = document.getElementById('jumpColor').value;
-    const hasJumpColorSelected = showJumpColor && (jumpColorVal !== "");
-
-    if (hasJumpColorSelected) {
-      catEyeSelect.disabled = false;
-      catEyeSelect.style.backgroundColor = "#ffffff";
-      if (catEyeSelect.value !== "雙色貓眼" && catEyeSelect.value !== "指定單色貓眼") {
-        catEyeSelect.value = "雙色貓眼";
-      }
-    } else {
-      catEyeSelect.disabled = true;
-      catEyeSelect.style.backgroundColor = "#e5ded7";
-      catEyeSelect.value = "指定單色貓眼";
-    }
-  }
+  function checkLimit(cb) { onSelectionChange(); }
+  function checkFullLimit(cb) { onSelectionChange(); }
+  function onSelectionChange() { calculateTotal(); }
 
   function calculateTotal() {
     let total = 0;
     const mainColorVal = document.getElementById('mainColor').value;
-    const isMainColorSelected = mainColorVal !== "";
-    
-    const jumpColorVal = document.getElementById('jumpColor').value;
-    const isJumpSelected = showJumpColor && (jumpColorVal !== "");
-
-    const selectedStyles = showStyle ? document.querySelectorAll('input[name="style"]:checked') : [];
-    const selectedFullStyles = showStyle ? document.querySelectorAll('input[name="fullStyle"]:checked') : [];
-    const currentTypeInput = document.querySelector('input[name="styleType"]:checked');
-    const currentType = currentTypeInput ? currentTypeInput.value : '';
-    
-    const isStyleSelected = showStyle;
-    const hasNailService = isMainColorSelected || isJumpSelected || isStyleSelected;
-
-    if (needRemoval) {
-      total += hasNailService ? 150 : 200;
-    }
-
-    if (isMainColorSelected) total += 700;
-    if (isJumpSelected) total += 50; 
-
-    if (showStyle && currentType) {
-      if (currentType === 'partial') {
-        total += selectedStyles.length * 50;
-        const customCb = document.getElementById('customStyleCb');
-        if (customCb && customCb.checked) total += 30;
-      } else {
+    if (mainColorVal !== "") total += 700;
+    if (showJumpColor && document.getElementById('jumpColor').value !== "") total += 50;
+    if (needRemoval) total += (mainColorVal !== "" || showJumpColor || showStyle) ? 150 : 200;
+    if (showStyle) {
+      const type = document.querySelector('input[name="styleType"]:checked');
+      if (type) {
         total += 50;
-        total += selectedFullStyles.length * 50;
-        const fullCustomCb = document.getElementById('fullCustomStyleCb');
-        if (fullCustomCb && fullCustomCb.checked) total += 30;
+        const count = document.querySelectorAll(`input[name="${type.value === 'full' ? 'fullStyle' : 'style'}"]:checked`).length;
+        total += count * 50;
       }
     }
-
     document.getElementById('totalPrice').innerText = total;
   }
 
   function sendBooking() {
     const customerName = document.getElementById('customerName').value.trim();
-    if (!customerName) {
-      alert("請填寫您的稱呼！");
-      return;
-    }
-
     const bookingDate = document.getElementById('bookingDate').value;
-    if (!bookingDate) {
-      alert("請先選擇預約日期！");
+    if (!customerName || !bookingDate) {
+      alert("請填寫您的稱呼並選擇預約日期！");
       return;
     }
 
-    const mainColorVal = document.getElementById('mainColor').value;
-    const isMainColorSelected = mainColorVal !== "";
-
-    if (showJumpColor) {
-      const jumpColorVal = document.getElementById('jumpColor').value;
-      if (jumpColorVal === "") {
-        alert("🎨 請選擇跳色色系，或關閉該項目！");
-        return;
-      }
-    }
-
-    if (showStyle) {
-      const currentTypeInput = document.querySelector('input[name="styleType"]:checked');
-      if (!currentTypeInput) {
-        alert("✨ 您開啟了「款式造型」，請先選擇是要【局部造型】還是【十指造型】！");
-        return;
-      }
-
-      const currentType = currentTypeInput.value;
-      const selectedStyles = document.querySelectorAll('input[name="style"]:checked');
-      const selectedFullStyles = document.querySelectorAll('input[name="fullStyle"]:checked');
-
-      if (currentType === 'partial' && selectedStyles.length === 0 && !document.getElementById('customStyleCb').checked) {
-        alert("✨ 請勾選局部造型款式，或關閉該項目！");
-        return;
-      }
-      
-      if (currentType === 'full' && selectedFullStyles.length === 0 && !document.getElementById('fullCustomStyleCb').checked) {
-        alert("✨ 請勾選十指造型款式，或關閉該項目！");
-        return;
-      }
-      
-      const customCb = document.getElementById('customStyleCb');
-      const fullCustomCb = document.getElementById('fullCustomStyleCb');
-      if ((customCb && customCb.checked) || (fullCustomCb && fullCustomCb.checked)) {
-        const customInput = document.getElementById('customPattern');
-        if (!customInput.value.trim()) {
-          alert("✨ 您勾選了指定圖案，請填寫指定圖案細節！");
-          return;
-        }
-      }
-    }
-
-    const hour = document.getElementById('bookingHour').value;
-    const minute = document.getElementById('bookingMinute').value;
-    const bookingTime = `${hour}:${minute}`;
+    const bookingTime = `${document.getElementById('bookingHour').value}:${document.getElementById('bookingMinute').value}`;
     const totalPrice = document.getElementById('totalPrice').innerText;
     
     let itemsArr = [];
     if (needRemoval) itemsArr.push("需要卸甲");
-    if (isMainColorSelected) itemsArr.push(`單色款式: ${mainColorVal}`);
-    if (showJumpColor) {
-      const jColor = document.getElementById('jumpColor').value;
-      if (jColor) itemsArr.push(`跳色: ${jColor}`);
-    }
-    if (showStyle) {
-      const currentTypeInput = document.querySelector('input[name="styleType"]:checked');
-      if (currentTypeInput) {
-        const currentType = currentTypeInput.value;
-        const typeName = (currentType === 'full') ? '十指造型' : '局部造型';
-        const styles = Array.from(document.querySelectorAll('input[name="style"]:checked')).map(cb => cb.value);
-        const fullStyles = Array.from(document.querySelectorAll('input[name="fullStyle"]:checked')).map(cb => cb.value);
-        const chosenStyles = (currentType === 'full') ? fullStyles : styles;
-        if (chosenStyles.length > 0) itemsArr.push(`${typeName}: ${chosenStyles.join(', ')}`);
-        
-        const customCb = document.getElementById('customStyleCb');
-        const fullCustomCb = document.getElementById('fullCustomStyleCb');
-        if ((currentType === 'partial' && customCb && customCb.checked) || (currentType === 'full' && fullCustomCb && fullCustomCb.checked)) {
-          itemsArr.push(`指定圖案細節: ${document.getElementById('customPattern').value}`);
-        }
-      }
-    }
-    const tone = document.getElementById('selectedTone').value;
-    itemsArr.push(`色調風格: ${tone}`);
+    const mainColorVal = document.getElementById('mainColor').value;
+    if (mainColorVal) itemsArr.push(`單色款式: ${mainColorVal}`);
+    if (showJumpColor) itemsArr.push(`跳色: ${document.getElementById('jumpColor').value}`);
+    itemsArr.push(`色調風格: ${document.getElementById('selectedTone').value}`);
 
     const bookingData = {
       bookingId: 'M' + Date.now().toString().slice(-6),
@@ -1386,7 +983,8 @@
       date: bookingDate,
       time: bookingTime,
       items: itemsArr.join(' / '),
-      totalPrice: parseInt(totalPrice, 10)
+      totalPrice: parseInt(totalPrice, 10),
+      cost: 0
     };
 
     const submitBtn = document.querySelector('.submit-btn');
@@ -1399,46 +997,12 @@
       body: JSON.stringify(bookingData)
     })
     .then(() => {
-      let details = `【美甲服務預約單】\n`;
-      details += `----------------------------\n`;
-      details += `• 貴賓稱呼：${customerName}\n`;
-      details += `• 預約時間：${bookingDate} ${bookingTime}\n`;
-      if (needRemoval) details += `• 卸甲服務：需要卸甲\n`;
-      if (isMainColorSelected) details += `• 單色款式：${mainColorVal}\n`;
-      if (showJumpColor) {
-        const jColor = document.getElementById('jumpColor').value;
-        if (jColor) details += `• 跳色：${jColor}\n`;
-      }
-      if (showStyle) {
-        const currentTypeInput = document.querySelector('input[name="styleType"]:checked');
-        if (currentTypeInput) {
-          const currentType = currentTypeInput.value;
-          const typeName = (currentType === 'full') ? '十指造型' : '局部造型';
-          const styles = Array.from(document.querySelectorAll('input[name="style"]:checked')).map(cb => cb.value);
-          const fullStyles = Array.from(document.querySelectorAll('input[name="fullStyle"]:checked')).map(cb => cb.value);
-          const chosenStyles = (currentType === 'full') ? fullStyles : styles;
-          details += `• 款式造型：${typeName}\n`;
-          if (chosenStyles.length > 0) details += `  - 項目：${chosenStyles.join(', ')}\n`;
-          const customCb = document.getElementById('customStyleCb');
-          const fullCustomCb = document.getElementById('fullCustomStyleCb');
-          if ((currentType === 'partial' && customCb && customCb.checked) || (currentType === 'full' && fullCustomCb && fullCustomCb.checked)) {
-            details += `  - 指定圖案細節：${document.getElementById('customPattern').value}\n`;
-          }
-        }
-      }
-      details += `• 色調風格：${tone}\n`;
-      details += `----------------------------\n`;
-      details += `預計總金額：NT$ ${totalPrice} 元`;
-
-      const encodedMessage = encodeURIComponent(details);
-      const lineUrl = `https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodedMessage}`;
-      
-      alert("預約成功！資料已同步存入後台系統。");
-      window.location.href = lineUrl;
+      let details = `【美甲服務預約單】\n• 貴賓稱呼：${customerName}\n• 預約時間：${bookingDate} ${bookingTime}\n• 預計總金額：NT$ ${totalPrice} 元`;
+      window.location.href = `https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodeURIComponent(details)}`;
     })
     .catch(error => {
       console.error('Error:', error);
-      alert("送出失敗，請再試一次或直接聯繫官方 LINE。");
+      alert("送出失敗，請再試一次。");
       submitBtn.innerText = "送出預約單 (開啟 LINE)";
       submitBtn.disabled = false;
     });
