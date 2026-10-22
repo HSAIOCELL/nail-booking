@@ -1,770 +1,327 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>美甲預約系統 - 後台管理儀表板</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
-  <style>
-    :root {
-      --bg-color: #f4f2ee;
-      --card-bg: #ffffff;
-      --primary: #8a7968;
-      --primary-dark: #6e5f50;
-      --accent-green: #738276;
-      --accent-sand: #d4c5b9;
-      --text-main: #4a4541;
-      --text-muted: #8c827a;
-      --border-color: #e6e0d8;
-    }
+const SPREADSHEET_ID = ""; // 若從試算表內建的指令碼可留空
+const CACHE_KEY = "nail_system_cache_v3";
 
-    * { box-sizing: border-box; }
+function getTargetSpreadsheet() {
+  if (SPREADSHEET_ID) {
+    return SpreadsheetApp.openById(SPREADSHEET_ID);
+  }
+  return SpreadsheetApp.getActiveSpreadsheet();
+}
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg-color);
-      margin: 0;
-      padding: 10px;
-      color: var(--text-main);
-    }
-
-    .container {
-      max-width: 1050px;
-      margin: 0 auto;
-      background: var(--card-bg);
-      padding: 16px 12px;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(138, 121, 104, 0.06);
-      border: 1px solid var(--border-color);
-    }
-
-    h2 {
-      text-align: center;
-      color: var(--primary-dark);
-      font-weight: 600;
-      letter-spacing: 1px;
-      margin: 0 0 14px 0;
-      font-size: 19px;
-    }
-
-    /* 手機優化分頁按鈕 */
-    .tab-nav {
-      display: flex;
-      gap: 4px;
-      overflow-x: auto;
-      padding-bottom: 6px;
-      margin-bottom: 15px;
-      border-bottom: 1.5px solid var(--border-color);
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 8px 10px;
-      background: #eee8e0;
-      color: var(--text-muted);
-      border: none;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: bold;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s ease;
-      text-align: center;
-    }
-
-    .tab-btn.active {
-      background: var(--primary);
-      color: #ffffff;
-      box-shadow: 0 2px 8px rgba(138, 121, 104, 0.25);
-    }
-
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    /* 統計卡片改為 3 張 */
-    .stats-container {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .stat-card {
-      background: #f7f5f0;
-      padding: 12px 6px;
-      border-radius: 12px;
-      text-align: center;
-      border: 1px solid var(--border-color);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .stat-card:hover { border-color: var(--primary); background: #f2ece4; }
-    .stat-card h3 { margin: 0 0 4px 0; font-size: 11.5px; color: var(--text-muted); font-weight: normal; }
-    .stat-card p { margin: 0; font-size: 15px; font-weight: bold; color: var(--primary-dark); }
-    @media (min-width: 600px) {
-      .stat-card p { font-size: 18px; }
-    }
-
-    #chartSection {
-      display: none;
-      background: #faf8f5;
-      border: 1px solid var(--border-color);
-      padding: 14px 10px;
-      border-radius: 12px;
-      margin-top: 15px;
-    }
-
-    .add-section {
-      background: #faf8f5;
-      border: 1px solid var(--border-color);
-      padding: 14px 10px;
-      border-radius: 12px;
-      margin-bottom: 14px;
-    }
-    .add-section h3 { margin-top: 0; color: var(--primary-dark); font-size: 14px; margin-bottom: 10px; font-weight: 600; }
-    
-    .form-row {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 4px;
-    }
-    @media (min-width: 600px) {
-      .form-row { flex-direction: row; align-items: center; }
-    }
-
-    .form-row input, .form-row select {
-      width: 100%;
-      padding: 9px 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      font-size: 13.5px;
-      background: #fff;
-      color: var(--text-main);
-      outline: none;
-    }
-    
-    .btn-action {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 10px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 13.5px;
-      font-weight: 500;
-      transition: background 0.2s;
-      white-space: nowrap;
-    }
-    .btn-action:hover { background: var(--primary-dark); }
-
-    /* 歷史設定清單與預覽區 */
-    .history-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin-top: 8px; }
-    .history-item { background: #fdfbf7; border: 1.5px dashed #c2b5aa; border-radius: 10px; padding: 8px; text-align: center; cursor: pointer; transition: all 0.2s; }
-    .history-item:hover { border-color: #7a6b63; background: #f5efe8; }
-    .history-item.active { border-style: solid; border-color: #7a6b63; background: #ebdcd3; font-weight: bold; }
-    .history-item .ym { font-size: 13.5px; color: #4a423d; }
-    .history-item .badge { font-size: 11px; display: inline-block; margin-top: 3px; padding: 2px 6px; border-radius: 10px; background: #e5ded7; }
-
-    /* 手機表格完整可視化 */
-    .table-wrapper { width: 100%; overflow-x: auto; border-radius: 8px; border: 1px solid var(--border-color); -webkit-overflow-scrolling: touch; }
-    table { width: 100%; border-collapse: collapse; min-width: 520px; }
-    th, td { border: 1px solid var(--border-color); padding: 8px 6px; text-align: center; font-size: 12.5px; }
-    th { background: #f7f5f0; color: var(--text-muted); font-weight: 500; white-space: nowrap; }
-    tr:nth-child(even) { background: #faf9f6; }
-    .loading { text-align: center; padding: 15px; color: var(--text-muted); }
-
-    .btn-refresh {
-      background: var(--accent-sand);
-      color: var(--primary-dark);
-      border: none;
-      padding: 9px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      margin-bottom: 10px;
-      width: 100%;
-    }
-
-    /* Flatpickr 視覺化預覽 */
-    .flatpickr-calendar { background: #faf8f5 !important; border: 1px solid #e2dad1 !important; box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important; border-radius: 12px !important; margin: 0 auto; }
-    .flatpickr-day.available-day-yellow { background-color: #fdf6e2 !important; color: #a37512 !important; font-weight: bold !important; border-radius: 50% !important; border: 1px solid #f2d896 !important; }
-    .flatpickr-day.available-day-blue { background-color: #e5ece9 !important; color: #4c6b61 !important; font-weight: bold !important; border-radius: 50% !important; border: 1px solid #b8c9c4 !important; }
-  </style>
-</head>
-<body>
-
-<div class="container">
-  <h2>💅 美甲預約系統 - 後台管理儀表板</h2>
-
-  <!-- 12號提醒橫幅 -->
-  <div id="adminShiftReminder" style="display: none; background: #fff2f0; border: 1.5px solid #ffccc7; color: #cf1322; padding: 10px; border-radius: 8px; margin-bottom: 12px; text-align: center; font-weight: bold; font-size: 13px;"></div>
-
-  <!-- 分頁選單 -->
-  <div class="tab-nav">
-    <button class="tab-btn active" onclick="switchTab('tab-stats')">📈 營收</button>
-    <button class="tab-btn" onclick="switchTab('tab-schedule')">📅 班表</button>
-    <button class="tab-btn" onclick="switchTab('tab-bookings')">📋 預約紀錄</button>
-    <button class="tab-btn" onclick="switchTab('tab-accounting')">💰 記帳管理</button>
-  </div>
-
-  <!-- Tab 1: 營收 -->
-  <div id="tab-stats" class="tab-content active">
-    <div class="stats-container">
-      <div class="stat-card" onclick="toggleChart('revenue')">
-        <h3>總累計營收</h3>
-        <p id="totalRevenue">NT$ 0</p>
-      </div>
-      <div class="stat-card">
-        <h3>總材料成本</h3>
-        <p id="totalCost">NT$ 0</p>
-      </div>
-      <div class="stat-card" onclick="toggleChart('profit')">
-        <h3>淨利</h3>
-        <p id="netProfit">NT$ 0</p>
-      </div>
-    </div>
-    <p style="font-size: 11.5px; color: var(--text-muted); text-align: center; margin-top: 4px;">💡 點擊營收或淨利卡片可展開/收合年度趨勢折線圖</p>
-
-    <div id="chartSection">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <h3 id="chartTitle" style="margin: 0; color: var(--primary-dark); font-size: 14px;">📈 年度每月營收趨勢</h3>
-        <select id="selectYear" onchange="renderChart()" style="padding: 4px 6px; border-radius: 6px; font-size: 12.5px; width: auto;"></select>
-      </div>
-      <div style="position: relative; height: 240px; width: 100%;">
-        <canvas id="trendChart"></canvas>
-      </div>
-    </div>
-  </div>
-
-  <!-- Tab 2: 班表 -->
-  <div id="tab-schedule" class="tab-content">
-    <div class="add-section">
-      <h3>各月獨立班別設定</h3>
-      <div class="form-row">
-        <input type="month" id="targetMonth">
-        <select id="shiftGroup">
-          <option value="B">B 組</option>
-          <option value="A">A 組</option>
-        </select>
-        <select id="shiftType">
-          <option value="夜班">夜班 (藍灰色)</option>
-          <option value="白班">白班 (黃色)</option>
-        </select>
-        <button class="btn-action" onclick="saveMonthlyShift()">💾</button>
-      </div>
-
-      <div style="margin-top: 12px;">
-        <div style="font-size: 12.5px; font-weight: bold; color: var(--text-muted); margin-bottom: 6px;">已設定月份紀錄：</div>
-        <div id="historyList" class="history-list">
-          <span style="font-size: 12px; color: var(--text-muted);">載入中...</span>
-        </div>
-      </div>
-
-      <!-- 預覽日曆區 -->
-      <div id="previewContainer" style="margin-top: 12px; text-align: center; display: none; padding-top: 10px; border-top: 1px dashed var(--border-color);">
-        <div style="font-size: 13px; font-weight: bold; margin-bottom: 6px; color: var(--primary-dark);" id="previewTitle">日曆預覽</div>
-        <input type="text" id="inlinePreviewCalendar" style="display: none;">
-      </div>
-    </div>
-
-    <!-- 特定日期微調 -->
-    <div class="add-section">
-      <h3>日期微調</h3>
-      <div class="form-row">
-        <input type="date" id="scheduleDate">
-        <select id="scheduleStatus">
-          <option value="開放">開放預約</option>
-          <option value="關閉">關閉預約</option>
-        </select>
-        <button class="btn-action" style="background: var(--accent-green);" onclick="updateScheduleOverride()">💾</button>
-      </div>
-
-      <div style="margin-top: 10px;">
-        <div style="font-size: 12.5px; font-weight: bold; color: var(--text-muted); margin-bottom: 6px;">微調紀錄：</div>
-        <div class="table-wrapper" style="max-height: 120px;">
-          <div id="overrideRecordContainer">
-            <span style="font-size: 12px; color: var(--text-muted);">尚無微調紀錄</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Tab 3: 預約紀錄 (無成本欄位) -->
-  <div id="tab-bookings" class="tab-content">
-    <div class="add-section" style="background: #ffffff; padding: 10px 0;">
-      <div style="padding: 0 10px 8px 10px;">
-        <button class="btn-refresh" onclick="fetchBookings()">🔄 重新整理預約紀錄</button>
-      </div>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>編號</th>
-              <th>客戶</th>
-              <th>日期</th>
-              <th>時間</th>
-              <th>項目</th>
-              <th>金額</th>
-              <th>狀態</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody id="bookingTableBody">
-            <tr><td colspan="8" class="loading">正在讀取預約資料...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- Tab 4: 記帳管理 (手動新增預約/記帳) -->
-  <div id="tab-accounting" class="tab-content">
-    <div class="add-section">
-      <h3>手動新增預約/記帳</h3>
-      <div class="form-row">
-        <input type="text" id="newName" placeholder="客戶名稱" required>
-        <input type="date" id="newDate" required>
-        
-        <!-- 全時段滑軌/下拉時間選單 -->
-        <div style="display: flex; gap: 4px;">
-          <select id="newHour" style="flex: 1;">
-            <option value="00">00時</option><option value="01">01時</option><option value="02">02時</option>
-            <option value="03">03時</option><option value="04">04時</option><option value="05">05時</option>
-            <option value="06">06時</option><option value="07">07時</option><option value="08">08時</option>
-            <option value="09">09時</option><option value="10">10時</option><option value="11">11時</option>
-            <option value="12" selected>12時</option><option value="13">13時</option><option value="14">14時</option>
-            <option value="15">15時</option><option value="16">16時</option><option value="17">17時</option>
-            <option value="18">18時</option><option value="19">19時</option><option value="20">20時</option>
-            <option value="21">21時</option><option value="22">22時</option><option value="23">23時</option>
-          </select>
-          <select id="newMinute" style="flex: 1;">
-            <option value="00">00分</option><option value="15">15分</option>
-            <option value="30">30分</option><option value="45">45分</option>
-          </select>
-        </div>
-
-        <input type="text" id="newItems" placeholder="項目 (例: 單色光療)" required>
-        <input type="number" id="newPrice" placeholder="金額 (NT$)" required min="0">
-        <input type="number" id="newCost" placeholder="成本 (NT$)" required min="0" value="0">
-        <button class="btn-action" onclick="manualAddBooking()">新增紀錄</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-  const scriptUrl = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
-  let globalBookings = []; 
-  let globalSchedules = {};
-  let globalMonthlyShiftTypes = {}; 
-  let trendChartInstance = null;
-  let currentChartType = 'revenue';
-  let isChartOpen = false;
-  let previewPicker = null;
-  let activePreviewYM = ""; 
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-    const currentYearMonth = today.toISOString().slice(0, 7);
-    
-    document.getElementById('newDate').value = todayStr;
-    document.getElementById('scheduleDate').value = todayStr;
-    document.getElementById('targetMonth').value = currentYearMonth;
-    
-    fetchBookings();
-  });
-
-  function switchTab(tabId) {
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-    
-    event.target.classList.add('active');
-    document.getElementById(tabId).classList.add('active');
+function initSheets() {
+  const ss = getTargetSpreadsheet();
+  
+  let bookingSheet = ss.getSheetByName("預約紀錄");
+  if (!bookingSheet) {
+    bookingSheet = ss.insertSheet("預約紀錄");
+    bookingSheet.appendRow(["預約編號", "客戶名稱", "日期", "時間", "項目", "預估金額", "狀態", "成本"]);
+    bookingSheet.getRange("A1:H1").setFontWeight("bold").setBackground("#ebdcd3");
   }
 
-  function fetchBookings() {
-    const tableBody = document.getElementById('bookingTableBody');
-    tableBody.innerHTML = `<tr><td colspan="8" class="loading">正在讀取最新資料...</td></tr>`;
+  let accountingSheet = ss.getSheetByName("記帳紀錄");
+  if (!accountingSheet) {
+    accountingSheet = ss.insertSheet("記帳紀錄");
+    accountingSheet.appendRow(["記錄編號", "日期", "項目", "金額", "成本"]);
+    accountingSheet.getRange("A1:E1").setFontWeight("bold").setBackground("#c2b5aa");
+  }
+  
+  let configSheet = ss.getSheetByName("系統設定");
+  if (!configSheet) {
+    configSheet = ss.insertSheet("系統設定");
+    configSheet.appendRow(["設定項目", "設定值"]);
+    configSheet.appendRow(["anchorDate", "2026-10-23"]); 
+    configSheet.appendRow(["durationHours", "5"]);      
+    configSheet.appendRow(["shiftGroup", "B"]); 
+    configSheet.appendRow(["shiftType", "夜班"]); 
+    configSheet.getRange("A1:B1").setFontWeight("bold").setBackground("#c2b5aa");
+  }
 
-    fetch(scriptUrl, { method: 'GET', mode: 'cors' })
-      .then(response => response.json())
-      .then(resData => {
-        globalBookings = resData.bookings || [];
-        globalSchedules = resData.schedules || {};
-        globalMonthlyShiftTypes = resData.monthlyShiftTypes || {};
+  let scheduleSheet = ss.getSheetByName("排班設定");
+  if (!scheduleSheet) {
+    scheduleSheet = ss.insertSheet("排班設定");
+    scheduleSheet.appendRow(["日期", "狀態", "可用時段"]); 
+    scheduleSheet.getRange("A1:C1").setFontWeight("bold").setBackground("#d4a373");
+  }
+
+  let monthlyShiftSheet = ss.getSheetByName("各月班別設定");
+  if (!monthlyShiftSheet) {
+    monthlyShiftSheet = ss.insertSheet("各月班別設定");
+    monthlyShiftSheet.appendRow(["年月", "班別組別", "班別類型"]);
+    monthlyShiftSheet.getRange("A1:C1").setFontWeight("bold").setBackground("#d4c5b9");
+  }
+}
+
+function cleanupOldData() {
+  const ss = getTargetSpreadsheet();
+  const today = new Date();
+
+  const bookingSheet = ss.getSheetByName("預約紀錄");
+  if (bookingSheet && bookingSheet.getLastRow() > 1) {
+    const rows = bookingSheet.getDataRange().getValues();
+    const header = rows[0];
+    let allBookings = [];
+    for (let i = 1; i < rows.length; i++) {
+      let r = rows[i];
+      let customerName = String(r[1] || "").trim();
+      let dateVal = r[2];
+      let d = (dateVal instanceof Date && !isNaN(dateVal)) ? dateVal : (dateVal ? new Date(dateVal) : new Date());
+      allBookings.push({ row: r, customerName: customerName, date: d });
+    }
+    allBookings.sort((a, b) => b.date - a.date);
+    let customerLatestMap = {}; 
+    let newRows = [header];
+    let isModified = false;
+
+    allBookings.forEach(item => {
+      let cName = item.customerName;
+      let isFutureOrToday = item.date >= new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      if (isFutureOrToday) {
+        newRows.push(item.row);
+      } else if (cName) {
+        if (!customerLatestMap[cName]) {
+          customerLatestMap[cName] = true;
+          newRows.push(item.row);
+        } else {
+          isModified = true;
+        }
+      } else {
+        newRows.push(item.row);
+      }
+    });
+    
+    if (isModified && newRows.length > 1) {
+      bookingSheet.clearContent();
+      bookingSheet.getRange(1, 1, newRows.length, newRows[0].length).setValues(newRows);
+      bookingSheet.getRange("A1:H1").setFontWeight("bold").setBackground("#ebdcd3");
+    }
+  }
+}
+
+function doGet(e) {
+  try {
+    const cache = CacheService.getScriptCache();
+    const cachedData = cache.get(CACHE_KEY);
+    if (cachedData) {
+      return ContentService.createTextOutput(cachedData).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    initSheets();
+    cleanupOldData(); 
+    const ss = getTargetSpreadsheet();
+    
+    const configSheet = ss.getSheetByName("系統設定");
+    const configData = configSheet.getDataRange().getValues();
+    let config = {};
+    for (let i = 1; i < configData.length; i++) {
+      if (configData[i][0]) config[configData[i][0]] = configData[i][1];
+    }
+    
+    let rawAnchor = config["anchorDate"] || "2026-10-23";
+    
+    const bookingSheet = ss.getSheetByName("預約紀錄");
+    const rows = bookingSheet.getDataRange().getValues();
+    let bookings = [];
+    if (rows.length > 1) {
+      for (let i = 1; i < rows.length; i++) {
+        const r = rows[i];
+        const bookingId = r[0] !== undefined && r[0] !== null ? String(r[0]) : '';
+        const customerName = r[1] !== undefined && r[1] !== null ? String(r[1]) : '';
+        let rawDate = r[2];
+        let rawTime = r[3];
+        const items = r[4] !== undefined && r[4] !== null ? String(r[4]) : '';
+        const totalPrice = r[5] !== '' && !isNaN(r[5]) ? Number(r[5]) : 0;
+        const status = r[6] !== undefined && r[6] !== '' ? String(r[6]) : '預約中';
+        const cost = r[7] !== '' && !isNaN(r[7]) ? Number(r[7]) : 0;
         
-        renderHistoryList();
-        renderOverrideRecords();
-        checkMonthlyShiftReminder();
+        if (bookingId || customerName) {
+          let dateStr = "";
+          if (rawDate instanceof Date && !isNaN(rawDate)) {
+            dateStr = Utilities.formatDate(rawDate, "Asia/Taipei", "yyyy-MM-dd");
+          } else if (rawDate) {
+            let dObj = new Date(rawDate);
+            dateStr = !isNaN(dObj) ? Utilities.formatDate(dObj, "Asia/Taipei", "yyyy-MM-dd") : String(rawDate).substring(0, 10);
+          }
 
-        if (activePreviewYM) {
-          showPreviewCalendar(activePreviewYM);
-        }
-
-        if (globalBookings.length === 0) {
-          tableBody.innerHTML = `<tr><td colspan="8" class="loading">目前沒有預約資料</td></tr>`;
-          updateFinance(0, 0);
-          return;
-        }
-
-        tableBody.innerHTML = "";
-        let totalRev = 0, totalCost = 0;
-        const now = new Date();
-
-        globalBookings.forEach((row, index) => {
-          const displayId = String(index + 1).padStart(3, '0');
-          const originalId = row.bookingId || displayId;
-          const customerName = row.customerName || "";
-          const date = row.date || "";
-          const time = row.time || "";
-          const items = row.items || "";
-          const price = Number(row.totalPrice) || 0;
-          let status = row.status || "預約中";
-          const cost = Number(row.cost) || 0;
-
-          // 智慧自動營收判定：若為預約中，但預約時間已過，自動視為已完成並計入營收
-          let isAutoCompleted = false;
-          if (status === "預約中" && date && time) {
-            let bookingDT = new Date(`${date}T${time}`);
-            if (!isNaN(bookingDT) && bookingDT < now) {
-              isAutoCompleted = true;
+          let timeStr = "";
+          if (rawTime instanceof Date && !isNaN(rawTime)) {
+            timeStr = Utilities.formatDate(rawTime, "Asia/Taipei", "HH:mm");
+          } else if (rawTime) {
+            let tStr = String(rawTime);
+            if (tStr.includes("GMT") || tStr.includes("1899")) {
+              let dObj = new Date(rawTime);
+              timeStr = !isNaN(dObj) ? Utilities.formatDate(dObj, "Asia/Taipei", "HH:mm") : tStr.substring(11, 16);
+            } else {
+              timeStr = tStr;
             }
           }
 
-          // 計算總營收與總成本 (已完成 或 自動過期完工 且非已取消)
-          if (status !== "已取消") {
-            totalCost += cost;
-            if (status === "已完成" || isAutoCompleted) {
-              totalRev += price;
-            }
-          }
+          bookings.push({
+            bookingId, customerName, date: dateStr, time: timeStr, items, totalPrice, status, cost
+          });
+        }
+      }
+    }
 
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${displayId}</td>
-            <td>${customerName}</td>
-            <td>${date}</td>
-            <td>${time}</td>
-            <td>${items}</td>
-            <td>NT$ ${price}</td>
-            <td>
-              <select id="status_${originalId}">
-                <option value="預約中" ${status === '預約中' ? 'selected' : ''}>預約中${isAutoCompleted ? ' (已過期自動計收)' : ''}</option>
-                <option value="已完成" ${status === '已完成' ? 'selected' : ''}>已完成</option>
-                <option value="已取消" ${status === '已取消' ? 'selected' : ''}>已取消</option>
-              </select>
-            </td>
-            <td><button class="btn-action" style="padding: 4px 8px; font-size: 11.5px; background: var(--accent-green);" onclick="updateBookingStatus('${originalId}')">儲存</button></td>
-          `;
-          tableBody.appendChild(tr);
+    // 讀取永久記帳紀錄
+    const accountingSheet = ss.getSheetByName("記帳紀錄");
+    const accRows = accountingSheet ? accountingSheet.getDataRange().getValues() : [];
+    let accountingRecords = [];
+    if (accRows.length > 1) {
+      for (let i = 1; i < accRows.length; i++) {
+        const r = accRows[i];
+        let dStr = "";
+        if (r[1] instanceof Date && !isNaN(r[1])) {
+          dStr = Utilities.formatDate(r[1], "Asia/Taipei", "yyyy-MM-dd");
+        } else if (r[1]) {
+          let dObj = new Date(r[1]);
+          dStr = !isNaN(dObj) ? Utilities.formatDate(dObj, "Asia/Taipei", "yyyy-MM-dd") : String(r[1]).substring(0, 10);
+        }
+        accountingRecords.push({
+          id: String(r[0] || ''),
+          date: dStr,
+          item: String(r[2] || ''),
+          price: Number(r[3]) || 0,
+          cost: Number(r[4]) || 0
         });
-
-        updateFinance(totalRev, totalCost);
-      })
-      .catch(err => {
-        tableBody.innerHTML = `<tr><td colspan="8" class="loading" style="color: red;">連線失敗！</td></tr>`;
-      });
-  }
-
-  function checkMonthlyShiftReminder() {
-    const today = new Date();
-    const currentDay = today.getDate();
-    const nextMonthObj = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-    const nextYM = `${nextMonthObj.getFullYear()}-${String(nextMonthObj.getMonth() + 1).padStart(2, '0')}`;
-    const isNextMonthSet = !!globalMonthlyShiftTypes[nextYM];
-    const reminderEl = document.getElementById('adminShiftReminder');
-
-    if (currentDay >= 12 && !isNextMonthSet) {
-      reminderEl.innerHTML = `🚨 提醒：今天是 ${currentDay} 號，尚未設定下個月 (${nextYM}) 班表！`;
-      reminderEl.style.display = 'block';
-    } else {
-      reminderEl.style.display = 'none';
-    }
-  }
-
-  function renderHistoryList() {
-    const listEl = document.getElementById('historyList');
-    listEl.innerHTML = "";
-    const sortedYM = Object.keys(globalMonthlyShiftTypes).sort();
-    if (sortedYM.length === 0) {
-      listEl.innerHTML = `<span style="font-size: 12px; color: var(--text-muted);">尚無設定紀錄</span>`;
-      return;
+      }
     }
 
-    sortedYM.forEach(ym => {
-      const item = globalMonthlyShiftTypes[ym];
-      const div = document.createElement('div');
-      div.className = `history-item ${activePreviewYM === ym ? 'active' : ''}`;
-      div.onclick = () => showPreviewCalendar(ym);
-      div.innerHTML = `
-        <div class="ym">📅 ${ym}</div>
-        <div class="badge">${item.shiftGroup}組/${item.shiftType}</div>
-      `;
-      listEl.appendChild(div);
-    });
-  }
+    const scheduleSheet = ss.getSheetByName("排班設定");
+    const scheduleRows = scheduleSheet.getDataRange().getValues();
+    let schedules = {};
+    if (scheduleRows.length > 1) {
+      for (let i = 1; i < scheduleRows.length; i++) {
+        let dVal = scheduleRows[i][0];
+        let sVal = scheduleRows[i][1];
+        let tVal = scheduleRows[i][2] || "";
+        if (dVal instanceof Date) dVal = Utilities.formatDate(dVal, "Asia/Taipei", "yyyy-MM-dd");
+        else if (dVal) dVal = String(dVal).substring(0, 10);
+        if (dVal) schedules[dVal] = { status: sVal, slots: tVal };
+      }
+    }
 
-  function showPreviewCalendar(ym) {
-    activePreviewYM = ym;
-    document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
-    event && event.currentTarget && event.currentTarget.classList.add('active');
-
-    const previewContainer = document.getElementById('previewContainer');
-    previewContainer.style.display = 'block';
+    const monthlyShiftSheet = ss.getSheetByName("各月班別設定");
+    const monthlyRows = monthlyShiftSheet.getDataRange().getValues();
+    let monthlyShiftTypes = {};
+    if (monthlyRows.length > 1) {
+      for (let i = 1; i < monthlyRows.length; i++) {
+        let rawYM = monthlyRows[i][0];
+        let ym = (rawYM instanceof Date && !isNaN(rawYM)) ? Utilities.formatDate(rawYM, "Asia/Taipei", "yyyy-MM") : String(rawYM).trim().substring(0, 7);
+        let sGroup = monthlyRows[i][1] || "B";
+        let sType = monthlyRows[i][2] || "夜班";
+        if (ym && ym.length === 7) monthlyShiftTypes[ym] = { shiftGroup: sGroup, shiftType: sType };
+      }
+    }
     
-    const item = globalMonthlyShiftTypes[ym] || { shiftGroup: 'B', shiftType: '夜班' };
-    document.getElementById('previewTitle').innerText = `🗓️ 預覽 ${ym} (${item.shiftGroup}組/${item.shiftType})`;
+    const outputObj = {
+      anchorDate: rawAnchor,
+      durationHours: parseInt(config["durationHours"] || "5", 10),
+      shiftGroup: config["shiftGroup"] || "B",
+      shiftType: config["shiftType"] || "夜班",
+      bookings,
+      accountingRecords,
+      schedules,
+      monthlyShiftTypes
+    };
 
-    const [year, month] = ym.split('-').map(Number);
-    const defaultDate = new Date(year, month - 1, 1);
+    const jsonString = JSON.stringify(outputObj);
+    try { cache.put(CACHE_KEY, jsonString, 600); } catch (err) {}
+    
+    return ContentService.createTextOutput(jsonString).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ error: error.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
 
-    if (previewPicker) previewPicker.destroy();
-
-    previewPicker = flatpickr("#inlinePreviewCalendar", {
-      inline: true,
-      locale: "zh",
-      defaultDate: defaultDate,
-      onDayCreate: function(dObj, dStr, fp, dayElement) {
-        const dateObj = dayElement.dateObj;
-        const dYear = dateObj.getFullYear();
-        const dMonth = String(dateObj.getMonth() + 1).padStart(2, '0');
-        const dDay = String(dateObj.getDate()).padStart(2, '0');
-        const dateStr = `${dYear}-${dMonth}-${dDay}`;
-        const dYM = `${dYear}-${dMonth}`;
-
-        if (dYM === ym) {
-          let isAvailable = false;
-          if (globalSchedules[dateStr]) {
-            if (globalSchedules[dateStr].status === "開放") isAvailable = true;
-            else if (globalSchedules[dateStr].status === "關閉") isAvailable = false;
-          } else {
-            const anchorDate = new Date("2026-10-23T00:00:00");
-            const targetDate = new Date(dYear, dateObj.getMonth(), dateObj.getDate());
-            const diffDays = Math.round((targetDate - anchorDate) / (1000 * 60 * 60 * 24));
-            let cycleDay = ((diffDays % 4) + 4) % 4;
-            if (item.shiftGroup === "A") cycleDay = (cycleDay + 2) % 4;
-            if (!(cycleDay === 0 || cycleDay === 1)) isAvailable = true;
-          }
-
-          if (isAvailable) {
-            const className = (item.shiftType === "白班") ? "available-day-yellow" : "available-day-blue";
-            dayElement.classList.add(className);
-          }
+function doPost(e) {
+  try {
+    initSheets();
+    const data = JSON.parse(e.postData.contents);
+    const ss = getTargetSpreadsheet();
+    
+    if (data.action === "updateBaseShift") {
+      let monthlyShiftSheet = ss.getSheetByName("各月班別設定");
+      let shiftsToSave = data.monthlyShiftTypes || {};
+      if (data.targetMonth && data.shiftGroup) {
+        shiftsToSave[data.targetMonth] = { shiftGroup: data.shiftGroup, shiftType: data.shiftType };
+      }
+      if (monthlyShiftSheet.getLastRow() > 1) {
+        monthlyShiftSheet.getRange(2, 1, monthlyShiftSheet.getLastRow() - 1, 3).clearContent();
+      }
+      for (let ym in shiftsToSave) {
+        let item = shiftsToSave[ym];
+        monthlyShiftSheet.appendRow([String(ym), String(item.shiftGroup), String(item.shiftType)]);
+      }
+      CacheService.getScriptCache().remove(CACHE_KEY);
+      return ContentService.createTextOutput(JSON.stringify({ result: "success" })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    if (data.action === "updateSchedule") {
+      const scheduleSheet = ss.getSheetByName("排班設定");
+      const rows = scheduleSheet.getDataRange().getValues();
+      let found = false;
+      for (let i = 1; i < rows.length; i++) {
+        let existingDate = rows[i][0];
+        if (existingDate instanceof Date) existingDate = Utilities.formatDate(existingDate, "Asia/Taipei", "yyyy-MM-dd");
+        else existingDate = String(existingDate).substring(0, 10);
+        if (existingDate === data.targetDate) {
+          scheduleSheet.getRange(i + 1, 2).setValue(data.status);
+          scheduleSheet.getRange(i + 1, 3).setValue(data.slots || "");
+          found = true;
+          break;
         }
       }
-    });
-  }
-
-  function renderOverrideRecords() {
-    const container = document.getElementById('overrideRecordContainer');
-    const dates = Object.keys(globalSchedules).sort();
-
-    if (dates.length === 0) {
-      container.innerHTML = `<span style="font-size: 12px; color: var(--text-muted);">尚無微調紀錄</span>`;
-      return;
+      if (!found) scheduleSheet.appendRow([data.targetDate, data.status, ""]);
+      CacheService.getScriptCache().remove(CACHE_KEY);
+      return ContentService.createTextOutput(JSON.stringify({ result: "success" })).setMimeType(ContentService.MimeType.JSON);
     }
-
-    let html = `<table class="mini-table"><tr><th>日期</th><th>狀態</th></tr>`;
-    dates.forEach(d => {
-      const info = globalSchedules[d];
-      html += `<tr><td>${d}</td><td>${info.status === '開放' ? '開放' : '關閉'}</td></tr>`;
-    });
-    html += `</table>`;
-    container.innerHTML = html;
-  }
-
-  function saveMonthlyShift() {
-    const targetMonth = document.getElementById('targetMonth').value;
-    const shiftGroup = document.getElementById('shiftGroup').value;
-    const shiftType = document.getElementById('shiftType').value;
-
-    if (!targetMonth) return alert("請選擇月份！");
-
-    globalMonthlyShiftTypes[targetMonth] = { shiftGroup, shiftType };
-
-    fetch(scriptUrl, { 
-      method: "POST", 
-      mode: "no-cors",
-      body: JSON.stringify({ action: "updateBaseShift", targetMonth, monthlyShiftTypes: globalMonthlyShiftTypes }) 
-    })
-    .then(() => {
-      alert(`【${targetMonth}】設定已儲存！`);
-      renderHistoryList();
-      showPreviewCalendar(targetMonth);
-      checkMonthlyShiftReminder();
-    })
-    .catch(() => {
-      alert(`【${targetMonth}】設定已送出！`);
-      renderHistoryList();
-      showPreviewCalendar(targetMonth);
-      checkMonthlyShiftReminder();
-    });
-  }
-
-  function updateScheduleOverride() {
-    const targetDate = document.getElementById('scheduleDate').value;
-    const status = document.getElementById('scheduleStatus').value;
-
-    if (!targetDate) return alert("請選擇日期！");
-
-    fetch(scriptUrl, { 
-      method: "POST", 
-      mode: "no-cors",
-      body: JSON.stringify({ action: "updateSchedule", targetDate, status, slots: "" }) 
-    })
-    .then(() => {
-      globalSchedules[targetDate] = { status, slots: "" };
-      renderOverrideRecords();
-      if (activePreviewYM) showPreviewCalendar(activePreviewYM);
-      alert(`日期 ${targetDate} 微調已儲存！`); 
-    })
-    .catch(() => {
-      globalSchedules[targetDate] = { status, slots: "" };
-      renderOverrideRecords();
-      if (activePreviewYM) showPreviewCalendar(activePreviewYM);
-      alert(`日期 ${targetDate} 微調已送出！`); 
-    });
-  }
-
-  function updateFinance(rev, cost) {
-    document.getElementById('totalRevenue').innerText = `NT$ ${rev}`;
-    document.getElementById('totalCost').innerText = `NT$ ${cost}`;
-    document.getElementById('netProfit').innerText = `NT$ ${rev - cost}`;
-  }
-
-  function toggleChart(type) {
-    const chartSection = document.getElementById('chartSection');
-    if (isChartOpen && currentChartType === type) {
-      chartSection.style.display = 'none';
-      isChartOpen = false;
-      return;
-    }
-
-    currentChartType = type;
-    document.getElementById('chartTitle').innerText = (type === 'revenue') ? "📈 年度每月營收趨勢" : "📈 年度每月淨利趨勢";
-    chartSection.style.display = 'block';
-    isChartOpen = true;
     
-    setYearDropdown();
-    renderChart();
-  }
-
-  function setYearDropdown() {
-    const yearSelect = document.getElementById('selectYear');
-    let years = new Set([new Date().getFullYear()]);
-    globalBookings.forEach(row => { if (row.date) years.add(row.date.split('-')[0]); });
-    yearSelect.innerHTML = "";
-    Array.from(years).sort().reverse().forEach(y => {
-      const opt = document.createElement('option');
-      opt.value = y; opt.innerText = `${y} 年`;
-      yearSelect.appendChild(opt);
-    });
-  }
-
-  function renderChart() {
-    const selectedYear = document.getElementById('selectYear').value || new Date().getFullYear();
-    let monthlyData = new Array(12).fill(0);
-    const now = new Date();
-
-    globalBookings.forEach(row => {
-      if (row.date && row.status !== "已取消") {
-        let isAutoCompleted = false;
-        if (row.status === "預約中" && row.date && row.time) {
-          let bookingDT = new Date(`${row.date}T${row.time}`);
-          if (!isNaN(bookingDT) && bookingDT < now) isAutoCompleted = true;
-        }
-
-        if (row.status === "已完成" || isAutoCompleted) {
-          const parts = row.date.split('-');
-          if (parts.length === 3 && parts[0] === String(selectedYear)) {
-            const monthIdx = parseInt(parts[1], 10) - 1;
-            if (monthIdx >= 0 && monthIdx < 12) {
-              const price = Number(row.totalPrice) || 0;
-              const cost = Number(row.cost) || 0;
-              monthlyData[monthIdx] += (currentChartType === 'revenue') ? price : (price - cost);
-            }
-          }
+    if (data.action === "update") {
+      const bookingSheet = ss.getSheetByName("預約紀錄");
+      const rows = bookingSheet.getDataRange().getValues();
+      let updated = false;
+      for (let i = 1; i < rows.length; i++) {
+        if (String(rows[i][0]) === String(data.bookingId)) {
+          if (data.status !== undefined) bookingSheet.getRange(i + 1, 7).setValue(data.status);
+          updated = true;
+          break;
         }
       }
-    });
+      CacheService.getScriptCache().remove(CACHE_KEY);
+      return ContentService.createTextOutput(JSON.stringify({ result: "success", updated })).setMimeType(ContentService.MimeType.JSON);
+    }
 
-    const ctx = document.getElementById('trendChart').getContext('2d');
-    if (trendChartInstance) trendChartInstance.destroy();
+    if (data.action === "addAccounting") {
+      const accountingSheet = ss.getSheetByName("記帳紀錄");
+      const newId = "ACC" + Date.now().toString().slice(-6);
+      accountingSheet.appendRow([newId, data.date, data.item, Number(data.price) || 0, Number(data.cost) || 0]);
+      CacheService.getScriptCache().remove(CACHE_KEY);
+      return ContentService.createTextOutput(JSON.stringify({ result: "success" })).setMimeType(ContentService.MimeType.JSON);
+    }
 
-    const chartColor = currentChartType === 'revenue' ? '#8a7968' : '#738276';
-    trendChartInstance = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
-        datasets: [{
-          label: `${selectedYear} 年 (${currentChartType === 'revenue' ? '營收' : '淨利'})`,
-          data: monthlyData,
-          borderColor: chartColor,
-          backgroundColor: currentChartType === 'revenue' ? 'rgba(138, 121, 104, 0.08)' : 'rgba(115, 130, 118, 0.08)',
-          borderWidth: 2, fill: true, tension: 0.3
-        }]
-      },
-      options: { responsive: true, maintainAspectRatio: false }
-    });
+    if (data.action === "deleteAccounting") {
+      const accountingSheet = ss.getSheetByName("記帳紀錄");
+      const rows = accountingSheet.getDataRange().getValues();
+      for (let i = 1; i < rows.length; i++) {
+        if (String(rows[i][0]) === String(data.id)) {
+          accountingSheet.deleteRow(i + 1);
+          break;
+        }
+      }
+      CacheService.getScriptCache().remove(CACHE_KEY);
+      return ContentService.createTextOutput(JSON.stringify({ result: "success" })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // 預設為新增客戶預約
+    const bookingSheet = ss.getSheetByName("預約紀錄");
+    const newId = "M" + Math.floor(100 + Math.random() * 900);
+    bookingSheet.appendRow([
+      newId, data.customerName || '', data.date || '', data.time || '', data.items || '', data.totalPrice || 0, '預約中', 0
+    ]);
+    
+    CacheService.getScriptCache().remove(CACHE_KEY);
+    return ContentService.createTextOutput(JSON.stringify({ result: "success" })).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ error: error.toString() })).setMimeType(ContentService.MimeType.JSON);
   }
-
-  function manualAddBooking() {
-    const customerName = document.getElementById('newName').value;
-    const date = document.getElementById('newDate').value;
-    const hour = document.getElementById('newHour').value;
-    const minute = document.getElementById('newMinute').value;
-    const time = `${hour}:${minute}`;
-    const items = document.getElementById('newItems').value;
-    const totalPrice = document.getElementById('newPrice').value;
-    const cost = document.getElementById('newCost').value;
-
-    if (!customerName || !date || !items || !totalPrice) return alert("請填寫完整資訊！");
-
-    fetch(scriptUrl, { 
-      method: "POST", 
-      mode: "no-cors",
-      body: JSON.stringify({ customerName, date, time, items, totalPrice: Number(totalPrice), cost: Number(cost) }) 
-    })
-    .then(() => {
-      alert("新增成功！"); 
-      document.getElementById('newName').value = "";
-      document.getElementById('newItems').value = "";
-      document.getElementById('newPrice').value = "";
-      document.getElementById('newCost').value = "0";
-      fetchBookings();
-    })
-    .catch(() => {
-      alert("新增已送出！"); 
-      fetchBookings();
-    });
-  }
-
-  function updateBookingStatus(bookingId) {
-    const newStatus = document.getElementById(`status_${bookingId}`).value;
-
-    fetch(scriptUrl, { 
-      method: "POST", 
-      mode: "no-cors",
-      body: JSON.stringify({ action: "update", bookingId, status: newStatus }) 
-    })
-    .then(() => {
-      alert(`狀態更新成功！`); 
-      fetchBookings();
-    })
-    .catch(() => {
-      alert(`狀態更新已送出！`); 
-      fetchBookings();
-    });
-  }
-</script>
-
-</body>
-</html>
+}
