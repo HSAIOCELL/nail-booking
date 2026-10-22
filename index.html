@@ -169,6 +169,7 @@
       font-family: inherit !important;
     }
 
+    /* 班別動態標記與更和諧的選取顏色 */
     .flatpickr-day.available-day-yellow {
       background-color: #fdf6e2 !important;
       color: #a37512 !important;
@@ -183,10 +184,15 @@
       border-radius: 50% !important;
       border: 1px solid #b8c9c4 !important;
     }
+    /* 已選擇日期的顏色改為高質感柔和可可棕，與黃藍色完美協調 */
+    .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, 
+    .flatpickr-day.selected:focus, .flatpickr-day.selected:hover, 
     .flatpickr-day.available-day-yellow.selected, .flatpickr-day.available-day-blue.selected {
-      background-color: #7a6b63 !important;
+      background-color: #5c5049 !important;
       color: #ffffff !important;
-      border-color: #5c5049 !important;
+      border-color: #4a3f38 !important;
+      font-weight: bold !important;
+      border-radius: 50% !important;
     }
     .flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover {
       color: #d1c7bd !important;
@@ -696,6 +702,7 @@
   let backendMonthlyShiftTypes = {}; 
   let backendSchedules = {};
   let globalBookings = [];
+  let pickerInstance = null;
 
   const ALL_COLORS = [
     "紅色", "粉色", "橘色", "黃色", "紅咖色", 
@@ -709,6 +716,11 @@
   document.addEventListener('DOMContentLoaded', () => {
     checkFrontendReminder();
     initLiffLogin();
+    
+    // ⚡ 立即初始化日曆，實現零延遲秒開！
+    initFlatpickr();
+
+    // 在背景非同步抓取後台排班與預約資料，抓到後自動重新整理日曆外觀與時段
     fetchBackendConfigAndInit();
   });
 
@@ -736,10 +748,15 @@
       if (data.schedules) backendSchedules = data.schedules;
       if (data.monthlyShiftTypes) backendMonthlyShiftTypes = data.monthlyShiftTypes; 
       if (data.bookings) globalBookings = data.bookings;
+      
+      // 資料載入完成後，重新繪製日曆與時間選單
+      if (pickerInstance) {
+        pickerInstance.redraw();
+        validateTime();
+      }
     } catch (e) {
       console.error("無法取得後端排班與預約資料", e);
     }
-    initFlatpickr();
   }
 
   function checkAdminMode(val) {
@@ -754,7 +771,7 @@
   function enableAdminOverride() {
     adminOverride = true;
     alert("🔓 管理者已強制解鎖！月曆所有日期現已開放手動點選預約。");
-    initFlatpickr();
+    if (pickerInstance) pickerInstance.redraw();
   }
 
   async function initLiffLogin() {
@@ -837,8 +854,6 @@
     return startDate;
   }
 
-  let pickerInstance = null;
-
   function initFlatpickr() {
     const taipeiNow = getTaipeiDate();
     const maxDate = new Date(taipeiNow.getFullYear(), taipeiNow.getMonth() + 2, 0);
@@ -907,7 +922,7 @@
     return false;
   }
 
-  // ⚡ 動態生成可預約的時間選項（無法預約的時段會直接從下拉選單中移除/不顯示）
+  // 動態生成可預約的時間選項（無法預約的時段直接從下拉選單中移除/不顯示）
   function validateTime() {
     const hourSelect = document.getElementById("bookingHour");
     const minuteSelect = document.getElementById("bookingMinute");
@@ -946,7 +961,6 @@
         isDisabled = true;
       }
 
-      // 檢查該小時內是否至少有一個分鐘可以預約
       let availableMinCount = 0;
       const minutesArr = [0, 15, 30, 45];
       for (let m of minutesArr) {
@@ -975,7 +989,6 @@
       return;
     }
 
-    // 恢復之前選的小時（若還有效），否則選第一個可用小時
     if (Array.from(hourSelect.options).some(opt => opt.value === prevHour)) {
       hourSelect.value = prevHour;
     } else if (firstValidHour !== null) {
