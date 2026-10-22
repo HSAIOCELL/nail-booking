@@ -208,6 +208,9 @@
 <div class="container">
   <h2>💅 美甲預約系統 - 後台管理儀表板</h2>
 
+  <!-- 12號提醒橫幅 (預設隱藏) -->
+  <div id="adminShiftReminder" style="display: none; background: #fff2f0; border: 1.5px solid #ffccc7; color: #cf1322; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; font-weight: bold; font-size: 14px; box-shadow: 0 2px 8px rgba(207, 19, 34, 0.1);"></div>
+
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('tab-stats')">📊 營運統計</button>
     <button class="tab-btn" onclick="switchTab('tab-schedule')">🔄 班別與微調</button>
@@ -351,7 +354,7 @@
   let currentChartType = 'revenue';
   let isChartOpen = false;
   let previewPicker = null;
-  let activePreviewYM = ""; // 紀錄目前點擊預覽的年月
+  let activePreviewYM = ""; 
 
   document.addEventListener('DOMContentLoaded', () => {
     const today = new Date();
@@ -386,8 +389,8 @@
         
         renderHistoryList();
         renderOverrideRecords();
+        checkMonthlyShiftReminder(); // 👈 檢查 12 號提醒
 
-        // 若目前正在預覽某個月，更新後自動刷新預覽日曆
         if (activePreviewYM) {
           showPreviewCalendar(activePreviewYM);
         }
@@ -450,6 +453,25 @@
       });
   }
 
+  // 12號未設定下個月班表自動提醒函式
+  function checkMonthlyShiftReminder() {
+    const today = new Date();
+    const currentDay = today.getDate();
+
+    const nextMonthObj = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    const nextYM = `${nextMonthObj.getFullYear()}-${String(nextMonthObj.getMonth() + 1).padStart(2, '0')}`;
+
+    const isNextMonthSet = !!globalMonthlyShiftTypes[nextYM];
+    const reminderEl = document.getElementById('adminShiftReminder');
+
+    if (currentDay >= 12 && !isNextMonthSet) {
+      reminderEl.innerHTML = `🚨 <strong>提醒：今天是 ${currentDay} 號，您尚未設定下個月 (${nextYM}) 的班表！</strong><br><span style="font-size: 12.5px; font-weight: normal; color: #8c827a;">請至下方「各月獨立班別設定」規劃並儲存 ${nextYM} 的班表。</span>`;
+      reminderEl.style.display = 'block';
+    } else {
+      reminderEl.style.display = 'none';
+    }
+  }
+
   function renderHistoryList() {
     const listEl = document.getElementById('historyList');
     listEl.innerHTML = "";
@@ -473,7 +495,6 @@
     });
   }
 
-  // 升級版：同時結合「每月循環班別」與「特定日期營業微調」
   function showPreviewCalendar(ym) {
     activePreviewYM = ym;
     document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
@@ -507,7 +528,6 @@
         if (dYM === ym) {
           let isAvailable = false;
 
-          // 1. 優先檢查是否有特定日期微調設定
           if (globalSchedules[dateStr]) {
             if (globalSchedules[dateStr].status === "開放") {
               isAvailable = true;
@@ -515,7 +535,6 @@
               isAvailable = false;
             }
           } else {
-            // 2. 若無微調，則跑 4 天循環公式
             const anchorDate = new Date("2026-10-23T00:00:00");
             const targetDate = new Date(dYear, dateObj.getMonth(), dateObj.getDate());
             const diffDays = Math.round((targetDate - anchorDate) / (1000 * 60 * 60 * 24));
@@ -524,11 +543,10 @@
             
             const isWorkDay = (cycleDay === 0 || cycleDay === 1);
             if (!isWorkDay) {
-              isAvailable = true; // 非工作日即為可預約日
+              isAvailable = true; 
             }
           }
 
-          // 根據是否可用上對應顏色（白班=黃色，夜班=藍灰色）
           if (isAvailable) {
             const className = (item.shiftType === "白班") ? "available-day-yellow" : "available-day-blue";
             dayElement.classList.add(className);
@@ -577,11 +595,13 @@
       alert(`【${targetMonth}】[${shiftGroup}組] ${shiftType} 設定已儲存成功！`);
       renderHistoryList();
       showPreviewCalendar(targetMonth);
+      checkMonthlyShiftReminder(); // 即時重新檢查提醒狀態
     })
     .catch(err => {
       alert(`【${targetMonth}】設定已送出！`);
       renderHistoryList();
       showPreviewCalendar(targetMonth);
+      checkMonthlyShiftReminder();
     });
   }
 
@@ -599,13 +619,13 @@
     .then(() => {
       globalSchedules[targetDate] = { status, slots: "" };
       renderOverrideRecords();
-      if (activePreviewYM) showPreviewCalendar(activePreviewYM); // 即時更新預覽日曆
+      if (activePreviewYM) showPreviewCalendar(activePreviewYM);
       alert(`日期 ${targetDate} 微調狀態儲存成功！`); 
     })
     .catch(err => {
       globalSchedules[targetDate] = { status, slots: "" };
       renderOverrideRecords();
-      if (activePreviewYM) showPreviewCalendar(activePreviewYM); // 即時更新預覽日曆
+      if (activePreviewYM) showPreviewCalendar(activePreviewYM);
       alert(`日期 ${targetDate} 微調狀態已送出！`); 
     });
   }
