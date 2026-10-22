@@ -91,6 +91,19 @@
       color: #5c5049;
     }
 
+    #frontendReminder {
+      display: none;
+      background: #fffae6;
+      border: 1px solid #ffe58f;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      text-align: center;
+      color: #d48806;
+      font-size: 13.5px;
+      font-weight: bold;
+    }
+
     .section {
       margin-bottom: 18px;
       padding-bottom: 16px;
@@ -466,6 +479,10 @@
     <h2>美甲服務預約選單</h2>
   </div>
 
+  <div id="frontendReminder">
+    ⚠️ 提醒：目前正值 15 號至 20 號期間，請留意下兩個月的最新班表與預約動態！
+  </div>
+
   <!-- 預約暱稱 (輸入 admin 可開啟隱藏式後台解鎖功能) -->
   <div class="section">
     <div class="section-title">預約暱稱</div>
@@ -715,11 +732,12 @@
   let needRemoval = false;
 
   document.addEventListener('DOMContentLoaded', () => {
+    checkFrontendReminder();
     initLiffLogin();
     fetchBackendConfigAndInit();
   });
 
-  // 當使用者從 LINE 點擊返回鍵回到前台頁面時，自動恢復送出按鈕狀態
+  // 從 LINE 返回頁面時，自動復原送出按鈕狀態
   window.addEventListener('pageshow', (event) => {
     const submitBtn = document.querySelector('.submit-btn');
     if (submitBtn) {
@@ -727,6 +745,14 @@
       submitBtn.disabled = false;
     }
   });
+
+  // 15號至20號前台自動跳出下兩個月班表更新提醒
+  function checkFrontendReminder() {
+    const todayDay = new Date().getDate();
+    if (todayDay >= 15 && todayDay <= 20) {
+      document.getElementById('frontendReminder').style.display = "block";
+    }
+  }
 
   async function fetchBackendConfigAndInit() {
     try {
@@ -832,14 +858,19 @@
 
   function initFlatpickr() {
     const taipeiNow = getTaipeiDate();
+    // 設定最大可選擇日期為「近兩個月」（當月及下個月月底）
+    const maxDate = new Date(taipeiNow.getFullYear(), taipeiNow.getMonth() + 2, 0);
+
     const defaultAvailableDate = findFirstAvailableDate(taipeiNow);
 
+    // 依據後端班別類型設定顏色：日班＝黃色，夜班＝莫蘭迪藍灰色
     const availableClassName = (backendShiftType === "日班") ? "available-day-yellow" : "available-day-blue";
 
     pickerInstance = flatpickr("#bookingDate", {
       locale: "zh",
       dateFormat: "Y-m-d",
       minDate: taipeiNow,
+      maxDate: maxDate,
       defaultDate: defaultAvailableDate,
       disable: [
         function(date) {
