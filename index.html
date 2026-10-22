@@ -205,11 +205,6 @@
       animation: selectFlash 0.6s cubic-bezier(0.25, 1, 0.5, 1);
       border-radius: 8px;
     }
-    
-    select option:disabled {
-      color: #c0b5ac;
-      background-color: #f5f2ed;
-    }
 
     .datetime-container {
       display: flex;
@@ -506,20 +501,10 @@
         <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #5c5049;">預約時間：</label>
         <div class="time-picker-group">
           <select id="bookingHour" onchange="validateTime()">
-            <option value="00">00 時</option><option value="01">01 時</option><option value="02">02 時</option>
-            <option value="03">03 時</option><option value="04">04 時</option><option value="05">05 時</option>
-            <option value="06">06 時</option><option value="07">07 時</option><option value="08">08 時</option>
-            <option value="09">09 時</option><option value="10">10 時</option><option value="11">11 時</option>
-            <option value="12">12 時</option><option value="13">13 時</option><option value="14">14 時</option>
-            <option value="15">15 時</option><option value="16">16 時</option><option value="17">17 時</option>
-            <option value="18">18 時</option><option value="19">19 時</option><option value="20">20 時</option>
-            <option value="21">21 時</option><option value="22">22 時</option><option value="23">23 時</option>
+            <!-- 動態生成小時選項 -->
           </select>
           <select id="bookingMinute" onchange="validateTime()">
-            <option value="00">00 分</option>
-            <option value="15">15 分</option>
-            <option value="30">30 分</option>
-            <option value="45">45 分</option>
+            <!-- 動態生成分鐘選項 -->
           </select>
         </div>
       </div>
@@ -750,7 +735,7 @@
       if (data.shiftType) backendShiftType = data.shiftType;
       if (data.schedules) backendSchedules = data.schedules;
       if (data.monthlyShiftTypes) backendMonthlyShiftTypes = data.monthlyShiftTypes; 
-      if (data.bookings) globalBookings = data.bookings; // 取得後端預約紀錄以進行時段鎖定
+      if (data.bookings) globalBookings = data.bookings;
     } catch (e) {
       console.error("無法取得後端排班與預約資料", e);
     }
@@ -910,7 +895,6 @@
         let [bh, bm] = b.time.split(':').map(Number);
         let bStart = bh * 60 + bm;
         
-        // 若客人只有預約一項卸甲服務，鎖定 2 小時；其餘鎖定 5 小時
         let isOnlyRemoval = b.items && b.items.includes("需要卸甲") && !b.items.includes("單色款式") && !b.items.includes("跳色") && !b.items.includes("局部造型") && !b.items.includes("十指造型");
         let lockHours = isOnlyRemoval ? 2 : 5;
         let bEnd = bStart + lockHours * 60; 
@@ -923,6 +907,7 @@
     return false;
   }
 
+  // ⚡ 動態生成可預約的時間選項（無法預約的時段會直接從下拉選單中移除/不顯示）
   function validateTime() {
     const hourSelect = document.getElementById("bookingHour");
     const minuteSelect = document.getElementById("bookingMinute");
@@ -930,15 +915,14 @@
 
     if (!dateInputVal) return;
 
+    const prevHour = hourSelect.value;
+    const prevMinute = minuteSelect.value;
+
     const scheduleInfo = backendSchedules[dateInputVal];
     let allowedHours = null;
     if (scheduleInfo && scheduleInfo.slots) {
       allowedHours = scheduleInfo.slots.split(',').map(s => s.trim().split(':')[0]);
     }
-
-    const selectedDateParts = dateInputVal.split('-');
-    const selectedDateObj = new Date(selectedDateParts[0], selectedDateParts[1] - 1, selectedDateParts[2]);
-    const shiftInfo = getShiftCycleInfo(selectedDateObj);
 
     const taipeiNow = getTaipeiDate();
     const todayStr = formatDateToYYYYMMDD(taipeiNow);
@@ -946,64 +930,85 @@
     const currentMinute = taipeiNow.getMinutes();
     const isToday = (dateInputVal === todayStr);
 
+    // 1. 動態建立【小時】選單
+    hourSelect.innerHTML = "";
+    let validHoursCount = 0;
     let firstValidHour = null;
-    Array.from(hourSelect.options).forEach(opt => {
-      const h = parseInt(opt.value, 10);
+
+    for (let h = 0; h <= 23; h++) {
+      const hStr = String(h).padStart(2, '0');
       let isDisabled = false;
 
       if (isToday && h < currentHour) {
         isDisabled = true;
       }
-
-      if (!adminOverride && allowedHours && !allowedHours.includes(opt.value)) {
+      if (!adminOverride && allowedHours && !allowedHours.includes(hStr)) {
         isDisabled = true;
       }
 
-      // 檢查該小時內是否有可預約的分鐘（未被佔用/緩衝）
+      // 檢查該小時內是否至少有一個分鐘可以預約
       let availableMinCount = 0;
-      Array.from(minuteSelect.options).forEach(mOpt => {
-        const m = parseInt(mOpt.value, 10);
+      const minutesArr = [0, 15, 30, 45];
+      for (let m of minutesArr) {
         if (!(isToday && h === currentHour && m <= currentMinute) && !isTimeBlocked(dateInputVal, h, m)) {
           availableMinCount++;
         }
-      });
+      }
 
       if (availableMinCount === 0) {
         isDisabled = true;
       }
 
-      opt.disabled = isDisabled;
-      opt.style.display = isDisabled ? "none" : "block"; // 無法預約的時間直接隱藏
-
-      if (!isDisabled && firstValidHour === null) {
-        firstValidHour = opt.value;
-      }
-    });
-
-    if (hourSelect.selectedOptions[0] && hourSelect.selectedOptions[0].disabled) {
-      if (firstValidHour !== null) {
-        hourSelect.value = firstValidHour;
+      if (!isDisabled) {
+        validHoursCount++;
+        const opt = document.createElement('option');
+        opt.value = hStr;
+        opt.innerText = `${hStr} 時`;
+        hourSelect.appendChild(opt);
+        if (firstValidHour === null) firstValidHour = hStr;
       }
     }
 
+    if (validHoursCount === 0) {
+      hourSelect.innerHTML = `<option value="">今日已無可預約時段</option>`;
+      minuteSelect.innerHTML = `<option value="">無</option>`;
+      return;
+    }
+
+    // 恢復之前選的小時（若還有效），否則選第一個可用小時
+    if (Array.from(hourSelect.options).some(opt => opt.value === prevHour)) {
+      hourSelect.value = prevHour;
+    } else if (firstValidHour !== null) {
+      hourSelect.value = firstValidHour;
+    }
+
+    // 2. 動態建立【分鐘】選單
     const selectedHour = parseInt(hourSelect.value, 10);
+    minuteSelect.innerHTML = "";
+    let validMinutesCount = 0;
     let firstValidMinute = null;
-    Array.from(minuteSelect.options).forEach(opt => {
-      const m = parseInt(opt.value, 10);
+
+    const minutesArr = [0, 15, 30, 45];
+    for (let m of minutesArr) {
+      const mStr = String(m).padStart(2, '0');
       let isBlocked = (isToday && selectedHour === currentHour && m <= currentMinute) || isTimeBlocked(dateInputVal, selectedHour, m);
-      
-      opt.disabled = isBlocked;
-      opt.style.display = isBlocked ? "none" : "block"; // 無法預約的分鐘直接隱藏
 
-      if (!isBlocked && firstValidMinute === null) {
-        firstValidMinute = opt.value;
+      if (!isBlocked) {
+        validMinutesCount++;
+        const opt = document.createElement('option');
+        opt.value = mStr;
+        opt.innerText = `${mStr} 分`;
+        minuteSelect.appendChild(opt);
+        if (firstValidMinute === null) firstValidMinute = mStr;
       }
-    });
+    }
 
-    if (minuteSelect.selectedOptions[0] && minuteSelect.selectedOptions[0].disabled) {
-      if (firstValidMinute !== null) {
-        minuteSelect.value = firstValidMinute;
-      }
+    if (validMinutesCount === 0) {
+      minuteSelect.innerHTML = `<option value="">無</option>`;
+    } else if (Array.from(minuteSelect.options).some(opt => opt.value === prevMinute)) {
+      minuteSelect.value = prevMinute;
+    } else if (firstValidMinute !== null) {
+      minuteSelect.value = firstValidMinute;
     }
   }
 
