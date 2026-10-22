@@ -169,7 +169,6 @@
       font-family: inherit !important;
     }
 
-    /* 班別動態標記與更和諧的選取顏色 */
     .flatpickr-day.available-day-yellow {
       background-color: #fdf6e2 !important;
       color: #a37512 !important;
@@ -184,7 +183,6 @@
       border-radius: 50% !important;
       border: 1px solid #b8c9c4 !important;
     }
-    /* 已選擇日期的顏色改為高質感柔和可可棕，與黃藍色完美協調 */
     .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, 
     .flatpickr-day.selected:focus, .flatpickr-day.selected:hover, 
     .flatpickr-day.available-day-yellow.selected, .flatpickr-day.available-day-blue.selected {
@@ -717,20 +715,53 @@
     checkFrontendReminder();
     initLiffLogin();
     
-    // ⚡ 立即初始化日曆，實現零延遲秒開！
+    // 1. 優先從本地讀取快取（有的話瞬間載入）
+    loadCacheData();
+
+    // 2. 零延遲初始化極速日曆
     initFlatpickr();
 
-    // 在背景非同步抓取後台排班與預約資料，抓到後自動重新整理日曆外觀與時段
+    // 3. 背景平行抓取後端最新資料（加速回應）
     fetchBackendConfigAndInit();
   });
 
   window.addEventListener('pageshow', (event) => {
     const submitBtn = document.querySelector('.submit-btn');
     if (submitBtn) {
-      submitBtn.innerText = "送出預約單 (開啟 LINE)";
+      submitBtn.innerText = "送出預預單 (開啟 LINE)";
       submitBtn.disabled = false;
     }
   });
+
+  function loadCacheData() {
+    try {
+      const cachedData = localStorage.getItem("nail_app_backend_cache");
+      if (cachedData) {
+        const data = JSON.parse(cachedData);
+        if (data.shiftGroup) backendShiftGroup = data.shiftGroup;
+        if (data.shiftType) backendShiftType = data.shiftType;
+        if (data.schedules) backendSchedules = data.schedules;
+        if (data.monthlyShiftTypes) backendMonthlyShiftTypes = data.monthlyShiftTypes; 
+        if (data.bookings) globalBookings = data.bookings;
+      }
+    } catch (e) {
+      console.log("讀取快取失敗", e);
+    }
+  }
+
+  function saveCacheData(data) {
+    try {
+      localStorage.setItem("nail_app_backend_cache", JSON.stringify({
+        shiftGroup: data.shiftGroup,
+        shiftType: data.shiftType,
+        schedules: data.schedules,
+        monthlyShiftTypes: data.monthlyShiftTypes,
+        bookings: data.bookings
+      }));
+    } catch (e) {
+      console.log("儲存快取失敗", e);
+    }
+  }
 
   function checkFrontendReminder() {
     const todayDay = new Date().getDate();
@@ -739,23 +770,30 @@
     }
   }
 
+  // ⚡ 優化傳輸效率：增加 keepalive 與高優質快取流轉
   async function fetchBackendConfigAndInit() {
     try {
-      const res = await fetch(SCRIPT_URL, { method: 'GET', mode: 'cors' });
+      const res = await fetch(SCRIPT_URL, { method: 'GET', mode: 'cors', keepalive: true });
       const data = await res.json();
+      
       if (data.shiftGroup) backendShiftGroup = data.shiftGroup;
       if (data.shiftType) backendShiftType = data.shiftType;
       if (data.schedules) backendSchedules = data.schedules;
       if (data.monthlyShiftTypes) backendMonthlyShiftTypes = data.monthlyShiftTypes; 
       if (data.bookings) globalBookings = data.bookings;
       
-      // 資料載入完成後，重新繪製日曆與時間選單
-      if (pickerInstance) {
-        pickerInstance.redraw();
-        validateTime();
-      }
+      // 快取至手機本地端
+      saveCacheData(data);
+      
+      // 非同步批次更新畫面，不卡住使用者觸控操作
+      window.requestAnimationFrame(() => {
+        if (pickerInstance) {
+          pickerInstance.redraw();
+          validateTime();
+        }
+      });
     } catch (e) {
-      console.error("無法取得後端排班與預約資料", e);
+      console.error("背景同步後端資料失敗", e);
     }
   }
 
@@ -902,7 +940,7 @@
     validateTime();
   }
 
-  // 智慧時間鎖定檢查：卸甲專用 2 小時，其餘 5 小時
+  // ⚡ 智慧時間重疊檢查：卸甲專用 2 小時，其餘 5 小時
   function isTimeBlocked(dateStr, hour, minute) {
     let candidateMinutes = hour * 60 + minute;
     for (let b of globalBookings) {
@@ -922,7 +960,7 @@
     return false;
   }
 
-  // 動態生成可預約的時間選項（無法預約的時段直接從下拉選單中移除/不顯示）
+  // ⚡ 動態生成時間選單（無法預約時段隱藏）
   function validateTime() {
     const hourSelect = document.getElementById("bookingHour");
     const minuteSelect = document.getElementById("bookingMinute");
