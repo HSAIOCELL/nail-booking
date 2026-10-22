@@ -77,13 +77,6 @@
       margin-bottom: 18px;
       padding-bottom: 16px;
       border-bottom: 1px solid #eae3d9;
-      transition: opacity 0.3s ease, filter 0.3s ease;
-    }
-
-    .section.disabled-step {
-      opacity: 0.4;
-      pointer-events: none;
-      filter: grayscale(40%);
     }
 
     .section-title {
@@ -175,6 +168,7 @@
       text-align: center;
     }
 
+    /* 色調 */
     .tone-palette-group {
       display: flex;
       justify-content: space-between;
@@ -211,6 +205,7 @@
       font-weight: 700;
     }
 
+    /* 加購卡片 */
     .addon-item-box {
       border: 1.5px dashed #c2b5aa;
       background-color: #fcfaf7;
@@ -265,7 +260,7 @@
     }
     .removal-card.active {
       border-style: solid;
-      border-color: #bdaca2;
+      border-color: #7a6b63;
       background-color: #f2ebe4;
     }
     .removal-card-title {
@@ -334,7 +329,7 @@
     </div>
   </div>
 
-  <!-- Step 1 -->
+  <!-- Step 1: 日期與時間 -->
   <div class="section">
     <div class="section-title">Step 1. 預約日期與時間</div>
     <div class="datetime-container">
@@ -359,13 +354,13 @@
     </div>
   </div>
 
-  <!-- Step 2 -->
+  <!-- Step 2: 單色款式 -->
   <div class="section">
     <div class="section-title">
       Step 2. 單色款式
       <button class="draw-btn" onclick="drawMainColor()">🫯 幫我抽色系</button>
     </div>
-    <select id="mainColor" onchange="onMainColorChange()">
+    <select id="mainColor" onchange="onSelectionChange()">
       <option value="">-- 請選擇色系 (無則留空) --</option>
       <option value="紅色">紅色</option><option value="粉色">粉色</option><option value="橘色">橘色</option>
       <option value="黃色">黃色</option><option value="紅咖色">紅咖色</option><option value="深咖/可可色">深咖/可可色</option>
@@ -375,11 +370,11 @@
     </select>
   </div>
 
-  <!-- Step 3: 加購項目完整選單 -->
-  <div class="section disabled-step" id="step3Section">
+  <!-- Step 3: 加購項目 -->
+  <div class="section">
     <div style="font-weight: bold; color: #5c5049; margin-bottom: 12px; font-size: 16.5px;">Step 3. 加購項目</div>
 
-    <!-- 跳色卡片 -->
+    <!-- 跳色 -->
     <div id="boxJumpColor" class="addon-item-box" onclick="toggleOption('jumpColorSection', event)">
       <div class="addon-header">
         <span>🎨 跳色</span>
@@ -397,23 +392,23 @@
       </div>
     </div>
 
-    <!-- 款式造型卡片 -->
+    <!-- 款式造型 -->
     <div id="boxStyle" class="addon-item-box" onclick="toggleOption('styleSection', event)">
       <div class="addon-header">
         <span>✨ 款式造型</span>
         <span id="badgeStyle" class="addon-badge">50元起 ➕</span>
       </div>
       <div id="styleSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
-        <div class="removal-card-group" style="margin-bottom: 12px; gap: 8px;">
-          <div id="typePartialCard" class="removal-card" onclick="setStyleType('partial')" style="padding: 10px;"><div class="removal-card-title" style="font-size: 14.5px;">局部造型</div></div>
-          <div id="typeFullCard" class="removal-card" onclick="setStyleType('full')" style="padding: 10px;"><div class="removal-card-title" style="font-size: 14.5px;">十指造型</div></div>
+        <div class="removal-card-group" style="gap: 8px;">
+          <div id="typePartialCard" class="removal-card" onclick="setStyleType('partial')"><div class="removal-card-title" style="font-size: 14.5px;">局部造型 (+50)</div></div>
+          <div id="typeFullCard" class="removal-card" onclick="setStyleType('full')"><div class="removal-card-title" style="font-size: 14.5px;">十指造型 (+100)</div></div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Step 4: 色調 -->
-  <div class="section disabled-step" id="step4Section">
+  <div class="section">
     <div class="section-title">Step 4. 色調</div>
     <div class="tone-palette-group">
       <div class="tone-option active" onclick="selectToneDot(this, '隨機')"><span class="color-dot"></span><span class="tone-label">隨機</span></div>
@@ -571,18 +566,11 @@
   }
 
   function loginWithLine() {
-    if (typeof liff !== 'undefined' && liff.isLoggedIn) {
+    if (typeof liff !== 'undefined') {
       if (!liff.isLoggedIn()) {
         liff.login();
       }
     }
-  }
-
-  function onMainColorChange() {
-    const mainColorVal = document.getElementById('mainColor').value;
-    document.getElementById('step3Section').classList.toggle('disabled-step', mainColorVal === "");
-    document.getElementById('step4Section').classList.toggle('disabled-step', mainColorVal === "");
-    onSelectionChange();
   }
 
   function selectToneDot(element, value) {
@@ -614,6 +602,7 @@
   }
 
   function setStyleType(type) {
+    if (event) event.stopPropagation();
     selectedStyleType = (selectedStyleType === type) ? "" : type;
     document.getElementById('typePartialCard').classList.toggle('active', selectedStyleType === 'partial');
     document.getElementById('typeFullCard').classList.toggle('active', selectedStyleType === 'full');
@@ -623,7 +612,7 @@
   function drawMainColor() {
     const select = document.getElementById('mainColor');
     select.selectedIndex = Math.floor(Math.random() * (select.options.length - 1)) + 1;
-    onMainColorChange();
+    onSelectionChange();
   }
 
   function onSelectionChange() {
@@ -632,7 +621,8 @@
     
     if (mainColor !== "") total += 700;
     if (showJumpColor && document.getElementById('jumpColor').value !== "") total += 50;
-    if (showStyle && selectedStyleType !== "") total += 50;
+    if (showStyle && selectedStyleType === 'partial') total += 50;
+    if (showStyle && selectedStyleType === 'full') total += 100;
     if (needRemoval) total += 150;
 
     document.getElementById('totalPrice').innerText = total;
