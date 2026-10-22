@@ -8,10 +8,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=ChenYuluoyan&family=Cinzel:wght@600&display=swap" rel="stylesheet">
   
-  <!-- 引入 Flatpickr 視覺化月曆套件 -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
+  <!-- 引入 Flatpickr 視覺化月曆套件 (使用cdnjs確保穩定載入) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/l10n/zh.js"></script>
 
   <style>
     body {
@@ -721,6 +721,7 @@
   let backendShiftGroup = "B";
   let backendMonthlyShiftTypes = {}; 
   let backendSchedules = {};
+  let pickerInstance = null;
 
   const ALL_COLORS = [
     "紅色", "粉色", "橘色", "黃色", "紅咖色", 
@@ -731,9 +732,15 @@
   let showJumpColor = false, showStyle = false;
   let needRemoval = false;
 
+  // 確保網頁一載入就先強制初始化一次月曆，避免因網路卡住而不顯示
   document.addEventListener('DOMContentLoaded', () => {
     checkFrontendReminder();
     initLiffLogin();
+    
+    // 【防呆機制】立即先建立基本月曆，讓使用者不會看到空白輸入框
+    initFlatpickr();
+
+    // 非同步向後台抓取最新班表與營業微調
     fetchBackendConfigAndInit();
   });
 
@@ -765,11 +772,11 @@
           backendMonthlyShiftTypes[ym] = { shiftGroup: backendShiftGroup, shiftType: backendMonthlyShiftTypes[ym] };
         }
       }
+      // 成功抓取後台資料後，重新整理月曆以套用最新微調狀態
+      initFlatpickr();
     } catch (e) {
-      console.warn("無法取得後端排班設定，已自動啟用預設排班邏輯", e);
+      console.warn("無法取得後端排班設定，已採用預設邏輯", e);
     }
-    // 確保無論網路請求成功或失敗，月曆都一定會順利初始化
-    initFlatpickr();
   }
 
   function checkAdminMode(val) {
@@ -884,12 +891,15 @@
     return startDate;
   }
 
-  let pickerInstance = null;
-
   function initFlatpickr() {
     const taipeiNow = getTaipeiDate();
     const maxDate = new Date(tapeiNow.getFullYear(), taipeiNow.getMonth() + 2, 0); 
-    const defaultAvailableDate = findFirstAvailableDate(taipeiNow);
+    const defaultAvailableDate = findFirstAvailableDate(tapeiNow);
+
+    // 如果已經有初始化過，先銷毀舊的再建立新的
+    if (pickerInstance) {
+      pickerInstance.destroy();
+    }
 
     pickerInstance = flatpickr("#bookingDate", {
       locale: "zh",
