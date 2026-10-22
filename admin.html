@@ -5,41 +5,72 @@
   <title>美甲預約系統 - 後台管理</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; background: #fdfbf7; margin: 0; padding: 20px; color: #333; }
-    .container { max-width: 1050px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-    h2 { text-align: center; color: #d4a373; }
+    :root {
+      --bg-color: #f4f2ee;
+      --card-bg: #ffffff;
+      --primary: #8a7968;
+      --primary-dark: #6e5f50;
+      --accent-green: #738276;
+      --accent-sand: #d4c5b9;
+      --text-main: #4a4541;
+      --text-muted: #8c827a;
+      --border-color: #e6e0d8;
+    }
+
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: var(--bg-color); margin: 0; padding: 25px; color: var(--text-main); }
+    .container { max-width: 1100px; margin: 0 auto; background: var(--card-bg); padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(138, 121, 104, 0.06); border: 1px solid var(--border-color); }
+    h2 { text-align: center; color: var(--primary-dark); font-weight: 600; letter-spacing: 1px; margin-bottom: 25px; }
     
-    #reminderBanner { display: none; background: #fffae6; border: 1px solid #ffe58f; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center; color: #d48806; font-weight: bold; }
+    #reminderBanner { display: none; background: #fdf6ec; border: 1px solid #f2e3d1; padding: 14px; border-radius: 10px; margin-bottom: 25px; text-align: center; color: #b88654; font-size: 14.5px; font-weight: 500; }
 
-    .stats-container { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
-    .stat-card { background: #faedcd; padding: 15px; border-radius: 8px; flex: 1; min-width: 200px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.2s; }
-    .stat-card:hover { transform: translateY(-3px); background: #f5e3be; }
-    .stat-card h3 { margin: 0 0 5px 0; font-size: 14px; color: #666; }
-    .stat-card p { margin: 0; font-size: 20px; font-weight: bold; color: #bc6c25; }
+    /* 統計卡片莫蘭迪色系 */
+    .stats-container { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+    .stat-card { background: #f7f5f0; padding: 20px 15px; border-radius: 12px; flex: 1; min-width: 210px; text-align: center; border: 1px solid var(--border-color); cursor: pointer; transition: all 0.25s ease; }
+    .stat-card:hover { transform: translateY(-3px); background: #f0ece5; border-color: var(--accent-sand); }
+    .stat-card h3 { margin: 0 0 8px 0; font-size: 13.5px; color: var(--text-muted); font-weight: normal; }
+    .stat-card p { margin: 0; font-size: 22px; font-weight: bold; color: var(--primary-dark); }
 
-    .add-section { background: #fefae0; border: 1px solid #faedcd; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-    .add-section h3 { margin-top: 0; color: #bc6c25; font-size: 16px; margin-bottom: 10px; }
-    .form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
-    .form-row input, .form-row select { padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; flex: 1; min-width: 120px; }
-    .btn-add { background: #606c38; color: white; border: none; padding: 9px 18px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; }
-    .btn-add:hover { background: #283618; }
-
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { border: 1px solid #e0e0e0; padding: 10px; text-align: center; font-size: 14px; }
-    th { background: #fefae0; color: #555; }
-    tr:nth-child(even) { background: #f9f9f9; }
-    .loading { text-align: center; padding: 20px; color: #888; }
-    .btn-refresh { background: #d4a373; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-bottom: 15px; }
-    .btn-refresh:hover { background: #bc6c25; }
+    /* 區塊樣式 */
+    .add-section { background: #faf8f5; border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+    .add-section h3 { margin-top: 0; color: var(--primary-dark); font-size: 15px; margin-bottom: 15px; font-weight: 600; }
+    .form-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+    .form-row:last-child { margin-bottom: 0; }
+    .form-row input, .form-row select { padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 14px; flex: 1; min-width: 140px; background: #fff; color: var(--text-main); outline: none; }
+    .form-row input:focus, .form-row select:focus { border-color: var(--primary); }
     
-    select, input[type="number"] { padding: 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 13px; text-align: center; }
-    .btn-save { background: #606c38; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; }
-    .btn-save:hover { background: #283618; }
+    .btn-action { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.2s; }
+    .btn-action:hover { background: var(--primary-dark); }
 
-    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center; }
-    .modal-content { background: #fff; padding: 25px; border-radius: 12px; width: 90%; max-width: 700px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); position: relative; }
-    .close-btn { position: absolute; right: 15px; top: 10px; font-size: 24px; cursor: pointer; color: #888; }
-    .close-btn:hover { color: #333; }
+    /* 小月曆預覽排班格 */
+    .preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+    .calendar-day { background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 4px; text-align: center; min-height: 50px; display: flex; flex-direction: column; justify-content: space-between; }
+    .calendar-day .day-num { font-size: 12px; color: var(--text-muted); font-weight: bold; }
+    .calendar-day .day-status { font-size: 11px; padding: 2px 4px; border-radius: 4px; font-weight: 500; }
+    
+    /* 排班狀態標籤顏色 */
+    .status-work { background: #f2e9e4; color: #9a7b70; } /* 上班 */
+    .status-off { background: #e8ede9; color: var(--accent-green); } /* 休假 */
+    .status-overtime { background: #faedcd; color: #bc6c25; } /* 加班 */
+    .status-closed { background: #f5f5f5; color: #aaa; text-decoration: line-through; } /* 閉店 */
+
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid var(--border-color); padding: 12px 10px; text-align: center; font-size: 14px; }
+    th { background: #f7f5f0; color: var(--text-muted); font-weight: 500; }
+    tr:nth-child(even) { background: #faf9f6; }
+    .loading { text-align: center; padding: 25px; color: var(--text-muted); }
+    
+    .btn-refresh { background: var(--accent-sand); color: var(--primary-dark); border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; margin-bottom: 15px; transition: background 0.2s; }
+    .btn-refresh:hover { background: #c5b4a4; }
+    
+    select, input[type="number"] { padding: 6px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 13px; text-align: center; }
+    .btn-save { background: var(--accent-green); color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; }
+    .btn-save:hover { background: #5c6b5f; }
+
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(74, 69, 65, 0.4); justify-content: center; align-items: center; }
+    .modal-content { background: var(--card-bg); padding: 30px; border-radius: 16px; width: 90%; max-width: 700px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: relative; }
+    .close-btn { position: absolute; right: 20px; top: 15px; font-size: 24px; cursor: pointer; color: var(--text-muted); }
+    .close-btn:hover { color: var(--text-main); }
   </style>
 </head>
 <body>
@@ -70,37 +101,47 @@
     </div>
   </div>
 
-  <!-- 班別設定區塊 (加入月份選擇) -->
-  <div class="add-section" style="background: #f4ece1; border-color: #e5d4c0;">
-    <h3 style="color: #bc6c25;">🔄 班別與月份設定</h3>
+  <!-- 班別與月份設定 -->
+  <div class="add-section">
+    <h3>🔄 班別與月份設定</h3>
     <div class="form-row">
-      <label style="font-weight: bold; font-size: 14px;">選擇月份：</label>
-      <input type="month" id="targetMonth" style="flex: 1;">
-      <label style="font-weight: bold; font-size: 14px;">組別：</label>
-      <select id="shiftGroup" style="flex: 0.8;">
+      <input type="month" id="targetMonth" onchange="renderSchedulePreview()">
+      <select id="shiftGroup" onchange="renderSchedulePreview()">
         <option value="B">B 班</option>
         <option value="A">A 班</option>
       </select>
-      <label style="font-weight: bold; font-size: 14px;">類型：</label>
-      <select id="shiftType" style="flex: 0.8;">
+      <select id="shiftType" onchange="renderSchedulePreview()">
         <option value="夜班">夜班</option>
         <option value="日班">日班</option>
       </select>
-      <button class="btn-add" style="background: #bc6c25; flex: 1;" onclick="updateBaseShift()">儲存該月班別</button>
+      <button class="btn-action" onclick="updateBaseShift()">儲存班別設定</button>
     </div>
   </div>
 
-  <div class="add-section" style="background: #eef2ed; border-color: #d8e2dc;">
-    <h3 style="color: #3a5a40;">📅 手動排班與時段微調 (加班 / 臨時休假)</h3>
+  <!-- 班表小預覽區塊 -->
+  <div class="add-section" style="background: #f4f2ee;">
+    <div class="preview-header">
+      <h3 style="margin: 0;">📅 當月排班狀態小預覽</h3>
+      <span id="previewMonthTitle" style="font-size: 13.5px; color: var(--text-muted); font-weight: bold;"></span>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; font-weight: bold;">
+      <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+    </div>
+    <div id="calendarPreviewGrid" class="calendar-grid">
+      <!-- 動態產生月曆格子 -->
+    </div>
+  </div>
+
+  <!-- 手動排班與時段微調 -->
+  <div class="add-section">
+    <h3>✨ 手動排班與時段微調 (加班 / 臨時休假)</h3>
     <div class="form-row">
       <input type="date" id="scheduleDate" required>
       <select id="scheduleStatus">
         <option value="開放">強制開放預約 (加班)</option>
         <option value="關閉">強制關閉預約 (休假)</option>
       </select>
-    </div>
-    <div class="form-row">
-      <select id="scheduleSlots" style="flex: 3;">
+      <select id="scheduleSlots">
         <option value="">-- 全天開放 (或照常) --</option>
         <option value="10:00">10:00 時段</option>
         <option value="12:00">12:00 時段</option>
@@ -109,10 +150,11 @@
         <option value="18:00">18:00 時段</option>
         <option value="20:00">20:00 時段</option>
       </select>
-      <button class="btn-add" style="background: #3a5a40; flex: 1;" onclick="updateScheduleOverride()">儲存排班微調</button>
+      <button class="btn-action" style="background: var(--accent-green);" onclick="updateScheduleOverride()">儲存微調</button>
     </div>
   </div>
 
+  <!-- 手動新增預約 -->
   <div class="add-section">
     <h3>➕ 手動新增預約 / 記帳</h3>
     <div class="form-row">
@@ -122,7 +164,7 @@
       <input type="text" id="newItems" placeholder="項目 (例: 單色光療)" required>
       <input type="number" id="newPrice" placeholder="金額 (NT$)" required min="0">
       <input type="number" id="newCost" placeholder="成本 (NT$)" required min="0" value="0">
-      <button class="btn-add" onclick="manualAddBooking()">新增紀錄</button>
+      <button class="btn-action" onclick="manualAddBooking()">新增紀錄</button>
     </div>
   </div>
 
@@ -148,10 +190,11 @@
   </table>
 </div>
 
+<!-- 年度趨勢圖彈窗 -->
 <div id="chartModal" class="modal">
   <div class="modal-content">
     <span class="close-btn" onclick="closeModal()">&times;</span>
-    <h3 id="modalTitle" style="color: #d4a373; text-align: center; margin-top: 0;">📈 年度趨勢折線圖</h3>
+    <h3 id="modalTitle" style="color: var(--primary-dark); text-align: center; margin-top: 0;">📈 年度趨勢折線圖</h3>
     <div style="margin-bottom: 15px; text-align: center;">
       <select id="selectYear" onchange="renderChart()" style="padding: 6px; border-radius: 6px; font-size: 14px;"></select>
     </div>
@@ -164,8 +207,10 @@
 <script>
   const scriptUrl = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
   let globalBookings = []; 
+  let globalSchedules = {};
   let trendChartInstance = null;
   let currentChartType = 'revenue';
+  const anchorBaseDate = "2026-10-23"; // 基準日
 
   document.addEventListener('DOMContentLoaded', () => {
     const today = new Date();
@@ -174,7 +219,7 @@
     
     document.getElementById('newDate').value = todayStr;
     document.getElementById('scheduleDate').value = todayStr;
-    document.getElementById('targetMonth').value = currentYearMonth; // 預設帶入當前月份
+    document.getElementById('targetMonth').value = currentYearMonth;
     
     checkReminder();
     fetchBookings();
@@ -199,9 +244,12 @@
       .then(resData => {
         tableBody.innerHTML = "";
         globalBookings = resData.bookings || [];
+        globalSchedules = resData.schedules || {};
         
         if (resData.shiftGroup) document.getElementById('shiftGroup').value = resData.shiftGroup;
         if (resData.shiftType) document.getElementById('shiftType').value = resData.shiftType;
+
+        renderSchedulePreview(); // 渲染小月曆
 
         if (globalBookings.length === 0) {
           tableBody.innerHTML = `<tr><td colspan="9" class="loading">目前沒有預約資料</td></tr>`;
@@ -260,6 +308,76 @@
       });
   }
 
+  // 渲染當月班表小預覽邏輯
+  function renderSchedulePreview() {
+    const targetMonthVal = document.getElementById('targetMonth').value; // "YYYY-MM"
+    if (!targetMonthVal) return;
+
+    const [year, month] = targetMonthVal.split('-').map(Number);
+    document.getElementById('previewMonthTitle').innerText = `${year} 年 ${month} 月排班預覽`;
+
+    const grid = document.getElementById('calendarPreviewGrid');
+    grid.innerHTML = "";
+
+    const firstDayIndex = new Date(year, month - 1, 1).getDay(); // 當月第一天星期幾
+    const totalDays = new Date(year, month, 0).getDate(); // 當月總天數
+
+    const anchorDate = new Date(anchorBaseDate + "T00:00:00");
+    const shiftGroup = document.getElementById('shiftGroup').value;
+
+    // 補齊前面空白格
+    for (let i = 0; i < firstDayIndex; i++) {
+      const emptyCell = document.createElement('div');
+      emptyCell.className = 'calendar-day';
+      emptyCell.style.background = 'transparent';
+      emptyCell.style.border = 'none';
+      grid.appendChild(emptyCell);
+    }
+
+    for (let day = 1; day <= totalDays; day++) {
+      const dateObj = new Date(year, month - 1, day);
+      const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      
+      const cell = document.createElement('div');
+      cell.className = 'calendar-day';
+
+      let statusText = "";
+      let statusClass = "";
+
+      // 1. 檢查後台覆寫
+      if (globalSchedules[dateStr]) {
+        const s = globalSchedules[dateStr];
+        if (s.status === "開放") {
+          statusText = s.slots ? `加班(${s.slots})` : "加班";
+          statusClass = "status-overtime";
+        } else if (s.status === "關閉") {
+          statusText = "休假";
+          statusClass = "status-closed";
+        }
+      } else {
+        // 2. 依二休二與 A/B 班計算
+        const diffDays = Math.round((dateObj - anchorDate) / (1000 * 60 * 60 * 24));
+        let cycleDay = ((diffDays % 4) + 4) % 4;
+        if (shiftGroup === "A") cycleDay = (cycleDay + 2) % 4; // A班錯開兩天
+
+        const isWorkDay = (cycleDay === 0 || cycleDay === 1);
+        if (isWorkDay) {
+          statusText = "上班";
+          statusClass = "status-work";
+        } else {
+          statusText = "休假";
+          statusClass = "status-off";
+        }
+      }
+
+      cell.innerHTML = `
+        <span class="day-num">${day}</span>
+        <span class="day-status ${statusClass}">${statusText}</span>
+      `;
+      grid.appendChild(cell);
+    }
+  }
+
   function updateBaseShift() {
     const targetMonth = document.getElementById('targetMonth').value;
     const shiftGroup = document.getElementById('shiftGroup').value;
@@ -273,8 +391,10 @@
     })
       .then(res => res.json())
       .then(res => {
-        if (res.result === "success") alert(`【${targetMonth}】班別已成功更新為：${shiftGroup}班 - ${shiftType}！`);
-        else alert("更新失敗");
+        if (res.result === "success") {
+          alert(`【${targetMonth}】班別已成功更新！`);
+          renderSchedulePreview();
+        } else alert("更新失敗");
       })
       .catch(err => alert("連線發生錯誤！"));
   }
@@ -289,8 +409,10 @@
     fetch(scriptUrl, { method: "POST", body: JSON.stringify({ action: "updateSchedule", targetDate, status, slots }) })
       .then(res => res.json())
       .then(res => {
-        if (res.result === "success") alert(`日期 ${targetDate} 已成功更新微調！`);
-        else alert("更新失敗");
+        if (res.result === "success") { 
+          alert(`日期 ${targetDate} 已成功更新微調！`); 
+          fetchBookings(); 
+        } else alert("更新失敗");
       })
       .catch(err => alert("連線發生錯誤！"));
   }
@@ -345,7 +467,7 @@
     const ctx = document.getElementById('trendChart').getContext('2d');
     if (trendChartInstance) trendChartInstance.destroy();
 
-    const chartColor = currentChartType === 'revenue' ? '#bc6c25' : '#3a5a40';
+    const chartColor = currentChartType === 'revenue' ? '#8a7968' : '#738276';
     trendChartInstance = new Chart(ctx, {
       type: 'line',
       data: {
@@ -354,7 +476,7 @@
           label: `${selectedYear} 年每月${currentChartType === 'revenue' ? '營收' : '淨利'} (NT$)`,
           data: monthlyData,
           borderColor: chartColor,
-          backgroundColor: currentChartType === 'revenue' ? 'rgba(188, 108, 37, 0.1)' : 'rgba(58, 90, 64, 0.1)',
+          backgroundColor: currentChartType === 'revenue' ? 'rgba(138, 121, 104, 0.08)' : 'rgba(115, 130, 118, 0.08)',
           borderWidth: 3, fill: true, tension: 0.3, pointBackgroundColor: chartColor, pointRadius: 5
         }]
       },
