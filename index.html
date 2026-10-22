@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=ChenYuluoyan&family=Cinzel:wght@600&display=swap" rel="stylesheet">
   
-  <!-- 引入 Flatpickr 視覺化月曆套件 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
@@ -132,18 +131,28 @@
       box-shadow: 0 10px 25px rgba(120, 108, 100, 0.15) !important;
       border-radius: 14px !important;
     }
-    .flatpickr-day.available-day {
+
+    /* 可預約日標籤：白班=黃色 / 夜班=莫蘭迪藍灰色 */
+    .flatpickr-day.available-day-yellow {
       background-color: #fdf6e2 !important;
       color: #a37512 !important;
       font-weight: bold !important;
       border-radius: 50% !important;
       border: 1px solid #f2d896 !important;
     }
-    .flatpickr-day.available-day.selected {
+    .flatpickr-day.available-day-blue {
+      background-color: #e5ece9 !important;
+      color: #4c6b61 !important;
+      font-weight: bold !important;
+      border-radius: 50% !important;
+      border: 1px solid #b8c9c4 !important;
+    }
+    .flatpickr-day.available-day-yellow.selected, .flatpickr-day.available-day-blue.selected {
       background-color: #7a6b63 !important;
       color: #ffffff !important;
       border-color: #5c5049 !important;
     }
+
     .flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover {
       color: #d1c7bd !important;
       background: transparent !important;
@@ -277,33 +286,6 @@
 
     .hidden { display: none !important; }
 
-    .checkbox-grid {
-      display: grid;
-      grid-template-columns: 0.85fr 1.15fr;
-      gap: 8px 10px;
-      padding: 10px;
-      background-color: #ffffff;
-      border-radius: 12px;
-      border: 1px solid #ebdcd3;
-    }
-    .chip-item {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 8px 10px;
-      border-radius: 20px;
-      color: #524741;
-      font-size: 14.5px;
-      font-weight: 500;
-      cursor: pointer;
-    }
-    .chip-item input { display: none; }
-    .chip-item:has(input:checked) {
-      background-color: #7a6b63;
-      color: #ffffff;
-      font-weight: 600;
-    }
-    
     .total-box {
       background-color: #ebdcd3;
       color: #4e423b;
@@ -328,7 +310,6 @@
       box-shadow: 0 4px 10px rgba(122, 107, 99, 0.2);
     }
     .submit-btn:hover { background-color: #5c5049; }
-    .sub-input { margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -342,10 +323,11 @@
     ⚠️ 提醒：目前正值 15 號至 20 號期間，請留意下兩個月的最新班表與預約動態！
   </div>
 
+  <!-- 暱稱欄位已統一為「預約暱稱」 -->
   <div class="section">
-    <div class="section-title">您的稱呼</div>
+    <div class="section-title">預約暱稱</div>
     <div style="display: flex; gap: 8px;">
-      <input type="text" id="customerName" placeholder="請輸入您的稱呼" style="flex: 1;">
+      <input type="text" id="customerName" placeholder="請輸入您的預約暱稱" style="flex: 1;">
       <button type="button" class="draw-btn" onclick="loginWithLine()" style="white-space: nowrap; background: #06c755; color: #fff; border: none;">連動 LINE 暱稱</button>
     </div>
   </div>
@@ -456,6 +438,7 @@
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
 
   let backendShiftGroup = "B";
+  let backendShiftType = "夜班"; 
   let backendSchedules = {};
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -476,6 +459,7 @@
       const res = await fetch(SCRIPT_URL, { method: 'GET', mode: 'cors' });
       const data = await res.json();
       if (data.shiftGroup) backendShiftGroup = data.shiftGroup;
+      if (data.shiftType) backendShiftType = data.shiftType;
       if (data.schedules) backendSchedules = data.schedules;
     } catch (e) {
       console.error("無法取得後端排班設定", e);
@@ -506,6 +490,8 @@
     const taipeiNow = new Date();
     const maxDate = new Date(taipeiNow.getFullYear(), taipeiNow.getMonth() + 2, 0);
 
+    const availableClassName = (backendShiftType === "日班") ? "available-day-yellow" : "available-day-blue";
+
     flatpickr("#bookingDate", {
       locale: "zh",
       dateFormat: "Y-m-d",
@@ -535,7 +521,7 @@
         }
 
         if (isAvailable && dayElement.dateObj >= taipeiNow) {
-          dayElement.classList.add("available-day");
+          dayElement.classList.add(availableClassName);
         }
       },
       onChange: function() { validateTime(); }
@@ -635,7 +621,7 @@
   function sendBooking() {
     const customerName = document.getElementById('customerName').value.trim();
     const bookingDate = document.getElementById('bookingDate').value;
-    if (!customerName || !bookingDate) return alert("請填寫您的稱呼並選擇預約日期！");
+    if (!customerName || !bookingDate) return alert("請填寫您的預約暱稱並選擇預約日期！");
 
     const bookingTime = `${document.getElementById('bookingHour').value}:${document.getElementById('bookingMinute').value}`;
     const totalPrice = document.getElementById('totalPrice').innerText;
@@ -657,7 +643,7 @@
         cost: 0
       })
     }).then(() => {
-      let details = `【美甲服務預約單】\n• 貴賓稱呼：${customerName}\n• 預約時間：${bookingDate} ${bookingTime}\n• 預計總金額：NT$ ${totalPrice} 元`;
+      let details = `【美甲服務預約單】\n• 預約暱稱：${customerName}\n• 預約時間：${bookingDate} ${bookingTime}\n• 預計總金額：NT$ ${totalPrice} 元`;
       window.location.href = `https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodeURIComponent(details)}`;
     });
   }
