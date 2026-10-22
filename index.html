@@ -218,6 +218,7 @@
       padding: 12px 14px;
       margin-bottom: 12px;
       cursor: pointer;
+      transition: all 0.2s ease;
     }
     .addon-item-box.active {
       border-style: solid;
@@ -254,12 +255,13 @@
       border: 1.5px dashed #c2b5aa;
       background-color: #fcfaf7;
       border-radius: 12px;
-      padding: 16px 10px;
+      padding: 14px 10px;
       text-align: center;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: all 0.2s ease;
     }
     .removal-card.active {
       border-style: solid;
@@ -267,7 +269,7 @@
       background-color: #f2ebe4;
     }
     .removal-card-title {
-      font-size: 16.5px;
+      font-size: 15.5px;
       font-weight: bold;
       color: #4e423b;
       margin: 0;
@@ -323,7 +325,7 @@
     ⚠️ 提醒：目前正值 15 號至 20 號期間，請留意下兩個月的最新班表與預約動態！
   </div>
 
-  <!-- 暱稱欄位已統一為「預約暱稱」 -->
+  <!-- 預約暱稱 -->
   <div class="section">
     <div class="section-title">預約暱稱</div>
     <div style="display: flex; gap: 8px;">
@@ -332,6 +334,7 @@
     </div>
   </div>
 
+  <!-- Step 1 -->
   <div class="section">
     <div class="section-title">Step 1. 預約日期與時間</div>
     <div class="datetime-container">
@@ -356,6 +359,7 @@
     </div>
   </div>
 
+  <!-- Step 2 -->
   <div class="section">
     <div class="section-title">
       Step 2. 單色款式
@@ -371,9 +375,11 @@
     </select>
   </div>
 
+  <!-- Step 3: 加購項目完整選單 -->
   <div class="section disabled-step" id="step3Section">
     <div style="font-weight: bold; color: #5c5049; margin-bottom: 12px; font-size: 16.5px;">Step 3. 加購項目</div>
 
+    <!-- 跳色卡片 -->
     <div id="boxJumpColor" class="addon-item-box" onclick="toggleOption('jumpColorSection', event)">
       <div class="addon-header">
         <span>🎨 跳色</span>
@@ -391,6 +397,7 @@
       </div>
     </div>
 
+    <!-- 款式造型卡片 -->
     <div id="boxStyle" class="addon-item-box" onclick="toggleOption('styleSection', event)">
       <div class="addon-header">
         <span>✨ 款式造型</span>
@@ -398,15 +405,14 @@
       </div>
       <div id="styleSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
         <div class="removal-card-group" style="margin-bottom: 12px; gap: 8px;">
-          <div id="typePartialCard" class="removal-card" onclick="setStyleType('partial')" style="padding: 10px;"><div class="removal-card-title" style="font-size: 15px;">局部造型</div></div>
-          <div id="typeFullCard" class="removal-card" onclick="setStyleType('full')" style="padding: 10px;"><div class="removal-card-title" style="font-size: 15px;">十指造型</div></div>
+          <div id="typePartialCard" class="removal-card" onclick="setStyleType('partial')" style="padding: 10px;"><div class="removal-card-title" style="font-size: 14.5px;">局部造型</div></div>
+          <div id="typeFullCard" class="removal-card" onclick="setStyleType('full')" style="padding: 10px;"><div class="removal-card-title" style="font-size: 14.5px;">十指造型</div></div>
         </div>
-        <input type="radio" name="styleType" value="partial" id="radioPartial" style="display:none;">
-        <input type="radio" name="styleType" value="full" id="radioFull" style="display:none;">
       </div>
     </div>
   </div>
 
+  <!-- Step 4: 色調 -->
   <div class="section disabled-step" id="step4Section">
     <div class="section-title">Step 4. 色調</div>
     <div class="tone-palette-group">
@@ -417,14 +423,16 @@
     <input type="hidden" id="selectedTone" value="隨機">
   </div>
 
+  <!-- Step 5: 卸甲服務 -->
   <div class="section">
     <div class="section-title">Step 5. 卸甲服務</div>
     <div class="removal-card-group">
-      <div id="removalYesCard" class="removal-card" onclick="setRemoval(true)"><div class="removal-card-title">需要卸甲</div></div>
+      <div id="removalYesCard" class="removal-card" onclick="setRemoval(true)"><div class="removal-card-title">需要卸甲 (+150)</div></div>
       <div id="removalNoCard" class="removal-card active" onclick="setRemoval(false)"><div class="removal-card-title">不需要</div></div>
     </div>
   </div>
 
+  <!-- 總金額 -->
   <div class="total-box">
     預計總金額：NT$ <span id="totalPrice">0</span> 元
   </div>
@@ -440,6 +448,9 @@
   let backendShiftGroup = "B";
   let backendShiftType = "夜班"; 
   let backendSchedules = {};
+
+  let showJumpColor = false, showStyle = false, needRemoval = false;
+  let selectedStyleType = "";
 
   document.addEventListener('DOMContentLoaded', () => {
     checkFrontendReminder();
@@ -559,8 +570,14 @@
     } catch (err) { console.log(err); }
   }
 
-  let showJumpColor = false, showStyle = false, needRemoval = false;
-  
+  function loginWithLine() {
+    if (typeof liff !== 'undefined' && liff.isLoggedIn) {
+      if (!liff.isLoggedIn()) {
+        liff.login();
+      }
+    }
+  }
+
   function onMainColorChange() {
     const mainColorVal = document.getElementById('mainColor').value;
     document.getElementById('step3Section').classList.toggle('disabled-step', mainColorVal === "");
@@ -597,10 +614,9 @@
   }
 
   function setStyleType(type) {
-    document.getElementById('radioPartial').checked = (type === 'partial');
-    document.getElementById('radioFull').checked = (type === 'full');
-    document.getElementById('typePartialCard').classList.toggle('active', type === 'partial');
-    document.getElementById('typeFullCard').classList.toggle('active', type === 'full');
+    selectedStyleType = (selectedStyleType === type) ? "" : type;
+    document.getElementById('typePartialCard').classList.toggle('active', selectedStyleType === 'partial');
+    document.getElementById('typeFullCard').classList.toggle('active', selectedStyleType === 'full');
     onSelectionChange();
   }
 
@@ -612,9 +628,13 @@
 
   function onSelectionChange() {
     let total = 0;
-    if (document.getElementById('mainColor').value !== "") total += 700;
+    const mainColor = document.getElementById('mainColor').value;
+    
+    if (mainColor !== "") total += 700;
     if (showJumpColor && document.getElementById('jumpColor').value !== "") total += 50;
+    if (showStyle && selectedStyleType !== "") total += 50;
     if (needRemoval) total += 150;
+
     document.getElementById('totalPrice').innerText = total;
   }
 
@@ -625,16 +645,21 @@
 
     const bookingTime = `${document.getElementById('bookingHour').value}:${document.getElementById('bookingMinute').value}`;
     const totalPrice = document.getElementById('totalPrice').innerText;
+    const toneVal = document.getElementById('selectedTone').value;
+    const mainColorVal = document.getElementById('mainColor').value;
+    const jumpColorVal = document.getElementById('jumpColor').value;
     
     let itemsArr = [];
     if (needRemoval) itemsArr.push("需要卸甲");
-    if (document.getElementById('mainColor').value) itemsArr.push(`單色款式: ${document.getElementById('mainColor').value}`);
+    if (mainColorVal) itemsArr.push(`單色款式: ${mainColorVal}`);
+    if (showJumpColor && jumpColorVal) itemsArr.push(`跳色: ${jumpColorVal}`);
+    if (showStyle && selectedStyleType) itemsArr.push(`款式造型: ${selectedStyleType === 'partial' ? '局部造型' : '十指造型'}`);
+    if (toneVal) itemsArr.push(`色調: ${toneVal}`);
 
     fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
       body: JSON.stringify({
-        bookingId: 'M' + Date.now().toString().slice(-6),
         customerName: customerName,
         date: bookingDate,
         time: bookingTime,
@@ -643,7 +668,7 @@
         cost: 0
       })
     }).then(() => {
-      let details = `【美甲服務預約單】\n• 預約暱稱：${customerName}\n• 預約時間：${bookingDate} ${bookingTime}\n• 預計總金額：NT$ ${totalPrice} 元`;
+      let details = `【美甲服務預約單】\n• 預約暱稱：${customerName}\n• 預約時間：${bookingDate} ${bookingTime}\n• 項目細節：${itemsArr.join(' / ')}\n• 預計總金額：NT$ ${totalPrice} 元`;
       window.location.href = `https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodeURIComponent(details)}`;
     });
   }
