@@ -3,24 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <title>美甲預約系統 - 後台管理</title>
-  <!-- 引入 Chart.js 用來畫折線圖 -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { font-family: Arial, sans-serif; background: #fdfbf7; margin: 0; padding: 20px; color: #333; }
     .container { max-width: 1050px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
     h2 { text-align: center; color: #d4a373; }
     
-    /* 15號提醒橫幅 */
     #reminderBanner { display: none; background: #fffae6; border: 1px solid #ffe58f; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center; color: #d48806; font-weight: bold; }
 
-    /* 統計卡片樣式 */
     .stats-container { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
     .stat-card { background: #faedcd; padding: 15px; border-radius: 8px; flex: 1; min-width: 200px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.2s; }
     .stat-card:hover { transform: translateY(-3px); background: #f5e3be; }
     .stat-card h3 { margin: 0 0 5px 0; font-size: 14px; color: #666; }
     .stat-card p { margin: 0; font-size: 20px; font-weight: bold; color: #bc6c25; }
 
-    /* 區塊通用樣式 */
     .add-section { background: #fefae0; border: 1px solid #faedcd; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
     .add-section h3 { margin-top: 0; color: #bc6c25; font-size: 16px; margin-bottom: 10px; }
     .form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
@@ -40,7 +36,6 @@
     .btn-save { background: #606c38; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; }
     .btn-save:hover { background: #283618; }
 
-    /* 彈跳視窗 (Modal) 樣式 */
     .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center; }
     .modal-content { background: #fff; padding: 25px; border-radius: 12px; width: 90%; max-width: 700px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); position: relative; }
     .close-btn { position: absolute; right: 15px; top: 10px; font-size: 24px; cursor: pointer; color: #888; }
@@ -52,12 +47,10 @@
 <div class="container">
   <h2>美甲預約管理後台</h2>
 
-  <!-- 15號提醒通知區塊 -->
   <div id="reminderBanner">
     ⚠️ 貼心提醒：目前正值 15 號至 20 號期間，請記得檢查並準備規劃與更新下兩個月的班表喔！
   </div>
   
-  <!-- 財務統計看板 (點擊營收或淨利卡片可看年度趨勢) -->
   <div class="stats-container">
     <div class="stat-card" onclick="openModal('revenue')">
       <h3>當月預估營收 (點擊看年度趨勢)</h3>
@@ -77,7 +70,23 @@
     </div>
   </div>
 
-  <!-- 手動排班與時段微調區塊 -->
+  <div class="add-section" style="background: #f4ece1; border-color: #e5d4c0;">
+    <h3 style="color: #bc6c25;">🔄 現行本月班別設定 (做二休二循環)</h3>
+    <div class="form-row">
+      <label style="font-weight: bold; font-size: 14px;">組別選擇：</label>
+      <select id="shiftGroup">
+        <option value="B">B 班 (10/23 為上班第一天)</option>
+        <option value="A">A 班 (10/23 為休假第一天)</option>
+      </select>
+      <label style="font-weight: bold; font-size: 14px;">班別類型：</label>
+      <select id="shiftType">
+        <option value="夜班">夜班</option>
+        <option value="日班">日班</option>
+      </select>
+      <button class="btn-add" style="background: #bc6c25;" onclick="updateBaseShift()">儲存班別設定</button>
+    </div>
+  </div>
+
   <div class="add-section" style="background: #eef2ed; border-color: #d8e2dc;">
     <h3 style="color: #3a5a40;">📅 手動排班與時段微調 (加班 / 臨時休假)</h3>
     <div class="form-row">
@@ -97,11 +106,10 @@
         <option value="18:00">18:00 時段</option>
         <option value="20:00">20:00 時段</option>
       </select>
-      <button class="btn-add" style="background: #3a5a40; flex: 1;" onclick="updateScheduleOverride()">儲存排班設定</button>
+      <button class="btn-add" style="background: #3a5a40; flex: 1;" onclick="updateScheduleOverride()">儲存排班微調</button>
     </div>
   </div>
 
-  <!-- 手動新增預約/記帳區塊 -->
   <div class="add-section">
     <h3>➕ 手動新增預約 / 記帳</h3>
     <div class="form-row">
@@ -137,15 +145,12 @@
   </table>
 </div>
 
-<!-- 年度趨勢折線圖彈跳視窗 -->
 <div id="chartModal" class="modal">
   <div class="modal-content">
     <span class="close-btn" onclick="closeModal()">&times;</span>
     <h3 id="modalTitle" style="color: #d4a373; text-align: center; margin-top: 0;">📈 年度趨勢折線圖</h3>
     <div style="margin-bottom: 15px; text-align: center;">
-      <select id="selectYear" onchange="renderChart()" style="padding: 6px; border-radius: 6px; font-size: 14px;">
-        <!-- 動態帶入年份 -->
-      </select>
+      <select id="selectYear" onchange="renderChart()" style="padding: 6px; border-radius: 6px; font-size: 14px;"></select>
     </div>
     <div style="position: relative; height: 300px; width: 100%;">
       <canvas id="trendChart"></canvas>
@@ -154,10 +159,11 @@
 </div>
 
 <script>
+  // 請確認這裡的網址是否為您最新的 Google Apps Script 部署網址
   const scriptUrl = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
   let globalBookings = []; 
   let trendChartInstance = null;
-  let currentChartType = 'revenue'; // 'revenue' 或 'profit'
+  let currentChartType = 'revenue';
 
   document.addEventListener('DOMContentLoaded', () => {
     const today = new Date().toISOString().split('T')[0];
@@ -176,4 +182,206 @@
 
   function fetchBookings() {
     const tableBody = document.getElementById('bookingTableBody');
-    tableBody.innerHTML
+    tableBody.innerHTML = `<tr><td colspan="9" class="loading">正在讀取最新資料...</td></tr>`;
+
+    // 加上 mode: 'cors' 確保跨網域讀取穩定
+    fetch(scriptUrl, { method: 'GET', mode: 'cors' })
+      .then(response => {
+        if (!response.ok) throw new Error("網路回應失敗");
+        return response.json();
+      })
+      .then(resData => {
+        tableBody.innerHTML = "";
+        globalBookings = resData.bookings || [];
+        
+        if (resData.shiftGroup) document.getElementById('shiftGroup').value = resData.shiftGroup;
+        if (resData.shiftType) document.getElementById('shiftType').value = resData.shiftType;
+
+        if (globalBookings.length === 0) {
+          tableBody.innerHTML = `<tr><td colspan="9" class="loading">目前沒有預約資料</td></tr>`;
+          updateFinance(0, 0, 0);
+          return;
+        }
+
+        let totalRev = 0, totalCost = 0;
+        const now = new Date();
+        const currentYearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        let currentMonthRev = 0;
+
+        globalBookings.forEach(row => {
+          const bookingId = row.bookingId || "";
+          const customerName = row.customerName || "";
+          const date = row.date || "";
+          const time = row.time || "";
+          const items = row.items || "";
+          const price = Number(row.totalPrice) || 0;
+          const status = row.status || "預約中";
+          const cost = Number(row.cost) || 0;
+
+          if (status !== "已取消") {
+            totalRev += price;
+            totalCost += cost;
+            if (date.startsWith(currentYearMonth)) currentMonthRev += price;
+          }
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>#${bookingId}</td>
+            <td>${customerName}</td>
+            <td>${date}</td>
+            <td>${time}</td>
+            <td>${items}</td>
+            <td>NT$ ${price}</td>
+            <td>
+              <select id="status_${bookingId}">
+                <option value="有效" ${status === '有效' ? 'selected' : ''}>有效</option>
+                <option value="預約中" ${status === '預約中' ? 'selected' : ''}>預約中</option>
+                <option value="已完成" ${status === '已完成' ? 'selected' : ''}>已完成</option>
+                <option value="已取消" ${status === '已取消' ? 'selected' : ''}>已取消</option>
+              </select>
+            </td>
+            <td><input type="number" id="cost_${bookingId}" value="${cost}" style="width: 80px;" min="0"></td>
+            <td><button class="btn-save" onclick="updateBooking('${bookingId}')">儲存</button></td>
+          `;
+          tableBody.appendChild(tr);
+        });
+
+        updateFinance(totalRev, totalCost, currentMonthRev);
+      })
+      .catch(err => {
+        console.error("讀取失敗", err);
+        tableBody.innerHTML = `<tr><td colspan="9" class="loading" style="color: red;">讀取失敗：無法連線至後端，請確認 Apps Script 網址或網路狀態！</td></tr>`;
+      });
+  }
+
+  function updateBaseShift() {
+    const shiftGroup = document.getElementById('shiftGroup').value;
+    const shiftType = document.getElementById('shiftType').value;
+
+    fetch(scriptUrl, { method: "POST", body: JSON.stringify({ action: "updateBaseShift", shiftGroup, shiftType }) })
+      .then(res => res.json())
+      .then(res => {
+        if (res.result === "success") alert(`基礎班別已成功更新為：【${shiftGroup}班 - ${shiftType}】！`);
+        else alert("更新失敗");
+      })
+      .catch(err => alert("連線發生錯誤！"));
+  }
+
+  function updateScheduleOverride() {
+    const targetDate = document.getElementById('scheduleDate').value;
+    const status = document.getElementById('scheduleStatus').value;
+    const slots = document.getElementById('scheduleSlots').value;
+
+    if (!targetDate) return alert("請選擇要調整的日期！");
+
+    fetch(scriptUrl, { method: "POST", body: JSON.stringify({ action: "updateSchedule", targetDate, status, slots }) })
+      .then(res => res.json())
+      .then(res => {
+        if (res.result === "success") alert(`日期 ${targetDate} 已成功更新微調！`);
+        else alert("更新失敗");
+      })
+      .catch(err => alert("連線發生錯誤！"));
+  }
+
+  function updateFinance(rev, cost, monthRev = 0) {
+    document.getElementById('currentMonthRevenue').innerText = `NT$ ${monthRev}`;
+    document.getElementById('totalRevenue').innerText = `NT$ ${rev}`;
+    document.getElementById('totalCost').innerText = `NT$ ${cost}`;
+    document.getElementById('netProfit').innerText = `NT$ ${rev - cost}`;
+  }
+
+  function openModal(type) {
+    currentChartType = type;
+    document.getElementById('modalTitle').innerText = (type === 'revenue') ? "📈 年度每月營收折線圖趨勢" : "📈 年度每月淨利（利潤）折線圖趨勢";
+    document.getElementById('chartModal').style.display = 'flex';
+    setYearDropdown();
+    renderChart();
+  }
+
+  function closeModal() { document.getElementById('chartModal').style.display = 'none'; }
+
+  function setYearDropdown() {
+    const yearSelect = document.getElementById('selectYear');
+    let years = new Set([new Date().getFullYear()]);
+    globalBookings.forEach(row => { if (row.date) years.add(row.date.split('-')[0]); });
+    yearSelect.innerHTML = "";
+    Array.from(years).sort().reverse().forEach(y => {
+      const opt = document.createElement('option');
+      opt.value = y; opt.innerText = `${y} 年`;
+      yearSelect.appendChild(opt);
+    });
+  }
+
+  function renderChart() {
+    const selectedYear = document.getElementById('selectYear').value || new Date().getFullYear();
+    let monthlyData = new Array(12).fill(0);
+
+    globalBookings.forEach(row => {
+      if (row.date && row.status !== "已取消") {
+        const parts = row.date.split('-');
+        if (parts.length === 3 && parts[0] === String(selectedYear)) {
+          const monthIdx = parseInt(parts[1], 10) - 1;
+          if (monthIdx >= 0 && monthIdx < 12) {
+            const price = Number(row.totalPrice) || 0;
+            const cost = Number(row.cost) || 0;
+            monthlyData[monthIdx] += (currentChartType === 'revenue') ? price : (price - cost);
+          }
+        }
+      }
+    });
+
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    if (trendChartInstance) trendChartInstance.destroy();
+
+    const chartColor = currentChartType === 'revenue' ? '#bc6c25' : '#3a5a40';
+    trendChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+        datasets: [{
+          label: `${selectedYear} 年每月${currentChartType === 'revenue' ? '營收' : '淨利'} (NT$)`,
+          data: monthlyData,
+          borderColor: chartColor,
+          backgroundColor: currentChartType === 'revenue' ? 'rgba(188, 108, 37, 0.1)' : 'rgba(58, 90, 64, 0.1)',
+          borderWidth: 3, fill: true, tension: 0.3, pointBackgroundColor: chartColor, pointRadius: 5
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { callback: v => 'NT$ ' + v } } } }
+    });
+  }
+
+  function manualAddBooking() {
+    const customerName = document.getElementById('newName').value;
+    const date = document.getElementById('newDate').value;
+    const time = document.getElementById('newTime').value;
+    const items = document.getElementById('newItems').value;
+    const totalPrice = document.getElementById('newPrice').value;
+    const cost = document.getElementById('newCost').value;
+
+    if (!customerName || !date || !time || !items || !totalPrice) return alert("請將必填欄位填寫完整！");
+
+    fetch(scriptUrl, { method: "POST", body: JSON.stringify({ customerName, date, time, items, totalPrice: Number(totalPrice), cost: Number(cost) }) })
+      .then(res => res.json())
+      .then(res => {
+        if (res.result === "success") {
+          alert("手動新增紀錄成功！");
+          fetchBookings();
+        } else alert("新增失敗");
+      }).catch(err => alert("連線錯誤！"));
+  }
+
+  function updateBooking(bookingId) {
+    const newStatus = document.getElementById(`status_${bookingId}`).value;
+    const newCost = document.getElementById(`cost_${bookingId}`).value;
+
+    fetch(scriptUrl, { method: "POST", body: JSON.stringify({ action: "update", bookingId, status: newStatus, cost: Number(newCost) }) })
+      .then(res => res.json())
+      .then(res => {
+        if (res.result === "success") { alert(`預約 #${bookingId} 更新成功！`); fetchBookings(); }
+        else alert("更新失敗");
+      }).catch(err => alert("連線錯誤！"));
+  }
+</script>
+
+</body>
+</html>
