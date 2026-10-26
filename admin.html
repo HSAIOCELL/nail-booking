@@ -221,7 +221,9 @@ td{padding:9px 6px;text-align:center;font-size:14px;border-bottom:1px dashed #d8
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
 const API="https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
-const LIFF_ID="";   /https://liff.line.me/2011884932-heTsoGVG/ ← 填入「後台專用」的 LIFF ID（見說明）
+/* 把後台的 LIFF ID 貼在下面的引號裡。只要 ID（例如 2011884932-abcdEFGH），貼成網址也會自動取出 ID */
+const LIFF_ID_RAW="2011884932-2EMCidxw";
+const LIFF_ID=(LIFF_ID_RAW.match(/\d{6,}-[A-Za-z0-9]+/)||[""])[0];
 const $=id=>document.getElementById(id);
 const pad=n=>String(n).padStart(2,"0");
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -240,8 +242,8 @@ $("dlg").onclick=e=>{if(e.target.id==="dlg"&&dres)dres(false)};
 /* ---------- LINE 登入驗證（不用密碼） ---------- */
 async function login(){
   if(!LIFF_ID){$("authBox").hidden=false;$("authBox").textContent="尚未設定 LIFF ID：請在程式最上方的 LIFF_ID 填入後台專用的 LIFF ID。";return false}
-  try{await liff.init({liffId:LIFF_ID})}catch(e){$("authBox").hidden=false;$("authBox").textContent="LIFF 初始化失敗，請確認 LIFF ID 與網址設定。";return false}
-  if(!liff.isLoggedIn()){liff.login();return false}
+  try{await Promise.race([liff.init({liffId:LIFF_ID}),new Promise((_,j)=>setTimeout(()=>j(new Error("timeout")),10000))])}catch(e){$("authBox").hidden=false;$("authBox").textContent="LIFF 初始化失敗，請確認 LIFF ID 與網址設定。";return false}
+  if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return false}
   return true;
 }
 async function post(body){
@@ -255,7 +257,7 @@ async function api(body){
       const w=await post({action:"whoami"}).catch(()=>({}));
       const box=$("authBox");box.hidden=false;
       if(w.sub){box.innerHTML=`這個 LINE 帳號還不是管理者。<br>你的 LINE ID：<b>${esc(w.sub)}</b><br>請把它貼到 Apps Script 的指令碼屬性 <b>ADMIN_LINE_IDS</b>，再重新整理本頁。`}
-      else{box.textContent="登入已逾時，正在重新登入…";setTimeout(()=>{liff.logout();liff.login()},900)}
+      else{box.textContent="登入已逾時，正在重新登入…";setTimeout(()=>{liff.logout();liff.login({redirectUri:location.href})},900)}
       return null;
     }
     return j;
