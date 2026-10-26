@@ -240,10 +240,17 @@ $("dlgYes").onclick=()=>dres&&dres(true);$("dlgNo").onclick=()=>dres&&dres(false
 $("dlg").onclick=e=>{if(e.target.id==="dlg"&&dres)dres(false)};
 
 /* ---------- LINE 登入驗證（不用密碼） ---------- */
+function authMsg(html,btn){const b=$("authBox");b.hidden=false;b.innerHTML=html+(btn?'<br><button class="btn" id="reLogin" type="button" style="margin-top:8px">重新登入</button>':"");const r=$("reLogin");if(r)r.onclick=()=>{try{sessionStorage.removeItem("lg")}catch(_){}liff.logout();liff.login({redirectUri:location.origin+location.pathname})}}
 async function login(){
-  if(!LIFF_ID){$("authBox").hidden=false;$("authBox").textContent="尚未設定 LIFF ID：請在程式最上方的 LIFF_ID 填入後台專用的 LIFF ID。";return false}
-  try{await Promise.race([liff.init({liffId:LIFF_ID}),new Promise((_,j)=>setTimeout(()=>j(new Error("timeout")),10000))])}catch(e){$("authBox").hidden=false;$("authBox").textContent="LIFF 初始化失敗，請確認 LIFF ID 與網址設定。";return false}
-  if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return false}
+  if(!LIFF_ID){authMsg("尚未設定 LIFF ID。");return false}
+  try{await Promise.race([liff.init({liffId:LIFF_ID}),new Promise((_,j)=>setTimeout(()=>j(new Error("timeout")),10000))])}
+  catch(e){authMsg("LIFF 初始化失敗："+esc(e&&e.message||e)+"<br>請確認 LIFF 的 Endpoint URL 與這個網頁網址相同。");return false}
+  if(!liff.isLoggedIn()){
+    let n=0;try{n=+sessionStorage.getItem("lg")||0;sessionStorage.setItem("lg",n+1)}catch(_){}
+    if(n>=2){authMsg("登入沒有成功（已停止自動重試）。<br>請確認 LIFF 的 Endpoint URL 是這個頁面的網址，並勾選 openid。",true);return false}
+    liff.login({redirectUri:location.origin+location.pathname});return false
+  }
+  try{sessionStorage.removeItem("lg")}catch(_){}
   return true;
 }
 async function post(body){
@@ -255,9 +262,8 @@ async function api(body){
     const j=await post(body);
     if(j.message==="unauthorized"){
       const w=await post({action:"whoami"}).catch(()=>({}));
-      const box=$("authBox");box.hidden=false;
-      if(w.sub){box.innerHTML=`這個 LINE 帳號還不是管理者。<br>你的 LINE ID：<b>${esc(w.sub)}</b><br>請把它貼到 Apps Script 的指令碼屬性 <b>ADMIN_LINE_IDS</b>，再重新整理本頁。`}
-      else{box.textContent="登入已逾時，正在重新登入…";setTimeout(()=>{liff.logout();liff.login({redirectUri:location.href})},900)}
+      if(w.sub)authMsg(`這個 LINE 帳號還不是管理者。<br>你的 LINE ID：<b>${esc(w.sub)}</b><br>請把它貼到 Apps Script 的指令碼屬性 <b>ADMIN_LINE_IDS</b>（取代原本的內容），儲存後重新整理本頁。`);
+      else authMsg("登入憑證驗證失敗："+esc(w.why||"無法連線到後端，請確認 Apps Script 已重新部署成新版本")+"。",true);
       return null;
     }
     return j;
