@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>後台管理</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" crossorigin="anonymous"></script>
@@ -14,15 +14,15 @@
 <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#4b4039;--soft:#8a7a6e;--line:#6b5d53;--paper:#fbf8f1;--sand:#ebe2d3;--gold:#c9a55e;--rose:#b5584f}
+:root{--ink:#4b4039;--soft:#8a7a6e;--line:#6b5d53;--paper:#fbf8f1;--sand:#ebe2d3;--gold:#c9a55e;--rose:#b5584f;--rose-bg:#f8e6e1;--gold-bg:#f8efd6;--gold-ink:#8a6a1e;--blue:#6f93b3;--blue-bg:#e4edf5;--blue-line:#b7cde0;--blue-ink:#436687}
 *{box-sizing:border-box;font-family:'LXGW WenKai TC','PingFang TC','Microsoft JhengHei',sans-serif}
 [hidden]{display:none!important}
 html{-webkit-tap-highlight-color:transparent}
-body{margin:0;padding:16px 12px;color:var(--ink);background:#f6f1e7}
+body{margin:0;padding:16px 12px 118px;color:var(--ink);background:#f6f1e7;overflow-wrap:anywhere}
 body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(60vmax 45vmax at 0 0,rgba(239,196,184,.3),transparent 60%),radial-gradient(60vmax 45vmax at 100% 100%,rgba(240,214,160,.28),transparent 60%)}
-button,select,input{touch-action:manipulation;font-size:15px;color:var(--ink)}
+button,select,input{touch-action:manipulation;font-size:16px;color:var(--ink)}
 .ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-.wrap{max-width:1050px;margin:0 auto;background:rgba(251,248,241,.96);border:1.6px solid var(--line);border-radius:26px 20px 28px 18px/20px 28px 18px 26px;box-shadow:4px 5px 0 var(--sand);padding:20px 16px}
+.wrap{max-width:640px;margin:0 auto;background:rgba(251,248,241,.96);border:1.6px solid var(--line);border-radius:26px 20px 28px 18px/20px 28px 18px 26px;box-shadow:4px 5px 0 var(--sand);padding:20px 14px}
 .head{text-align:center;margin-bottom:14px}
 .eyebrow{font:600 11px 'Cinzel',serif;letter-spacing:.42em;text-indent:.42em;color:#b8964f;margin-bottom:4px}
 h1{margin:0;font-size:25px;letter-spacing:.14em}
@@ -30,52 +30,123 @@ h1 span{background:linear-gradient(transparent 62%,rgba(240,204,120,.5) 62% 90%,
 .orn{display:block;width:176px;height:16px;margin:8px auto 0;stroke:var(--gold);fill:none;stroke-width:1.5;stroke-linecap:round}
 .note{display:block;border:1.4px dashed #d3a85a;background:#fbf0d8;color:#8a5f1e;padding:9px 12px;border-radius:14px 10px 16px 10px;margin-bottom:12px;text-align:center;font-size:14px;line-height:1.7}
 .note b{user-select:all;word-break:break-all}
-.tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 12px}
-.tab{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border:1.5px dashed #b9aa9b;border-radius:16px 12px 18px 11px;background:#fdfbf6;color:var(--soft);cursor:pointer;white-space:nowrap;transition:transform .12s,background-color .15s}
-.tab.active{border-style:solid;border-color:var(--line);background:#f3ebdf;color:var(--ink);box-shadow:2px 3px 0 var(--sand)}
-.tab:active{transform:scale(.96);transition:none}
-.pane{display:none}.pane.active{display:block;animation:rise .25s ease-out}
-@keyframes rise{from{opacity:0;transform:translateY(6px)}}
+.pane{display:none}.pane.active{display:block;animation:rise .3s ease-out}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+@keyframes grow{from{transform:scaleX(0)}}
+
+/* 底部導覽（單手好按） */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:center;padding:14px 10px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(0deg,rgba(246,241,231,.98) 55%,rgba(246,241,231,0))}
+.nav-in{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;width:100%;max-width:560px;background:var(--paper);border:1.6px solid var(--line);border-radius:24px 18px 26px 16px;padding:6px;box-shadow:3px 4px 0 var(--sand)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 0 6px;border:1.5px dashed transparent;border-radius:16px 12px 18px 11px;background:transparent;color:var(--soft);cursor:pointer;font-size:13px;transition:transform .12s,background-color .15s}
+.tab .ic{width:23px;height:23px}
+.tab.active{background:#f3ebdf;border:1.5px solid var(--line);color:var(--ink)}
+.tab:active{transform:scale(.94);transition:none}
+
 .box{border:1.5px dashed #c9bbaa;border-radius:18px 14px 20px 13px;padding:14px 12px;margin-bottom:14px;background:#fdfbf6}
-.box h3{margin:0 0 10px;font-size:16.5px}
-.muted{font-size:13px;color:var(--soft)}
-.row{display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
-@media(min-width:620px){.row{flex-direction:row;align-items:center}}
-input,select{width:100%;padding:9px 12px;border:1.5px solid var(--line);border-radius:14px 10px 15px 11px/11px 15px 10px 14px;outline:none;background:#fff;appearance:none;-webkit-appearance:none}
+.box>h3,.sec-t{margin:0 0 10px;font-size:17px;display:flex;align-items:center;gap:8px}
+.box>h3 .ic{color:var(--gold)}
+.muted{font-size:13px;color:var(--soft);line-height:1.6}
+.empty{padding:14px 4px;text-align:center;color:var(--soft);font-size:14px}
+.row{display:flex;flex-direction:column;gap:10px;margin-bottom:4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+input,select{width:100%;min-height:46px;padding:9px 13px;border:1.5px solid var(--line);border-radius:14px 10px 15px 11px/11px 15px 10px 14px;outline:none;background:#fff;appearance:none;-webkit-appearance:none}
 select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9'%3E%3Cpath d='M1.5 1.8L7 7.2 12.5 1.6' fill='none' stroke='%236b5d53' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
 input:focus,select:focus{box-shadow:2px 3px 0 var(--sand)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--ink);color:#fff;border:1.6px solid var(--ink);padding:9px 18px;border-radius:18px 12px 19px 11px;cursor:pointer;box-shadow:2px 3px 0 var(--sand);white-space:nowrap;transition:transform .12s}
+label.f{display:block;font-size:13px;color:var(--soft);margin:2px 0 4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:46px;background:var(--ink);color:#fff;border:1.6px solid var(--ink);padding:9px 18px;border-radius:18px 12px 19px 11px;cursor:pointer;box-shadow:2px 3px 0 var(--sand);white-space:nowrap;transition:transform .12s}
+.btn.full{width:100%}
 .btn.alt{background:#fff;color:var(--ink)}
-.btn:active,.ib:active,.chip:active,.stat:active,.seg button:active{transform:scale(.96);transition:none}
-.ib{width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:1.4px solid var(--line);background:#fff;border-radius:12px 9px 13px 8px;cursor:pointer;transition:transform .12s}
-.ib .ic{width:17px;height:17px}.ib.danger{color:var(--rose)}.ib.ok{background:#f3ebdf}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.stat{background:#fff;border:1.5px solid var(--line);border-radius:16px 12px 18px 11px;padding:12px 6px;text-align:center;box-shadow:2px 3px 0 var(--sand);transition:transform .12s}
-.stat.click{cursor:pointer}.stat span{font-size:12.5px;color:var(--soft)}.stat b{display:block;margin-top:4px;font-size:17px}
-#chartSection{display:none;margin-top:14px}
-.seg{display:flex;gap:8px;width:100%}
-.seg button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:1.5px dashed #b9aa9b;border-radius:16px 12px 18px 11px;background:#fff;cursor:pointer;transition:transform .12s}
-.seg button.on{border-style:solid;border-color:var(--line);box-shadow:2px 3px 0 var(--sand)}
-.seg .out.on{background:#f8e6e1;color:var(--rose)}.seg .in.on{background:#f8efd6;color:#8a6a1e}
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 10px}
-.chip{padding:6px 14px;border:1.4px dashed #b9aa9b;border-radius:16px 12px 17px 11px;background:#fff;cursor:pointer;transition:transform .12s}
+.btn.rose{background:var(--rose);border-color:#8f3f37}
+.btn.gold{background:#b8964f;border-color:#8f7236}
+.btn.blue{background:var(--blue);border-color:#4f7392}
+.btn:disabled{opacity:.45}
+.btn:active,.ib:active,.chip:active,.tbtn:active,.sg button:active{transform:scale(.96);transition:none}
+.ib{width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:1.4px solid var(--line);background:#fff;border-radius:13px 10px 14px 9px;cursor:pointer;transition:transform .12s;flex-shrink:0}
+.ib .ic{width:18px;height:18px}.ib.danger{color:var(--rose)}.ib.ok{background:#f3ebdf}
+
+/* 月份切換 */
+.step{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.step b{font-size:17.5px;letter-spacing:.06em;text-align:center;flex:1}
+
+/* 營收 */
+.rc{background:#fff;border:1.6px solid var(--line);border-radius:22px 16px 24px 15px;box-shadow:3px 4px 0 var(--sand);padding:14px 14px 12px;margin-bottom:14px;animation:rise .4s ease-out both}
+.rc.yr{background:#f4f8fb;border-color:#5d7a94;box-shadow:3px 4px 0 var(--blue-line);animation-delay:.07s}
+.rc-t{font-size:13px;color:var(--soft);margin:8px 0 0}
+.big{font-size:34px;font-weight:700;letter-spacing:.02em;line-height:1.2}
+.mini{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.mini div{background:#faf6ee;border:1.3px dashed #cdbfae;border-radius:13px 9px 14px 8px;padding:8px 6px;text-align:center}
+.yr .mini div{background:#fff;border-color:var(--blue-line)}
+.mini span{display:block;font-size:12.5px;color:var(--soft)}.mini b{font-size:17px}
+.pos{color:var(--blue-ink)}.neg{color:var(--rose)}
+.sg{display:flex;gap:8px}
+.sg button{flex:1;min-height:42px;display:flex;align-items:center;justify-content:center;gap:6px;border:1.5px dashed #b9aa9b;border-radius:16px 12px 18px 11px;background:#fff;color:var(--soft);cursor:pointer;transition:transform .12s}
+.sg button.on{border-style:solid;border-color:var(--line);background:#f3ebdf;color:var(--ink);box-shadow:2px 3px 0 var(--sand);font-weight:700}
+.sg.blue button.on{background:var(--blue-bg);border-color:#5d7a94;color:var(--blue-ink);box-shadow:2px 3px 0 var(--blue-line)}
+.cwrap{position:relative;height:220px;margin-top:10px}
+.bl{margin-top:10px}
+.bl h4{margin:0 0 8px;font-size:15px;display:flex;justify-content:space-between}
+.bl .ln{margin-bottom:9px}
+.bl .t{display:flex;justify-content:space-between;font-size:14px;margin-bottom:3px}
+.bar{height:9px;border-radius:7px 4px 8px 5px;transform-origin:left;animation:grow .7s cubic-bezier(.2,.8,.2,1) both}
+.bar.in{background:#e3c97f}.bar.out{background:#e2a79f}
+
+/* 預約卡片 */
+.bk{background:#fff;border:1.5px solid var(--line);border-radius:18px 13px 20px 12px;box-shadow:2px 3px 0 var(--sand);padding:11px 12px;margin-bottom:10px}
+.bk-top,.bk-bot{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.bk-top b{font-size:16.5px}.bk-m{font-size:14px;color:var(--soft);margin:3px 0}.bk-i{font-size:14.5px;line-height:1.6;margin-bottom:6px}
+.bk-bot{border-top:1px dashed #d8cdbd;padding-top:8px}.bk-bot .pr{font-weight:700;font-size:16px}
+.act{display:flex;gap:6px}
+.st{display:inline-block;padding:4px 12px;border-radius:12px 9px 13px 8px;cursor:pointer;border:1.3px solid transparent;font-size:14px}
+.st.wait{background:var(--gold-bg);color:var(--gold-ink);border-color:#e6cf92}.st.done{background:var(--blue-bg);color:var(--blue-ink);border-color:var(--blue-line)}
+details.box summary{list-style:none;cursor:pointer;font-size:17px;display:flex;align-items:center;gap:8px;min-height:30px}
+details.box summary::-webkit-details-marker{display:none}
+details.box[open] summary{margin-bottom:12px}
+
+/* 記帳 */
+.tt{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tbtn{min-height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:1.5px dashed #c4b5a5;border-radius:18px 13px 20px 12px;background:#fff;color:var(--soft);cursor:pointer;font-size:16px;transition:transform .12s,background-color .15s}
+.tbtn .ic{width:24px;height:24px}
+.tbtn.out.on{background:var(--rose-bg);border:2px solid var(--rose);color:var(--rose);font-weight:700;box-shadow:2px 3px 0 #ecc5be}
+.tbtn.in.on{background:var(--gold-bg);border:2px solid #b8964f;color:var(--gold-ink);font-weight:700;box-shadow:2px 3px 0 #ecdca6}
+#accForm{border-radius:18px 13px 20px 12px;padding:12px;margin-top:12px;transition:background-color .2s,border-color .2s}
+#accForm[data-t="支出"]{background:#fcf1ee;border:1.5px solid #e6bdb5}
+#accForm[data-t="收入"]{background:#fcf6e2;border:1.5px solid #e6d396}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+.chip{padding:8px 14px;border:1.4px dashed #b9aa9b;border-radius:16px 12px 17px 11px;background:#fff;cursor:pointer;transition:transform .12s;font-size:15px}
 .chip.on{background:var(--ink);color:#fff;border:1.4px solid var(--ink)}
-.hist{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:8px}
-.hist div.h{padding:8px;text-align:center;border:1.4px dashed #b9aa9b;border-radius:14px 10px 15px 9px;background:#fff;cursor:pointer}
-.hist div.h.on{border-style:solid;border-color:var(--line);background:#f3ebdf}
+.amt{position:relative}.amt i{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-style:normal;color:var(--soft)}.amt input{padding-left:50px;font-size:20px;font-weight:700}
+.lh{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:14px 10px 15px 9px;font-weight:700;margin:2px 0 6px}
+.lh.in{background:var(--gold-bg);color:var(--gold-ink);border-left:5px solid #b8964f}.lh.out{background:var(--rose-bg);color:var(--rose);border-left:5px solid var(--rose)}
+.rw{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 4px;border-bottom:1px dashed #d8cdbd}
+.rw-main{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.rw .nm{font-size:15.5px}.rw .am{font-size:16px}.rw.i .am{color:var(--gold-ink)}.rw.o .am{color:var(--rose)}
+.rw small{color:var(--soft);font-size:12.5px}
+.tg{display:inline-block;margin-left:6px;padding:0 8px;border-radius:10px 7px 11px 6px;background:#efe9dc;font-size:12px;color:var(--soft)}
+.inl{min-height:40px;padding:4px 10px;font-size:15px;border-radius:11px}
+.ef{display:grid;gap:6px;width:100%}
+.sec{margin-bottom:16px}
+
+/* 班表 */
+.hist{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:8px}
+.hist div.h{padding:9px 6px;text-align:center;border:1.4px dashed #b9aa9b;border-radius:14px 10px 15px 9px;background:#fff;cursor:pointer;font-size:14.5px}
+.hist div.h.on{border-style:solid;border-color:#5d7a94;background:var(--blue-bg)}
 .hist small{display:block;margin-top:2px;color:var(--soft)}
-.tw{width:100%;overflow-x:auto}
-table{width:100%;border-collapse:collapse;min-width:520px}
-th{padding:8px 6px;font-weight:400;font-size:13px;color:var(--soft);border-bottom:1.5px solid var(--line);white-space:nowrap}
-td{padding:9px 6px;text-align:center;font-size:14px;border-bottom:1px dashed #d8cdbd}
-.loading{padding:16px;text-align:center;color:var(--soft)}
-.inl{width:100%;padding:4px 8px;font-size:13px;border-radius:10px}
-.st{display:inline-block;padding:2px 10px;border-radius:12px 9px 13px 8px;cursor:pointer;border:1.3px solid transparent}
-.st.wait{background:#f8efd6;color:#8a6a1e}.st.done{background:#efe9dc;color:var(--ink)}
-.tag{display:inline-block;padding:1px 10px;border-radius:12px 9px 13px 8px;font-size:13px}.tag.out{background:#f8e6e1;color:var(--rose)}.tag.in{background:#f8efd6;color:#8a6a1e}
-.flatpickr-calendar{background:var(--paper)!important;border:1.6px solid var(--line)!important;box-shadow:4px 5px 0 var(--sand)!important;border-radius:20px 16px 22px 14px!important;margin:0 auto}
+.flatpickr-calendar{background:var(--paper)!important;border:1.6px solid var(--line)!important;box-shadow:3px 4px 0 var(--sand)!important;border-radius:20px 16px 22px 14px!important;margin:6px auto 0;width:100%!important;max-width:340px}
+.flatpickr-calendar.inline .dayContainer,.flatpickr-calendar .flatpickr-innerContainer,.flatpickr-calendar .flatpickr-rContainer,.flatpickr-days{width:100%!important;min-width:0!important;max-width:none!important}
+.flatpickr-day{max-width:none!important;height:40px!important;line-height:40px!important}
 .flatpickr-day.ya{background:#fbefcf!important;color:#9a6d1c!important;border:1.4px solid #e6c47a!important;border-radius:50%!important}
-.flatpickr-day.yb{background:#eceee0!important;color:#5f6b50!important;border:1.4px solid #c9d1b6!important;border-radius:50%!important}
+.flatpickr-day.yb{background:var(--blue-bg)!important;color:var(--blue-ink)!important;border:1.4px solid var(--blue-line)!important;border-radius:50%!important}
+.flatpickr-day.ov-o{box-shadow:inset 0 0 0 2px var(--blue)!important;border-radius:50%!important}
+.flatpickr-day.ov-c{background:var(--rose-bg)!important;color:var(--rose)!important;text-decoration:line-through;border-radius:50%!important}
+.flatpickr-day.selected{background:var(--ink)!important;color:#fff!important;border-color:var(--ink)!important;border-radius:50%!important}
+.lg{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:8px 0;font-size:13px;color:var(--soft)}
+.lg i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.ov{display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px dashed #d8cdbd}
+.ov span:first-child{flex:1}
+.tag{display:inline-block;padding:2px 11px;border-radius:12px 9px 13px 8px;font-size:13.5px}.tag.o{background:var(--blue-bg);color:var(--blue-ink)}.tag.c{background:var(--rose-bg);color:var(--rose)}
+.pick{text-align:center;font-size:15.5px;margin:6px 0 10px;min-height:24px}
+
+/* 提示框 */
 .dlg{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(75,64,57,.3);animation:fade .15s ease-out}
 @keyframes fade{from{opacity:0}}
 .dc{position:relative;background:var(--paper);border:1.6px solid var(--line);border-radius:24px 18px 26px 16px/18px 26px 16px 24px;box-shadow:4px 5px 0 var(--sand);padding:26px 22px 20px;max-width:330px;width:100%;text-align:center;animation:pop .22s cubic-bezier(.2,.9,.3,1.2)}
@@ -102,6 +173,10 @@ td{padding:9px 6px;text-align:center;font-size:14px;border-bottom:1px dashed #d8
   <symbol id="i-in" viewBox="0 0 24 24"><path d="M17 7L7 17M7 9.6V17H14.4"/></symbol>
   <symbol id="i-note" viewBox="0 0 24 24"><path d="M12 3.6c4.8-.1 8.3 3.5 8.2 8.2-.1 4.7-3.6 8.5-8.3 8.4-4.8 0-8.3-3.7-8.2-8.4.1-4.6 3.5-8.2 8.3-8.2Z"/><path d="M12 7.5v5.2"/><circle cx="12" cy="16.2" r=".8" fill="currentColor"/></symbol>
   <symbol id="i-ok" viewBox="0 0 24 24"><path d="M12 3.6c4.8-.1 8.3 3.5 8.2 8.2-.1 4.7-3.6 8.5-8.3 8.4-4.8 0-8.3-3.7-8.2-8.4.1-4.6 3.5-8.2 8.3-8.2Z"/><path d="M8 12.4L11 15.4 16.2 9"/></symbol>
+  <symbol id="i-l" viewBox="0 0 24 24"><path d="M14.8 5.2L8.4 12 14.6 18.8"/></symbol>
+  <symbol id="i-r" viewBox="0 0 24 24"><path d="M9.2 5.2L15.6 12 9.4 18.8"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5.2V18.8M5.2 12H18.8"/></symbol>
+  <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M5 11V9.6Q5 7 7.6 7H17"/><path d="M14.6 4.4L17.4 7 14.6 9.6"/><path d="M19 13v1.4Q19 17 16.4 17H7"/><path d="M9.4 14.4L6.6 17l2.8 2.6"/></symbol>
 </svg>
 
 <div class="wrap">
@@ -110,118 +185,157 @@ td{padding:9px 6px;text-align:center;font-size:14px;border-bottom:1px dashed #d8
     <h1><span>後台管理</span></h1>
     <svg class="orn" viewBox="0 0 176 16" aria-hidden="true"><path d="M4 9Q26 4 58 8T80 8"/><path d="M96 8Q122 12 152 8T172 9"/><path d="M88 2C88.6 6 90 7.4 94 8 90 8.7 88.6 10 88 14 87.4 10 86 8.7 82 8 86 7.4 87.4 6 88 2Z" fill="#fff6d8"/></svg>
   </header>
-
   <div id="authBox" class="note" hidden></div>
   <div id="adminShiftReminder" class="note" hidden></div>
 
-  <nav class="tabs">
-    <button class="tab active" onclick="switchTab('tab-stats',this)"><svg class="ic"><use href="#i-chart"/></svg>營收</button>
-    <button class="tab" onclick="switchTab('tab-schedule',this)"><svg class="ic"><use href="#i-cal"/></svg>班表</button>
-    <button class="tab" onclick="switchTab('tab-bookings',this)"><svg class="ic"><use href="#i-list"/></svg>預約</button>
-    <button class="tab" onclick="switchTab('tab-accounting',this)"><svg class="ic"><use href="#i-coin"/></svg>記帳</button>
-  </nav>
-
+  <!-- ===== 營收 ===== -->
   <section id="tab-stats" class="pane active">
-    <div class="stats">
-      <div class="stat click" onclick="toggleChart('revenue')"><span>累計營收</span><b id="totalRevenue">NT$ 0</b></div>
-      <div class="stat"><span>材料成本</span><b id="totalCost">NT$ 0</b></div>
-      <div class="stat click" onclick="toggleChart('profit')"><span>淨利</span><b id="netProfit">NT$ 0</b></div>
-    </div>
-    <p class="muted" style="text-align:center">點「累計營收」或「淨利」可看年度趨勢</p>
-    <div id="chartSection" class="box">
-      <div class="row" style="flex-direction:row;justify-content:space-between;align-items:center">
-        <h3 id="chartTitle" style="margin:0"></h3>
-        <select id="selectYear" onchange="renderChart()" style="width:auto"></select>
+    <div class="rc">
+      <div class="step">
+        <button class="ib" type="button" data-a="ym" data-id="sel" data-d="-1" aria-label="上個月"><svg class="ic"><use href="#i-l"/></svg></button>
+        <b id="lbl-sel"></b>
+        <button class="ib" type="button" data-a="ym" data-id="sel" data-d="1" aria-label="下個月"><svg class="ic"><use href="#i-r"/></svg></button>
       </div>
-      <div style="position:relative;height:240px;width:100%"><canvas id="trendChart"></canvas></div>
+      <div class="rc-t">本月營收</div>
+      <div class="big" id="mRev">NT$ 0</div>
+      <div class="mini"><div><span>支出</span><b id="mExp">NT$ 0</b></div><div><span>淨利</span><b id="mNet">NT$ 0</b></div></div>
+      <div id="mLists"></div>
+    </div>
+
+    <div class="rc yr">
+      <div class="step">
+        <button class="ib" type="button" data-a="ym" data-id="selY" data-d="-1" aria-label="上一年"><svg class="ic"><use href="#i-l"/></svg></button>
+        <b id="lbl-selY"></b>
+        <button class="ib" type="button" data-a="ym" data-id="selY" data-d="1" aria-label="下一年"><svg class="ic"><use href="#i-r"/></svg></button>
+      </div>
+      <div class="rc-t">全年營收</div>
+      <div class="big" id="yRev">NT$ 0</div>
+      <div class="mini"><div><span>支出</span><b id="yExp">NT$ 0</b></div><div><span>淨利</span><b id="yNet">NT$ 0</b></div></div>
+      <div class="sg blue" style="margin-top:14px">
+        <button type="button" class="on" data-a="cm" data-id="revenue">營收</button>
+        <button type="button" data-a="cm" data-id="profit">淨利</button>
+      </div>
+      <div class="cwrap"><canvas id="trendChart"></canvas></div>
+      <div class="muted" style="text-align:center">點一根長條，上面的月份就會跟著切換</div>
     </div>
   </section>
 
+  <!-- ===== 班表 ===== -->
   <section id="tab-schedule" class="pane">
     <div class="box">
-      <h3>月份班別</h3>
-      <div class="row">
-        <input type="month" id="targetMonth">
-        <select id="shiftGroup"><option value="B">B 組</option><option value="A">A 組</option></select>
-        <select id="shiftType"><option value="夜班">夜班</option><option value="白班">白班</option></select>
-        <button class="btn" onclick="saveMonthlyShift()"><svg class="ic"><use href="#i-check"/></svg>儲存</button>
+      <h3><svg class="ic"><use href="#i-cal"/></svg>月份班別</h3>
+      <div class="step">
+        <button class="ib" type="button" data-a="ym" data-id="sh" data-d="-1" aria-label="上個月"><svg class="ic"><use href="#i-l"/></svg></button>
+        <b id="lbl-sh"></b>
+        <button class="ib" type="button" data-a="ym" data-id="sh" data-d="1" aria-label="下個月"><svg class="ic"><use href="#i-r"/></svg></button>
       </div>
-      <div class="muted" style="margin-top:10px">已設定的月份（點一下預覽）</div>
-      <div id="historyList" class="hist"></div>
-      <div id="previewContainer" style="margin-top:12px;text-align:center;display:none;padding-top:10px;border-top:1px dashed #c9bbaa">
-        <div id="previewTitle" style="margin-bottom:6px"></div>
+      <div class="two" style="margin-top:12px">
+        <div class="sg blue" id="sgG"><button type="button" data-a="shg" data-id="B">B 組</button><button type="button" data-a="shg" data-id="A">A 組</button></div>
+        <div class="sg blue" id="sgT"><button type="button" data-a="sht" data-id="夜班">夜班</button><button type="button" data-a="sht" data-id="白班">白班</button></div>
+      </div>
+      <div id="previewContainer" style="margin:12px 0 4px;text-align:center">
+        <div id="previewTitle" class="muted"></div>
         <input type="text" id="inlinePreviewCalendar" style="display:none">
+        <div class="lg"><span><i style="background:var(--blue-bg);border:1.4px solid var(--blue-line)"></i>夜班可約</span><span><i style="background:#fbefcf;border:1.4px solid #e6c47a"></i>白班可約</span></div>
       </div>
+      <button class="btn blue full" type="button" onclick="saveMonthlyShift()"><svg class="ic"><use href="#i-check"/></svg>儲存這個月的班別</button>
+      <div class="muted" style="margin-top:14px">已設定的月份（點一下切換）</div>
+      <div id="historyList" class="hist"></div>
     </div>
+
     <div class="box">
-      <h3>日期微調</h3>
-      <div class="row">
-        <input type="date" id="scheduleDate">
-        <select id="scheduleStatus"><option value="開放">開放預約</option><option value="關閉">關閉預約</option></select>
-        <button class="btn" onclick="updateScheduleOverride()"><svg class="ic"><use href="#i-check"/></svg>儲存</button>
-      </div>
-      <div class="tw" style="max-height:170px;margin-top:8px"><div id="overrideRecordContainer"></div></div>
+      <h3><svg class="ic"><use href="#i-pencil"/></svg>日期微調</h3>
+      <div class="muted" style="margin-bottom:4px">1. 點一下要調整的日期　2. 選開放或關閉　3. 儲存</div>
+      <input type="text" id="ovCalIn" style="display:none">
+      <div class="lg"><span><i style="box-shadow:inset 0 0 0 2px var(--blue)"></i>特別開放</span><span><i style="background:var(--rose-bg);border:1.4px solid var(--rose)"></i>特別關閉</span></div>
+      <div class="pick" id="ovPick">先點上面日曆的日期</div>
+      <div class="sg" id="sgO"><button type="button" data-a="ovs" data-id="開放">開放預約</button><button type="button" data-a="ovs" data-id="關閉">關閉預約</button></div>
+      <button class="btn full" type="button" id="ovSave" style="margin-top:10px" onclick="updateScheduleOverride()" disabled><svg class="ic"><use href="#i-check"/></svg>儲存這一天</button>
+      <div class="muted" style="margin:14px 0 4px">已微調的日期</div>
+      <div id="overrideRecordContainer" style="max-height:230px;overflow:auto"></div>
     </div>
   </section>
 
+  <!-- ===== 預約 ===== -->
   <section id="tab-bookings" class="pane">
-    <div class="box">
-      <h3>新增預約</h3>
+    <details class="box">
+      <summary><svg class="ic" style="color:var(--gold)"><use href="#i-plus"/></svg>新增預約</summary>
       <div class="row">
         <input type="text" id="newName" placeholder="客戶名稱" maxlength="30">
         <input type="date" id="newDate">
-        <div style="display:flex;gap:6px;width:100%"><select id="newHour"></select><select id="newMinute"><option value="00">00 分</option><option value="15">15 分</option><option value="30">30 分</option><option value="45">45 分</option></select></div>
+        <div class="two"><select id="newHour"></select><select id="newMinute"><option value="00">00 分</option><option value="15">15 分</option><option value="30">30 分</option><option value="45">45 分</option></select></div>
         <input type="text" id="newItems" placeholder="項目（例：單色光療）" maxlength="100">
-        <input type="number" id="newPrice" placeholder="金額" min="0">
-        <button class="btn" onclick="manualAddBooking()">新增</button>
+        <input type="number" id="newPrice" placeholder="金額" min="0" inputmode="numeric">
+        <button class="btn full" type="button" onclick="manualAddBooking()">新增預約</button>
       </div>
+    </details>
+    <div class="step" style="margin:0 2px 12px">
+      <button class="ib" type="button" data-a="ym" data-id="bk" data-d="-1" aria-label="上個月"><svg class="ic"><use href="#i-l"/></svg></button>
+      <b id="lbl-bk"></b>
+      <button class="ib" type="button" data-a="ym" data-id="bk" data-d="1" aria-label="下個月"><svg class="ic"><use href="#i-r"/></svg></button>
     </div>
-    <div class="box">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:6px"><button class="btn alt" onclick="fetchData()"><svg class="ic"><use href="#i-refresh"/></svg>重新整理</button></div>
-      <div class="tw"><table>
-        <thead><tr><th>編號</th><th>客戶</th><th>日期</th><th>時間</th><th>項目</th><th>金額</th><th>狀態</th><th></th></tr></thead>
-        <tbody id="bookingTableBody"></tbody>
-      </table></div>
-    </div>
+    <div id="bookingList"></div>
+    <div style="text-align:center"><button class="btn alt" type="button" onclick="fetchData()"><svg class="ic"><use href="#i-refresh"/></svg>重新整理</button></div>
   </section>
 
+  <!-- ===== 記帳 ===== -->
   <section id="tab-accounting" class="pane">
     <div class="box">
-      <h3>新增收支</h3>
-      <div class="seg">
-        <button type="button" id="btnExpense" class="out on" onclick="setAccType('支出')"><svg class="ic"><use href="#i-out"/></svg>支出</button>
-        <button type="button" id="btnIncome" class="in" onclick="setAccType('收入')"><svg class="ic"><use href="#i-in"/></svg>收入</button>
+      <div class="step">
+        <button class="ib" type="button" data-a="ym" data-id="acc" data-d="-1" aria-label="上個月"><svg class="ic"><use href="#i-l"/></svg></button>
+        <b id="lbl-acc"></b>
+        <button class="ib" type="button" data-a="ym" data-id="acc" data-d="1" aria-label="下個月"><svg class="ic"><use href="#i-r"/></svg></button>
       </div>
-      <input type="hidden" id="accType" value="支出">
-      <div class="chips">
-        <span class="chip" onclick="selectItem('材料費','支出',this)">材料費</span>
-        <span class="chip" onclick="selectItem('房租','支出',this)">房租</span>
-        <span class="chip" onclick="selectItem('上課費','支出',this)">上課費</span>
-        <span class="chip" onclick="selectItem('美甲膠','支出',this)">美甲膠</span>
-        <span class="chip" onclick="selectItem('其他收入','收入',this)">其他收入</span>
+      <div class="tt" style="margin-top:12px">
+        <button type="button" class="tbtn out on" data-a="acct" data-id="支出"><svg class="ic"><use href="#i-out"/></svg>支出</button>
+        <button type="button" class="tbtn in" data-a="acct" data-id="收入"><svg class="ic"><use href="#i-in"/></svg>收入</button>
       </div>
-      <div class="row">
-        <input type="date" id="accDate">
-        <input type="text" id="accItem" placeholder="選上面的項目，或自己輸入" maxlength="100" style="flex:2">
-        <input type="number" id="accCost" placeholder="金額" min="0" value="0">
-        <button class="btn" onclick="manualAddAccounting()">新增</button>
+      <div id="accForm" data-t="支出">
+        <div class="chips" id="chips"></div>
+        <div class="row">
+          <input type="text" id="accItem" placeholder="項目（點上面，或自己輸入）" maxlength="100">
+          <div class="amt"><i>NT$</i><input type="number" id="accAmt" placeholder="0" min="0" inputmode="numeric"></div>
+          <button class="btn full rose" type="button" id="accSubmit" onclick="manualAddAccounting()">記一筆支出</button>
+        </div>
       </div>
     </div>
+
     <div class="box">
-      <div class="tw"><table>
-        <thead><tr><th>編號</th><th>日期</th><th>類型</th><th>項目</th><th>金額</th><th></th></tr></thead>
-        <tbody id="accountingTableBody"></tbody>
-      </table></div>
+      <div id="accInc" class="sec"></div>
+      <div id="accExp" class="sec" style="margin-bottom:0"></div>
+    </div>
+
+    <div class="box">
+      <h3><svg class="ic"><use href="#i-repeat"/></svg>每月固定支出</h3>
+      <div class="muted" style="margin-bottom:8px">例如房租、訂閱費。設定一次，每個月都會自動算進支出，不用每個月重記。</div>
+      <div id="fixedList"></div>
+      <details style="margin-top:10px">
+        <summary class="btn alt full" style="list-style:none"><svg class="ic"><use href="#i-plus"/></svg>新增固定支出</summary>
+        <div class="row" style="margin-top:12px">
+          <div class="chips" id="fxChips"></div>
+          <input type="text" id="fxItem" placeholder="項目（例：房租）" maxlength="60">
+          <div class="amt"><i>NT$</i><input type="number" id="fxAmt" placeholder="每月金額" min="0" inputmode="numeric"></div>
+          <div class="two"><div><label class="f">從哪個月開始</label><input type="month" id="fxStart"></div><div><label class="f">到哪個月結束（可不填）</label><input type="month" id="fxEnd"></div></div>
+          <button class="btn full rose" type="button" onclick="addFixed()">儲存固定支出</button>
+        </div>
+      </details>
     </div>
   </section>
 </div>
+
+<nav class="nav"><div class="nav-in">
+  <button class="tab active" type="button" data-t="tab-stats"><svg class="ic"><use href="#i-chart"/></svg>營收</button>
+  <button class="tab" type="button" data-t="tab-schedule"><svg class="ic"><use href="#i-cal"/></svg>班表</button>
+  <button class="tab" type="button" data-t="tab-bookings"><svg class="ic"><use href="#i-list"/></svg>預約</button>
+  <button class="tab" type="button" data-t="tab-accounting"><svg class="ic"><use href="#i-coin"/></svg>記帳</button>
+</div></nav>
 
 <div id="dlg" class="dlg" hidden role="dialog" aria-modal="true"><div class="dc"><svg class="ic"><use id="dlgIc" href="#i-note"/></svg><p id="dlgMsg"></p><div class="btns"><button id="dlgNo" class="btn alt" type="button">取消</button><button id="dlgYes" class="btn" type="button">好的</button></div></div></div>
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
 const API="https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
-/* 把後台的 LIFF ID 貼在下面的引號裡。只要 ID（例如 2011884932-abcdEFGH），貼成網址也會自動取出 ID */
+/* 後台專用的 LIFF ID（只要 ID；貼成網址也會自動取出） */
 const LIFF_ID_RAW="2011884932-2EMCidxw";
 const LIFF_ID=(LIFF_ID_RAW.match(/\d{6,}-[A-Za-z0-9]+/)||[""])[0];
 const $=id=>document.getElementById(id);
@@ -229,8 +343,18 @@ const pad=n=>String(n).padStart(2,"0");
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const ic=n=>`<svg class="ic"><use href="#i-${n}"/></svg>`;
-const ib=(a,id,i,t,c="")=>`<button class="ib ${c}" data-a="${a}" data-id="${id}" title="${t}" aria-label="${t}">${ic(i)}</button>`;
-let B=[],A=[],S={},M={},ANCHOR="2026-10-23",chart=null,ctype="revenue",copen=false,picker=null,activeYM="";
+const ib=(a,id,i,t,c="")=>`<button class="ib ${c}" type="button" data-a="${a}" data-id="${id}" title="${t}" aria-label="${t}">${ic(i)}</button>`;
+const money=n=>"NT$ "+Math.round(n||0).toLocaleString("en-US");
+const curYM=ymd(new Date()).slice(0,7);
+const shiftYM=(ym,d)=>{const[y,m]=ym.split("-").map(Number),t=new Date(y,m-1+d,1);return`${t.getFullYear()}-${pad(t.getMonth()+1)}`};
+const ymLabel=ym=>{const[y,m]=ym.split("-");return`${y} 年 ${+m} 月`};
+const WD=["日","一","二","三","四","五","六"];
+
+let B=[],A=[],F=[],S={},M={},ANCHOR="2026-10-23",chart=null,picker=null,ovPicker=null,MS={};
+let selYM=curYM,accYM=curYM,bkYM=curYM,cmode="revenue",accType="支出",ovDate="",ovStatus="開放";
+let shYM=ymd(new Date()).slice(8)>="12"?shiftYM(curYM,1):curYM,shGroup="B",shType="夜班";
+const CHIPS={"支出":["材料費","房租","上課費","美甲膠","訂閱費"],"收入":["美甲收入","卸甲收入"]};
+const FX_CHIPS=["房租","訂閱費","水電","網路"];
 
 /* ---------- 手繪提示框 ---------- */
 let dres=null;
@@ -263,10 +387,7 @@ async function api(body){
     if(j.message==="unauthorized"){
       const w=await post({action:"whoami"}).catch(()=>({}));
       if(w.sub)authMsg(`這個 LINE 帳號還不是管理者。<br>你的 LINE ID：<b>${esc(w.sub)}</b><br>請把它貼到 Apps Script 的指令碼屬性 <b>ADMIN_LINE_IDS</b>（取代原本的內容），儲存後重新整理本頁。`);
-      else{
-        let tk="",inc="?",ver="?";try{tk=liff.getIDToken()||"";inc=liff.isInClient();ver=(liff.getDecodedIDToken()||{}).aud||""}catch(_){}
-        authMsg("登入憑證驗證失敗："+esc(w.why||"後端沒有回傳原因，通常代表 Apps Script 還在跑舊版本，或網址指到別的部署")+"。<br><small style='opacity:.75'>診斷（請截圖給我）：<br>在LINE內開啟="+inc+"｜取得憑證="+(tk?"是("+tk.length+"字)":"否")+"｜憑證aud="+esc(ver)+"<br>後端回應="+esc(JSON.stringify(w).slice(0,160))+"<br>後端網址結尾="+esc(API.slice(-12))+"</small>",true);
-      }
+      else authMsg("登入憑證驗證失敗："+esc(w.why||"後端沒有回傳原因")+"。",true);
       return null;
     }
     return j;
@@ -274,59 +395,124 @@ async function api(body){
 }
 function bg(body){api(body).then(async r=>{if(!r||r.result!=="success"){await say((r&&r.message)||"儲存失敗，將重新載入資料");fetchData()}})}
 
+/* ---------- 啟動 ---------- */
 document.addEventListener("DOMContentLoaded",async()=>{
   const ts=ymd(new Date());
-  ["newDate","accDate","scheduleDate"].forEach(i=>$(i).value=ts);$("targetMonth").value=ts.slice(0,7);
+  $("newDate").value=ts;$("fxStart").value=curYM;
   $("newHour").innerHTML=Array.from({length:24},(_,h)=>`<option value="${pad(h)}"${h===12?" selected":""}>${pad(h)} 時</option>`).join("");
+  $("fxChips").innerHTML=FX_CHIPS.map(n=>`<span class="chip" data-a="fxchip" data-id="${esc(n)}">${esc(n)}</span>`).join("");
   document.body.addEventListener("click",onClick);
+  document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>switchTab(b.dataset.t,b));
+  setAccType("支出");syncShift();initOv();labels();renderAll();
   if(await login())fetchData();
 });
 function onClick(e){
   const el=e.target.closest("[data-a]");if(!el)return;
-  const f={toggle:toggleStatus,bedit:editBooking,bsave:saveBooking,bcancel:cancelBooking,rerender:renderAll,aedit:editAcc,asave:saveAcc,adel:delAcc,hist:showPreview,sdel:delOverride}[el.dataset.a];
+  const f={toggle:toggleStatus,bedit:editBooking,bsave:saveBooking,bcancel:cancelBooking,rerender:renderAll,aedit:editAcc,asave:saveAcc,adel:delAcc,sdel:delOverride,
+    fedit:editFixed,fsave:saveFixed,fdel:delFixed,hist:id=>{shYM=id;syncShift()},ym:(id)=>stepYM(id,+el.dataset.d),cm:setChartMode,acct:setAccType,
+    chip:pickChip,fxchip:id=>{$("fxItem").value=id},shg:id=>{shGroup=id;syncShift(true)},sht:id=>{shType=id;syncShift(true)},ovs:id=>{ovStatus=id;syncOv()}}[el.dataset.a];
   if(f)f(el.dataset.id);
 }
-function switchTab(id,btn){document.querySelectorAll(".tab,.pane").forEach(x=>x.classList.remove("active"));btn.classList.add("active");$(id).classList.add("active")}
-function setAccType(t){$("accType").value=t;$("btnExpense").classList.toggle("on",t==="支出");$("btnIncome").classList.toggle("on",t==="收入")}
-function selectItem(n,t,el){$("accItem").value=n;setAccType(t);document.querySelectorAll(".chip").forEach(c=>c.classList.remove("on"));el.classList.add("on")}
+function switchTab(id,btn){
+  document.querySelectorAll(".pane").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  btn.classList.add("active");$(id).classList.add("active");window.scrollTo({top:0});
+  if(id==="tab-stats"&&chart)setTimeout(()=>{chart.resize();chart.update()},30);
+}
+function labels(){$("lbl-sel").textContent=ymLabel(selYM);$("lbl-selY").textContent=selYM.slice(0,4)+" 年";$("lbl-acc").textContent=ymLabel(accYM);$("lbl-bk").textContent=ymLabel(bkYM);$("lbl-sh").textContent=ymLabel(shYM)}
+function stepYM(k,d){
+  if(k==="sel")selYM=shiftYM(selYM,d);else if(k==="selY")selYM=shiftYM(selYM,d*12);
+  else if(k==="acc")accYM=shiftYM(accYM,d);else if(k==="bk")bkYM=shiftYM(bkYM,d);else if(k==="sh"){shYM=shiftYM(shYM,d);syncShift();return}
+  labels();if(k==="sel"||k==="selY")renderStats();else if(k==="acc")renderAcc();else renderBookings();
+}
 
 /* ---------- 讀取 ---------- */
 async function fetchData(){
-  $("bookingTableBody").innerHTML='<tr><td colspan="8" class="loading">讀取中…</td></tr>';
-  $("accountingTableBody").innerHTML='<tr><td colspan="6" class="loading">讀取中…</td></tr>';
+  $("bookingList").innerHTML='<div class="empty">讀取中…</div>';
   const r=await api({action:"adminGet"});
-  if(!r||r.result!=="success"){const m='<tr><td colspan="8" class="loading">無法讀取資料，請確認已用管理者的 LINE 帳號登入</td></tr>';$("bookingTableBody").innerHTML=m;$("accountingTableBody").innerHTML=m;return}
+  if(!r||r.result!=="success"){$("bookingList").innerHTML='<div class="empty">無法讀取資料，請確認已用管理者的 LINE 帳號登入</div>';return}
   $("authBox").hidden=true;
-  B=r.bookings||[];A=r.accountingRecords||[];S=r.schedules||{};M=r.monthlyShiftTypes||{};
+  B=r.bookings||[];A=r.accountingRecords||[];F=r.fixedExpenses||[];S=r.schedules||{};M=r.monthlyShiftTypes||{};
   if(/^\d{4}-\d{2}-\d{2}$/.test(r.anchorDate))ANCHOR=r.anchorDate;
-  renderAll();
+  if(M[shYM]){shGroup=M[shYM].shiftGroup;shType=M[shYM].shiftType}
+  syncShift();renderAll();if(ovPicker)ovPicker.redraw();
 }
 const isPast=(r,now)=>r.status==="預約中"&&r.date&&r.time&&new Date(`${r.date}T${r.time}`)<now;
+function renderAll(){MS={};renderStats();renderBookings();renderAcc();renderHistory();renderOverrides();shiftReminder()}
 
-function renderAll(){
-  renderHistory();renderOverrides();shiftReminder();
-  if(activeYM)showPreview(activeYM);
-  const now=new Date();
-  const rows=B.map((r,i)=>{
-    if(r.status==="已取消")return"";
-    const auto=isPast(r,now),dn=r.status==="已完成"||auto,id=esc(r.bookingId);
-    return`<tr id="b-${id}"><td>${pad(i+1).padStart(3,"0")}</td><td>${esc(r.customerName)}</td><td>${esc(r.date)}</td><td>${esc(r.time)}</td><td>${esc(r.items)}</td><td>NT$ <span>${+r.totalPrice||0}</span></td><td><span class="st ${dn?"done":"wait"}" data-a="toggle" data-id="${id}">${dn?"已完成":"預約中"}${auto?"（自動）":""}</span></td><td style="white-space:nowrap">${ib("bedit",id,"pencil","修改金額")} ${ib("bcancel",id,"trash","刪除","danger")}</td></tr>`;
-  }).join("");
-  $("bookingTableBody").innerHTML=rows||'<tr><td colspan="8" class="loading">目前沒有預約</td></tr>';
-  $("accountingTableBody").innerHTML=A.length?A.map((a,i)=>{
-    const inc=a.type==="收入",id=esc(a.id);
-    return`<tr id="a-${id}"><td>${pad(i+1).padStart(3,"0")}</td><td>${esc(a.date)}</td><td><span class="tag ${inc?"in":"out"}">${inc?"收入":"支出"}</span></td><td>${esc(a.item)}</td><td>NT$ ${+a.amount||0}</td><td style="white-space:nowrap">${ib("aedit",id,"pencil","編輯")} ${ib("adel",id,"trash","刪除","danger")}</td></tr>`;
-  }).join(""):'<tr><td colspan="6" class="loading">還沒有記帳紀錄</td></tr>';
-  finance();
+/* ---------- 營收 ---------- */
+const add=(o,k,n)=>{o[k]=(o[k]||0)+n};
+const fixedOn=(f,ym)=>f.start&&ym>=f.start&&(!f.end||ym<=f.end)&&ym<=curYM;
+function ms(ym){
+  if(MS[ym])return MS[ym];
+  const r={rev:0,exp:0,ri:{},ei:{}},now=new Date();
+  B.forEach(b=>{
+    if(b.status==="已取消"||!b.date||b.date.slice(0,7)!==ym)return;
+    if(b.status==="已完成"||isPast(b,now)){const p=+b.totalPrice||0;r.rev+=p;if(p)add(r.ri,"預約收入",p)}
+    const c=+b.cost||0;if(c){r.exp+=c;add(r.ei,"預約成本",c)}
+  });
+  A.forEach(a=>{
+    if(!a.date||a.date.slice(0,7)!==ym)return;const n=+a.amount||0;
+    if(a.type==="收入"){r.rev+=n;add(r.ri,a.item||"收入",n)}else{r.exp+=n;add(r.ei,a.item||"支出",n)}
+  });
+  F.forEach(f=>{if(fixedOn(f,ym)){r.exp+=f.amount;add(r.ei,f.item,f.amount)}});
+  r.net=r.rev-r.exp;return MS[ym]=r;
+}
+function ys(y){const r={rev:0,exp:0};for(let m=1;m<=12;m++){const s=ms(`${y}-${pad(m)}`);r.rev+=s.rev;r.exp+=s.exp}r.net=r.rev-r.exp;return r}
+const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+function animNum(id,to,signed){
+  const el=$(id),from=el._v==null?0:el._v;el._v=to;
+  const paint=v=>{el.textContent=(signed&&v<0?"-":"")+money(Math.abs(v))};
+  if(signed){el.classList.toggle("neg",to<0);el.classList.toggle("pos",to>=0)}
+  cancelAnimationFrame(el._r);
+  if(reduce||from===to){paint(to);return}
+  const t0=performance.now(),dur=650;
+  const tick=t=>{const p=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-p,3);paint(from+(to-from)*e);if(p<1)el._r=requestAnimationFrame(tick)};
+  el._r=requestAnimationFrame(tick);
+}
+function bars(map,cls){
+  const e=Object.entries(map).sort((a,b)=>b[1]-a[1]);if(!e.length)return'<div class="muted" style="padding:2px 0 6px">這個月還沒有紀錄</div>';
+  const mx=e[0][1]||1;
+  return e.map(([k,v])=>`<div class="ln"><div class="t"><span>${esc(k)}</span><span>${money(v)}</span></div><div class="bar ${cls}" style="width:${Math.max(4,v/mx*100)}%"></div></div>`).join("");
+}
+function renderStats(){
+  labels();const m=ms(selYM),y=ys(selYM.slice(0,4));
+  animNum("mRev",m.rev);animNum("mExp",m.exp);animNum("mNet",m.net,true);
+  animNum("yRev",y.rev);animNum("yExp",y.exp);animNum("yNet",y.net,true);
+  $("mLists").innerHTML=`<div class="bl"><h4 style="color:var(--gold-ink)">收入來源</h4>${bars(m.ri,"in")}</div><div class="bl"><h4 style="color:var(--rose)">支出明細</h4>${bars(m.ei,"out")}</div>`;
+  renderChart();
+}
+function setChartMode(k){cmode=k;document.querySelectorAll('[data-a="cm"]').forEach(b=>b.classList.toggle("on",b.dataset.id===k));renderChart()}
+function renderChart(){try{drawChart()}catch(e){console.error(e)}}
+function drawChart(){
+  if(typeof Chart==="undefined")return;
+  const y=selYM.slice(0,4),rev=cmode==="revenue";
+  const vals=Array.from({length:12},(_,i)=>{const s=ms(`${y}-${pad(i+1)}`);return rev?s.rev:s.net});
+  const sel=+selYM.slice(5)-1;
+  const col=vals.map((v,i)=>v<0?(i===sel?"#c2635a":"#e6b3ac"):rev?(i===sel?"#c9a55e":"#ecdcb2"):(i===sel?"#5f87a9":"#bfd3e3"));
+  if(!chart){
+    Chart.defaults.font.family="'LXGW WenKai TC',sans-serif";
+    chart=new Chart($("trendChart").getContext("2d"),{type:"bar",
+      data:{labels:Array.from({length:12},(_,i)=>`${i+1}`),datasets:[{data:vals,backgroundColor:col,borderRadius:7,borderSkipped:false,maxBarThickness:22}]},
+      options:{responsive:true,maintainAspectRatio:false,animation:{duration:600},plugins:{legend:{display:false},tooltip:{callbacks:{title:c=>`${c[0].label} 月`,label:c=>money(c.raw)}}},
+        scales:{x:{grid:{display:false},ticks:{color:"#8a7a6e"}},y:{grid:{color:"#eee6d8"},ticks:{color:"#8a7a6e",maxTicksLimit:5,callback:v=>v>=10000||v<=-10000?(v/10000)+"萬":v}}},
+        onClick:(e,els)=>{if(els.length){selYM=`${selYM.slice(0,4)}-${pad(els[0].index+1)}`;renderStats()}}}});
+  }else{chart.data.datasets[0].data=vals;chart.data.datasets[0].backgroundColor=col;chart.update()}
 }
 
 /* ---------- 預約 ---------- */
+function renderBookings(){
+  labels();const now=new Date();
+  const list=B.filter(r=>r.status!=="已取消"&&r.date&&r.date.slice(0,7)===bkYM).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
+  $("bookingList").innerHTML=list.length?list.map(r=>{
+    const dn=r.status==="已完成"||isPast(r,now),id=esc(r.bookingId);
+    return`<div class="bk" id="b-${id}"><div class="bk-top"><b>${esc(r.customerName)}</b><span class="st ${dn?"done":"wait"}" data-a="toggle" data-id="${id}">${dn?"已完成":"預約中"}</span></div><div class="bk-m">${esc(r.date)}　${esc(r.time)}</div><div class="bk-i">${esc(r.items)}</div><div class="bk-bot"><span class="pr">${money(+r.totalPrice||0)}</span><span class="act">${ib("bedit",id,"pencil","改金額")}${ib("bcancel",id,"trash","刪除","danger")}</span></div></div>`;
+  }).join(""):'<div class="empty">這個月沒有預約</div>';
+}
 function toggleStatus(id){const b=B.find(x=>x.bookingId===id);if(!b)return;b.status=b.status==="已完成"?"預約中":"已完成";renderAll();bg({action:"update",bookingId:id,status:b.status})}
 async function cancelBooking(id){if(!await ask("確定要刪除這筆預約嗎？"))return;B=B.filter(x=>x.bookingId!==id);renderAll();bg({action:"update",bookingId:id,status:"已取消"})}
 function editBooking(id){
-  const tr=$("b-"+id),b=B.find(x=>x.bookingId===id);if(!tr||!b)return;
-  tr.children[5].innerHTML=`NT$ <input type="number" id="ip-${esc(id)}" class="inl" style="width:84px" value="${+b.totalPrice||0}">`;
-  tr.children[7].innerHTML=`${ib("bsave",esc(id),"check","儲存","ok")} ${ib("rerender","","x","取消")}`;
+  const c=$("b-"+id),b=B.find(x=>x.bookingId===id);if(!c||!b)return;const k=esc(id);
+  c.querySelector(".bk-bot").innerHTML=`<span style="display:flex;align-items:center;gap:6px">NT$ <input type="number" id="ip-${k}" class="inl" style="width:110px" inputmode="numeric" value="${+b.totalPrice||0}"></span><span class="act">${ib("bsave",k,"check","儲存","ok")}${ib("rerender","","x","取消")}</span>`;
 }
 function saveBooking(id){const v=parseInt($("ip-"+id).value,10),b=B.find(x=>x.bookingId===id);if(isNaN(v)||v<0||!b)return;b.totalPrice=v;renderAll();bg({action:"updatePrice",bookingId:id,newPrice:v})}
 async function manualAddBooking(){
@@ -334,58 +520,72 @@ async function manualAddBooking(){
   if(!customerName||!date||!items||!$("newPrice").value||totalPrice<0)return say("請把名稱、日期、項目、金額填完整");
   const r=await api({action:"addBooking",customerName,date,time,items,totalPrice,cost:0});
   if(!r||r.result!=="success")return say((r&&r.message)||"新增失敗");
-  ["newName","newItems","newPrice"].forEach(i=>$(i).value="");fetchData();
+  ["newName","newItems","newPrice"].forEach(i=>$(i).value="");bkYM=date.slice(0,7);$("newName").closest("details").open=false;fetchData();
 }
 
-/* ---------- 記帳 ---------- */
+/* ---------- 記帳（只到月份） ---------- */
+function setAccType(t){
+  accType=t;$("accForm").dataset.t=t;
+  document.querySelectorAll(".tbtn").forEach(b=>b.classList.toggle("on",b.dataset.id===t));
+  const s=$("accSubmit");s.textContent="記一筆"+t;s.className="btn full "+(t==="支出"?"rose":"gold");
+  $("accItem").value="";renderChips();
+}
+function renderChips(){$("chips").innerHTML=CHIPS[accType].map(n=>`<span class="chip" data-a="chip" data-id="${esc(n)}">${esc(n)}</span>`).join("")}
+function pickChip(n){$("accItem").value=n;document.querySelectorAll("#chips .chip").forEach(c=>c.classList.toggle("on",c.dataset.id===n))}
+function accRow(a){
+  const id=esc(a.id),inc=a.type==="收入";
+  return`<div class="rw ${inc?"i":"o"}" id="a-${id}"><div class="rw-main"><span class="nm">${esc(a.item)}</span></div><b class="am">${money(+a.amount||0)}</b><span class="act">${ib("aedit",id,"pencil","修改")}${ib("adel",id,"trash","刪除","danger")}</span></div>`;
+}
+function renderAcc(){
+  labels();
+  const rows=A.filter(a=>a.date&&a.date.slice(0,7)===accYM),inc=rows.filter(a=>a.type==="收入"),exp=rows.filter(a=>a.type!=="收入");
+  const fx=F.filter(f=>fixedOn(f,accYM)),sum=l=>l.reduce((t,a)=>t+(+a.amount||0),0),fxs=fx.reduce((t,f)=>t+f.amount,0);
+  const none='<div class="empty">這個月還沒有紀錄</div>';
+  $("accInc").innerHTML=`<div class="lh in"><span>收入</span><span>${money(sum(inc))}</span></div>${inc.map(accRow).join("")||none}`;
+  $("accExp").innerHTML=`<div class="lh out"><span>支出</span><span>${money(sum(exp)+fxs)}</span></div>${exp.map(accRow).join("")}${fx.map(f=>`<div class="rw o"><div class="rw-main"><span class="nm">${esc(f.item)}<span class="tg">固定</span></span></div><b class="am">${money(f.amount)}</b></div>`).join("")}${(exp.length||fx.length)?"":none}`;
+  renderFixed();
+}
 function editAcc(id){
-  const a=A.find(x=>x.id===id),tr=$("a-"+id);if(!a||!tr)return;const k=esc(id);
-  tr.children[1].innerHTML=`<input type="date" id="ad-${k}" class="inl" value="${esc(a.date)}">`;
-  tr.children[2].innerHTML=`<select id="at-${k}" class="inl"><option${a.type==="支出"?" selected":""}>支出</option><option${a.type==="收入"?" selected":""}>收入</option></select>`;
-  tr.children[3].innerHTML=`<input type="text" id="ai-${k}" class="inl" maxlength="100" value="${esc(a.item)}">`;
-  tr.children[4].innerHTML=`<input type="number" id="am-${k}" class="inl" style="width:84px" value="${+a.amount||0}">`;
-  tr.children[5].innerHTML=`${ib("asave",k,"check","儲存","ok")} ${ib("rerender","","x","取消")}`;
+  const a=A.find(x=>x.id===id),r=$("a-"+id);if(!a||!r)return;const k=esc(id);
+  r.innerHTML=`<div class="ef"><input type="text" id="ai-${k}" class="inl" maxlength="100" value="${esc(a.item)}"><input type="number" id="am-${k}" class="inl" inputmode="numeric" value="${+a.amount||0}"><input type="month" id="ad-${k}" class="inl" value="${esc(a.date.slice(0,7))}"></div><span class="act">${ib("asave",k,"check","儲存","ok")}${ib("rerender","","x","取消")}</span>`;
 }
 function saveAcc(id){
-  const date=$("ad-"+id).value,type=$("at-"+id).value,item=$("ai-"+id).value.trim(),amount=parseInt($("am-"+id).value,10),a=A.find(x=>x.id===id);
-  if(!date||!item||isNaN(amount)||amount<0||!a)return;
-  Object.assign(a,{date,type,item,amount});renderAll();bg({action:"updateAccounting",id,date,type,item,amount});
+  const a=A.find(x=>x.id===id),date=$("ad-"+id).value,item=$("ai-"+id).value.trim(),amount=parseInt($("am-"+id).value,10);
+  if(!a||!date||!item||isNaN(amount)||amount<0)return;
+  Object.assign(a,{date:date+"-01",item,amount});renderAll();bg({action:"updateAccounting",id,date,type:a.type,item,amount});
 }
 async function delAcc(id){if(!await ask("確定要刪除這筆記帳嗎？"))return;A=A.filter(x=>x.id!==id);renderAll();bg({action:"deleteAccounting",id})}
 async function manualAddAccounting(){
-  const date=$("accDate").value,type=$("accType").value,item=$("accItem").value.trim(),amount=Number($("accCost").value);
-  if(!date||!item||!(amount>=0))return say("請把日期、項目、金額填完整");
-  const r=await api({action:"addAccounting",date,type,item,amount});
+  const item=$("accItem").value.trim(),amount=Number($("accAmt").value);
+  if(!item||!(amount>0))return say("請填寫項目和金額");
+  const r=await api({action:"addAccounting",date:accYM,type:accType,item,amount});
   if(!r||r.result!=="success")return say((r&&r.message)||"新增失敗");
-  $("accItem").value="";$("accCost").value="0";document.querySelectorAll(".chip").forEach(c=>c.classList.remove("on"));fetchData();
+  $("accItem").value="";$("accAmt").value="";document.querySelectorAll("#chips .chip").forEach(c=>c.classList.remove("on"));fetchData();
 }
 
-/* ---------- 營收 / 圖表 ---------- */
-function finance(){
-  let rev=0,cost=0;const now=new Date();
-  B.forEach(r=>{if(r.status==="已取消")return;if(r.status==="已完成"||isPast(r,now))rev+=+r.totalPrice||0;cost+=+r.cost||0});
-  A.forEach(a=>{const n=+a.amount||0;if(a.type==="收入")rev+=n;else cost+=n});
-  $("totalRevenue").textContent=`NT$ ${rev}`;$("totalCost").textContent=`NT$ ${cost}`;$("netProfit").textContent=`NT$ ${rev-cost}`;
+/* ---------- 每月固定支出 ---------- */
+function renderFixed(){
+  $("fixedList").innerHTML=F.length?F.map(f=>{const id=esc(f.id);
+    return`<div class="rw o" id="f-${id}"><div class="rw-main"><span class="nm">${esc(f.item)}</span><small>${esc(f.start)} 起${f.end?`　到 ${esc(f.end)}`:"　持續中"}</small></div><b class="am">${money(f.amount)}<small> /月</small></b><span class="act">${ib("fedit",id,"pencil","修改")}${ib("fdel",id,"trash","刪除","danger")}</span></div>`}).join(""):'<div class="empty">還沒有固定支出</div>';
 }
-function toggleChart(type){
-  if(copen&&ctype===type){$("chartSection").style.display="none";copen=false;return}
-  ctype=type;copen=true;$("chartSection").style.display="block";
-  $("chartTitle").textContent=type==="revenue"?"年度每月營收":"年度每月淨利";
-  const ys=new Set([String(new Date().getFullYear())]);
-  B.forEach(r=>r.date&&ys.add(r.date.split("-")[0]));A.forEach(a=>a.date&&ys.add(a.date.split("-")[0]));
-  $("selectYear").innerHTML=[...ys].sort().reverse().map(y=>`<option value="${esc(y)}">${esc(y)} 年</option>`).join("");
-  renderChart();
+async function addFixed(){
+  const item=$("fxItem").value.trim(),amount=Number($("fxAmt").value),start=$("fxStart").value,end=$("fxEnd").value;
+  if(!item||!(amount>0)||!start)return say("請填寫項目、每月金額和開始月份");
+  if(end&&end<start)return say("結束月份不能比開始月份早");
+  const r=await api({action:"addFixed",item,amount,start,end});
+  if(!r||r.result!=="success")return say((r&&r.message)||"新增失敗");
+  $("fxItem").value="";$("fxAmt").value="";$("fxEnd").value="";$("fxItem").closest("details").open=false;fetchData();
 }
-function renderChart(){
-  const y=$("selectYear").value,data=new Array(12).fill(0),now=new Date(),rev=ctype==="revenue";
-  const slot=d=>{const p=(d||"").split("-");return p.length===3&&p[0]===y?parseInt(p[1],10)-1:-1};
-  B.forEach(r=>{if(r.status==="已取消"||!(r.status==="已完成"||isPast(r,now)))return;const m=slot(r.date);if(m>=0)data[m]+=rev?(+r.totalPrice||0):(+r.totalPrice||0)-(+r.cost||0)});
-  A.forEach(a=>{const m=slot(a.date);if(m<0)return;const n=+a.amount||0;if(a.type==="收入")data[m]+=n;else if(!rev)data[m]-=n});
-  if(chart)chart.destroy();
-  const c=rev?"#8a7968":"#b8964f";
-  Chart.defaults.font.family="'LXGW WenKai TC',sans-serif";
-  chart=new Chart($("trendChart").getContext("2d"),{type:"line",data:{labels:Array.from({length:12},(_,i)=>`${i+1}月`),datasets:[{label:`${y} 年（${rev?"營收":"淨利"}）`,data,borderColor:c,backgroundColor:c+"1a",borderWidth:2,fill:true,tension:.3}]},options:{responsive:true,maintainAspectRatio:false}});
+function editFixed(id){
+  const f=F.find(x=>x.id===id),r=$("f-"+id);if(!f||!r)return;const k=esc(id);
+  r.innerHTML=`<div class="ef"><input type="text" id="fi-${k}" class="inl" maxlength="60" value="${esc(f.item)}"><input type="number" id="fa-${k}" class="inl" inputmode="numeric" value="${f.amount}"><div class="two"><input type="month" id="fs-${k}" class="inl" value="${esc(f.start)}"><input type="month" id="fe-${k}" class="inl" value="${esc(f.end)}"></div><small class="muted">左：開始月　右：結束月（不填＝持續中）</small></div><span class="act">${ib("fsave",k,"check","儲存","ok")}${ib("rerender","","x","取消")}</span>`;
 }
+function saveFixed(id){
+  const f=F.find(x=>x.id===id),item=$("fi-"+id).value.trim(),amount=parseInt($("fa-"+id).value,10),start=$("fs-"+id).value,end=$("fe-"+id).value;
+  if(!f||!item||isNaN(amount)||amount<0||!start||(end&&end<start))return say("請確認項目、金額與月份");
+  Object.assign(f,{item,amount,start,end});renderAll();bg({action:"updateFixed",id,item,amount,start,end});
+}
+async function delFixed(id){if(!await ask("確定要刪除這個固定支出嗎？\n（過去每個月的支出也會一併消失）"))return;F=F.filter(x=>x.id!==id);renderAll();bg({action:"deleteFixed",id})}
 
 /* ---------- 班表 ---------- */
 function shiftReminder(){
@@ -393,17 +593,22 @@ function shiftReminder(){
   if(t.getDate()>=12&&!M[ym]){el.textContent=`今天是 ${t.getDate()} 號，還沒設定下個月（${ym}）的班表喔`;el.hidden=false}else el.hidden=true;
 }
 function renderHistory(){
-  const ks=Object.keys(M).sort();
-  $("historyList").innerHTML=ks.length?ks.map(k=>`<div class="h${activeYM===k?" on":""}" data-a="hist" data-id="${esc(k)}">${esc(k)}<small>${esc(M[k].shiftGroup)} 組・${esc(M[k].shiftType)}</small></div>`).join(""):'<span class="muted">還沒有設定紀錄</span>';
+  const ks=Object.keys(M).sort().reverse();
+  $("historyList").innerHTML=ks.length?ks.map(k=>`<div class="h${shYM===k?" on":""}" data-a="hist" data-id="${esc(k)}">${esc(k)}<small>${esc(M[k].shiftGroup)} 組・${esc(M[k].shiftType)}</small></div>`).join(""):'<span class="muted">還沒有設定紀錄</span>';
 }
-function showPreview(ym){
-  activeYM=ym;renderHistory();
-  const it=M[ym]||{shiftGroup:"B",shiftType:"夜班"};
-  $("previewContainer").style.display="block";
-  $("previewTitle").textContent=`${ym} 預覽（${it.shiftGroup} 組・${it.shiftType}）`;
+function syncShift(fromBtn){
+  if(!fromBtn&&M[shYM]){shGroup=M[shYM].shiftGroup;shType=M[shYM].shiftType}
+  labels();
+  document.querySelectorAll("#sgG button").forEach(b=>b.classList.toggle("on",b.dataset.id===shGroup));
+  document.querySelectorAll("#sgT button").forEach(b=>b.classList.toggle("on",b.dataset.id===shType));
+  renderHistory();showPreview(shYM,{shiftGroup:shGroup,shiftType:shType});
+}
+function showPreview(ym,it){
+  if(typeof flatpickr==="undefined")return;
+  $("previewTitle").textContent=`${ymLabel(ym)}預覽（${it.shiftGroup} 組・${it.shiftType}）`;
   const[y,m]=ym.split("-").map(Number),[ay,am,ad]=ANCHOR.split("-").map(Number);
   if(picker)picker.destroy();
-  picker=flatpickr("#inlinePreviewCalendar",{inline:true,locale:"zh",defaultDate:new Date(y,m-1,1),
+  picker=flatpickr("#inlinePreviewCalendar",{inline:true,locale:"zh",clickOpens:false,defaultDate:new Date(y,m-1,1),
     onDayCreate:(a,b,fp,el)=>{
       const d=el.dateObj,ds=ymd(d);if(ds.slice(0,7)!==ym)return;
       const s=S[ds];let ok;
@@ -411,23 +616,36 @@ function showPreview(ym){
       else{let c=((Math.round((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(ay,am-1,ad))/864e5)%4)+4)%4;if(it.shiftGroup==="A")c=(c+2)%4;ok=!(c===0||c===1)}
       if(ok)el.classList.add(it.shiftType==="白班"?"ya":"yb");
     }});
+  picker.calendarContainer.addEventListener("click",e=>e.stopPropagation(),true);
+}
+function saveMonthlyShift(){
+  M[shYM]={shiftGroup:shGroup,shiftType:shType};renderHistory();shiftReminder();
+  bg({action:"updateBaseShift",targetMonth:shYM,shiftGroup:shGroup,shiftType:shType,monthlyShiftTypes:M});say(`已儲存 ${ymLabel(shYM)} 的班別`,true);
+}
+
+/* 日期微調：點日曆 → 選開放/關閉 → 儲存 */
+function initOv(){
+  if(typeof flatpickr==="undefined")return;
+  ovPicker=flatpickr("#ovCalIn",{inline:true,locale:"zh",
+    onChange:d=>{ovDate=d[0]?ymd(d[0]):"";if(S[ovDate])ovStatus=S[ovDate].status;syncOv()},
+    onDayCreate:(a,b,fp,el)=>{const s=S[ymd(el.dateObj)];if(s)el.classList.add(s.status==="開放"?"ov-o":"ov-c")}});
+  syncOv();
+}
+function syncOv(){
+  document.querySelectorAll("#sgO button").forEach(b=>b.classList.toggle("on",b.dataset.id===ovStatus));
+  $("ovSave").disabled=!ovDate;
+  if(ovDate){const d=new Date(ovDate+"T00:00");$("ovPick").innerHTML=`<b>${d.getMonth()+1} 月 ${d.getDate()} 日（週${WD[d.getDay()]}）</b>`}else $("ovPick").textContent="先點上面日曆的日期";
 }
 function renderOverrides(){
-  const ds=Object.keys(S).sort();
-  $("overrideRecordContainer").innerHTML=ds.length?`<table><tr><th>日期</th><th>狀態</th><th></th></tr>${ds.map(d=>`<tr><td>${esc(d)}</td><td>${S[d].status==="開放"?"開放":"關閉"}</td><td>${ib("sdel",esc(d),"trash","刪除","danger")}</td></tr>`).join("")}</table>`:'<span class="muted">還沒有微調紀錄</span>';
+  const ds=Object.keys(S).sort().reverse();
+  $("overrideRecordContainer").innerHTML=ds.length?ds.map(d=>{const o=S[d].status==="開放",t=new Date(d+"T00:00");return`<div class="ov"><span>${esc(d)}（週${WD[t.getDay()]||""}）</span><span class="tag ${o?"o":"c"}">${o?"開放":"關閉"}</span>${ib("sdel",esc(d),"trash","刪除","danger")}</div>`}).join(""):'<div class="empty">還沒有微調紀錄</div>';
+  if(ovPicker)ovPicker.redraw();
 }
-function delOverride(d){delete S[d];renderOverrides();if(activeYM)showPreview(activeYM);bg({action:"deleteSchedule",targetDate:d})}
-function saveMonthlyShift(){
-  const targetMonth=$("targetMonth").value,shiftGroup=$("shiftGroup").value,shiftType=$("shiftType").value;
-  if(!targetMonth)return;
-  M[targetMonth]={shiftGroup,shiftType};showPreview(targetMonth);shiftReminder();
-  bg({action:"updateBaseShift",targetMonth,shiftGroup,shiftType,monthlyShiftTypes:M});
-}
+function delOverride(d){delete S[d];renderOverrides();syncShift();bg({action:"deleteSchedule",targetDate:d})}
 function updateScheduleOverride(){
-  const targetDate=$("scheduleDate").value,status=$("scheduleStatus").value;
-  if(!targetDate)return;
-  S[targetDate]={status,slots:""};renderOverrides();if(activeYM)showPreview(activeYM);
-  bg({action:"updateSchedule",targetDate,status});
+  if(!ovDate)return;
+  S[ovDate]={status:ovStatus,slots:""};renderOverrides();syncShift();
+  bg({action:"updateSchedule",targetDate:ovDate,status:ovStatus});say(`已儲存：${ovDate} ${ovStatus==="開放"?"開放預約":"關閉預約"}`,true);
 }
 </script>
 </body>
