@@ -146,6 +146,43 @@
       outline: none;
     }
 
+    /* 收入/支出 雙色切換按鈕群組 */
+    .type-toggle-group {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+    }
+    .type-btn {
+      flex: 1;
+      padding: 9px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: #fff;
+      font-size: 13.5px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .type-btn.expense {
+      color: #8c827a;
+    }
+    .type-btn.expense.active {
+      background: #fff2f0;
+      color: #cf1322;
+      border-color: #ffccc7;
+      box-shadow: 0 2px 6px rgba(207, 19, 34, 0.15);
+    }
+    .type-btn.income {
+      color: #8c827a;
+    }
+    .type-btn.income.active {
+      background: #f6ffed;
+      color: #237804;
+      border-color: #b7eb8f;
+      box-shadow: 0 2px 6px rgba(35, 120, 4, 0.15);
+    }
+
     /* 常用項目快捷標籤 */
     .tag-container {
       display: flex;
@@ -210,7 +247,6 @@
       width: 100%;
     }
 
-    /* 行內編輯輸入框樣式 */
     .inline-input {
       width: 100%;
       padding: 4px 6px;
@@ -230,10 +266,8 @@
 <div class="container">
   <h2>後台管理儀表板</h2>
 
-  <!-- 12號提醒橫幅 -->
   <div id="adminShiftReminder" style="display: none; background: #fff2f0; border: 1.5px solid #ffccc7; color: #cf1322; padding: 10px; border-radius: 8px; margin-bottom: 12px; text-align: center; font-weight: bold; font-size: 13px;"></div>
 
-  <!-- 分頁選單 -->
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('tab-stats')">📈 營收</button>
     <button class="tab-btn" onclick="switchTab('tab-schedule')">📅 班表</button>
@@ -294,14 +328,12 @@
         </div>
       </div>
 
-      <!-- 預覽日曆區 -->
       <div id="previewContainer" style="margin-top: 12px; text-align: center; display: none; padding-top: 10px; border-top: 1px dashed var(--border-color);">
         <div style="font-size: 13px; font-weight: bold; margin-bottom: 6px; color: var(--primary-dark);" id="previewTitle">日曆預覽</div>
         <input type="text" id="inlinePreviewCalendar" style="display: none;">
       </div>
     </div>
 
-    <!-- 特定日期微調 -->
     <div class="add-section">
       <h3>日期微調</h3>
       <div class="form-row">
@@ -387,14 +419,19 @@
       <h3>手動新增收支</h3>
       <div class="form-row">
         <input type="date" id="accDate" required>
-        <select id="accType">
-          <option value="支出">🔴 支出</option>
-          <option value="收入">🟢 收入</option>
-        </select>
+        
+        <!-- 🔴🟢 雙色按鈕切換 (取代下拉選單) -->
+        <div class="type-toggle-group">
+          <button type="button" id="btnExpense" class="type-btn expense active" onclick="setAccType('支出')">🔴 支出</button>
+          <button type="button" id="btnIncome" class="type-btn income" onclick="setAccType('收入')">🟢 收入</button>
+        </div>
+        <input type="hidden" id="accType" value="支出">
+
         <input type="text" id="accItem" placeholder="項目說明" required>
         <input type="number" id="accCost" placeholder="金額 (NT$)" required min="0" value="0">
         <button class="btn-action" onclick="manualAddAccounting()">新增紀錄</button>
       </div>
+
       <!-- 快捷點擊標籤 -->
       <div class="tag-container">
         <span style="font-size: 11.5px; color: var(--text-muted); align-self: center;">快捷帶入：</span>
@@ -462,10 +499,24 @@
     document.getElementById(tabId).classList.add('active');
   }
 
+  // 🎨 切換收支按鈕狀態
+  function setAccType(type) {
+    document.getElementById('accType').value = type;
+    const btnExp = document.getElementById('btnExpense');
+    const btnInc = document.getElementById('btnIncome');
+    if (type === '支出') {
+      btnExp.classList.add('active');
+      btnInc.classList.remove('active');
+    } else {
+      btnInc.classList.add('active');
+      btnExp.classList.remove('active');
+    }
+  }
+
   // 快捷設置項目名稱與類型
   function quickSetItem(itemName, typeName) {
     document.getElementById('accItem').value = itemName;
-    document.getElementById('accType').value = typeName;
+    setAccType(typeName);
   }
 
   function fetchData() {
@@ -654,7 +705,6 @@
     });
   }
 
-  // ⚡ 點擊即時切換狀態
   function toggleStatus(bookingId) {
     const booking = globalBookings.find(b => (b.bookingId || '') === String(bookingId));
     if (booking) {
@@ -668,7 +718,6 @@
     });
   }
 
-  // ⚡ 點擊即時刪除預約
   function cancelBooking(bookingId) {
     globalBookings = globalBookings.filter(b => (b.bookingId || '') !== String(bookingId));
     renderAllTables();
@@ -679,7 +728,6 @@
     });
   }
 
-  // ⚡ 點擊即時刪除記帳
   function deleteAccounting(id) {
     globalAccounting = globalAccounting.filter(acc => acc.id !== String(id));
     renderAllTables();
