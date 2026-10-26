@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>美甲服務預約選單</title>
+  <title>🌸 美甲服務預約選單</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=ChenYuluoyan&family=Cinzel:wght@600&display=swap" rel="stylesheet">
@@ -18,32 +18,31 @@
       -webkit-touch-callout: none;
       -webkit-user-select: none;
       user-select: none;
-      background-color: #f4f1ea;
+      background-color: #f7f4ee;
       margin: 0;
       padding: 20px 15px;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      color: #4a423d;
+      color: #5a5049;
       position: relative;
       overflow-x: hidden;
     }
 
     body::before {
-      content: "NT$    $    NT$    $\n$    NT$    $    NT$\nNT$    $    NT$    $\n$NT$    $    NT$    $";
+      content: "Nail 🌸 Style ✨ Nail 🌸 Style ✨\n✨ Nail 🌸 Style ✨ Nail 🌸";
       white-space: pre-line;
       position: fixed;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%) rotate(-12deg);
-      font-family: 'Cinzel', serif;
-      font-size: 38px;
-      font-weight: 600;
-      letter-spacing: 50px;
-      line-height: 2.2;
-      color: #c5a059;
-      opacity: 0.055;
+      transform: translate(-50%, -50%) rotate(-10deg);
+      font-family: 'ChenYuluoyan', serif;
+      font-size: 32px;
+      letter-spacing: 30px;
+      line-height: 2.5;
+      color: #d4c5b9;
+      opacity: 0.12;
       pointer-events: none;
       z-index: 0;
       width: 140vw;
@@ -61,53 +60,53 @@
 
     input[type="checkbox"], 
     input[type="radio"] {
-      accent-color: #7a6b63;
+      accent-color: #8c7b73;
       cursor: pointer;
     }
 
     .card {
-      background: #faf8f5;
+      background: #fcfbfa;
       max-width: 440px;
       width: 100%;
-      border-radius: 16px;
-      box-shadow: 0 6px 18px rgba(120, 108, 100, 0.08);
-      padding: 28px 22px;
-      border: 1px solid #e2dad1;
+      border-radius: 24px;
+      box-shadow: 0 8px 24px rgba(138, 123, 115, 0.08);
+      padding: 30px 22px;
+      border: 1.5px solid #e8e2dc;
       position: relative;
       z-index: 1;
     }
     
     .title-header {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
       padding-bottom: 12px;
-      border-bottom: 3px solid #ebdcd3;
+      border-bottom: 2px dashed #ebdcd3;
     }
     .title-header h2 {
       margin: 0;
-      font-size: 25px;
+      font-size: 26px;
       font-weight: bold;
       letter-spacing: 2px;
-      color: #5c5049;
+      color: #5a5049;
     }
 
     #frontendReminder {
       display: none;
-      background: #fffae6;
-      border: 1px solid #ffe58f;
+      background: #fffbf0;
+      border: 1px dashed #ffe58f;
       padding: 10px;
-      border-radius: 8px;
+      border-radius: 12px;
       margin-bottom: 15px;
       text-align: center;
-      color: #d48806;
-      font-size: 13.5px;
+      color: #b37feb;
+      font-size: 14px;
       font-weight: bold;
     }
 
     .section {
-      margin-bottom: 18px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid #eae3d9;
+      margin-bottom: 20px;
+      padding-bottom: 18px;
+      border-bottom: 1.5px dashed #efece6;
       transition: opacity 0.3s ease, filter 0.3s ease;
     }
 
@@ -119,76 +118,75 @@
 
     .section-title {
       font-weight: bold;
-      color: #5c5049;
+      color: #5a5049;
       margin-bottom: 10px;
-      font-size: 16.5px;
+      font-size: 17px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
     label {
       font-size: 15.5px;
-      color: #524741;
+      color: #6e6057;
       cursor: pointer;
     }
     select, input[type="text"] {
       width: 100%;
-      padding: 9px 12px;
-      border: 1px solid #cfc5bb;
-      border-radius: 8px;
+      padding: 10px 14px;
+      border: 1.5px solid #dfd6cd;
+      border-radius: 14px;
       outline: none;
       font-size: 15px;
       background-color: #ffffff;
-      color: #4a423d;
+      color: #5a5049;
       appearance: none;
       -webkit-appearance: none;
       transition: border-color 0.2s;
     }
     select:focus, input[type="text"]:focus {
-      border-color: #7a6b63;
-      box-shadow: 0 0 4px rgba(122, 107, 99, 0.25);
+      border-color: #8c7b73;
+      box-shadow: 0 0 6px rgba(140, 123, 115, 0.2);
     }
 
     .flatpickr-input {
       width: 100%;
-      padding: 9px 12px;
-      border: 1px solid #cfc5bb;
-      border-radius: 8px;
+      padding: 10px 14px;
+      border: 1.5px solid #dfd6cd;
+      border-radius: 14px;
       outline: none;
       font-size: 15px;
       background-color: #ffffff !important;
-      color: #4a423d;
+      color: #5a5049;
       cursor: pointer;
     }
 
     .flatpickr-calendar {
-      background: #faf8f5 !important;
-      border: 1px solid #e2dad1 !important;
-      box-shadow: 0 10px 25px rgba(120, 108, 100, 0.15) !important;
-      border-radius: 14px !important;
+      background: #fcfbfa !important;
+      border: 1.5px solid #e8e2dc !important;
+      box-shadow: 0 10px 25px rgba(138, 123, 115, 0.12) !important;
+      border-radius: 20px !important;
       font-family: inherit !important;
     }
 
     .flatpickr-day.available-day-yellow {
-      background-color: #fdf6e2 !important;
-      color: #a37512 !important;
+      background-color: #fff9e6 !important;
+      color: #b8860b !important;
       font-weight: bold !important;
       border-radius: 50% !important;
-      border: 1px solid #f2d896 !important;
+      border: 1px solid #fae19c !important;
     }
     .flatpickr-day.available-day-blue {
-      background-color: #e5ece9 !important;
+      background-color: #e8f0ec !important;
       color: #4c6b61 !important;
       font-weight: bold !important;
       border-radius: 50% !important;
       border: 1px solid #b8c9c4 !important;
     }
     .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, 
-    .flatpickr-day.selected:focus, .flatpickr-day.selected:hover, 
-    .flatpickr-day.available-day-yellow.selected, .flatpickr-day.available-day-blue.selected {
-      background-color: #5c5049 !important;
+    .flatpickr-day.selected:focus, .flatpickr-day.selected:hover {
+      background-color: #8c7b73 !important;
       color: #ffffff !important;
-      border-color: #4a3f38 !important;
+      border-color: #726259 !important;
       font-weight: bold !important;
       border-radius: 50% !important;
     }
@@ -196,18 +194,18 @@
       color: #d1c7bd !important;
       background: transparent !important;
       text-decoration: line-through;
-      opacity: 0.4;
+      opacity: 0.35;
     }
 
     @keyframes selectFlash {
-      0% { border-color: #7a6b63; box-shadow: 0 0 0 3px rgba(122, 107, 99, 0.4); background-color: #ffffff; }
-      50% { border-color: #a8988e; box-shadow: 0 0 0 5px rgba(122, 107, 99, 0.6); background-color: #eae1d7; }
-      100% { border-color: #cfc5bb; box-shadow: none; background-color: #ffffff; }
+      0% { border-color: #8c7b73; box-shadow: 0 0 0 3px rgba(140, 123, 115, 0.4); background-color: #ffffff; }
+      50% { border-color: #a8988e; box-shadow: 0 0 0 5px rgba(140, 123, 115, 0.6); background-color: #f2ebe4; }
+      100% { border-color: #dfd6cd; box-shadow: none; background-color: #ffffff; }
     }
 
     .flash-highlight {
       animation: selectFlash 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-      border-radius: 8px;
+      border-radius: 14px;
     }
 
     .datetime-container {
@@ -229,7 +227,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       margin-top: 10px;
       padding: 6px 4px;
     }
@@ -238,134 +236,133 @@
       align-items: center;
       gap: 8px;
       cursor: pointer;
-      padding: 6px 10px;
+      padding: 8px 12px;
       border-radius: 20px;
+      background: #f7f4ee;
+      border: 1px solid #ebdcd3;
       transition: all 0.25s ease;
       user-select: none;
       white-space: nowrap;
     }
     .tone-option:hover {
-      background-color: rgba(240, 236, 227, 0.6);
+      background-color: #f0ebe4;
     }
     .color-dot {
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
-      box-sizing: border-box;
-      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-      position: relative;
+      background-color: #dfd6cd;
+      border: 1.5px solid #c9bebc;
       flex-shrink: 0;
-      background-color: #e8e0d5; 
-      border: 1.5px solid #d4c7b8;
     }
     .tone-label {
-      font-size: 15px;
-      color: #8c7c75;
+      font-size: 14.5px;
+      color: #6e6057;
       font-weight: 500;
-      white-space: nowrap;
-      transition: color 0.25s ease, font-weight 0.25s ease;
+    }
+    .tone-option.active {
+      background-color: #f2ebe4;
+      border-color: #8c7b73;
+      box-shadow: 0 2px 6px rgba(140, 123, 115, 0.15);
     }
     .tone-option.active .color-dot {
-      background-color: #7a6b63;
-      border-color: #5c5049;
-      transform: scale(1.15);
-      box-shadow: 0 0 0 2.5px #faf8f5, 0 0 0 4.5px #7a6b63;
+      background-color: #8c7b73;
+      border-color: #5a5049;
     }
     .tone-option.active .tone-label {
-      color: #3d3028;
+      color: #5a5049;
       font-weight: 700;
     }
 
     .addon-item-box {
-      border: 1.5px dashed #c2b5aa;
-      background-color: #fcfaf7;
-      border-radius: 12px;
-      padding: 12px 14px;
+      border: 1.5px dashed #dfd6cd;
+      background-color: #ffffff;
+      border-radius: 16px;
+      padding: 14px 16px;
       margin-bottom: 12px;
       cursor: pointer;
       transition: all 0.25s ease;
     }
     .addon-item-box:hover {
-      border-color: #827167;
-      background-color: #f5efe8;
+      border-color: #a8988e;
+      background-color: #fdfbf7;
     }
     .addon-item-box.active {
       border-style: solid;
-      border-color: #7a6b63;
-      background-color: #f2ebe4;
-      box-shadow: 0 2px 8px rgba(122, 107, 99, 0.12);
+      border-color: #8c7b73;
+      background-color: #f7f3ee;
+      box-shadow: 0 3px 10px rgba(140, 123, 115, 0.1);
     }
     .addon-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 16px;
+      font-size: 16.5px;
       font-weight: bold;
-      color: #5c5049;
+      color: #5a5049;
     }
     .addon-badge {
       font-size: 13px;
-      background-color: #e5ded7;
-      color: #6e6057;
-      padding: 3px 10px;
+      background-color: #f0ebe4;
+      color: #726259;
+      padding: 3px 12px;
       border-radius: 20px;
       transition: all 0.2s ease;
     }
     .addon-item-box.active .addon-badge {
-      background-color: #7a6b63;
+      background-color: #8c7b73;
       color: #ffffff;
     }
 
     .removal-card-group {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       margin-top: 10px;
     }
     .removal-card {
       flex: 1;
-      border: 1.5px dashed #c2b5aa;
-      background-color: #fcfaf7;
-      border-radius: 12px;
-      padding: 16px 10px;
+      border: 1.5px dashed #dfd6cd;
+      background-color: #ffffff;
+      border-radius: 16px;
+      padding: 14px 10px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: all 0.25s ease;
       user-select: none;
       display: flex;
       align-items: center;
       justify-content: center;
     }
     .removal-card:hover {
-      border-color: #827167;
-      background-color: #f5efe8;
+      border-color: #a8988e;
+      background-color: #fdfbf7;
     }
     .removal-card.active {
       border-style: solid;
-      border-color: #bdaca2;
-      background-color: #f2ebe4;
-      transform: scale(1.03);
-      box-shadow: 0 4px 12px rgba(122, 107, 99, 0.15);
+      border-color: #8c7b73;
+      background-color: #f7f3ee;
+      box-shadow: 0 3px 10px rgba(140, 123, 115, 0.12);
     }
     .removal-card-title {
-      font-size: 16.5px;
+      font-size: 16px;
       font-weight: bold;
-      color: #4e423b;
+      color: #5a5049;
       margin: 0;
     }
 
     .draw-btn {
-      background-color: #e4dcd3;
-      color: #4a423d;
-      border: 1px solid #c9bebc;
+      background-color: #f0ebe4;
+      color: #5a5049;
+      border: 1.5px solid #dfd6cd;
       padding: 5px 14px;
-      border-radius: 16px;
-      font-size: 13.5px;
+      border-radius: 20px;
+      font-size: 13px;
       font-weight: bold;
       cursor: pointer;
       transition: all 0.2s;
     }
     .draw-btn:hover {
-      background-color: #d7ccc3;
+      background-color: #e8e2dc;
       transform: translateY(-1px);
     }
 
@@ -377,10 +374,10 @@
       display: grid;
       grid-template-columns: 0.85fr 1.15fr;
       gap: 8px 10px;
-      padding: 10px;
-      background-color: #ffffff;
-      border-radius: 12px;
-      border: 1px solid #ebdcd3;
+      padding: 12px;
+      background-color: #fcfbfa;
+      border-radius: 14px;
+      border: 1.5px solid #ebdcd3;
     }
 
     .chip-item {
@@ -390,83 +387,71 @@
       padding: 8px 10px;
       border-radius: 20px;
       background-color: transparent; 
-      border: none;                     
-      color: #524741;
+      border: none;
+      color: #6e6057;
       font-size: 14.5px;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+      transition: all 0.2s ease;
       user-select: none;
-      text-align: center;
       white-space: nowrap;
     }
 
-    .chip-item input[type="checkbox"],
-    .chip-item input[type="radio"] {
+    .chip-item input[type="checkbox"] {
       display: none;
     }
 
-    .chip-item::before {
-      content: "";
-      display: inline-block;
-      width: 0;
-      opacity: 0;
-      transition: all 0.2s ease;
-      margin-right: 0;
-    }
-
     .chip-item:hover {
-      background-color: #f5efe8; 
-      border-radius: 20px;
+      background-color: #f0ebe4; 
     }
 
     .chip-item:has(input:checked) {
-      background-color: #7a6b63;
-      border-color: #5c5049;
+      background-color: #8c7b73;
       color: #ffffff;
       font-weight: 600;
-      box-shadow: 0 2px 6px rgba(122, 107, 99, 0.25);
+      box-shadow: 0 2px 6px rgba(140, 123, 115, 0.25);
     }
 
     .chip-item:has(input:checked)::before {
-      content: "✓";
-      width: 14px;
-      opacity: 1;
+      content: "✓ ";
       margin-right: 4px;
       font-weight: bold;
     }
     
     .total-box {
-      background-color: #ebdcd3;
-      color: #4e423b;
+      background-color: #f0ebe4;
+      color: #5a5049;
       padding: 14px;
-      border-radius: 12px;
+      border-radius: 16px;
       text-align: center;
       font-size: 19px;
       font-weight: bold;
-      margin-top: 10px;
-      margin-bottom: 18px;
-      letter-spacing: 0.5px;
+      margin-top: 14px;
+      margin-bottom: 16px;
+      border: 1.5px solid #ebdcd3;
     }
     .submit-btn {
       width: 100%;
-      background-color: #7a6b63;
+      background-color: #8c7b73;
       color: #ffffff;
       border: none;
-      padding: 12px;
+      padding: 13px;
       font-size: 17.5px;
       font-weight: bold;
       border-radius: 22px;
       cursor: pointer;
-      box-shadow: 0 4px 10px rgba(122, 107, 99, 0.2);
-      transition: background 0.2s;
+      box-shadow: 0 4px 12px rgba(140, 123, 115, 0.25);
+      transition: background 0.2s, transform 0.1s;
       letter-spacing: 1px;
     }
     .submit-btn:hover {
-      background-color: #5c5049;
+      background-color: #726259;
+    }
+    .submit-btn:active {
+      transform: scale(0.98);
     }
     .sub-input {
-      margin-top: 8px;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -474,35 +459,35 @@
 
 <div class="card">
   <div class="title-header">
-    <h2>美甲服務預約選單</h2>
+    <h2>🌸 美甲服務預約選單 🌸</h2>
   </div>
 
   <div id="frontendReminder">
-    ⚠️ 提醒：目前正值 15 號至 20 號期間，請留意下兩個月的最新班表與預約動態！
+    ✨ 提醒：目前正值 15 號至 20 號期間，請留意下兩個月的最新班表與預約動態！
   </div>
 
   <div class="section">
-    <div class="section-title">預約暱稱</div>
+    <div class="section-title">🤍 預約暱稱</div>
     <div style="display: flex; gap: 8px;">
       <input type="text" id="customerName" placeholder="請輸入您的預約暱稱" oninput="checkAdminMode(this.value)" style="flex: 1;">
-      <button type="button" class="draw-btn" onclick="loginWithLine()" style="white-space: nowrap; background: #06c755; color: #fff; border: none;">連動 LINE 暱稱</button>
+      <button type="button" class="draw-btn" onclick="loginWithLine()" style="white-space: nowrap; background: #06c755; color: #fff; border: none;">連動 LINE</button>
     </div>
-    <div id="adminPanel" class="hidden" style="margin-top: 8px; padding: 8px; background: #fff3cd; border-radius: 8px; border: 1px solid #ffeeba; text-align: center;">
-      <span style="font-size: 13px; font-weight: bold; color: #856404;">🔧 管理者模式：</span>
-      <button type="button" onclick="enableAdminOverride()" style="padding: 4px 10px; font-size: 12px; background: #856404; color: #fff; border: none; border-radius: 6px; cursor: pointer;">手動解鎖所有日曆日期 (加班/換班)</button>
+    <div id="adminPanel" class="hidden" style="margin-top: 8px; padding: 8px; background: #fffbe6; border-radius: 10px; border: 1px dashed #ffe58f; text-align: center;">
+      <span style="font-size: 13px; font-weight: bold; color: #d48806;">🔧 管理者模式：</span>
+      <button type="button" onclick="enableAdminOverride()" style="padding: 4px 10px; font-size: 12px; background: #d48806; color: #fff; border: none; border-radius: 6px; cursor: pointer;">手動解鎖所有日曆日期</button>
     </div>
   </div>
 
   <!-- Step 1. 預約日期與時間 -->
   <div class="section">
-    <div class="section-title">Step 1. 預約日期與時間</div>
+    <div class="section-title">🗓️ Step 1. 預約日期與時間</div>
     <div class="datetime-container">
       <div>
-        <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #5c5049;">預約日期：</label>
+        <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #6e6057;">預約日期：</label>
         <input type="text" id="bookingDate" placeholder="請選擇預約日期">
       </div>
       <div>
-        <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #5c5049;">預約時間：</label>
+        <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #6e6057;">預約時間：</label>
         <div class="time-picker-group">
           <select id="bookingHour" onchange="validateTime()">
             <!-- 動態生成小時選項 -->
@@ -518,8 +503,8 @@
   <!-- Step 2. 單色款式 -->
   <div class="section">
     <div class="section-title">
-      Step 2. 單色款式
-      <button class="draw-btn" onclick="drawMainColor()">🫯 幫我抽色系</button>
+      <span>💅 Step 2. 單色款式</span>
+      <button class="draw-btn" onclick="drawMainColor()">🎨 幫我抽色系</button>
     </div>
     <select id="mainColor" onchange="onMainColorChange()">
       <option value="">-- 請選擇色系 (無則留空) --</option>
@@ -542,8 +527,8 @@
 
   <!-- Step 3. 加購項目 -->
   <div class="section disabled-step" id="step3Section">
-    <div style="font-weight: bold; color: #5c5049; margin-bottom: 12px; font-size: 16.5px;">
-      Step 3. 加購項目
+    <div style="font-weight: bold; color: #5a5049; margin-bottom: 12px; font-size: 17px;">
+      ✨ Step 3. 加購項目
     </div>
 
     <!-- 跳色 -->
@@ -554,8 +539,8 @@
       </div>
       <div id="jumpColorSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-          <div style="font-size: 13.5px; font-weight: bold; color: #5c5049;">選擇色系：</div>
-          <button class="draw-btn" onclick="drawSmartJumpColor(event)">🫯 隨機配色</button>
+          <div style="font-size: 13.5px; font-weight: bold; color: #6e6057;">選擇色系：</div>
+          <button class="draw-btn" onclick="drawSmartJumpColor(event)">🎲 隨機配色</button>
         </div>
         <div>
           <select id="jumpColor" onchange="onSelectionChange()">
@@ -582,12 +567,12 @@
     <!-- 款式造型 -->
     <div id="boxStyle" class="addon-item-box" onclick="toggleOption('styleSection', event)">
       <div class="addon-header">
-        <span>✨ 款式造型</span>
+        <span>🪄 款式造型</span>
         <span id="badgeStyle" class="addon-badge">50元起 ➕</span>
       </div>
       <div id="styleSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
-          <button class="draw-btn" onclick="drawStyle(event)">🫯 幫我抽款式</button>
+          <button class="draw-btn" onclick="drawStyle(event)">✨ 幫我抽款式</button>
         </div>
 
         <div class="removal-card-group" style="margin-top: 0; margin-bottom: 12px; gap: 8px;">
@@ -602,14 +587,14 @@
         <input type="radio" name="styleType" value="full" id="radioFull" style="display:none;">
         
         <div id="partialStyleGroup" class="hidden">
-          <div style="font-size: 12px; color: #8c7c75; margin-bottom: 4px; font-weight: 500;">(至多5指造型+5指以上單色/跳色)</div>
+          <div style="font-size: 12px; color: #8c7c75; margin-bottom: 4px; font-weight: 500;">(至多4指造型)</div>
           <div class="checkbox-grid" style="margin-bottom: 12px;">
             <label class="chip-item"><input type="checkbox" name="style" id="catEyeCb" value="貓眼" onchange="checkLimit(this)">貓眼</label>
-            <label class="chip-item"><input type="checkbox" name="style" value="立體不規則造型" onchange="checkLimit(this)">立體不規則造型</label>
+            <label class="chip-item"><input type="checkbox" name="style" value="立體不規則造型" onchange="checkLimit(this)">立體不規則</label>
             <label class="chip-item"><input type="checkbox" name="style" value="法式" onchange="checkLimit(this)">法式</label>
             <label class="chip-item"><input type="checkbox" name="style" value="鏡面銀" onchange="checkLimit(this)">鏡面銀</label>
             <label class="chip-item"><input type="checkbox" name="style" value="漸層" onchange="checkLimit(this)">漸層</label>
-            <label class="chip-item"><input type="checkbox" name="style" value="小飾品/貼紙" onchange="checkLimit(this)">小飾品/貼紙</label>
+            <label class="chip-item"><input type="checkbox" name="style" value="小飾品/貼紙" onchange="checkLimit(this)">飾品貼紙</label>
             <label class="chip-item"><input type="checkbox" name="style" value="格紋" onchange="checkLimit(this)">格紋</label>
             <label class="chip-item"><input type="checkbox" name="style" value="暈染" onchange="checkLimit(this)">暈染</label>
             <label class="chip-item"><input type="checkbox" name="style" value="海莉款" onchange="checkLimit(this)">海莉款</label>
@@ -618,14 +603,14 @@
         </div>
 
         <div id="fullStyleGroup" class="hidden">
-          <div style="font-size: 12px; color: transparent; margin-bottom: 4px; user-select: none; pointer-events: none;">(佔位)</div>
+          <div style="font-size: 12px; color: #8c7c75; margin-bottom: 4px; font-weight: 500;">(至多4項搭配)</div>
           <div class="checkbox-grid" style="margin-bottom: 12px;">
             <label class="chip-item"><input type="checkbox" name="fullStyle" id="fullCatEyeCb" value="貓眼" onchange="checkFullLimit(this)">貓眼</label>
-            <label class="chip-item"><input type="checkbox" name="fullStyle" value="立體不規則造型" onchange="checkFullLimit(this)">立體不規則造型</label>
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="立體不規則造型" onchange="checkFullLimit(this)">立體不規則</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="法式" onchange="checkFullLimit(this)">法式</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="鏡面銀" onchange="checkFullLimit(this)">鏡面銀</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="漸層" onchange="checkFullLimit(this)">漸層</label>
-            <label class="chip-item"><input type="checkbox" name="fullStyle" value="小飾品/貼紙" onchange="checkFullLimit(this)">小飾品/貼紙</label>
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="小飾品/貼紙" onchange="checkFullLimit(this)">飾品貼紙</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="格紋" onchange="checkFullLimit(this)">格紋</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="暈染" onchange="checkFullLimit(this)">暈染</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="海莉款" onchange="checkFullLimit(this)">海莉款</label>
@@ -634,7 +619,7 @@
         </div>
 
         <div id="catEyeDetailDiv" class="sub-input hidden">
-          <label style="font-size: 13px; font-weight: bold; color: #5c5049;">貓眼類型：</label>
+          <label style="font-size: 13px; font-weight: bold; color: #5a5049;">貓眼類型：</label>
           <select id="catEyeType" style="background-color: #ffffff; font-weight: bold;">
             <option value="指定單色貓眼">指定單色貓眼</option>
             <option value="雙色貓眼">雙色貓眼</option>
@@ -650,7 +635,7 @@
 
   <!-- Step 4. 色調 -->
   <div class="section disabled-step" id="step4Section">
-    <div class="section-title">Step 4. 色調</div>
+    <div class="section-title">🎨 Step 4. 色調選擇</div>
     <div class="tone-palette-group">
       <div class="tone-option active" onclick="selectToneDot(this, '隨機')">
         <span class="color-dot"></span>
@@ -670,7 +655,7 @@
 
   <!-- Step 5. 卸甲服務 -->
   <div class="section">
-    <div class="section-title">Step 5. 卸甲服務</div>
+    <div class="section-title">🤍 Step 5. 卸甲服務</div>
     <div class="removal-card-group">
       <div id="removalYesCard" class="removal-card" onclick="setRemoval(true)">
         <div class="removal-card-title">需要卸甲</div>
@@ -685,7 +670,7 @@
     預計總金額：NT$ <span id="totalPrice">0</span> 元
   </div>
 
-  <button class="submit-btn" onclick="sendBooking()">送出預約單 (開啟 LINE)</button>
+  <button class="submit-btn" onclick="sendBooking()">送出預約單 (開啟 LINE) ✨</button>
 </div>
 
 <!-- 引入 LINE LIFF SDK -->
@@ -714,21 +699,15 @@
   document.addEventListener('DOMContentLoaded', () => {
     checkFrontendReminder();
     initLiffLogin();
-    
-    // 1. 優先從本地讀取快取（有的話瞬間載入）
     loadCacheData();
-
-    // 2. 零延遲初始化極速日曆
     initFlatpickr();
-
-    // 3. 背景平行抓取後端最新資料（加速回應）
     fetchBackendConfigAndInit();
   });
 
-  window.addEventListener('pageshow', (event) => {
+  window.addEventListener('pageshow', () => {
     const submitBtn = document.querySelector('.submit-btn');
     if (submitBtn) {
-      submitBtn.innerText = "送出預預單 (開啟 LINE)";
+      submitBtn.innerText = "送出預約單 (開啟 LINE) ✨";
       submitBtn.disabled = false;
     }
   });
@@ -770,7 +749,6 @@
     }
   }
 
-  // ⚡ 優化傳輸效率：增加 keepalive 與高優質快取流轉
   async function fetchBackendConfigAndInit() {
     try {
       const res = await fetch(SCRIPT_URL, { method: 'GET', mode: 'cors', keepalive: true });
@@ -782,10 +760,8 @@
       if (data.monthlyShiftTypes) backendMonthlyShiftTypes = data.monthlyShiftTypes; 
       if (data.bookings) globalBookings = data.bookings;
       
-      // 快取至手機本地端
       saveCacheData(data);
       
-      // 非同步批次更新畫面，不卡住使用者觸控操作
       window.requestAnimationFrame(() => {
         if (pickerInstance) {
           pickerInstance.redraw();
@@ -822,7 +798,7 @@
         const profile = await liff.getProfile();
         nameInput.value = profile.displayName;
         nameInput.readOnly = true;
-        nameInput.style.background = "#f5f2ed";
+        nameInput.style.background = "#f7f3ee";
         nameInput.style.fontWeight = "bold";
       }
     } catch (err) {
@@ -932,7 +908,7 @@
           dayElement.classList.add(availableClassName);
         }
       },
-      onChange: function(selectedDates, dateStr, instance) {
+      onChange: function() {
         validateTime();
       }
     });
@@ -940,7 +916,6 @@
     validateTime();
   }
 
-  // ⚡ 智慧時間重疊檢查：卸甲專用 2 小時，其餘 5 小時
   function isTimeBlocked(dateStr, hour, minute) {
     let candidateMinutes = hour * 60 + minute;
     for (let b of globalBookings) {
@@ -960,7 +935,6 @@
     return false;
   }
 
-  // ⚡ 動態生成時間選單（無法預約時段隱藏）
   function validateTime() {
     const hourSelect = document.getElementById("bookingHour");
     const minuteSelect = document.getElementById("bookingMinute");
@@ -983,7 +957,6 @@
     const currentMinute = taipeiNow.getMinutes();
     const isToday = (dateInputVal === todayStr);
 
-    // 1. 動態建立【小時】選單
     hourSelect.innerHTML = "";
     let validHoursCount = 0;
     let firstValidHour = null;
@@ -1033,7 +1006,6 @@
       hourSelect.value = firstValidHour;
     }
 
-    // 2. 動態建立【分鐘】選單
     const selectedHour = parseInt(hourSelect.value, 10);
     minuteSelect.innerHTML = "";
     let validMinutesCount = 0;
@@ -1061,6 +1033,8 @@
     } else if (firstValidMinute !== null) {
       minuteSelect.value = firstValidMinute;
     }
+
+    onSelectionChange();
   }
 
   function setRemoval(status) {
@@ -1295,7 +1269,7 @@
   function checkLimit(checkbox) {
     const checkboxes = document.querySelectorAll('input[name="style"]:checked');
     if (checkboxes.length > 4) {
-      alert("局部造型最多只能勾選 4 個喔！");
+      alert("局部造型最多只能勾選 4 個喔！✨");
       checkbox.checked = false;
     }
     const customCb = document.getElementById('customStyleCb');
@@ -1310,7 +1284,7 @@
   function checkFullLimit(checkbox) {
     const checkboxes = document.querySelectorAll('input[name="fullStyle"]:checked');
     if (checkboxes.length > 4) {
-      alert("十指造型最多只能勾選 4 項喔！");
+      alert("十指造型最多只能勾選 4 項喔！✨");
       checkbox.checked = false;
     }
     const fullCustomCb = document.getElementById('fullCustomStyleCb');
@@ -1396,7 +1370,7 @@
       }
     } else {
       catEyeSelect.disabled = true;
-      catEyeSelect.style.backgroundColor = "#e5ded7";
+      catEyeSelect.style.backgroundColor = "#f0ebe4";
       catEyeSelect.value = "指定單色貓眼";
     }
   }
@@ -1443,13 +1417,13 @@
   function sendBooking() {
     const customerName = document.getElementById('customerName').value.trim();
     if (!customerName) {
-      alert("請填寫您的預約暱稱！");
+      alert("請填寫您的預約暱稱！🤍");
       return;
     }
 
     const bookingDate = document.getElementById('bookingDate').value;
     if (!bookingDate) {
-      alert("請先選擇預約日期！");
+      alert("請先選擇預約日期！🗓️");
       return;
     }
 
@@ -1538,7 +1512,7 @@
     };
 
     const submitBtn = document.querySelector('.submit-btn');
-    submitBtn.innerText = "預約送出中...";
+    submitBtn.innerText = "預約送出中... ☕";
     submitBtn.disabled = true;
 
     fetch(SCRIPT_URL, {
@@ -1547,7 +1521,7 @@
       body: JSON.stringify(bookingData)
     })
     .then(() => {
-      let details = `【美甲服務預約單】\n`;
+      let details = `【美甲服務預約單】🌸\n`;
       details += `----------------------------\n`;
       details += `• 預約暱稱：${customerName}\n`;
       details += `• 預約時間：${bookingDate} ${bookingTime}\n`;
@@ -1576,21 +1550,22 @@
       }
       details += `• 色調風格：${tone}\n`;
       details += `----------------------------\n`;
-      details += `預計總金額：NT$ ${totalPrice} 元`;
+      details += `預計總金額：NT$ ${totalPrice} 元 🤍`;
 
       const encodedMessage = encodeURIComponent(details);
       const lineUrl = `https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodedMessage}`;
       
-      alert("預約成功！");
+      alert("預約成功！✨");
       window.location.href = lineUrl;
     })
     .catch(error => {
       console.error('Error:', error);
       alert("送出失敗，請再試一次或直接聯繫官方 LINE。");
-      submitBtn.innerText = "送出預約單 (開啟 LINE)";
+      submitBtn.innerText = "送出預約單 (開啟 LINE) ✨";
       submitBtn.disabled = false;
     });
   }
 </script>
+
 </body>
 </html>
