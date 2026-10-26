@@ -263,7 +263,10 @@ async function api(body){
     if(j.message==="unauthorized"){
       const w=await post({action:"whoami"}).catch(()=>({}));
       if(w.sub)authMsg(`這個 LINE 帳號還不是管理者。<br>你的 LINE ID：<b>${esc(w.sub)}</b><br>請把它貼到 Apps Script 的指令碼屬性 <b>ADMIN_LINE_IDS</b>（取代原本的內容），儲存後重新整理本頁。`);
-      else authMsg("登入憑證驗證失敗："+esc(w.why||"無法連線到後端，請確認 Apps Script 已重新部署成新版本")+"。",true);
+      else{
+        let tk="",inc="?",ver="?";try{tk=liff.getIDToken()||"";inc=liff.isInClient();ver=(liff.getDecodedIDToken()||{}).aud||""}catch(_){}
+        authMsg("登入憑證驗證失敗："+esc(w.why||"後端沒有回傳原因，通常代表 Apps Script 還在跑舊版本，或網址指到別的部署")+"。<br><small style='opacity:.75'>診斷（請截圖給我）：<br>在LINE內開啟="+inc+"｜取得憑證="+(tk?"是("+tk.length+"字)":"否")+"｜憑證aud="+esc(ver)+"<br>後端回應="+esc(JSON.stringify(w).slice(0,160))+"<br>後端網址結尾="+esc(API.slice(-12))+"</small>",true);
+      }
       return null;
     }
     return j;
