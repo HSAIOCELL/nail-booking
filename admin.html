@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'none'; form-action 'none'">
-<title>後台管理儀表板</title>
+<title>後台管理</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" crossorigin="anonymous"></script>
@@ -12,230 +12,280 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f4f2ee;--primary:#8a7968;--dark:#6e5f50;--ok:#7f8c70;--sand:#d4c5b9;--text:#4a4541;--muted:#8c827a;--line:#e6e0d8}
+:root{--ink:#4b4039;--soft:#8a7a6e;--line:#6b5d53;--paper:#fbf8f1;--sand:#ebe2d3;--gold:#c9a55e;--rose:#b5584f}
 *{box-sizing:border-box;font-family:'LXGW WenKai TC','PingFang TC','Microsoft JhengHei',sans-serif}
-body{background:var(--bg);margin:0;padding:10px;color:var(--text);-webkit-tap-highlight-color:transparent}
-.container{max-width:1050px;margin:0 auto;background:#fff;padding:16px 12px;border-radius:16px;box-shadow:0 4px 20px rgba(138,121,104,.06);border:1px solid var(--line)}
-h2{text-align:center;color:var(--dark);font-weight:700;letter-spacing:.14em;margin:0 0 14px;font-size:20px}
-button,select,input{touch-action:manipulation}
-.tab-nav{display:flex;gap:4px;overflow-x:auto;padding-bottom:6px;margin-bottom:15px;border-bottom:1.5px solid var(--line)}
-.tab-btn{flex:1;padding:8px 10px;background:#eee8e0;color:var(--muted);border:none;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background-color .18s,color .18s}
-.tab-btn.active{background:var(--primary);color:#fff}
-.tab-content{display:none}.tab-content.active{display:block;animation:fade .25s ease-out}
-@keyframes fade{from{opacity:0;transform:translateY(6px)}}
-.stats-container{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
-.stat-card{background:#f7f5f0;padding:12px 6px;border-radius:12px;text-align:center;border:1px solid var(--line);cursor:pointer;transition:background-color .18s,border-color .18s}
-.stat-card:hover{border-color:var(--primary);background:#f2ece4}
-.stat-card h3{margin:0 0 4px;font-size:11.5px;color:var(--muted);font-weight:400}
-.stat-card p{margin:0;font-size:15px;font-weight:700;color:var(--dark)}
-@media(min-width:600px){.stat-card p{font-size:18px}}
-#chartSection{display:none;background:#faf8f5;border:1px solid var(--line);padding:14px 10px;border-radius:12px;margin-top:15px}
-.add-section{background:#faf8f5;border:1px solid var(--line);padding:14px 10px;border-radius:12px;margin-bottom:14px}
-.add-section h3{margin:0 0 10px;color:var(--dark);font-size:14px}
-.form-row{display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
-@media(min-width:600px){.form-row{flex-direction:row;align-items:center}}
-.form-row input,.form-row select{width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--line);font-size:13.5px;background:#fff;color:var(--text);outline:none}
-.type-toggle-group{display:flex;gap:6px;width:100%}
-.type-btn{flex:1;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:13.5px;font-weight:700;cursor:pointer;transition:background-color .18s}
-.type-btn.expense.active{background:#fff2f0;color:#cf1322;border-color:#ffccc7}
-.type-btn.income.active{background:#f4f0e2;color:#7a6a2c;border-color:#e2d49a}
-.item-pill-container{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 4px}
-.item-pill{background:#fff;border:1px solid var(--line);padding:6px 12px;border-radius:20px;font-size:13px;cursor:pointer;color:var(--text);transition:background-color .18s,border-color .18s}
-.item-pill:hover{border-color:var(--primary);background:#f2ece4}
-.item-pill.active{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:700}
-.btn-action{background:var(--primary);color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;font-size:13.5px;white-space:nowrap;transition:background-color .18s,transform .12s}
-.btn-action:hover{background:var(--dark)}.btn-action:active{transform:scale(.96)}
-.btn-action.sm{padding:3px 6px;font-size:11px}.btn-action.danger{background:#c0504d}.btn-action.ok{background:var(--ok)}.btn-action.gray{background:var(--muted)}
-.history-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:8px}
-.history-item{background:#fdfbf7;border:1.5px dashed #c2b5aa;border-radius:10px;padding:8px;text-align:center;cursor:pointer;transition:background-color .18s,border-color .18s}
-.history-item:hover{border-color:#7a6b63;background:#f5efe8}
-.history-item.active{border-style:solid;border-color:#7a6b63;background:#ebdcd3;font-weight:700}
-.history-item .badge{font-size:11px;display:inline-block;margin-top:3px;padding:2px 6px;border-radius:10px;background:#e5ded7}
-.table-wrapper{width:100%;overflow-x:auto;border-radius:8px;border:1px solid var(--line)}
+[hidden]{display:none!important}
+html{-webkit-tap-highlight-color:transparent}
+body{margin:0;padding:16px 12px;color:var(--ink);background:#f6f1e7}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(60vmax 45vmax at 0 0,rgba(239,196,184,.3),transparent 60%),radial-gradient(60vmax 45vmax at 100% 100%,rgba(240,214,160,.28),transparent 60%)}
+button,select,input{touch-action:manipulation;font-size:15px;color:var(--ink)}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.wrap{max-width:1050px;margin:0 auto;background:rgba(251,248,241,.96);border:1.6px solid var(--line);border-radius:26px 20px 28px 18px/20px 28px 18px 26px;box-shadow:4px 5px 0 var(--sand);padding:20px 16px}
+.head{text-align:center;margin-bottom:14px}
+.eyebrow{font:600 11px 'Cinzel',serif;letter-spacing:.42em;text-indent:.42em;color:#b8964f;margin-bottom:4px}
+h1{margin:0;font-size:25px;letter-spacing:.14em}
+h1 span{background:linear-gradient(transparent 62%,rgba(240,204,120,.5) 62% 90%,transparent 90%);padding:0 .25em}
+.orn{display:block;width:176px;height:16px;margin:8px auto 0;stroke:var(--gold);fill:none;stroke-width:1.5;stroke-linecap:round}
+.note{display:block;border:1.4px dashed #d3a85a;background:#fbf0d8;color:#8a5f1e;padding:9px 12px;border-radius:14px 10px 16px 10px;margin-bottom:12px;text-align:center;font-size:14px;line-height:1.7}
+.note b{user-select:all;word-break:break-all}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 12px}
+.tab{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border:1.5px dashed #b9aa9b;border-radius:16px 12px 18px 11px;background:#fdfbf6;color:var(--soft);cursor:pointer;white-space:nowrap;transition:transform .12s,background-color .15s}
+.tab.active{border-style:solid;border-color:var(--line);background:#f3ebdf;color:var(--ink);box-shadow:2px 3px 0 var(--sand)}
+.tab:active{transform:scale(.96);transition:none}
+.pane{display:none}.pane.active{display:block;animation:rise .25s ease-out}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}}
+.box{border:1.5px dashed #c9bbaa;border-radius:18px 14px 20px 13px;padding:14px 12px;margin-bottom:14px;background:#fdfbf6}
+.box h3{margin:0 0 10px;font-size:16.5px}
+.muted{font-size:13px;color:var(--soft)}
+.row{display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
+@media(min-width:620px){.row{flex-direction:row;align-items:center}}
+input,select{width:100%;padding:9px 12px;border:1.5px solid var(--line);border-radius:14px 10px 15px 11px/11px 15px 10px 14px;outline:none;background:#fff;appearance:none;-webkit-appearance:none}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9'%3E%3Cpath d='M1.5 1.8L7 7.2 12.5 1.6' fill='none' stroke='%236b5d53' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+input:focus,select:focus{box-shadow:2px 3px 0 var(--sand)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--ink);color:#fff;border:1.6px solid var(--ink);padding:9px 18px;border-radius:18px 12px 19px 11px;cursor:pointer;box-shadow:2px 3px 0 var(--sand);white-space:nowrap;transition:transform .12s}
+.btn.alt{background:#fff;color:var(--ink)}
+.btn:active,.ib:active,.chip:active,.stat:active,.seg button:active{transform:scale(.96);transition:none}
+.ib{width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:1.4px solid var(--line);background:#fff;border-radius:12px 9px 13px 8px;cursor:pointer;transition:transform .12s}
+.ib .ic{width:17px;height:17px}.ib.danger{color:var(--rose)}.ib.ok{background:#f3ebdf}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:#fff;border:1.5px solid var(--line);border-radius:16px 12px 18px 11px;padding:12px 6px;text-align:center;box-shadow:2px 3px 0 var(--sand);transition:transform .12s}
+.stat.click{cursor:pointer}.stat span{font-size:12.5px;color:var(--soft)}.stat b{display:block;margin-top:4px;font-size:17px}
+#chartSection{display:none;margin-top:14px}
+.seg{display:flex;gap:8px;width:100%}
+.seg button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:1.5px dashed #b9aa9b;border-radius:16px 12px 18px 11px;background:#fff;cursor:pointer;transition:transform .12s}
+.seg button.on{border-style:solid;border-color:var(--line);box-shadow:2px 3px 0 var(--sand)}
+.seg .out.on{background:#f8e6e1;color:var(--rose)}.seg .in.on{background:#f8efd6;color:#8a6a1e}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 10px}
+.chip{padding:6px 14px;border:1.4px dashed #b9aa9b;border-radius:16px 12px 17px 11px;background:#fff;cursor:pointer;transition:transform .12s}
+.chip.on{background:var(--ink);color:#fff;border:1.4px solid var(--ink)}
+.hist{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:8px}
+.hist div.h{padding:8px;text-align:center;border:1.4px dashed #b9aa9b;border-radius:14px 10px 15px 9px;background:#fff;cursor:pointer}
+.hist div.h.on{border-style:solid;border-color:var(--line);background:#f3ebdf}
+.hist small{display:block;margin-top:2px;color:var(--soft)}
+.tw{width:100%;overflow-x:auto}
 table{width:100%;border-collapse:collapse;min-width:520px}
-th,td{border:1px solid var(--line);padding:8px 6px;text-align:center;font-size:12.5px}
-th{background:#f7f5f0;color:var(--muted);font-weight:400;white-space:nowrap}
-tr:nth-child(even){background:#faf9f6}
-.loading{text-align:center;padding:15px;color:var(--muted)}
-.btn-refresh{background:var(--sand);color:var(--dark);border:none;padding:9px;border-radius:8px;cursor:pointer;font-size:13px;margin-bottom:10px;width:100%}
-.inline-input{width:100%;padding:4px 6px;font-size:12px;border:1px solid var(--primary);border-radius:4px}
-.st{cursor:pointer;padding:3px 8px;border-radius:6px;font-weight:700}.st.done{background:#eceee0;color:#5f6b50}.st.wait{background:#fdf6e2}
-.muted{font-size:12px;color:var(--muted)}
-.flatpickr-calendar{background:#faf8f5!important;border:1px solid #e2dad1!important;box-shadow:0 4px 12px rgba(0,0,0,.08)!important;border-radius:12px!important;margin:0 auto}
-.flatpickr-day.available-day-yellow{background:#fdf6e2!important;color:#a37512!important;font-weight:700!important;border-radius:50%!important;border:1px solid #f2d896!important}
-.flatpickr-day.available-day-blue{background:#eceee0!important;color:#5f6b50!important;font-weight:700!important;border-radius:50%!important;border:1px solid #c9d1b6!important}
+th{padding:8px 6px;font-weight:400;font-size:13px;color:var(--soft);border-bottom:1.5px solid var(--line);white-space:nowrap}
+td{padding:9px 6px;text-align:center;font-size:14px;border-bottom:1px dashed #d8cdbd}
+.loading{padding:16px;text-align:center;color:var(--soft)}
+.inl{width:100%;padding:4px 8px;font-size:13px;border-radius:10px}
+.st{display:inline-block;padding:2px 10px;border-radius:12px 9px 13px 8px;cursor:pointer;border:1.3px solid transparent}
+.st.wait{background:#f8efd6;color:#8a6a1e}.st.done{background:#efe9dc;color:var(--ink)}
+.tag{display:inline-block;padding:1px 10px;border-radius:12px 9px 13px 8px;font-size:13px}.tag.out{background:#f8e6e1;color:var(--rose)}.tag.in{background:#f8efd6;color:#8a6a1e}
+.flatpickr-calendar{background:var(--paper)!important;border:1.6px solid var(--line)!important;box-shadow:4px 5px 0 var(--sand)!important;border-radius:20px 16px 22px 14px!important;margin:0 auto}
+.flatpickr-day.ya{background:#fbefcf!important;color:#9a6d1c!important;border:1.4px solid #e6c47a!important;border-radius:50%!important}
+.flatpickr-day.yb{background:#eceee0!important;color:#5f6b50!important;border:1.4px solid #c9d1b6!important;border-radius:50%!important}
+.dlg{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(75,64,57,.3);animation:fade .15s ease-out}
+@keyframes fade{from{opacity:0}}
+.dc{position:relative;background:var(--paper);border:1.6px solid var(--line);border-radius:24px 18px 26px 16px/18px 26px 16px 24px;box-shadow:4px 5px 0 var(--sand);padding:26px 22px 20px;max-width:330px;width:100%;text-align:center;animation:pop .22s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.94)}}
+.dc::before{content:"";position:absolute;inset:6px;border:1.2px dashed #d3c5b0;border-radius:20px 14px 22px 12px/14px 22px 12px 20px;pointer-events:none}
+.dc .ic{width:34px;height:34px;color:var(--gold);stroke-width:1.5;margin-bottom:8px}
+.dc p{margin:0 0 16px;font-size:16.5px;line-height:1.7;white-space:pre-line}
+.dc .btns{display:flex;gap:10px;justify-content:center}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div class="container">
-  <h2>後台管理儀表板</h2>
-  <div id="adminShiftReminder" style="display:none;background:#fff2f0;border:1.5px solid #ffccc7;color:#cf1322;padding:10px;border-radius:8px;margin-bottom:12px;text-align:center;font-weight:700;font-size:13px"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 4.5V19.6L20.4 19.2"/><path d="M7.4 15.6L11 10.8 14.2 13.6 19.4 6.8"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><path d="M4.6 6.4Q12 5.4 19.6 6.6L19.2 19.6Q12 20.4 4.8 19.4Z"/><path d="M4.8 10.4H19.4M8.2 3.8V7.4M15.8 3.8V7.2"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M6 4.2Q12 3.6 18 4.4L17.6 20Q12 20.6 6.4 19.8Z"/><path d="M9.2 9H15M9.2 12.6H15M9.2 16H13"/></symbol>
+  <symbol id="i-coin" viewBox="0 0 24 24"><path d="M12 4.2C16.6 4 19.9 7.6 19.8 12 19.7 16.5 16.4 19.9 12 19.8 7.5 19.7 4.1 16.4 4.2 12 4.3 7.7 7.6 4.3 12 4.2Z"/><path d="M14.4 9.4C13.8 8.2 10 8 9.8 10.2 9.6 12.6 14.6 11.6 14.4 14 14.2 16.2 10.4 16 9.4 14.8M12 7V17"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M5 19L5.8 15.4 16.6 4.8 19.4 7.6 8.6 18.2Z"/><path d="M14.4 7L17.2 9.8"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M5 7.4H19M9.4 7.2V5H14.6V7.2"/><path d="M6.6 7.6L7.6 19.4H16.4L17.4 7.6"/><path d="M10.4 10.6V16M13.6 10.6V16"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M4.8 12.6L9.6 17.2 19.2 6.6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6.2L18 18M18 6L6.2 17.8"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19 12.4A7 7 0 1 1 16.2 6.6"/><path d="M17.6 3.4L16.6 7 13 7.8"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M7 17L17 7M9.6 7H17V14.4"/></symbol>
+  <symbol id="i-in" viewBox="0 0 24 24"><path d="M17 7L7 17M7 9.6V17H14.4"/></symbol>
+  <symbol id="i-note" viewBox="0 0 24 24"><path d="M12 3.6c4.8-.1 8.3 3.5 8.2 8.2-.1 4.7-3.6 8.5-8.3 8.4-4.8 0-8.3-3.7-8.2-8.4.1-4.6 3.5-8.2 8.3-8.2Z"/><path d="M12 7.5v5.2"/><circle cx="12" cy="16.2" r=".8" fill="currentColor"/></symbol>
+  <symbol id="i-ok" viewBox="0 0 24 24"><path d="M12 3.6c4.8-.1 8.3 3.5 8.2 8.2-.1 4.7-3.6 8.5-8.3 8.4-4.8 0-8.3-3.7-8.2-8.4.1-4.6 3.5-8.2 8.3-8.2Z"/><path d="M8 12.4L11 15.4 16.2 9"/></symbol>
+</svg>
 
-  <div class="tab-nav">
-    <button class="tab-btn active" onclick="switchTab('tab-stats',this)">📈 營收</button>
-    <button class="tab-btn" onclick="switchTab('tab-schedule',this)">📅 班表</button>
-    <button class="tab-btn" onclick="switchTab('tab-bookings',this)">📋 預約紀錄</button>
-    <button class="tab-btn" onclick="switchTab('tab-accounting',this)">💰 記帳管理</button>
-  </div>
+<div class="wrap">
+  <header class="head">
+    <div class="eyebrow">ADMIN</div>
+    <h1><span>後台管理</span></h1>
+    <svg class="orn" viewBox="0 0 176 16" aria-hidden="true"><path d="M4 9Q26 4 58 8T80 8"/><path d="M96 8Q122 12 152 8T172 9"/><path d="M88 2C88.6 6 90 7.4 94 8 90 8.7 88.6 10 88 14 87.4 10 86 8.7 82 8 86 7.4 87.4 6 88 2Z" fill="#fff6d8"/></svg>
+  </header>
 
-  <div id="tab-stats" class="tab-content active">
-    <div class="stats-container">
-      <div class="stat-card" onclick="toggleChart('revenue')"><h3>總累計營收</h3><p id="totalRevenue">NT$ 0</p></div>
-      <div class="stat-card"><h3>總材料成本</h3><p id="totalCost">NT$ 0</p></div>
-      <div class="stat-card" onclick="toggleChart('profit')"><h3>淨利</h3><p id="netProfit">NT$ 0</p></div>
+  <div id="authBox" class="note" hidden></div>
+  <div id="adminShiftReminder" class="note" hidden></div>
+
+  <nav class="tabs">
+    <button class="tab active" onclick="switchTab('tab-stats',this)"><svg class="ic"><use href="#i-chart"/></svg>營收</button>
+    <button class="tab" onclick="switchTab('tab-schedule',this)"><svg class="ic"><use href="#i-cal"/></svg>班表</button>
+    <button class="tab" onclick="switchTab('tab-bookings',this)"><svg class="ic"><use href="#i-list"/></svg>預約</button>
+    <button class="tab" onclick="switchTab('tab-accounting',this)"><svg class="ic"><use href="#i-coin"/></svg>記帳</button>
+  </nav>
+
+  <section id="tab-stats" class="pane active">
+    <div class="stats">
+      <div class="stat click" onclick="toggleChart('revenue')"><span>累計營收</span><b id="totalRevenue">NT$ 0</b></div>
+      <div class="stat"><span>材料成本</span><b id="totalCost">NT$ 0</b></div>
+      <div class="stat click" onclick="toggleChart('profit')"><span>淨利</span><b id="netProfit">NT$ 0</b></div>
     </div>
-    <p class="muted" style="text-align:center">💡 點擊營收或淨利卡片可展開/收合年度趨勢折線圖</p>
-    <div id="chartSection">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <h3 id="chartTitle" style="margin:0;color:var(--dark);font-size:14px"></h3>
-        <select id="selectYear" onchange="renderChart()" style="padding:4px 6px;border-radius:6px;font-size:12.5px"></select>
+    <p class="muted" style="text-align:center">點「累計營收」或「淨利」可看年度趨勢</p>
+    <div id="chartSection" class="box">
+      <div class="row" style="flex-direction:row;justify-content:space-between;align-items:center">
+        <h3 id="chartTitle" style="margin:0"></h3>
+        <select id="selectYear" onchange="renderChart()" style="width:auto"></select>
       </div>
       <div style="position:relative;height:240px;width:100%"><canvas id="trendChart"></canvas></div>
     </div>
-  </div>
+  </section>
 
-  <div id="tab-schedule" class="tab-content">
-    <div class="add-section">
-      <h3>月份班別設定</h3>
-      <div class="form-row">
+  <section id="tab-schedule" class="pane">
+    <div class="box">
+      <h3>月份班別</h3>
+      <div class="row">
         <input type="month" id="targetMonth">
         <select id="shiftGroup"><option value="B">B 組</option><option value="A">A 組</option></select>
         <select id="shiftType"><option value="夜班">夜班</option><option value="白班">白班</option></select>
-        <button class="btn-action" onclick="saveMonthlyShift()">💾</button>
+        <button class="btn" onclick="saveMonthlyShift()"><svg class="ic"><use href="#i-check"/></svg>儲存</button>
       </div>
-      <div style="margin-top:12px">
-        <div class="muted" style="font-weight:700;margin-bottom:6px">已設定月份紀錄：</div>
-        <div id="historyList" class="history-list"></div>
-      </div>
-      <div id="previewContainer" style="margin-top:12px;text-align:center;display:none;padding-top:10px;border-top:1px dashed var(--line)">
-        <div style="font-size:13px;font-weight:700;margin-bottom:6px;color:var(--dark)" id="previewTitle"></div>
+      <div class="muted" style="margin-top:10px">已設定的月份（點一下預覽）</div>
+      <div id="historyList" class="hist"></div>
+      <div id="previewContainer" style="margin-top:12px;text-align:center;display:none;padding-top:10px;border-top:1px dashed #c9bbaa">
+        <div id="previewTitle" style="margin-bottom:6px"></div>
         <input type="text" id="inlinePreviewCalendar" style="display:none">
       </div>
     </div>
-    <div class="add-section">
+    <div class="box">
       <h3>日期微調</h3>
-      <div class="form-row">
+      <div class="row">
         <input type="date" id="scheduleDate">
         <select id="scheduleStatus"><option value="開放">開放預約</option><option value="關閉">關閉預約</option></select>
-        <button class="btn-action ok" onclick="updateScheduleOverride()">💾</button>
+        <button class="btn" onclick="updateScheduleOverride()"><svg class="ic"><use href="#i-check"/></svg>儲存</button>
       </div>
-      <div style="margin-top:10px">
-        <div class="muted" style="font-weight:700;margin-bottom:6px">微調紀錄</div>
-        <div class="table-wrapper" style="max-height:150px"><div id="overrideRecordContainer"></div></div>
-      </div>
+      <div class="tw" style="max-height:170px;margin-top:8px"><div id="overrideRecordContainer"></div></div>
     </div>
-  </div>
+  </section>
 
-  <div id="tab-bookings" class="tab-content">
-    <div class="add-section">
-      <h3>手動新增預約</h3>
-      <div class="form-row">
+  <section id="tab-bookings" class="pane">
+    <div class="box">
+      <h3>新增預約</h3>
+      <div class="row">
         <input type="text" id="newName" placeholder="客戶名稱" maxlength="30">
         <input type="date" id="newDate">
-        <div style="display:flex;gap:4px;width:100%">
-          <select id="newHour" style="flex:1"></select>
-          <select id="newMinute" style="flex:1"><option value="00">00分</option><option value="15">15分</option><option value="30">30分</option><option value="45">45分</option></select>
-        </div>
-        <input type="text" id="newItems" placeholder="項目 (例: 單色光療)" maxlength="100">
-        <input type="number" id="newPrice" placeholder="金額 (NT$)" min="0">
-        <button class="btn-action" onclick="manualAddBooking()">新增預約</button>
+        <div style="display:flex;gap:6px;width:100%"><select id="newHour"></select><select id="newMinute"><option value="00">00 分</option><option value="15">15 分</option><option value="30">30 分</option><option value="45">45 分</option></select></div>
+        <input type="text" id="newItems" placeholder="項目（例：單色光療）" maxlength="100">
+        <input type="number" id="newPrice" placeholder="金額" min="0">
+        <button class="btn" onclick="manualAddBooking()">新增</button>
       </div>
     </div>
-    <div class="add-section" style="background:#fff;padding:10px 0">
-      <div style="padding:0 10px 8px"><button class="btn-refresh" onclick="fetchData()">🔄 重新整理預約紀錄</button></div>
-      <div class="table-wrapper"><table>
-        <thead><tr><th>編號</th><th>客戶</th><th>日期</th><th>時間</th><th>項目</th><th>金額</th><th>狀態</th><th>操作</th></tr></thead>
+    <div class="box">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:6px"><button class="btn alt" onclick="fetchData()"><svg class="ic"><use href="#i-refresh"/></svg>重新整理</button></div>
+      <div class="tw"><table>
+        <thead><tr><th>編號</th><th>客戶</th><th>日期</th><th>時間</th><th>項目</th><th>金額</th><th>狀態</th><th></th></tr></thead>
         <tbody id="bookingTableBody"></tbody>
       </table></div>
     </div>
-  </div>
+  </section>
 
-  <div id="tab-accounting" class="tab-content">
-    <div class="add-section">
-      <h3>手動新增收支</h3>
-      <div class="form-row" style="margin-bottom:6px">
-        <div class="type-toggle-group">
-          <button type="button" id="btnExpense" class="type-btn expense active" onclick="setAccType('支出')">🔴 支出</button>
-          <button type="button" id="btnIncome" class="type-btn income" onclick="setAccType('收入')">🟡 收入</button>
-        </div>
-        <input type="hidden" id="accType" value="支出">
+  <section id="tab-accounting" class="pane">
+    <div class="box">
+      <h3>新增收支</h3>
+      <div class="seg">
+        <button type="button" id="btnExpense" class="out on" onclick="setAccType('支出')"><svg class="ic"><use href="#i-out"/></svg>支出</button>
+        <button type="button" id="btnIncome" class="in" onclick="setAccType('收入')"><svg class="ic"><use href="#i-in"/></svg>收入</button>
       </div>
-      <div style="margin-bottom:8px">
-        <div class="muted" style="margin-bottom:4px">點擊下方項目直接帶入（免手動打字）：</div>
-        <div class="item-pill-container">
-          <button type="button" class="item-pill" onclick="selectItem('材料費','支出',this)">💅 材料費</button>
-          <button type="button" class="item-pill" onclick="selectItem('房租','支出',this)">🏠 房租</button>
-          <button type="button" class="item-pill" onclick="selectItem('上課費','支出',this)">📚 上課費</button>
-          <button type="button" class="item-pill" onclick="selectItem('美甲膠','支出',this)">🎨 美甲膠</button>
-          <button type="button" class="item-pill" onclick="selectItem('其他收入','收入',this)">✨ 其他收入</button>
-        </div>
+      <input type="hidden" id="accType" value="支出">
+      <div class="chips">
+        <span class="chip" onclick="selectItem('材料費','支出',this)">材料費</span>
+        <span class="chip" onclick="selectItem('房租','支出',this)">房租</span>
+        <span class="chip" onclick="selectItem('上課費','支出',this)">上課費</span>
+        <span class="chip" onclick="selectItem('美甲膠','支出',this)">美甲膠</span>
+        <span class="chip" onclick="selectItem('其他收入','收入',this)">其他收入</span>
       </div>
-      <div class="form-row">
-        <input type="date" id="accDate" style="flex:1">
-        <input type="text" id="accItem" placeholder="點上方按鈕或自行輸入項目" maxlength="100" style="flex:2">
-        <input type="number" id="accCost" placeholder="金額 (NT$)" min="0" value="0" style="flex:1">
-        <button class="btn-action" onclick="manualAddAccounting()">新增紀錄</button>
+      <div class="row">
+        <input type="date" id="accDate">
+        <input type="text" id="accItem" placeholder="選上面的項目，或自己輸入" maxlength="100" style="flex:2">
+        <input type="number" id="accCost" placeholder="金額" min="0" value="0">
+        <button class="btn" onclick="manualAddAccounting()">新增</button>
       </div>
     </div>
-    <div class="add-section" style="background:#fff;padding:10px 0">
-      <div style="padding:0 10px 8px;font-weight:700;font-size:13.5px;color:var(--dark)">📊 記帳永久留存紀錄</div>
-      <div class="table-wrapper"><table>
-        <thead><tr><th>編號</th><th>日期</th><th>類型</th><th>項目說明</th><th>金額</th><th>操作</th></tr></thead>
+    <div class="box">
+      <div class="tw"><table>
+        <thead><tr><th>編號</th><th>日期</th><th>類型</th><th>項目</th><th>金額</th><th></th></tr></thead>
         <tbody id="accountingTableBody"></tbody>
       </table></div>
     </div>
-  </div>
+  </section>
 </div>
 
+<div id="dlg" class="dlg" hidden role="dialog" aria-modal="true"><div class="dc"><svg class="ic"><use id="dlgIc" href="#i-note"/></svg><p id="dlgMsg"></p><div class="btns"><button id="dlgNo" class="btn alt" type="button">取消</button><button id="dlgYes" class="btn" type="button">好的</button></div></div></div>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
 const API="https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
+const LIFF_ID="";   // ← 填入「後台專用」的 LIFF ID（見說明）
 const $=id=>document.getElementById(id);
 const pad=n=>String(n).padStart(2,"0");
-const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));  /* 所有外來文字一律轉義，防 XSS */
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const ic=n=>`<svg class="ic"><use href="#i-${n}"/></svg>`;
+const ib=(a,id,i,t,c="")=>`<button class="ib ${c}" data-a="${a}" data-id="${id}" title="${t}" aria-label="${t}">${ic(i)}</button>`;
 let B=[],A=[],S={},M={},ANCHOR="2026-10-23",chart=null,ctype="revenue",copen=false,picker=null,activeYM="";
 
-/* ---------- 管理密碼（只存在這個分頁，關閉就消失） ---------- */
-function token(){let t=sessionStorage.getItem("adm_tok");if(!t){t=(prompt("請輸入管理密碼")||"").trim();if(t)sessionStorage.setItem("adm_tok",t)}return t}
+/* ---------- 手繪提示框 ---------- */
+let dres=null;
+function dlg(msg,icon,ask){return new Promise(r=>{$("dlgMsg").textContent=msg;$("dlgIc").setAttribute("href","#i-"+icon);$("dlgNo").hidden=!ask;$("dlgYes").textContent=ask?"確定":"好的";$("dlg").hidden=false;$("dlgYes").focus({preventScroll:true});dres=v=>{$("dlg").hidden=true;dres=null;r(v)}})}
+const say=(m,ok)=>dlg(m,ok?"ok":"note",false), ask=m=>dlg(m,"note",true);
+$("dlgYes").onclick=()=>dres&&dres(true);$("dlgNo").onclick=()=>dres&&dres(false);
+$("dlg").onclick=e=>{if(e.target.id==="dlg"&&dres)dres(false)};
+
+/* ---------- LINE 登入驗證（不用密碼） ---------- */
+async function login(){
+  if(!LIFF_ID){$("authBox").hidden=false;$("authBox").textContent="尚未設定 LIFF ID：請在程式最上方的 LIFF_ID 填入後台專用的 LIFF ID。";return false}
+  try{await liff.init({liffId:LIFF_ID})}catch(e){$("authBox").hidden=false;$("authBox").textContent="LIFF 初始化失敗，請確認 LIFF ID 與網址設定。";return false}
+  if(!liff.isLoggedIn()){liff.login();return false}
+  return true;
+}
+async function post(body){
+  const t=liff.getIDToken();
+  return await(await fetch(API,{method:"POST",body:JSON.stringify({...body,idToken:t||""})})).json();
+}
 async function api(body){
-  const t=token();if(!t)return null;
   try{
-    const j=await(await fetch(API,{method:"POST",body:JSON.stringify({...body,adminToken:t})})).json();
-    if(j.message==="unauthorized"){sessionStorage.removeItem("adm_tok");alert("管理密碼錯誤，請重新整理頁面後再輸入");return null}
+    const j=await post(body);
+    if(j.message==="unauthorized"){
+      const w=await post({action:"whoami"}).catch(()=>({}));
+      const box=$("authBox");box.hidden=false;
+      if(w.sub){box.innerHTML=`這個 LINE 帳號還不是管理者。<br>你的 LINE ID：<b>${esc(w.sub)}</b><br>請把它貼到 Apps Script 的指令碼屬性 <b>ADMIN_LINE_IDS</b>，再重新整理本頁。`}
+      else{box.textContent="登入已逾時，正在重新登入…";setTimeout(()=>{liff.logout();liff.login()},900)}
+      return null;
+    }
     return j;
   }catch(e){return null}
 }
-function bg(body){api(body).then(r=>{if(!r||r.result!=="success"){alert((r&&r.message)||"儲存失敗，將重新載入資料");fetchData()}})}
+function bg(body){api(body).then(async r=>{if(!r||r.result!=="success"){await say((r&&r.message)||"儲存失敗，將重新載入資料");fetchData()}})}
 
-document.addEventListener("DOMContentLoaded",()=>{
+document.addEventListener("DOMContentLoaded",async()=>{
   const ts=ymd(new Date());
   ["newDate","accDate","scheduleDate"].forEach(i=>$(i).value=ts);$("targetMonth").value=ts.slice(0,7);
-  $("newHour").innerHTML=Array.from({length:24},(_,h)=>`<option value="${pad(h)}"${h===12?" selected":""}>${pad(h)}時</option>`).join("");
+  $("newHour").innerHTML=Array.from({length:24},(_,h)=>`<option value="${pad(h)}"${h===12?" selected":""}>${pad(h)} 時</option>`).join("");
   document.body.addEventListener("click",onClick);
-  fetchData();
+  if(await login())fetchData();
 });
 function onClick(e){
   const el=e.target.closest("[data-a]");if(!el)return;
-  const id=el.dataset.id,f={toggle:toggleStatus,bedit:editBooking,bsave:saveBooking,bcancel:cancelBooking,rerender:renderAll,aedit:editAcc,asave:saveAcc,adel:delAcc,hist:showPreview,sdel:delOverride}[el.dataset.a];
-  if(f)f(id);
+  const f={toggle:toggleStatus,bedit:editBooking,bsave:saveBooking,bcancel:cancelBooking,rerender:renderAll,aedit:editAcc,asave:saveAcc,adel:delAcc,hist:showPreview,sdel:delOverride}[el.dataset.a];
+  if(f)f(el.dataset.id);
 }
-function switchTab(id,btn){
-  document.querySelectorAll(".tab-btn,.tab-content").forEach(x=>x.classList.remove("active"));
-  btn.classList.add("active");$(id).classList.add("active");
-}
-function setAccType(t){$("accType").value=t;$("btnExpense").classList.toggle("active",t==="支出");$("btnIncome").classList.toggle("active",t==="收入")}
-function selectItem(name,type,btn){$("accItem").value=name;setAccType(type);document.querySelectorAll(".item-pill").forEach(p=>p.classList.remove("active"));btn.classList.add("active")}
+function switchTab(id,btn){document.querySelectorAll(".tab,.pane").forEach(x=>x.classList.remove("active"));btn.classList.add("active");$(id).classList.add("active")}
+function setAccType(t){$("accType").value=t;$("btnExpense").classList.toggle("on",t==="支出");$("btnIncome").classList.toggle("on",t==="收入")}
+function selectItem(n,t,el){$("accItem").value=n;setAccType(t);document.querySelectorAll(".chip").forEach(c=>c.classList.remove("on"));el.classList.add("on")}
 
 /* ---------- 讀取 ---------- */
 async function fetchData(){
-  $("bookingTableBody").innerHTML='<tr><td colspan="8" class="loading">正在讀取資料...</td></tr>';
-  $("accountingTableBody").innerHTML='<tr><td colspan="6" class="loading">正在讀取記帳紀錄...</td></tr>';
+  $("bookingTableBody").innerHTML='<tr><td colspan="8" class="loading">讀取中…</td></tr>';
+  $("accountingTableBody").innerHTML='<tr><td colspan="6" class="loading">讀取中…</td></tr>';
   const r=await api({action:"adminGet"});
-  if(!r||r.result!=="success"){
-    const m='<tr><td colspan="8" class="loading" style="color:#c0392b">連線失敗或密碼錯誤，請重新整理頁面</td></tr>';
-    $("bookingTableBody").innerHTML=m;$("accountingTableBody").innerHTML=m;return;
-  }
+  if(!r||r.result!=="success"){const m='<tr><td colspan="8" class="loading">無法讀取資料，請確認已用管理者的 LINE 帳號登入</td></tr>';$("bookingTableBody").innerHTML=m;$("accountingTableBody").innerHTML=m;return}
+  $("authBox").hidden=true;
   B=r.bookings||[];A=r.accountingRecords||[];S=r.schedules||{};M=r.monthlyShiftTypes||{};
   if(/^\d{4}-\d{2}-\d{2}$/.test(r.anchorDate))ANCHOR=r.anchorDate;
   renderAll();
@@ -249,58 +299,54 @@ function renderAll(){
   const rows=B.map((r,i)=>{
     if(r.status==="已取消")return"";
     const auto=isPast(r,now),dn=r.status==="已完成"||auto,id=esc(r.bookingId);
-    return`<tr id="b-${id}"><td>${pad(i+1).padStart(3,"0")}</td><td>${esc(r.customerName)}</td><td>${esc(r.date)}</td><td>${esc(r.time)}</td><td>${esc(r.items)}</td><td>NT$ <span>${+r.totalPrice||0}</span></td><td><span class="st ${dn?"done":"wait"}" data-a="toggle" data-id="${id}">${dn?"已完成":"預約中"}${auto?" (自動)":""}</span></td><td><button class="btn-action sm" data-a="bedit" data-id="${id}">✏️</button> <button class="btn-action sm danger" data-a="bcancel" data-id="${id}">刪除</button></td></tr>`;
+    return`<tr id="b-${id}"><td>${pad(i+1).padStart(3,"0")}</td><td>${esc(r.customerName)}</td><td>${esc(r.date)}</td><td>${esc(r.time)}</td><td>${esc(r.items)}</td><td>NT$ <span>${+r.totalPrice||0}</span></td><td><span class="st ${dn?"done":"wait"}" data-a="toggle" data-id="${id}">${dn?"已完成":"預約中"}${auto?"（自動）":""}</span></td><td style="white-space:nowrap">${ib("bedit",id,"pencil","修改金額")} ${ib("bcancel",id,"trash","刪除","danger")}</td></tr>`;
   }).join("");
-  $("bookingTableBody").innerHTML=rows||'<tr><td colspan="8" class="loading">目前沒有預約資料</td></tr>';
+  $("bookingTableBody").innerHTML=rows||'<tr><td colspan="8" class="loading">目前沒有預約</td></tr>';
   $("accountingTableBody").innerHTML=A.length?A.map((a,i)=>{
     const inc=a.type==="收入",id=esc(a.id);
-    return`<tr id="a-${id}"><td>${pad(i+1).padStart(3,"0")}</td><td>${esc(a.date)}</td><td><span style="padding:2px 6px;background:${inc?"#f4f0e2":"#fff2f0"};color:${inc?"#7a6a2c":"#cf1322"};border-radius:4px;font-weight:700">${inc?"收入":"支出"}</span></td><td>${esc(a.item)}</td><td>NT$ ${+a.amount||0}</td><td><button class="btn-action sm" data-a="aedit" data-id="${id}">✏️</button> <button class="btn-action sm danger" data-a="adel" data-id="${id}">刪除</button></td></tr>`;
-  }).join(""):'<tr><td colspan="6" class="loading">尚無記帳紀錄</td></tr>';
+    return`<tr id="a-${id}"><td>${pad(i+1).padStart(3,"0")}</td><td>${esc(a.date)}</td><td><span class="tag ${inc?"in":"out"}">${inc?"收入":"支出"}</span></td><td>${esc(a.item)}</td><td>NT$ ${+a.amount||0}</td><td style="white-space:nowrap">${ib("aedit",id,"pencil","編輯")} ${ib("adel",id,"trash","刪除","danger")}</td></tr>`;
+  }).join(""):'<tr><td colspan="6" class="loading">還沒有記帳紀錄</td></tr>';
   finance();
 }
 
 /* ---------- 預約 ---------- */
 function toggleStatus(id){const b=B.find(x=>x.bookingId===id);if(!b)return;b.status=b.status==="已完成"?"預約中":"已完成";renderAll();bg({action:"update",bookingId:id,status:b.status})}
-function cancelBooking(id){if(!confirm("確定刪除這筆預約？"))return;B=B.filter(x=>x.bookingId!==id);renderAll();bg({action:"update",bookingId:id,status:"已取消"})}
+async function cancelBooking(id){if(!await ask("確定要刪除這筆預約嗎？"))return;B=B.filter(x=>x.bookingId!==id);renderAll();bg({action:"update",bookingId:id,status:"已取消"})}
 function editBooking(id){
   const tr=$("b-"+id),b=B.find(x=>x.bookingId===id);if(!tr||!b)return;
-  tr.children[5].innerHTML=`NT$ <input type="number" id="ip-${esc(id)}" class="inline-input" style="width:70px" value="${+b.totalPrice||0}">`;
-  tr.children[7].innerHTML=`<button class="btn-action sm ok" data-a="bsave" data-id="${esc(id)}">💾</button> <button class="btn-action sm gray" data-a="rerender">✕</button>`;
+  tr.children[5].innerHTML=`NT$ <input type="number" id="ip-${esc(id)}" class="inl" style="width:84px" value="${+b.totalPrice||0}">`;
+  tr.children[7].innerHTML=`${ib("bsave",esc(id),"check","儲存","ok")} ${ib("rerender","","x","取消")}`;
 }
-function saveBooking(id){
-  const v=parseInt($("ip-"+id).value,10),b=B.find(x=>x.bookingId===id);
-  if(isNaN(v)||v<0||!b)return;
-  b.totalPrice=v;renderAll();bg({action:"updatePrice",bookingId:id,newPrice:v});
-}
+function saveBooking(id){const v=parseInt($("ip-"+id).value,10),b=B.find(x=>x.bookingId===id);if(isNaN(v)||v<0||!b)return;b.totalPrice=v;renderAll();bg({action:"updatePrice",bookingId:id,newPrice:v})}
 async function manualAddBooking(){
   const customerName=$("newName").value.trim(),date=$("newDate").value,time=`${$("newHour").value}:${$("newMinute").value}`,items=$("newItems").value.trim(),totalPrice=Number($("newPrice").value);
-  if(!customerName||!date||!items||!$("newPrice").value||totalPrice<0)return alert("請把名稱、日期、項目、金額填完整");
+  if(!customerName||!date||!items||!$("newPrice").value||totalPrice<0)return say("請把名稱、日期、項目、金額填完整");
   const r=await api({action:"addBooking",customerName,date,time,items,totalPrice,cost:0});
-  if(!r||r.result!=="success")return alert((r&&r.message)||"新增失敗");
+  if(!r||r.result!=="success")return say((r&&r.message)||"新增失敗");
   ["newName","newItems","newPrice"].forEach(i=>$(i).value="");fetchData();
 }
 
 /* ---------- 記帳 ---------- */
 function editAcc(id){
   const a=A.find(x=>x.id===id),tr=$("a-"+id);if(!a||!tr)return;const k=esc(id);
-  tr.children[1].innerHTML=`<input type="date" id="ad-${k}" class="inline-input" value="${esc(a.date)}">`;
-  tr.children[2].innerHTML=`<select id="at-${k}" class="inline-input"><option${a.type==="支出"?" selected":""}>支出</option><option${a.type==="收入"?" selected":""}>收入</option></select>`;
-  tr.children[3].innerHTML=`<input type="text" id="ai-${k}" class="inline-input" maxlength="100" value="${esc(a.item)}">`;
-  tr.children[4].innerHTML=`<input type="number" id="am-${k}" class="inline-input" style="width:70px" value="${+a.amount||0}">`;
-  tr.children[5].innerHTML=`<button class="btn-action sm ok" data-a="asave" data-id="${k}">💾</button> <button class="btn-action sm gray" data-a="rerender">✕</button>`;
+  tr.children[1].innerHTML=`<input type="date" id="ad-${k}" class="inl" value="${esc(a.date)}">`;
+  tr.children[2].innerHTML=`<select id="at-${k}" class="inl"><option${a.type==="支出"?" selected":""}>支出</option><option${a.type==="收入"?" selected":""}>收入</option></select>`;
+  tr.children[3].innerHTML=`<input type="text" id="ai-${k}" class="inl" maxlength="100" value="${esc(a.item)}">`;
+  tr.children[4].innerHTML=`<input type="number" id="am-${k}" class="inl" style="width:84px" value="${+a.amount||0}">`;
+  tr.children[5].innerHTML=`${ib("asave",k,"check","儲存","ok")} ${ib("rerender","","x","取消")}`;
 }
 function saveAcc(id){
   const date=$("ad-"+id).value,type=$("at-"+id).value,item=$("ai-"+id).value.trim(),amount=parseInt($("am-"+id).value,10),a=A.find(x=>x.id===id);
   if(!date||!item||isNaN(amount)||amount<0||!a)return;
   Object.assign(a,{date,type,item,amount});renderAll();bg({action:"updateAccounting",id,date,type,item,amount});
 }
-function delAcc(id){if(!confirm("確定刪除這筆記帳？"))return;A=A.filter(x=>x.id!==id);renderAll();bg({action:"deleteAccounting",id})}
+async function delAcc(id){if(!await ask("確定要刪除這筆記帳嗎？"))return;A=A.filter(x=>x.id!==id);renderAll();bg({action:"deleteAccounting",id})}
 async function manualAddAccounting(){
   const date=$("accDate").value,type=$("accType").value,item=$("accItem").value.trim(),amount=Number($("accCost").value);
-  if(!date||!item||!(amount>=0))return alert("請把日期、項目、金額填完整");
+  if(!date||!item||!(amount>=0))return say("請把日期、項目、金額填完整");
   const r=await api({action:"addAccounting",date,type,item,amount});
-  if(!r||r.result!=="success")return alert((r&&r.message)||"新增失敗");
-  $("accItem").value="";$("accCost").value="0";document.querySelectorAll(".item-pill").forEach(p=>p.classList.remove("active"));fetchData();
+  if(!r||r.result!=="success")return say((r&&r.message)||"新增失敗");
+  $("accItem").value="";$("accCost").value="0";document.querySelectorAll(".chip").forEach(c=>c.classList.remove("on"));fetchData();
 }
 
 /* ---------- 營收 / 圖表 ---------- */
@@ -313,7 +359,7 @@ function finance(){
 function toggleChart(type){
   if(copen&&ctype===type){$("chartSection").style.display="none";copen=false;return}
   ctype=type;copen=true;$("chartSection").style.display="block";
-  $("chartTitle").textContent=type==="revenue"?"📈 年度每月營收趨勢":"📈 年度每月淨利趨勢";
+  $("chartTitle").textContent=type==="revenue"?"年度每月營收":"年度每月淨利";
   const ys=new Set([String(new Date().getFullYear())]);
   B.forEach(r=>r.date&&ys.add(r.date.split("-")[0]));A.forEach(a=>a.date&&ys.add(a.date.split("-")[0]));
   $("selectYear").innerHTML=[...ys].sort().reverse().map(y=>`<option value="${esc(y)}">${esc(y)} 年</option>`).join("");
@@ -325,24 +371,25 @@ function renderChart(){
   B.forEach(r=>{if(r.status==="已取消"||!(r.status==="已完成"||isPast(r,now)))return;const m=slot(r.date);if(m>=0)data[m]+=rev?(+r.totalPrice||0):(+r.totalPrice||0)-(+r.cost||0)});
   A.forEach(a=>{const m=slot(a.date);if(m<0)return;const n=+a.amount||0;if(a.type==="收入")data[m]+=n;else if(!rev)data[m]-=n});
   if(chart)chart.destroy();
-  const c=rev?"#8a7968":"#a08f5c";
-  chart=new Chart($("trendChart").getContext("2d"),{type:"line",data:{labels:Array.from({length:12},(_,i)=>`${i+1}月`),datasets:[{label:`${y} 年 (${rev?"營收":"淨利"})`,data,borderColor:c,backgroundColor:c+"14",borderWidth:2,fill:true,tension:.3}]},options:{responsive:true,maintainAspectRatio:false}});
+  const c=rev?"#8a7968":"#b8964f";
+  Chart.defaults.font.family="'LXGW WenKai TC',sans-serif";
+  chart=new Chart($("trendChart").getContext("2d"),{type:"line",data:{labels:Array.from({length:12},(_,i)=>`${i+1}月`),datasets:[{label:`${y} 年（${rev?"營收":"淨利"}）`,data,borderColor:c,backgroundColor:c+"1a",borderWidth:2,fill:true,tension:.3}]},options:{responsive:true,maintainAspectRatio:false}});
 }
 
 /* ---------- 班表 ---------- */
 function shiftReminder(){
   const t=new Date(),n=new Date(t.getFullYear(),t.getMonth()+1,1),ym=`${n.getFullYear()}-${pad(n.getMonth()+1)}`,el=$("adminShiftReminder");
-  if(t.getDate()>=12&&!M[ym]){el.textContent=`🚨 提醒：今天是 ${t.getDate()} 號，尚未設定下個月 (${ym}) 班表！`;el.style.display="block"}else el.style.display="none";
+  if(t.getDate()>=12&&!M[ym]){el.textContent=`今天是 ${t.getDate()} 號，還沒設定下個月（${ym}）的班表喔`;el.hidden=false}else el.hidden=true;
 }
 function renderHistory(){
   const ks=Object.keys(M).sort();
-  $("historyList").innerHTML=ks.length?ks.map(k=>`<div class="history-item${activeYM===k?" active":""}" data-a="hist" data-id="${esc(k)}"><div>📅 ${esc(k)}</div><div class="badge">${esc(M[k].shiftGroup)}組/${esc(M[k].shiftType)}</div></div>`).join(""):'<span class="muted">尚無設定紀錄</span>';
+  $("historyList").innerHTML=ks.length?ks.map(k=>`<div class="h${activeYM===k?" on":""}" data-a="hist" data-id="${esc(k)}">${esc(k)}<small>${esc(M[k].shiftGroup)} 組・${esc(M[k].shiftType)}</small></div>`).join(""):'<span class="muted">還沒有設定紀錄</span>';
 }
 function showPreview(ym){
   activeYM=ym;renderHistory();
   const it=M[ym]||{shiftGroup:"B",shiftType:"夜班"};
   $("previewContainer").style.display="block";
-  $("previewTitle").textContent=`🗓️ 預覽 ${ym} (${it.shiftGroup}組/${it.shiftType})`;
+  $("previewTitle").textContent=`${ym} 預覽（${it.shiftGroup} 組・${it.shiftType}）`;
   const[y,m]=ym.split("-").map(Number),[ay,am,ad]=ANCHOR.split("-").map(Number);
   if(picker)picker.destroy();
   picker=flatpickr("#inlinePreviewCalendar",{inline:true,locale:"zh",defaultDate:new Date(y,m-1,1),
@@ -351,12 +398,12 @@ function showPreview(ym){
       const s=S[ds];let ok;
       if(s&&s.status==="開放")ok=true;else if(s&&s.status==="關閉")ok=false;
       else{let c=((Math.round((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(ay,am-1,ad))/864e5)%4)+4)%4;if(it.shiftGroup==="A")c=(c+2)%4;ok=!(c===0||c===1)}
-      if(ok)el.classList.add(it.shiftType==="白班"?"available-day-yellow":"available-day-blue");
+      if(ok)el.classList.add(it.shiftType==="白班"?"ya":"yb");
     }});
 }
 function renderOverrides(){
   const ds=Object.keys(S).sort();
-  $("overrideRecordContainer").innerHTML=ds.length?`<table><tr><th>日期</th><th>狀態</th><th>操作</th></tr>${ds.map(d=>`<tr><td>${esc(d)}</td><td>${S[d].status==="開放"?"開放":"關閉"}</td><td><button class="btn-action sm danger" data-a="sdel" data-id="${esc(d)}">刪除</button></td></tr>`).join("")}</table>`:'<span class="muted">尚無微調紀錄</span>';
+  $("overrideRecordContainer").innerHTML=ds.length?`<table><tr><th>日期</th><th>狀態</th><th></th></tr>${ds.map(d=>`<tr><td>${esc(d)}</td><td>${S[d].status==="開放"?"開放":"關閉"}</td><td>${ib("sdel",esc(d),"trash","刪除","danger")}</td></tr>`).join("")}</table>`:'<span class="muted">還沒有微調紀錄</span>';
 }
 function delOverride(d){delete S[d];renderOverrides();if(activeYM)showPreview(activeYM);bg({action:"deleteSchedule",targetDate:d})}
 function saveMonthlyShift(){
