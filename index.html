@@ -1,600 +1,214 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🌸 美甲服務預約選單</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=ChenYuluoyan&family=Cinzel:wght@600&display=swap" rel="stylesheet">
-  
-  <!-- 引入 Flatpickr 視覺化月曆套件 -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美甲服務預約選單</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=ChenYuluoyan&family=Cinzel:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
+<style>
+:root{color-scheme:light;--ink:#4b4039;--soft:#8a7a6e;--line:#6b5d53;--paper:#fbf8f1;--sage:#8fa595;--blush:#efc4b8;--sand:#ebe2d3}
+*{box-sizing:border-box;font-family:'ChenYuluoyan','PingFang TC','Microsoft JhengHei',sans-serif}
+body{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;margin:0;padding:22px 14px;display:flex;justify-content:center;align-items:center;min-height:100vh;color:var(--ink);overflow-x:hidden;
+background:#f6f1e7 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .33 0 0 0 0 .27 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E")}
+.card{position:relative;z-index:1;background:var(--paper);max-width:440px;width:100%;padding:26px 20px 24px;border:1.6px solid var(--line);border-radius:26px 20px 28px 18px/20px 28px 18px 26px;box-shadow:4px 5px 0 var(--sand)}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:-4px;flex-shrink:0}
+.title-header{text-align:center;margin-bottom:20px}
+.title-header h2{margin:0;font-size:25px;letter-spacing:3px;font-weight:normal}
+.title-header::after,.section::after{content:"";display:block;height:6px;margin-top:12px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='6'%3E%3Cpath d='M0 3Q5 0 10 3T20 3T30 3T40 3' fill='none' stroke='%23d3c5b0' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E") repeat-x}
+#frontendReminder{display:none;background:#fbf0d8;border:1.4px dashed #d3a85a;padding:9px 12px;border-radius:14px 10px 16px 10px;margin-bottom:16px;text-align:center;color:#a0722a;font-size:14px}
+.section{margin-bottom:16px;transition:opacity .3s,filter .3s}
+.section.disabled-step{opacity:.4;pointer-events:none;filter:grayscale(40%)}
+.section-title{margin-bottom:10px;font-size:17px;display:flex;justify-content:space-between;align-items:center}
+label{font-size:15px;color:var(--ink);cursor:pointer}
+input[type=checkbox],input[type=radio]{accent-color:var(--line)}
+select,input[type=text],.flatpickr-input{width:100%;padding:9px 13px;border:1.5px solid var(--line);border-radius:14px 10px 15px 11px/11px 15px 10px 14px;outline:none;font-size:15px;background-color:#fff!important;color:var(--ink);appearance:none;-webkit-appearance:none;transition:box-shadow .2s}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9'%3E%3Cpath d='M1.5 1.8L7 7.2 12.5 1.6' fill='none' stroke='%236b5d53' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+select:focus,input[type=text]:focus{box-shadow:2px 3px 0 var(--sand)}
+@keyframes selectFlash{0%{box-shadow:0 0 0 3px rgba(143,165,149,.6)}100%{box-shadow:none}}
+.flash-highlight{animation:selectFlash .6s ease-out}
+.datetime-container{display:flex;flex-direction:column;gap:10px}
+.datetime-container label{display:block;font-size:14px;margin-bottom:4px;color:var(--soft)}
+.time-picker-group{display:flex;gap:8px}.time-picker-group select{flex:1;text-align:center}
+/* flatpickr */
+.flatpickr-calendar{background:var(--paper)!important;border:1.6px solid var(--line)!important;box-shadow:4px 5px 0 var(--sand)!important;border-radius:20px 16px 22px 14px!important}
+.flatpickr-day.available-day-yellow{background:#fbefcf!important;color:#9a6d1c!important;border:1.4px solid #e6c47a!important;border-radius:50% 46% 52% 48%!important}
+.flatpickr-day.available-day-blue{background:#e1ebe4!important;color:#4c6b5a!important;border:1.4px solid #a9c1b1!important;border-radius:48% 52% 46% 50%!important}
+.flatpickr-day.selected,.flatpickr-day.selected:hover,.flatpickr-day.selected:focus{background:var(--ink)!important;color:#fff!important;border-color:var(--ink)!important;border-radius:50%!important}
+.flatpickr-day.flatpickr-disabled,.flatpickr-day.flatpickr-disabled:hover{color:#cfc4b5!important;background:transparent!important;text-decoration:line-through;opacity:.45}
+/* buttons / cards */
+.draw-btn{display:inline-flex;align-items:center;gap:5px;background:#fff;color:var(--ink);border:1.5px solid var(--line);padding:4px 13px 4px 10px;border-radius:16px 12px 17px 11px;font-size:14px;cursor:pointer;transition:transform .15s,background .15s}
+.draw-btn:hover{background:var(--sand);transform:translateY(-1px) rotate(-1deg)}
+.draw-btn .ic{width:17px;height:17px}
+.addon-item-box,.removal-card{border:1.5px dashed #b9aa9b;background:#fdfbf6;border-radius:16px 12px 18px 11px;cursor:pointer;transition:all .25s}
+.addon-item-box{padding:12px 14px;margin-bottom:12px}
+.addon-item-box:hover,.removal-card:hover{border-color:var(--line);background:#f6efe4}
+.addon-item-box.active,.removal-card.active{border-style:solid;border-color:var(--line);background:#f3ebdf;box-shadow:3px 3px 0 var(--sand)}
+.addon-header{display:flex;justify-content:space-between;align-items:center;font-size:16.5px}
+.addon-header span:first-child{display:flex;align-items:center;gap:7px}
+.addon-badge{font-size:13px;background:var(--sand);color:var(--soft);padding:2px 11px;border-radius:14px 10px 15px 9px;transition:all .2s}
+.addon-item-box.active .addon-badge{background:var(--sage);color:#fff}
+.removal-card-group{display:flex;gap:12px;margin-top:10px}
+.removal-card{flex:1;padding:15px 10px;text-align:center;display:flex;align-items:center;justify-content:center}
+.removal-card.active{transform:rotate(-.8deg)}
+.removal-card-title{font-size:16.5px;margin:0}
+.hidden{display:none!important}
+.checkbox-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:8px 10px;padding:10px;background:#fff;border:1.4px solid var(--sand);border-radius:16px 12px 18px 12px}
+.chip-item{display:inline-flex;align-items:center;justify-content:center;padding:7px 10px;border-radius:16px 12px 17px 11px;color:var(--ink);font-size:14.5px;cursor:pointer;transition:all .2s;text-align:center;white-space:nowrap}
+.chip-item input{display:none}
+.chip-item:hover{background:#f6efe4}
+.chip-item:has(input:checked){background:var(--line);color:#fff}
+.chip-item:has(input:checked)::before{content:"";width:13px;height:13px;margin-right:5px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 7.5l3.2 3.6L12 2.8' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat}
+.hint{font-size:12.5px;color:var(--soft);margin-bottom:5px}
+.sub-input{margin-top:8px}.sub-input label{font-size:13.5px;color:var(--soft)}
+/* tone */
+.tone-palette-group{display:flex;justify-content:space-between;gap:8px;margin-top:10px}
+.tone-option{display:flex;align-items:center;gap:7px;cursor:pointer;padding:6px 9px;border-radius:18px 12px 19px 11px;transition:background .2s;white-space:nowrap}
+.tone-option:hover{background:#f3ece0}
+.color-dot{width:18px;height:18px;border-radius:52% 48% 50% 50%;border:1.6px solid var(--line);background:#fff;transition:all .25s cubic-bezier(.34,1.56,.64,1);flex-shrink:0}
+.tone-label{font-size:15px;color:var(--soft)}
+.tone-option.active .color-dot{background:var(--sage);transform:scale(1.15);box-shadow:0 0 0 2.5px var(--paper),0 0 0 4px var(--line)}
+.tone-option.active .tone-label{color:var(--ink)}
+/* total */
+.total-box{display:flex;align-items:center;justify-content:center;gap:10px;background:#f2e0d9;border:1.5px solid var(--line);padding:13px;border-radius:20px 14px 22px 13px;text-align:center;font-size:19px;margin:6px 0 18px;letter-spacing:.5px;box-shadow:3px 3px 0 var(--sand)}
+.submit-btn{width:100%;background:var(--ink);color:#fff;border:1.6px solid var(--ink);padding:12px;font-size:17.5px;border-radius:26px 18px 28px 17px/18px 28px 17px 26px;cursor:pointer;box-shadow:3px 4px 0 var(--sand);transition:transform .15s;letter-spacing:2px}
+.submit-btn:hover{transform:translateY(-1px) rotate(-.4deg)}
+.submit-btn:disabled{opacity:.6}
 
-  <style>
-    body {
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      user-select: none;
-      background-color: #f7f4ee;
-      margin: 0;
-      padding: 20px 15px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      color: #5a5049;
-      position: relative;
-      overflow-x: hidden;
-    }
-
-    body::before {
-      content: "Nail 🌸 Style ✨ Nail 🌸 Style ✨\n✨ Nail 🌸 Style ✨ Nail 🌸";
-      white-space: pre-line;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) rotate(-10deg);
-      font-family: 'ChenYuluoyan', serif;
-      font-size: 32px;
-      letter-spacing: 30px;
-      line-height: 2.5;
-      color: #d4c5b9;
-      opacity: 0.12;
-      pointer-events: none;
-      z-index: 0;
-      width: 140vw;
-      text-align: center;
-    }
-
-    * {
-      box-sizing: border-box;
-      font-family: 'ChenYuluoyan', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-    }
-
-    :root {
-      color-scheme: light;
-    }
-
-    input[type="checkbox"], 
-    input[type="radio"] {
-      accent-color: #8c7b73;
-      cursor: pointer;
-    }
-
-    .card {
-      background: #fcfbfa;
-      max-width: 440px;
-      width: 100%;
-      border-radius: 24px;
-      box-shadow: 0 8px 24px rgba(138, 123, 115, 0.08);
-      padding: 30px 22px;
-      border: 1.5px solid #e8e2dc;
-      position: relative;
-      z-index: 1;
-    }
-    
-    .title-header {
-      text-align: center;
-      margin-bottom: 22px;
-      padding-bottom: 12px;
-      border-bottom: 2px dashed #ebdcd3;
-    }
-    .title-header h2 {
-      margin: 0;
-      font-size: 26px;
-      font-weight: bold;
-      letter-spacing: 2px;
-      color: #5a5049;
-    }
-
-    #frontendReminder {
-      display: none;
-      background: #fffbf0;
-      border: 1px dashed #ffe58f;
-      padding: 10px;
-      border-radius: 12px;
-      margin-bottom: 15px;
-      text-align: center;
-      color: #b37feb;
-      font-size: 14px;
-      font-weight: bold;
-    }
-
-    .section {
-      margin-bottom: 20px;
-      padding-bottom: 18px;
-      border-bottom: 1.5px dashed #efece6;
-      transition: opacity 0.3s ease, filter 0.3s ease;
-    }
-
-    .section.disabled-step {
-      opacity: 0.4;
-      pointer-events: none;
-      filter: grayscale(40%);
-    }
-
-    .section-title {
-      font-weight: bold;
-      color: #5a5049;
-      margin-bottom: 10px;
-      font-size: 17px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    label {
-      font-size: 15.5px;
-      color: #6e6057;
-      cursor: pointer;
-    }
-    select, input[type="text"] {
-      width: 100%;
-      padding: 10px 14px;
-      border: 1.5px solid #dfd6cd;
-      border-radius: 14px;
-      outline: none;
-      font-size: 15px;
-      background-color: #ffffff;
-      color: #5a5049;
-      appearance: none;
-      -webkit-appearance: none;
-      transition: border-color 0.2s;
-    }
-    select:focus, input[type="text"]:focus {
-      border-color: #8c7b73;
-      box-shadow: 0 0 6px rgba(140, 123, 115, 0.2);
-    }
-
-    .flatpickr-input {
-      width: 100%;
-      padding: 10px 14px;
-      border: 1.5px solid #dfd6cd;
-      border-radius: 14px;
-      outline: none;
-      font-size: 15px;
-      background-color: #ffffff !important;
-      color: #5a5049;
-      cursor: pointer;
-    }
-
-    .flatpickr-calendar {
-      background: #fcfbfa !important;
-      border: 1.5px solid #e8e2dc !important;
-      box-shadow: 0 10px 25px rgba(138, 123, 115, 0.12) !important;
-      border-radius: 20px !important;
-      font-family: inherit !important;
-    }
-
-    .flatpickr-day.available-day-yellow {
-      background-color: #fff9e6 !important;
-      color: #b8860b !important;
-      font-weight: bold !important;
-      border-radius: 50% !important;
-      border: 1px solid #fae19c !important;
-    }
-    .flatpickr-day.available-day-blue {
-      background-color: #e8f0ec !important;
-      color: #4c6b61 !important;
-      font-weight: bold !important;
-      border-radius: 50% !important;
-      border: 1px solid #b8c9c4 !important;
-    }
-    .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, 
-    .flatpickr-day.selected:focus, .flatpickr-day.selected:hover {
-      background-color: #8c7b73 !important;
-      color: #ffffff !important;
-      border-color: #726259 !important;
-      font-weight: bold !important;
-      border-radius: 50% !important;
-    }
-    .flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover {
-      color: #d1c7bd !important;
-      background: transparent !important;
-      text-decoration: line-through;
-      opacity: 0.35;
-    }
-
-    @keyframes selectFlash {
-      0% { border-color: #8c7b73; box-shadow: 0 0 0 3px rgba(140, 123, 115, 0.4); background-color: #ffffff; }
-      50% { border-color: #a8988e; box-shadow: 0 0 0 5px rgba(140, 123, 115, 0.6); background-color: #f2ebe4; }
-      100% { border-color: #dfd6cd; box-shadow: none; background-color: #ffffff; }
-    }
-
-    .flash-highlight {
-      animation: selectFlash 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-      border-radius: 14px;
-    }
-
-    .datetime-container {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .time-picker-group {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    .time-picker-group select {
-      flex: 1;
-      text-align: center;
-    }
-
-    .tone-palette-group {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-top: 10px;
-      padding: 6px 4px;
-    }
-    .tone-option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      padding: 8px 12px;
-      border-radius: 20px;
-      background: #f7f4ee;
-      border: 1px solid #ebdcd3;
-      transition: all 0.25s ease;
-      user-select: none;
-      white-space: nowrap;
-    }
-    .tone-option:hover {
-      background-color: #f0ebe4;
-    }
-    .color-dot {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background-color: #dfd6cd;
-      border: 1.5px solid #c9bebc;
-      flex-shrink: 0;
-    }
-    .tone-label {
-      font-size: 14.5px;
-      color: #6e6057;
-      font-weight: 500;
-    }
-    .tone-option.active {
-      background-color: #f2ebe4;
-      border-color: #8c7b73;
-      box-shadow: 0 2px 6px rgba(140, 123, 115, 0.15);
-    }
-    .tone-option.active .color-dot {
-      background-color: #8c7b73;
-      border-color: #5a5049;
-    }
-    .tone-option.active .tone-label {
-      color: #5a5049;
-      font-weight: 700;
-    }
-
-    .addon-item-box {
-      border: 1.5px dashed #dfd6cd;
-      background-color: #ffffff;
-      border-radius: 16px;
-      padding: 14px 16px;
-      margin-bottom: 12px;
-      cursor: pointer;
-      transition: all 0.25s ease;
-    }
-    .addon-item-box:hover {
-      border-color: #a8988e;
-      background-color: #fdfbf7;
-    }
-    .addon-item-box.active {
-      border-style: solid;
-      border-color: #8c7b73;
-      background-color: #f7f3ee;
-      box-shadow: 0 3px 10px rgba(140, 123, 115, 0.1);
-    }
-    .addon-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 16.5px;
-      font-weight: bold;
-      color: #5a5049;
-    }
-    .addon-badge {
-      font-size: 13px;
-      background-color: #f0ebe4;
-      color: #726259;
-      padding: 3px 12px;
-      border-radius: 20px;
-      transition: all 0.2s ease;
-    }
-    .addon-item-box.active .addon-badge {
-      background-color: #8c7b73;
-      color: #ffffff;
-    }
-
-    .removal-card-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .removal-card {
-      flex: 1;
-      border: 1.5px dashed #dfd6cd;
-      background-color: #ffffff;
-      border-radius: 16px;
-      padding: 14px 10px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      user-select: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .removal-card:hover {
-      border-color: #a8988e;
-      background-color: #fdfbf7;
-    }
-    .removal-card.active {
-      border-style: solid;
-      border-color: #8c7b73;
-      background-color: #f7f3ee;
-      box-shadow: 0 3px 10px rgba(140, 123, 115, 0.12);
-    }
-    .removal-card-title {
-      font-size: 16px;
-      font-weight: bold;
-      color: #5a5049;
-      margin: 0;
-    }
-
-    .draw-btn {
-      background-color: #f0ebe4;
-      color: #5a5049;
-      border: 1.5px solid #dfd6cd;
-      padding: 5px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .draw-btn:hover {
-      background-color: #e8e2dc;
-      transform: translateY(-1px);
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .checkbox-grid {
-      display: grid;
-      grid-template-columns: 0.85fr 1.15fr;
-      gap: 8px 10px;
-      padding: 12px;
-      background-color: #fcfbfa;
-      border-radius: 14px;
-      border: 1.5px solid #ebdcd3;
-    }
-
-    .chip-item {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 8px 10px;
-      border-radius: 20px;
-      background-color: transparent; 
-      border: none;
-      color: #6e6057;
-      font-size: 14.5px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      user-select: none;
-      white-space: nowrap;
-    }
-
-    .chip-item input[type="checkbox"] {
-      display: none;
-    }
-
-    .chip-item:hover {
-      background-color: #f0ebe4; 
-    }
-
-    .chip-item:has(input:checked) {
-      background-color: #8c7b73;
-      color: #ffffff;
-      font-weight: 600;
-      box-shadow: 0 2px 6px rgba(140, 123, 115, 0.25);
-    }
-
-    .chip-item:has(input:checked)::before {
-      content: "✓ ";
-      margin-right: 4px;
-      font-weight: bold;
-    }
-    
-    .total-box {
-      background-color: #f0ebe4;
-      color: #5a5049;
-      padding: 14px;
-      border-radius: 16px;
-      text-align: center;
-      font-size: 19px;
-      font-weight: bold;
-      margin-top: 14px;
-      margin-bottom: 16px;
-      border: 1.5px solid #ebdcd3;
-    }
-    .submit-btn {
-      width: 100%;
-      background-color: #8c7b73;
-      color: #ffffff;
-      border: none;
-      padding: 13px;
-      font-size: 17.5px;
-      font-weight: bold;
-      border-radius: 22px;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(140, 123, 115, 0.25);
-      transition: background 0.2s, transform 0.1s;
-      letter-spacing: 1px;
-    }
-    .submit-btn:hover {
-      background-color: #726259;
-    }
-    .submit-btn:active {
-      transform: scale(0.98);
-    }
-    .sub-input {
-      margin-top: 10px;
-    }
-  </style>
+/* ===== v2：浮水印 / 飄動 / 流暢度 ===== */
+body::before{content:"NT$ $ NT$ $ NT$ $\A $ NT$ $ NT$ $ NT$\A NT$ $ NT$ $ NT$ $\A $ NT$ $ NT$ $ NT$\A NT$ $ NT$ $ NT$ $\A $ NT$ $ NT$ $ NT$\A NT$ $ NT$ $ NT$ $\A $ NT$ $ NT$ $ NT$\A NT$ $ NT$ $ NT$ $\A $ NT$ $ NT$ $ NT$";white-space:pre-line;position:fixed;top:50%;left:50%;width:140vw;text-align:center;font-family:'Cinzel',serif;font-size:38px;font-weight:600;letter-spacing:46px;line-height:2.2;color:#c9a55e;text-shadow:0 0 10px rgba(240,216,150,.95),0 0 28px rgba(214,178,100,.8);opacity:.1;pointer-events:none;z-index:0;will-change:transform,opacity;transform:translate(-50%,-50%) rotate(-12deg);animation:wm 9s ease-in-out infinite}
+@keyframes wm{0%,100%{opacity:.07;transform:translate(-50%,-50%) rotate(-12deg)}50%{opacity:.15;transform:translate(-50%,-48%) rotate(-12deg)}}
+.floaty{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.floaty svg{position:absolute;width:var(--s,18px);height:var(--s,18px);fill:rgba(240,216,150,.35);stroke:#cfa95c;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;opacity:.3;will-change:transform,opacity;animation:drift var(--d,8s) ease-in-out var(--dl,0s) infinite}
+@keyframes drift{0%,100%{transform:translate3d(0,0,0) rotate(0);opacity:.2}50%{transform:translate3d(12px,-20px,0) rotate(16deg);opacity:.65}}
+@keyframes rise{from{opacity:0;transform:translate3d(0,14px,0)}}
+@keyframes pop{from{opacity:0;transform:translate3d(0,-6px,0)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes bump{40%{transform:scale(1.04)}}
+@keyframes twinkle{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.18) rotate(18deg)}}
+@keyframes selectFlash{40%{transform:scale(1.025)}}
+.card>*{animation:rise .6s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--i,0)*50ms)}
+.card>:nth-child(2){--i:1}.card>:nth-child(3){--i:2}.card>:nth-child(4){--i:3}.card>:nth-child(5){--i:4}.card>:nth-child(6){--i:5}.card>:nth-child(7){--i:6}.card>:nth-child(8){--i:7}.card>:nth-child(9){--i:8}.card>:nth-child(10){--i:9}
+.title-header h2{animation:bob 6s ease-in-out infinite}
+#jumpColorSection,#styleSection,#partialStyleGroup,#fullStyleGroup,#catEyeDetailDiv,#customInputDiv,#adminPanel{animation:pop .3s ease-out}
+.total-box.bump{animation:bump .35s ease-out}
+.total-box .ic{animation:twinkle 3.4s ease-in-out infinite}
+.flash-highlight{animation:selectFlash .5s ease-out}
+.section{transition:opacity .3s}.section.disabled-step{filter:none}
+.draw-btn,.removal-card,.addon-item-box,.chip-item,.tone-option,.submit-btn{transition:transform .18s ease,background-color .2s,border-color .2s}
+.color-dot{transition:transform .25s cubic-bezier(.34,1.56,.64,1),background-color .2s}
+select,input[type=text],.flatpickr-input{transition:border-color .2s}
+.draw-btn:active,.removal-card:active,.chip-item:active,.tone-option:active,.submit-btn:active{transform:scale(.96)}
+.addon-badge{font-size:0;padding:2px 12px;transition:background-color .2s,color .2s}
+.addon-badge::after{content:"加購";font-size:13px}
+.addon-item-box.active .addon-badge::after{content:"已加購"}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;">
 
+<!-- 手繪抖動濾鏡與圖示庫 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="wob"><feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.6"/></filter>
+  <symbol id="i-wand" viewBox="0 0 24 24"><path d="M4.8 19.4L14.6 9.6"/><path d="M5.3 18.8L7 20.2"/><path d="M17.6 3.4C17.8 5.5 18.6 6.3 20.7 6.6 18.6 7 17.8 7.9 17.6 10 17.4 7.9 16.6 7 14.5 6.6 16.6 6.3 17.4 5.5 17.6 3.4Z"/><path d="M6.2 3.6V8M4 5.8H8.3" stroke-width="1.4"/></symbol>
+  <symbol id="i-drops" viewBox="0 0 24 24"><path d="M9.2 5.4C5.6 5.2 3.7 8.6 5 11.7c1.2 3 4.8 3.5 6.7 1.3"/><path d="M14.9 9.4c3.5.1 5.3 3.4 4.1 6.4-1.2 3-5 3.5-7 1.2"/><path d="M9.6 9.8c-.6 1.8.2 3.5 1.9 4.3" /></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3.5C12.6 8.5 14.5 10.8 20 12c-5.5 1.4-7.4 3.4-8 8.5-.6-5.1-2.4-7.1-8-8.5 5.6-1.2 7.4-3.5 8-8.5Z"/></symbol>
+  <symbol id="i-note" viewBox="0 0 24 24"><path d="M12 3.6c4.8-.1 8.3 3.5 8.2 8.2-.1 4.7-3.6 8.5-8.3 8.4-4.8 0-8.3-3.7-8.2-8.4.1-4.6 3.5-8.2 8.3-8.2Z"/><path d="M12 7.5v5.2"/><circle cx="12" cy="16.2" r=".8" fill="currentColor"/></symbol>
+</svg>
+
+<div class="floaty" aria-hidden="true"><svg viewBox="0 0 24 24" style="left:6%;top:12%;--s:22px;--d:9s;--dl:0s"><use href="#i-spark"/></svg><svg viewBox="0 0 24 24" style="left:88%;top:9%;--s:16px;--d:7s;--dl:-2s"><use href="#i-spark"/></svg><svg viewBox="0 0 24 24" style="left:14%;top:72%;--s:18px;--d:10s;--dl:-4s"><use href="#i-spark"/></svg><svg viewBox="0 0 24 24" style="left:92%;top:58%;--s:24px;--d:11s;--dl:-1s"><use href="#i-spark"/></svg><svg viewBox="0 0 24 24" style="left:48%;top:4%;--s:14px;--d:8s;--dl:-5s"><use href="#i-spark"/></svg><svg viewBox="0 0 24 24" style="left:80%;top:88%;--s:18px;--d:9.5s;--dl:-3s"><use href="#i-spark"/></svg><svg viewBox="0 0 24 24" style="left:4%;top:40%;--s:14px;--d:7.5s;--dl:-6s"><use href="#i-spark"/></svg></div>
+
 <div class="card">
   <div class="title-header">
-    <h2>🌸 美甲服務預約選單 🌸</h2>
+    <h2>美甲服務預約選單</h2>
   </div>
 
-  <div id="frontendReminder">
-    ✨ 提醒：目前正值 15 號至 20 號期間，請留意下兩個月的最新班表與預約動態！
-  </div>
+  <div id="frontendReminder"><svg class="ic"><use href="#i-note"/></svg> 目前正值 15 號至 20 號期間，請留意下兩個月的最新班表與預約動態！</div>
 
   <div class="section">
-    <div class="section-title">🤍 預約暱稱</div>
-    <div style="display: flex; gap: 8px;">
-      <input type="text" id="customerName" placeholder="請輸入您的預約暱稱" oninput="checkAdminMode(this.value)" style="flex: 1;">
-      <button type="button" class="draw-btn" onclick="loginWithLine()" style="white-space: nowrap; background: #06c755; color: #fff; border: none;">連動 LINE</button>
+    <div class="section-title">預約暱稱</div>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="customerName" placeholder="請輸入您的預約暱稱" oninput="checkAdminMode(this.value)" style="flex:1">
+      <button type="button" class="draw-btn" onclick="loginWithLine()" style="white-space:nowrap;background:#06c755;color:#fff;border-color:#05a847">連動 LINE 暱稱</button>
     </div>
-    <div id="adminPanel" class="hidden" style="margin-top: 8px; padding: 8px; background: #fffbe6; border-radius: 10px; border: 1px dashed #ffe58f; text-align: center;">
-      <span style="font-size: 13px; font-weight: bold; color: #d48806;">🔧 管理者模式：</span>
-      <button type="button" onclick="enableAdminOverride()" style="padding: 4px 10px; font-size: 12px; background: #d48806; color: #fff; border: none; border-radius: 6px; cursor: pointer;">手動解鎖所有日曆日期</button>
+    <div id="adminPanel" class="hidden" style="margin-top:8px;padding:8px;background:#fbf0d8;border-radius:14px 10px 15px 10px;border:1.4px dashed #d3a85a;text-align:center">
+      <span style="font-size:13px;color:#8a6420">管理者模式：</span>
+      <button type="button" onclick="enableAdminOverride()" style="padding:4px 10px;font-size:12.5px;background:#8a6420;color:#fff;border:none;border-radius:10px 8px 11px 8px;cursor:pointer">手動解鎖所有日曆日期 (加班/換班)</button>
     </div>
   </div>
 
-  <!-- Step 1. 預約日期與時間 -->
   <div class="section">
-    <div class="section-title">🗓️ Step 1. 預約日期與時間</div>
+    <div class="section-title">Step 1. 預約日期與時間</div>
     <div class="datetime-container">
-      <div>
-        <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #6e6057;">預約日期：</label>
-        <input type="text" id="bookingDate" placeholder="請選擇預約日期">
-      </div>
-      <div>
-        <label style="font-size: 13.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #6e6057;">預約時間：</label>
+      <div><label>預約日期</label><input type="text" id="bookingDate" placeholder="請選擇預約日期"></div>
+      <div><label>預約時間</label>
         <div class="time-picker-group">
-          <select id="bookingHour" onchange="validateTime()">
-            <!-- 動態生成小時選項 -->
-          </select>
-          <select id="bookingMinute" onchange="validateTime()">
-            <!-- 動態生成分鐘選項 -->
-          </select>
+          <select id="bookingHour" onchange="validateTime()"></select>
+          <select id="bookingMinute" onchange="validateTime()"></select>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Step 2. 單色款式 -->
   <div class="section">
-    <div class="section-title">
-      <span>💅 Step 2. 單色款式</span>
-      <button class="draw-btn" onclick="drawMainColor()">🎨 幫我抽色系</button>
+    <div class="section-title">Step 2. 單色款式
+      <button class="draw-btn" onclick="drawMainColor()"><svg class="ic"><use href="#i-wand"/></svg>幫我抽色系</button>
     </div>
     <select id="mainColor" onchange="onMainColorChange()">
       <option value="">-- 請選擇色系 (無則留空) --</option>
-      <option value="紅色">紅色</option>
-      <option value="粉色">粉色</option>
-      <option value="橘色">橘色</option>
-      <option value="黃色">黃色</option>
-      <option value="紅咖色">紅咖色</option>
-      <option value="深咖/可可色">深咖/可可色</option>
-      <option value="淺咖色">淺咖色</option>
-      <option value="綠色">綠色</option>
-      <option value="藍色">藍色</option>
-      <option value="紫色">紫色</option>
-      <option value="黑色">黑色</option>
-      <option value="銀色/白色">銀色/白色</option>
-      <option value="灰色">灰色</option>
-      <option value="金色/香檳色">金色/香檳色</option>
+      <option value="紅色">紅色</option><option value="粉色">粉色</option><option value="橘色">橘色</option><option value="黃色">黃色</option><option value="紅咖色">紅咖色</option><option value="深咖/可可色">深咖/可可色</option><option value="淺咖色">淺咖色</option><option value="綠色">綠色</option><option value="藍色">藍色</option><option value="紫色">紫色</option><option value="黑色">黑色</option><option value="銀色/白色">銀色/白色</option><option value="灰色">灰色</option><option value="金色/香檳色">金色/香檳色</option>
     </select>
   </div>
 
-  <!-- Step 3. 加購項目 -->
   <div class="section disabled-step" id="step3Section">
-    <div style="font-weight: bold; color: #5a5049; margin-bottom: 12px; font-size: 17px;">
-      ✨ Step 3. 加購項目
-    </div>
+    <div class="section-title">Step 3. 加購項目</div>
 
-    <!-- 跳色 -->
     <div id="boxJumpColor" class="addon-item-box" onclick="toggleOption('jumpColorSection', event)">
       <div class="addon-header">
-        <span>🎨 跳色</span>
-        <span id="badgeJumpColor" class="addon-badge">50 元 ➕</span>
+        <span><svg class="ic" style="color:#c98f80"><use href="#i-drops"/></svg>跳色</span>
+        <span id="badgeJumpColor" class="addon-badge">加購</span>
       </div>
-      <div id="jumpColorSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-          <div style="font-size: 13.5px; font-weight: bold; color: #6e6057;">選擇色系：</div>
-          <button class="draw-btn" onclick="drawSmartJumpColor(event)">🎲 隨機配色</button>
+      <div id="jumpColorSection" class="hidden" style="margin-top:10px" onclick="event.stopPropagation()">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div style="font-size:14px;color:var(--soft)">選擇色系</div>
+          <button class="draw-btn" onclick="drawSmartJumpColor(event)"><svg class="ic"><use href="#i-wand"/></svg>隨機配色</button>
         </div>
-        <div>
-          <select id="jumpColor" onchange="onSelectionChange()">
-            <option value="">--請選擇跳色色系--</option>
-            <option value="紅色">紅色</option>
-            <option value="粉色">粉色</option>
-            <option value="橘色">橘色</option>
-            <option value="黃色">黃色</option>
-            <option value="紅咖色">紅咖色</option>
-            <option value="深咖/可可色">深咖/可可色</option>
-            <option value="淺咖色">淺咖色</option>
-            <option value="綠色">綠色</option>
-            <option value="藍色">藍色</option>
-            <option value="紫色">紫色</option>
-            <option value="黑色">黑色</option>
-            <option value="銀色/白色">銀色/白色</option>
-            <option value="灰色">灰色</option>
-            <option value="金色/香檳色">金色/香檳色</option>
-          </select>
-        </div>
+        <select id="jumpColor" onchange="onSelectionChange()">
+          <option value="">--請選擇跳色色系--</option>
+          <option value="紅色">紅色</option><option value="粉色">粉色</option><option value="橘色">橘色</option><option value="黃色">黃色</option><option value="紅咖色">紅咖色</option><option value="深咖/可可色">深咖/可可色</option><option value="淺咖色">淺咖色</option><option value="綠色">綠色</option><option value="藍色">藍色</option><option value="紫色">紫色</option><option value="黑色">黑色</option><option value="銀色/白色">銀色/白色</option><option value="灰色">灰色</option><option value="金色/香檳色">金色/香檳色</option>
+        </select>
       </div>
     </div>
 
-    <!-- 款式造型 -->
     <div id="boxStyle" class="addon-item-box" onclick="toggleOption('styleSection', event)">
       <div class="addon-header">
-        <span>🪄 款式造型</span>
-        <span id="badgeStyle" class="addon-badge">50元起 ➕</span>
+        <span><svg class="ic" style="color:#c9a24f"><use href="#i-spark"/></svg>款式造型</span>
+        <span id="badgeStyle" class="addon-badge">加購</span>
       </div>
-      <div id="styleSection" class="hidden" style="margin-top: 10px;" onclick="event.stopPropagation()">
-        <div style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
-          <button class="draw-btn" onclick="drawStyle(event)">✨ 幫我抽款式</button>
+      <div id="styleSection" class="hidden" style="margin-top:10px" onclick="event.stopPropagation()">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+          <button class="draw-btn" onclick="drawStyle(event)"><svg class="ic"><use href="#i-wand"/></svg>幫我抽款式</button>
         </div>
+        <div class="removal-card-group" style="margin:0 0 12px;gap:8px">
+          <div id="typePartialCard" class="removal-card" onclick="setStyleType('partial')" style="padding:10px"><div class="removal-card-title" style="font-size:15px">局部造型</div></div>
+          <div id="typeFullCard" class="removal-card" onclick="setStyleType('full')" style="padding:10px"><div class="removal-card-title" style="font-size:15px">十指造型</div></div>
+        </div>
+        <input type="radio" name="styleType" value="partial" id="radioPartial" style="display:none">
+        <input type="radio" name="styleType" value="full" id="radioFull" style="display:none">
 
-        <div class="removal-card-group" style="margin-top: 0; margin-bottom: 12px; gap: 8px;">
-          <div id="typePartialCard" class="removal-card" onclick="setStyleType('partial')" style="padding: 10px; font-size: 15px;">
-            <div class="removal-card-title" style="font-size: 15px;">局部造型</div>
-          </div>
-          <div id="typeFullCard" class="removal-card" onclick="setStyleType('full')" style="padding: 10px; font-size: 15px;">
-            <div class="removal-card-title" style="font-size: 15px;">十指造型</div>
-          </div>
-        </div>
-        <input type="radio" name="styleType" value="partial" id="radioPartial" style="display:none;">
-        <input type="radio" name="styleType" value="full" id="radioFull" style="display:none;">
-        
         <div id="partialStyleGroup" class="hidden">
-          <div style="font-size: 12px; color: #8c7c75; margin-bottom: 4px; font-weight: 500;">(至多4指造型)</div>
-          <div class="checkbox-grid" style="margin-bottom: 12px;">
+          <div class="hint">(至多5指造型+5指以上單色/跳色)</div>
+          <div class="checkbox-grid" style="margin-bottom:12px">
             <label class="chip-item"><input type="checkbox" name="style" id="catEyeCb" value="貓眼" onchange="checkLimit(this)">貓眼</label>
-            <label class="chip-item"><input type="checkbox" name="style" value="立體不規則造型" onchange="checkLimit(this)">立體不規則</label>
+            <label class="chip-item"><input type="checkbox" name="style" value="立體不規則造型" onchange="checkLimit(this)">立體不規則造型</label>
             <label class="chip-item"><input type="checkbox" name="style" value="法式" onchange="checkLimit(this)">法式</label>
             <label class="chip-item"><input type="checkbox" name="style" value="鏡面銀" onchange="checkLimit(this)">鏡面銀</label>
             <label class="chip-item"><input type="checkbox" name="style" value="漸層" onchange="checkLimit(this)">漸層</label>
-            <label class="chip-item"><input type="checkbox" name="style" value="小飾品/貼紙" onchange="checkLimit(this)">飾品貼紙</label>
+            <label class="chip-item"><input type="checkbox" name="style" value="小飾品/貼紙" onchange="checkLimit(this)">小飾品/貼紙</label>
             <label class="chip-item"><input type="checkbox" name="style" value="格紋" onchange="checkLimit(this)">格紋</label>
             <label class="chip-item"><input type="checkbox" name="style" value="暈染" onchange="checkLimit(this)">暈染</label>
             <label class="chip-item"><input type="checkbox" name="style" value="海莉款" onchange="checkLimit(this)">海莉款</label>
@@ -603,14 +217,14 @@
         </div>
 
         <div id="fullStyleGroup" class="hidden">
-          <div style="font-size: 12px; color: #8c7c75; margin-bottom: 4px; font-weight: 500;">(至多4項搭配)</div>
-          <div class="checkbox-grid" style="margin-bottom: 12px;">
+          <div class="hint" style="visibility:hidden">佔位</div>
+          <div class="checkbox-grid" style="margin-bottom:12px">
             <label class="chip-item"><input type="checkbox" name="fullStyle" id="fullCatEyeCb" value="貓眼" onchange="checkFullLimit(this)">貓眼</label>
-            <label class="chip-item"><input type="checkbox" name="fullStyle" value="立體不規則造型" onchange="checkFullLimit(this)">立體不規則</label>
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="立體不規則造型" onchange="checkFullLimit(this)">立體不規則造型</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="法式" onchange="checkFullLimit(this)">法式</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="鏡面銀" onchange="checkFullLimit(this)">鏡面銀</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="漸層" onchange="checkFullLimit(this)">漸層</label>
-            <label class="chip-item"><input type="checkbox" name="fullStyle" value="小飾品/貼紙" onchange="checkFullLimit(this)">飾品貼紙</label>
+            <label class="chip-item"><input type="checkbox" name="fullStyle" value="小飾品/貼紙" onchange="checkFullLimit(this)">小飾品/貼紙</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="格紋" onchange="checkFullLimit(this)">格紋</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="暈染" onchange="checkFullLimit(this)">暈染</label>
             <label class="chip-item"><input type="checkbox" name="fullStyle" value="海莉款" onchange="checkFullLimit(this)">海莉款</label>
@@ -619,13 +233,9 @@
         </div>
 
         <div id="catEyeDetailDiv" class="sub-input hidden">
-          <label style="font-size: 13px; font-weight: bold; color: #5a5049;">貓眼類型：</label>
-          <select id="catEyeType" style="background-color: #ffffff; font-weight: bold;">
-            <option value="指定單色貓眼">指定單色貓眼</option>
-            <option value="雙色貓眼">雙色貓眼</option>
-          </select>
+          <label>貓眼類型</label>
+          <select id="catEyeType"><option value="指定單色貓眼">指定單色貓眼</option><option value="雙色貓眼">雙色貓眼</option></select>
         </div>
-
         <div id="customInputDiv" class="sub-input hidden">
           <input type="text" id="customPattern" placeholder="請填寫指定圖案細節 (必填)">
         </div>
@@ -633,939 +243,34 @@
     </div>
   </div>
 
-  <!-- Step 4. 色調 -->
   <div class="section disabled-step" id="step4Section">
-    <div class="section-title">🎨 Step 4. 色調選擇</div>
+    <div class="section-title">Step 4. 色調</div>
     <div class="tone-palette-group">
-      <div class="tone-option active" onclick="selectToneDot(this, '隨機')">
-        <span class="color-dot"></span>
-        <span class="tone-label">隨機</span>
-      </div>
-      <div class="tone-option" onclick="selectToneDot(this, '個性暗色調')">
-        <span class="color-dot"></span>
-        <span class="tone-label">個性暗色調</span>
-      </div>
-      <div class="tone-option" onclick="selectToneDot(this, '清透亮色調')">
-        <span class="color-dot"></span>
-        <span class="tone-label">清透亮色調</span>
-      </div>
+      <div class="tone-option active" onclick="selectToneDot(this, '隨機')"><span class="color-dot"></span><span class="tone-label">隨機</span></div>
+      <div class="tone-option" onclick="selectToneDot(this, '個性暗色調')"><span class="color-dot"></span><span class="tone-label">個性暗色調</span></div>
+      <div class="tone-option" onclick="selectToneDot(this, '清透亮色調')"><span class="color-dot"></span><span class="tone-label">清透亮色調</span></div>
     </div>
     <input type="hidden" id="selectedTone" value="隨機">
   </div>
 
-  <!-- Step 5. 卸甲服務 -->
   <div class="section">
-    <div class="section-title">🤍 Step 5. 卸甲服務</div>
+    <div class="section-title">Step 5. 卸甲服務</div>
     <div class="removal-card-group">
-      <div id="removalYesCard" class="removal-card" onclick="setRemoval(true)">
-        <div class="removal-card-title">需要卸甲</div>
-      </div>
-      <div id="removalNoCard" class="removal-card active" onclick="setRemoval(false)">
-        <div class="removal-card-title">不需要</div>
-      </div>
+      <div id="removalYesCard" class="removal-card" onclick="setRemoval(true)"><div class="removal-card-title">需要卸甲</div></div>
+      <div id="removalNoCard" class="removal-card active" onclick="setRemoval(false)"><div class="removal-card-title">不需要</div></div>
     </div>
   </div>
 
   <div class="total-box">
-    預計總金額：NT$ <span id="totalPrice">0</span> 元
+    <svg class="ic" style="color:#c98f80"><use href="#i-spark"/></svg>
+    <span>預計總金額：NT$ <span id="totalPrice">0</span> 元</span>
   </div>
-
-  <button class="submit-btn" onclick="sendBooking()">送出預約單 (開啟 LINE) ✨</button>
+  <button class="submit-btn" onclick="sendBooking()">送出預約單 (開啟 LINE)</button>
 </div>
 
-<!-- 引入 LINE LIFF SDK -->
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script>
-  const LINE_OFFICIAL_ACCOUNT_ID = "@344gjuzg"; 
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
-
-  let adminOverride = false; 
-  let backendShiftGroup = "B";
-  let backendShiftType = "夜班"; 
-  let backendMonthlyShiftTypes = {}; 
-  let backendSchedules = {};
-  let globalBookings = [];
-  let pickerInstance = null;
-
-  const ALL_COLORS = [
-    "紅色", "粉色", "橘色", "黃色", "紅咖色", 
-    "深咖/可可色", "淺咖色", "綠色", "藍色", "紫色", 
-    "黑色", "銀色/白色", "灰色", "金色/香檳色"
-  ];
-
-  let showJumpColor = false, showStyle = false;
-  let needRemoval = false;
-
-  document.addEventListener('DOMContentLoaded', () => {
-    checkFrontendReminder();
-    initLiffLogin();
-    loadCacheData();
-    initFlatpickr();
-    fetchBackendConfigAndInit();
-  });
-
-  window.addEventListener('pageshow', () => {
-    const submitBtn = document.querySelector('.submit-btn');
-    if (submitBtn) {
-      submitBtn.innerText = "送出預約單 (開啟 LINE) ✨";
-      submitBtn.disabled = false;
-    }
-  });
-
-  function loadCacheData() {
-    try {
-      const cachedData = localStorage.getItem("nail_app_backend_cache");
-      if (cachedData) {
-        const data = JSON.parse(cachedData);
-        if (data.shiftGroup) backendShiftGroup = data.shiftGroup;
-        if (data.shiftType) backendShiftType = data.shiftType;
-        if (data.schedules) backendSchedules = data.schedules;
-        if (data.monthlyShiftTypes) backendMonthlyShiftTypes = data.monthlyShiftTypes; 
-        if (data.bookings) globalBookings = data.bookings;
-      }
-    } catch (e) {
-      console.log("讀取快取失敗", e);
-    }
-  }
-
-  function saveCacheData(data) {
-    try {
-      localStorage.setItem("nail_app_backend_cache", JSON.stringify({
-        shiftGroup: data.shiftGroup,
-        shiftType: data.shiftType,
-        schedules: data.schedules,
-        monthlyShiftTypes: data.monthlyShiftTypes,
-        bookings: data.bookings
-      }));
-    } catch (e) {
-      console.log("儲存快取失敗", e);
-    }
-  }
-
-  function checkFrontendReminder() {
-    const todayDay = new Date().getDate();
-    if (todayDay >= 15 && todayDay <= 20) {
-      document.getElementById('frontendReminder').style.display = "block";
-    }
-  }
-
-  async function fetchBackendConfigAndInit() {
-    try {
-      const res = await fetch(SCRIPT_URL, { method: 'GET', mode: 'cors', keepalive: true });
-      const data = await res.json();
-      
-      if (data.shiftGroup) backendShiftGroup = data.shiftGroup;
-      if (data.shiftType) backendShiftType = data.shiftType;
-      if (data.schedules) backendSchedules = data.schedules;
-      if (data.monthlyShiftTypes) backendMonthlyShiftTypes = data.monthlyShiftTypes; 
-      if (data.bookings) globalBookings = data.bookings;
-      
-      saveCacheData(data);
-      
-      window.requestAnimationFrame(() => {
-        if (pickerInstance) {
-          pickerInstance.redraw();
-          validateTime();
-        }
-      });
-    } catch (e) {
-      console.error("背景同步後端資料失敗", e);
-    }
-  }
-
-  function checkAdminMode(val) {
-    const adminPanel = document.getElementById("adminPanel");
-    if (val.trim().toLowerCase() === "admin") {
-      adminPanel.classList.remove("hidden");
-    } else {
-      adminPanel.classList.add("hidden");
-    }
-  }
-
-  function enableAdminOverride() {
-    adminOverride = true;
-    alert("🔓 管理者已強制解鎖！月曆所有日期現已開放手動點選預約。");
-    if (pickerInstance) pickerInstance.redraw();
-  }
-
-  async function initLiffLogin() {
-    const nameInput = document.getElementById('customerName');
-    if (typeof liff === 'undefined') return;
-
-    try {
-      await liff.init({ liffId: "2011884932-heTsoGVG" });
-      if (liff.isLoggedIn()) {
-        const profile = await liff.getProfile();
-        nameInput.value = profile.displayName;
-        nameInput.readOnly = true;
-        nameInput.style.background = "#f7f3ee";
-        nameInput.style.fontWeight = "bold";
-      }
-    } catch (err) {
-      console.log("LIFF 載入狀態：", err);
-    }
-  }
-
-  function loginWithLine() {
-    if (typeof liff !== 'undefined' && !liff.isLoggedIn()) {
-      liff.login();
-    } else {
-      alert("目前已在 LINE 環境或已完成登入！");
-    }
-  }
-
-  function getShiftCycleInfo(dateObj) {
-    const year = dateObj.getFullYear();
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const yearMonth = `${year}-${month}`;
-
-    const monthConfig = backendMonthlyShiftTypes[yearMonth];
-    const currentGroup = monthConfig ? monthConfig.shiftGroup : backendShiftGroup;
-    const currentType = monthConfig ? monthConfig.shiftType : backendShiftType;
-
-    const anchorDate = new Date("2026-10-23T00:00:00"); 
-    const targetDate = new Date(year, dateObj.getMonth(), dateObj.getDate());
-    const diffDays = Math.round((targetDate - anchorDate) / (1000 * 60 * 60 * 24));
-    
-    let cycleDay = ((diffDays % 4) + 4) % 4;
-    if (currentGroup === "A") {
-      cycleDay = (cycleDay + 2) % 4;
-    }
-    
-    return {
-      cycleDay: cycleDay,
-      isWorkDay: (cycleDay === 0 || cycleDay === 1), 
-      shiftType: currentType 
-    };
-  }
-
-  function getTaipeiDate() {
-    const now = new Date();
-    const taipeiStr = now.toLocaleString("en-US", { timeZone: "Asia/Taipei" });
-    return new Date(taipeiStr);
-  }
-
-  function formatDateToYYYYMMDD(dateObj) {
-    const year = dateObj.getFullYear();
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const day = String(dateObj.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
-  function findFirstAvailableDate(startDate) {
-    let checkDate = new Date(startDate);
-    for (let i = 0; i < 14; i++) {
-      const dateStr = formatDateToYYYYMMDD(checkDate);
-      if (backendSchedules[dateStr] && backendSchedules[dateStr].status === "開放") {
-        return checkDate;
-      }
-      const shiftInfo = getShiftCycleInfo(checkDate);
-      if (!shiftInfo.isWorkDay && (!backendSchedules[dateStr] || backendSchedules[dateStr].status !== "關閉")) {
-        return checkDate;
-      }
-      checkDate.setDate(checkDate.getDate() + 1);
-    }
-    return startDate;
-  }
-
-  function initFlatpickr() {
-    const taipeiNow = getTaipeiDate();
-    const maxDate = new Date(taipeiNow.getFullYear(), taipeiNow.getMonth() + 2, 0);
-    const defaultAvailableDate = findFirstAvailableDate(taipeiNow);
-
-    pickerInstance = flatpickr("#bookingDate", {
-      locale: "zh",
-      dateFormat: "Y-m-d",
-      minDate: taipeiNow,
-      maxDate: maxDate,
-      defaultDate: defaultAvailableDate,
-      disable: [
-        function(date) {
-          if (adminOverride) return false; 
-          const dateStr = formatDateToYYYYMMDD(date);
-          if (backendSchedules[dateStr]) {
-            if (backendSchedules[dateStr].status === "開放") return false;
-            if (backendSchedules[dateStr].status === "關閉") return true;
-          }
-          const shiftInfo = getShiftCycleInfo(date);
-          return shiftInfo.isWorkDay;
-        }
-      ],
-      onDayCreate: function(dObj, dStr, fp, dayElement) {
-        const dateStr = formatDateToYYYYMMDD(dayElement.dateObj);
-        let isAvailable = false;
-
-        if (backendSchedules[dateStr]) {
-          if (backendSchedules[dateStr].status === "開放") isAvailable = true;
-        } else {
-          const shiftInfo = getShiftCycleInfo(dayElement.dateObj);
-          if (!shiftInfo.isWorkDay) isAvailable = true;
-        }
-
-        if (isAvailable && dayElement.dateObj >= taipeiNow) {
-          const shiftInfo = getShiftCycleInfo(dayElement.dateObj);
-          const availableClassName = (shiftInfo.shiftType === "白班") ? "available-day-yellow" : "available-day-blue";
-          dayElement.classList.add(availableClassName);
-        }
-      },
-      onChange: function() {
-        validateTime();
-      }
-    });
-
-    validateTime();
-  }
-
-  function isTimeBlocked(dateStr, hour, minute) {
-    let candidateMinutes = hour * 60 + minute;
-    for (let b of globalBookings) {
-      if (b.date === dateStr && b.status !== "已取消") {
-        let [bh, bm] = b.time.split(':').map(Number);
-        let bStart = bh * 60 + bm;
-        
-        let isOnlyRemoval = b.items && b.items.includes("需要卸甲") && !b.items.includes("單色款式") && !b.items.includes("跳色") && !b.items.includes("局部造型") && !b.items.includes("十指造型");
-        let lockHours = isOnlyRemoval ? 2 : 5;
-        let bEnd = bStart + lockHours * 60; 
-
-        if (candidateMinutes >= bStart && candidateMinutes < bEnd) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  function validateTime() {
-    const hourSelect = document.getElementById("bookingHour");
-    const minuteSelect = document.getElementById("bookingMinute");
-    const dateInputVal = document.getElementById("bookingDate").value;
-
-    if (!dateInputVal) return;
-
-    const prevHour = hourSelect.value;
-    const prevMinute = minuteSelect.value;
-
-    const scheduleInfo = backendSchedules[dateInputVal];
-    let allowedHours = null;
-    if (scheduleInfo && scheduleInfo.slots) {
-      allowedHours = scheduleInfo.slots.split(',').map(s => s.trim().split(':')[0]);
-    }
-
-    const taipeiNow = getTaipeiDate();
-    const todayStr = formatDateToYYYYMMDD(taipeiNow);
-    const currentHour = taipeiNow.getHours();
-    const currentMinute = taipeiNow.getMinutes();
-    const isToday = (dateInputVal === todayStr);
-
-    hourSelect.innerHTML = "";
-    let validHoursCount = 0;
-    let firstValidHour = null;
-
-    for (let h = 0; h <= 23; h++) {
-      const hStr = String(h).padStart(2, '0');
-      let isDisabled = false;
-
-      if (isToday && h < currentHour) {
-        isDisabled = true;
-      }
-      if (!adminOverride && allowedHours && !allowedHours.includes(hStr)) {
-        isDisabled = true;
-      }
-
-      let availableMinCount = 0;
-      const minutesArr = [0, 15, 30, 45];
-      for (let m of minutesArr) {
-        if (!(isToday && h === currentHour && m <= currentMinute) && !isTimeBlocked(dateInputVal, h, m)) {
-          availableMinCount++;
-        }
-      }
-
-      if (availableMinCount === 0) {
-        isDisabled = true;
-      }
-
-      if (!isDisabled) {
-        validHoursCount++;
-        const opt = document.createElement('option');
-        opt.value = hStr;
-        opt.innerText = `${hStr} 時`;
-        hourSelect.appendChild(opt);
-        if (firstValidHour === null) firstValidHour = hStr;
-      }
-    }
-
-    if (validHoursCount === 0) {
-      hourSelect.innerHTML = `<option value="">今日已無可預約時段</option>`;
-      minuteSelect.innerHTML = `<option value="">無</option>`;
-      return;
-    }
-
-    if (Array.from(hourSelect.options).some(opt => opt.value === prevHour)) {
-      hourSelect.value = prevHour;
-    } else if (firstValidHour !== null) {
-      hourSelect.value = firstValidHour;
-    }
-
-    const selectedHour = parseInt(hourSelect.value, 10);
-    minuteSelect.innerHTML = "";
-    let validMinutesCount = 0;
-    let firstValidMinute = null;
-
-    const minutesArr = [0, 15, 30, 45];
-    for (let m of minutesArr) {
-      const mStr = String(m).padStart(2, '0');
-      let isBlocked = (isToday && selectedHour === currentHour && m <= currentMinute) || isTimeBlocked(dateInputVal, selectedHour, m);
-
-      if (!isBlocked) {
-        validMinutesCount++;
-        const opt = document.createElement('option');
-        opt.value = mStr;
-        opt.innerText = `${mStr} 分`;
-        minuteSelect.appendChild(opt);
-        if (firstValidMinute === null) firstValidMinute = mStr;
-      }
-    }
-
-    if (validMinutesCount === 0) {
-      minuteSelect.innerHTML = `<option value="">無</option>`;
-    } else if (Array.from(minuteSelect.options).some(opt => opt.value === prevMinute)) {
-      minuteSelect.value = prevMinute;
-    } else if (firstValidMinute !== null) {
-      minuteSelect.value = firstValidMinute;
-    }
-
-    onSelectionChange();
-  }
-
-  function setRemoval(status) {
-    needRemoval = status;
-    const yesCard = document.getElementById('removalYesCard');
-    const noCard = document.getElementById('removalNoCard');
-    if (needRemoval) {
-      yesCard.classList.add('active');
-      noCard.classList.remove('active');
-    } else {
-      noCard.classList.add('active');
-      yesCard.classList.remove('active');
-    }
-    onSelectionChange();
-  }
-
-  function toggleOption(id, event) {
-    if (event) event.stopPropagation();
-    const el = document.getElementById(id);
-    if (id === 'jumpColorSection') { 
-      showJumpColor = !showJumpColor; 
-      el.classList.toggle('hidden', !showJumpColor); 
-      document.getElementById('boxJumpColor').classList.toggle('active', showJumpColor);
-      document.getElementById('badgeJumpColor').innerText = showJumpColor ? '已加購 ✔' : '50 元 ➕';
-    }
-    else if (id === 'styleSection') { 
-      showStyle = !showStyle; 
-      el.classList.toggle('hidden', !showStyle); 
-      document.getElementById('boxStyle').classList.toggle('active', showStyle);
-      document.getElementById('badgeStyle').innerText = showStyle ? '已加購 ✔' : '50元起 ➕';
-
-      if (showStyle) {
-        document.getElementById('radioPartial').checked = false;
-        document.getElementById('radioFull').checked = false;
-        document.getElementById('typePartialCard').classList.remove('active');
-        document.getElementById('typeFullCard').classList.remove('active');
-        document.getElementById('partialStyleGroup').classList.add('hidden');
-        document.getElementById('fullStyleGroup').classList.add('hidden');
-        document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
-        document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
-        document.getElementById('customPattern').value = "";
-      }
-    }
-    onSelectionChange();
-  }
-
-  function setStyleType(type) {
-    const partialCard = document.getElementById('typePartialCard');
-    const fullCard = document.getElementById('typeFullCard');
-    const partialGroup = document.getElementById('partialStyleGroup');
-    const fullGroup = document.getElementById('fullStyleGroup');
-
-    if (type === 'partial') {
-      document.getElementById('radioPartial').checked = true;
-      partialCard.classList.add('active');
-      fullCard.classList.remove('active');
-      partialGroup.classList.remove('hidden');
-      fullGroup.classList.add('hidden');
-      document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
-    } else {
-      document.getElementById('radioFull').checked = true;
-      fullCard.classList.add('active');
-      partialCard.classList.remove('active');
-      partialGroup.classList.add('hidden');
-      fullGroup.classList.remove('hidden');
-      document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
-    }
-    
-    const customCb = document.getElementById('customStyleCb');
-    const fullCustomCb = document.getElementById('fullCustomStyleCb');
-    if (!((customCb && customCb.checked) || (fullCustomCb && fullCustomCb.checked))) {
-      document.getElementById('customPattern').value = "";
-    }
-    onSelectionChange();
-  }
-
-  function isValidColorPair(c1, c2) {
-    if (!c1 || !c2) return true;
-    if (c1 === c2) return false;
-    if ((c1 === "藍色" && c2 === "紫色") || (c1 === "紫色" && c2 === "藍色")) return false;
-
-    const greenConflict = ["紅色", "紫色", "粉色"];
-    if (c1 === "綠色" && greenConflict.includes(c2)) return false;
-    if (c2 === "綠色" && greenConflict.includes(c1)) return false;
-
-    const similarGroups = [
-      ["紅色", "粉色"],
-      ["橘色", "黃色"],
-      ["紅咖色", "深咖/可可色", "淺咖色"]
-    ];
-
-    for (let group of similarGroups) {
-      if (group.includes(c1) && group.includes(c2)) return false;
-    }
-    return true;
-  }
-
-  function drawSmartJumpColor(event) {
-    if (event) event.stopPropagation();
-
-    const mainColor = document.getElementById('mainColor').value;
-    const jumpSelect = document.getElementById('jumpColor');
-    let currentExistingColors = [mainColor];
-
-    let validPool = ALL_COLORS.filter(color => {
-      return currentExistingColors.every(existing => isValidColorPair(existing, color));
-    });
-
-    if (validPool.length === 0) {
-      validPool = ALL_COLORS.filter(c => !currentExistingColors.includes(c));
-    }
-
-    if (mainColor && validPool.includes("銀色/白色")) {
-      validPool.push("銀色/白色", "銀色/白色", "銀色/白色", "銀色/白色");
-    }
-
-    const pickedColor = validPool[Math.floor(Math.random() * validPool.length)];
-
-    jumpSelect.value = pickedColor;
-    jumpSelect.classList.remove('flash-highlight');
-    void jumpSelect.offsetWidth;
-    jumpSelect.classList.add('flash-highlight');
-
-    onSelectionChange();
-  }
-
-  function drawMainColor() {
-    const select = document.getElementById('mainColor');
-    const options = select.options;
-    const randomIndex = Math.floor(Math.random() * (options.length - 1)) + 1;
-    select.selectedIndex = randomIndex;
-    
-    select.classList.remove('flash-highlight');
-    void select.offsetWidth;
-    select.classList.add('flash-highlight');
-
-    onMainColorChange();
-  }
-
-  function drawStyle(event) {
-    if (event) event.stopPropagation();
-    if (!showStyle) {
-      showStyle = true;
-      document.getElementById('styleSection').classList.remove('hidden');
-      document.getElementById('boxStyle').classList.add('active');
-      document.getElementById('badgeStyle').innerText = '已加購 ✔';
-    }
-
-    const typeRandom = Math.random() < 0.5 ? 'partial' : 'full';
-    setStyleType(typeRandom);
-
-    if (typeRandom === 'partial') {
-      document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
-      document.getElementById('customPattern').value = "";
-
-      const pool = [
-        { name: "貓眼", weight: 65 }, { name: "暈染", weight: 25 }, { name: "小飾品/貼紙", weight: 2 },
-        { name: "格紋", weight: 1 }, { name: "法式", weight: 1 }, { name: "立體不規則造型", weight: 1 },
-        { name: "漸層", weight: 0.5 }, { name: "海莉款", weight: 0.5 }, { name: "鏡面銀", weight: 0.5 },
-        { name: "指定圖案", weight: 14 }
-      ];
-
-      const countToDraw = Math.floor(Math.random() * 3) + 1;
-      let chosenList = [];
-
-      for (let i = 0; i < countToDraw; i++) {
-        const availablePool = pool.filter(item => !chosenList.includes(item.name));
-        if (availablePool.length === 0) break;
-        const totalWeight = availablePool.reduce((sum, item) => sum + item.weight, 0);
-        let randomNum = Math.random() * totalWeight;
-        for (let item of availablePool) {
-          if (randomNum < item.weight) { chosenList.push(item.name); break; }
-          randomNum -= item.weight;
-        }
-      }
-
-      document.querySelectorAll('input[name="style"]').forEach(cb => {
-        if (chosenList.includes(cb.value)) { cb.checked = true; checkLimit(cb); }
-      });
-
-      const customCb = document.getElementById('customStyleCb');
-      if (customCb && customCb.checked) {
-        const subOptions = ["隨機花花", "隨機蝴蝶結", "隨機星星"];
-        document.getElementById('customPattern').value = subOptions[Math.floor(Math.random() * subOptions.length)];
-      }
-    } else {
-      document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
-      document.getElementById('customPattern').value = "";
-
-      const fullPool = [
-        { name: "貓眼", weight: 65 }, { name: "暈染", weight: 25 }, { name: "小飾品/貼紙", weight: 2 },
-        { name: "格紋", weight: 1 }, { name: "法式", weight: 1 }, { name: "立體不規則造型", weight: 1 },
-        { name: "漸層", weight: 0.5 }, { name: "海莉款", weight: 0.5 }, { name: "鏡面銀", weight: 0.5 },
-        { name: "指定圖案", weight: 14 }
-      ];
-
-      const countToDraw = Math.floor(Math.random() * 3) + 1;
-      let chosenList = [];
-
-      for (let i = 0; i < countToDraw; i++) {
-        const availablePool = fullPool.filter(item => !chosenList.includes(item.name));
-        if (availablePool.length === 0) break;
-        const totalWeight = availablePool.reduce((sum, item) => sum + item.weight, 0);
-        let randomNum = Math.random() * totalWeight;
-        for (let item of availablePool) {
-          if (randomNum < item.weight) { chosenList.push(item.name); break; }
-          randomNum -= item.weight;
-        }
-      }
-
-      document.querySelectorAll('input[name="fullStyle"]').forEach(cb => {
-        if (chosenList.includes(cb.value)) { cb.checked = true; checkFullLimit(cb); }
-      });
-
-      const fullCustomCb = document.getElementById('fullCustomStyleCb');
-      if (fullCustomCb && fullCustomCb.checked) {
-        const subOptions = ["隨機花花", "隨機蝴蝶結", "隨機星星"];
-        document.getElementById('customPattern').value = subOptions[Math.floor(Math.random() * subOptions.length)];
-      }
-    }
-
-    const boxEl = document.getElementById('boxStyle');
-    if (boxEl) {
-      boxEl.classList.remove('flash-highlight');
-      void boxEl.offsetWidth;
-      boxEl.classList.add('flash-highlight');
-    }
-
-    onSelectionChange();
-  }
-
-  function checkLimit(checkbox) {
-    const checkboxes = document.querySelectorAll('input[name="style"]:checked');
-    if (checkboxes.length > 4) {
-      alert("局部造型最多只能勾選 4 個喔！✨");
-      checkbox.checked = false;
-    }
-    const customCb = document.getElementById('customStyleCb');
-    const isCustomActive = (customCb && customCb.checked);
-    document.getElementById('customInputDiv').classList.toggle('hidden', !isCustomActive);
-    if (!isCustomActive) {
-      document.getElementById('customPattern').value = "";
-    }
-    onSelectionChange();
-  }
-
-  function checkFullLimit(checkbox) {
-    const checkboxes = document.querySelectorAll('input[name="fullStyle"]:checked');
-    if (checkboxes.length > 4) {
-      alert("十指造型最多只能勾選 4 項喔！✨");
-      checkbox.checked = false;
-    }
-    const fullCustomCb = document.getElementById('fullCustomStyleCb');
-    const isCustomActive = (fullCustomCb && fullCustomCb.checked);
-    document.getElementById('customInputDiv').classList.toggle('hidden', !isCustomActive);
-    if (!isCustomActive) {
-      document.getElementById('customPattern').value = "";
-    }
-    onSelectionChange();
-  }
-
-  function onMainColorChange() {
-    const mainColorVal = document.getElementById('mainColor').value;
-    const step3 = document.getElementById('step3Section');
-    const step4 = document.getElementById('step4Section');
-
-    if (mainColorVal !== "") {
-      step3.classList.remove('disabled-step');
-      step4.classList.remove('disabled-step');
-    } else {
-      step3.classList.add('disabled-step');
-      step4.classList.add('disabled-step');
-
-      showJumpColor = false;
-      showStyle = false;
-      document.getElementById('jumpColorSection').classList.add('hidden');
-      document.getElementById('styleSection').classList.add('hidden');
-      document.getElementById('boxJumpColor').classList.remove('active');
-      document.getElementById('boxStyle').classList.remove('active');
-      document.getElementById('badgeJumpColor').innerText = '50 元 ➕';
-      document.getElementById('badgeStyle').innerText = '50元起 ➕';
-      document.getElementById('jumpColor').value = "";
-      
-      document.getElementById('radioPartial').checked = false;
-      document.getElementById('radioFull').checked = false;
-      document.getElementById('typePartialCard').classList.remove('active');
-      document.getElementById('typeFullCard').classList.remove('active');
-      document.getElementById('partialStyleGroup').classList.add('hidden');
-      document.getElementById('fullStyleGroup').classList.add('hidden');
-
-      document.querySelectorAll('input[name="style"]').forEach(cb => cb.checked = false);
-      document.querySelectorAll('input[name="fullStyle"]').forEach(cb => cb.checked = false);
-      document.getElementById('customPattern').value = "";
-    }
-    onSelectionChange();
-  }
-
-  function selectToneDot(element, value) {
-    const options = document.querySelectorAll('.tone-option');
-    options.forEach(opt => opt.classList.remove('active'));
-    element.classList.add('active');
-    document.getElementById('selectedTone').value = value;
-  }
-
-  function onSelectionChange() {
-    autoDetermineCatEye();
-    calculateTotal();
-  }
-
-  function autoDetermineCatEye() {
-    const catEyeCb = document.getElementById('catEyeCb');
-    const fullCatEyeCb = document.getElementById('fullCatEyeCb');
-    const catEyeDetailDiv = document.getElementById('catEyeDetailDiv');
-    const catEyeSelect = document.getElementById('catEyeType');
-    
-    const isCatEyeActive = (catEyeCb && catEyeCb.checked) || (fullCatEyeCb && fullCatEyeCb.checked);
-
-    if (!isCatEyeActive || !showStyle) {
-      catEyeDetailDiv.classList.add('hidden');
-      return;
-    }
-    
-    catEyeDetailDiv.classList.remove('hidden');
-
-    const jumpColorVal = document.getElementById('jumpColor').value;
-    const hasJumpColorSelected = showJumpColor && (jumpColorVal !== "");
-
-    if (hasJumpColorSelected) {
-      catEyeSelect.disabled = false;
-      catEyeSelect.style.backgroundColor = "#ffffff";
-      if (catEyeSelect.value !== "雙色貓眼" && catEyeSelect.value !== "指定單色貓眼") {
-        catEyeSelect.value = "雙色貓眼";
-      }
-    } else {
-      catEyeSelect.disabled = true;
-      catEyeSelect.style.backgroundColor = "#f0ebe4";
-      catEyeSelect.value = "指定單色貓眼";
-    }
-  }
-
-  function calculateTotal() {
-    let total = 0;
-    const mainColorVal = document.getElementById('mainColor').value;
-    const isMainColorSelected = mainColorVal !== "";
-    
-    const jumpColorVal = document.getElementById('jumpColor').value;
-    const isJumpSelected = showJumpColor && (jumpColorVal !== "");
-
-    const selectedStyles = showStyle ? document.querySelectorAll('input[name="style"]:checked') : [];
-    const selectedFullStyles = showStyle ? document.querySelectorAll('input[name="fullStyle"]:checked') : [];
-    const currentTypeInput = document.querySelector('input[name="styleType"]:checked');
-    const currentType = currentTypeInput ? currentTypeInput.value : '';
-    
-    const isStyleSelected = showStyle;
-    const hasNailService = isMainColorSelected || isJumpSelected || isStyleSelected;
-
-    if (needRemoval) {
-      total += hasNailService ? 150 : 200;
-    }
-
-    if (isMainColorSelected) total += 700;
-    if (isJumpSelected) total += 50; 
-
-    if (showStyle && currentType) {
-      if (currentType === 'partial') {
-        total += selectedStyles.length * 50;
-        const customCb = document.getElementById('customStyleCb');
-        if (customCb && customCb.checked) total += 30;
-      } else {
-        total += 50;
-        total += selectedFullStyles.length * 50;
-        const fullCustomCb = document.getElementById('fullCustomStyleCb');
-        if (fullCustomCb && fullCustomCb.checked) total += 30;
-      }
-    }
-
-    document.getElementById('totalPrice').innerText = total;
-  }
-
-  function sendBooking() {
-    const customerName = document.getElementById('customerName').value.trim();
-    if (!customerName) {
-      alert("請填寫您的預約暱稱！🤍");
-      return;
-    }
-
-    const bookingDate = document.getElementById('bookingDate').value;
-    if (!bookingDate) {
-      alert("請先選擇預約日期！🗓️");
-      return;
-    }
-
-    const mainColorVal = document.getElementById('mainColor').value;
-    const isMainColorSelected = mainColorVal !== "";
-
-    if (showJumpColor) {
-      const jumpColorVal = document.getElementById('jumpColor').value;
-      if (jumpColorVal === "") {
-        alert("🎨 請選擇跳色色系，或關閉該項目！");
-        return;
-      }
-    }
-
-    if (showStyle) {
-      const currentTypeInput = document.querySelector('input[name="styleType"]:checked');
-      if (!currentTypeInput) {
-        alert("✨ 您開啟了「款式造型」，請先選擇是要【局部造型】還是【十指造型】！");
-        return;
-      }
-
-      const currentType = currentTypeInput.value;
-      const selectedStyles = document.querySelectorAll('input[name="style"]:checked');
-      const selectedFullStyles = document.querySelectorAll('input[name="fullStyle"]:checked');
-
-      if (currentType === 'partial' && selectedStyles.length === 0 && !document.getElementById('customStyleCb').checked) {
-        alert("✨ 請勾選局部造型款式，或關閉該項目！");
-        return;
-      }
-      
-      if (currentType === 'full' && selectedFullStyles.length === 0 && !document.getElementById('fullCustomStyleCb').checked) {
-        alert("✨ 請勾選十指造型款式，或關閉該項目！");
-        return;
-      }
-      
-      const customCb = document.getElementById('customStyleCb');
-      const fullCustomCb = document.getElementById('fullCustomStyleCb');
-      if ((customCb && customCb.checked) || (fullCustomCb && fullCustomCb.checked)) {
-        const customInput = document.getElementById('customPattern');
-        if (!customInput.value.trim()) {
-          alert("✨ 您勾選了指定圖案，請填寫指定圖案細節！");
-          return;
-        }
-      }
-    }
-
-    const hour = document.getElementById('bookingHour').value;
-    const minute = document.getElementById('bookingMinute').value;
-    const bookingTime = `${hour}:${minute}`;
-    const totalPrice = document.getElementById('totalPrice').innerText;
-    
-    let itemsArr = [];
-    if (needRemoval) itemsArr.push("需要卸甲");
-    if (isMainColorSelected) itemsArr.push(`單色款式: ${mainColorVal}`);
-    if (showJumpColor) {
-      const jColor = document.getElementById('jumpColor').value;
-      if (jColor) itemsArr.push(`跳色: ${jColor}`);
-    }
-    if (showStyle) {
-      const currentTypeInput = document.querySelector('input[name="styleType"]:checked');
-      if (currentTypeInput) {
-        const currentType = currentTypeInput.value;
-        const typeName = (currentType === 'full') ? '十指造型' : '局部造型';
-        const styles = Array.from(document.querySelectorAll('input[name="style"]:checked')).map(cb => cb.value);
-        const fullStyles = Array.from(document.querySelectorAll('input[name="fullStyle"]:checked')).map(cb => cb.value);
-        const chosenStyles = (currentType === 'full') ? fullStyles : styles;
-        if (chosenStyles.length > 0) itemsArr.push(`${typeName}: ${chosenStyles.join(', ')}`);
-        
-        const customCb = document.getElementById('customStyleCb');
-        const fullCustomCb = document.getElementById('fullCustomStyleCb');
-        if ((currentType === 'partial' && customCb && customCb.checked) || (currentType === 'full' && fullCustomCb && fullCustomCb.checked)) {
-          itemsArr.push(`指定圖案細節: ${document.getElementById('customPattern').value}`);
-        }
-      }
-    }
-    const tone = document.getElementById('selectedTone').value;
-    itemsArr.push(`色調風格: ${tone}`);
-
-    const bookingData = {
-      bookingId: 'M' + Date.now().toString().slice(-6),
-      customerName: customerName,
-      date: bookingDate,
-      time: bookingTime,
-      items: itemsArr.join(' / '),
-      totalPrice: parseInt(totalPrice, 10)
-    };
-
-    const submitBtn = document.querySelector('.submit-btn');
-    submitBtn.innerText = "預約送出中... ☕";
-    submitBtn.disabled = true;
-
-    fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      body: JSON.stringify(bookingData)
-    })
-    .then(() => {
-      let details = `【美甲服務預約單】🌸\n`;
-      details += `----------------------------\n`;
-      details += `• 預約暱稱：${customerName}\n`;
-      details += `• 預約時間：${bookingDate} ${bookingTime}\n`;
-      if (needRemoval) details += `• 卸甲服務：需要卸甲\n`;
-      if (isMainColorSelected) details += `• 單色款式：${mainColorVal}\n`;
-      if (showJumpColor) {
-        const jColor = document.getElementById('jumpColor').value;
-        if (jColor) details += `• 跳色：${jColor}\n`;
-      }
-      if (showStyle) {
-        const currentTypeInput = document.querySelector('input[name="styleType"]:checked');
-        if (currentTypeInput) {
-          const currentType = currentTypeInput.value;
-          const typeName = (currentType === 'full') ? '十指造型' : '局部造型';
-          const styles = Array.from(document.querySelectorAll('input[name="style"]:checked')).map(cb => cb.value);
-          const fullStyles = Array.from(document.querySelectorAll('input[name="fullStyle"]:checked')).map(cb => cb.value);
-          const chosenStyles = (currentType === 'full') ? fullStyles : styles;
-          details += `• 款式造型：${typeName}\n`;
-          if (chosenStyles.length > 0) details += `  - 項目：${chosenStyles.join(', ')}\n`;
-          const customCb = document.getElementById('customStyleCb');
-          const fullCustomCb = document.getElementById('fullCustomStyleCb');
-          if ((currentType === 'partial' && customCb && customCb.checked) || (currentType === 'full' && fullCustomCb && fullCustomCb.checked)) {
-            details += `  - 指定圖案細節：${document.getElementById('customPattern').value}\n`;
-          }
-        }
-      }
-      details += `• 色調風格：${tone}\n`;
-      details += `----------------------------\n`;
-      details += `預計總金額：NT$ ${totalPrice} 元 🤍`;
-
-      const encodedMessage = encodeURIComponent(details);
-      const lineUrl = `https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodedMessage}`;
-      
-      alert("預約成功！✨");
-      window.location.href = lineUrl;
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert("送出失敗，請再試一次或直接聯繫官方 LINE。");
-      submitBtn.innerText = "送出預約單 (開啟 LINE) ✨";
-      submitBtn.disabled = false;
-    });
-  }
-</script>
+<script>(function(){var t=document.getElementById("totalPrice");if(!t||!window.MutationObserver)return;var b=t.closest(".total-box");new MutationObserver(function(){b.classList.remove("bump");void b.offsetWidth;b.classList.add("bump")}).observe(t,{childList:true,characterData:true,subtree:true})})();</script>
+<!-- ▼▼▼ 請把你原本程式碼裡的整段 <script> ... </script>（從 LINE_OFFICIAL_ACCOUNT_ID 開始的那段）原封不動貼在這裡 ▼▼▼ -->
 
 </body>
 </html>
