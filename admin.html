@@ -164,17 +164,11 @@
       text-align: center;
       transition: all 0.2s;
     }
-    .type-btn.expense {
-      color: #8c827a;
-    }
     .type-btn.expense.active {
       background: #fff2f0;
       color: #cf1322;
       border-color: #ffccc7;
       box-shadow: 0 2px 6px rgba(207, 19, 34, 0.15);
-    }
-    .type-btn.income {
-      color: #8c827a;
     }
     .type-btn.income.active {
       background: #f6ffed;
@@ -183,27 +177,34 @@
       box-shadow: 0 2px 6px rgba(35, 120, 4, 0.15);
     }
 
-    /* 常用項目快捷標籤 */
-    .tag-container {
+    /* 免打字項目點擊按鈕 (Pills) */
+    .item-pill-container {
       display: flex;
       gap: 6px;
       flex-wrap: wrap;
-      margin: 6px 0 8px 0;
+      margin-top: 8px;
+      margin-bottom: 4px;
     }
-    .tag-btn {
-      background: #efece6;
+    .item-pill {
+      background: #fff;
       border: 1px solid var(--border-color);
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
       cursor: pointer;
       color: var(--text-main);
       transition: all 0.2s;
     }
-    .tag-btn:hover {
+    .item-pill:hover {
+      border-color: var(--primary);
+      background: #f2ece4;
+    }
+    .item-pill.active {
       background: var(--primary);
       color: white;
       border-color: var(--primary);
+      font-weight: bold;
+      box-shadow: 0 2px 6px rgba(138, 121, 104, 0.25);
     }
     
     .btn-action {
@@ -417,28 +418,35 @@
   <div id="tab-accounting" class="tab-content">
     <div class="add-section">
       <h3>手動新增收支</h3>
-      <div class="form-row">
-        <input type="date" id="accDate" required>
-        
-        <!-- 🔴🟢 雙色按鈕切換 (取代下拉選單) -->
+      
+      <!-- 1. 選擇收支類型 (雙色按鈕) -->
+      <div class="form-row" style="margin-bottom: 6px;">
         <div class="type-toggle-group">
           <button type="button" id="btnExpense" class="type-btn expense active" onclick="setAccType('支出')">🔴 支出</button>
           <button type="button" id="btnIncome" class="type-btn income" onclick="setAccType('收入')">🟢 收入</button>
         </div>
         <input type="hidden" id="accType" value="支出">
-
-        <input type="text" id="accItem" placeholder="項目說明" required>
-        <input type="number" id="accCost" placeholder="金額 (NT$)" required min="0" value="0">
-        <button class="btn-action" onclick="manualAddAccounting()">新增紀錄</button>
       </div>
 
-      <!-- 快捷點擊標籤 -->
-      <div class="tag-container">
-        <span style="font-size: 11.5px; color: var(--text-muted); align-self: center;">快捷帶入：</span>
-        <button class="tag-btn" onclick="quickSetItem('材料費', '支出')">💅 材料費</button>
-        <button class="tag-btn" onclick="quickSetItem('房租', '支出')">🏠 房租</button>
-        <button class="tag-btn" onclick="quickSetItem('上課費', '支出')">📚 上課費</button>
-        <button class="tag-btn" onclick="quickSetItem('美甲膠', '支出')">🎨 美甲膠</button>
+      <!-- 2. 免打字項目標籤按鈕 (Pills) -->
+      <div style="margin-bottom: 8px;">
+        <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 4px;">點擊下方項目直接帶入（免手動打字）：</div>
+        <div class="item-pill-container">
+          <button type="button" class="item-pill" onclick="selectItem('材料費', '支出', this)">💅 材料費</button>
+          <button type="button" class="item-pill" onclick="selectItem('房租', '支出', this)">🏠 房租</button>
+          <button type="button" class="item-pill" onclick="selectItem('上課費', '支出', this)">📚 上課費</button>
+          <button type="button" class="item-pill" onclick="selectItem('美甲膠', '支出', this)">🎨 美甲膠</button>
+          <button type="button" class="item-pill" onclick="selectItem('其他收入', '收入', this)">✨ 其他收入</button>
+        </div>
+      </div>
+
+      <!-- 3. 日期、項目欄位與金額輸入 -->
+      <div class="form-row">
+        <input type="date" id="accDate" required style="flex: 1;">
+        <!-- 隱藏或保留文字框，點擊上方按鈕會自動填入，也可以手動微調 -->
+        <input type="text" id="accItem" placeholder="點上方按鈕或自行輸入項目" required style="flex: 2;">
+        <input type="number" id="accCost" placeholder="金額 (NT$)" required min="0" value="0" style="flex: 1;">
+        <button class="btn-action" onclick="manualAddAccounting()">新增紀錄</button>
       </div>
     </div>
 
@@ -513,10 +521,14 @@
     }
   }
 
-  // 快捷設置項目名稱與類型
-  function quickSetItem(itemName, typeName) {
+  // 🖱️ 點擊免打字項目按鈕 (自動填入項目 + 自動切換收支顏色 + 按鈕高亮)
+  function selectItem(itemName, typeName, btnElement) {
     document.getElementById('accItem').value = itemName;
     setAccType(typeName);
+
+    // 移除其他按鈕的 active 狀態，並將點擊的按鈕加上 active
+    document.querySelectorAll('.item-pill').forEach(pill => pill.classList.remove('active'));
+    btnElement.classList.add('active');
   }
 
   function fetchData() {
@@ -1063,6 +1075,7 @@
 
     document.getElementById('accItem').value = "";
     document.getElementById('accCost').value = "0";
+    document.querySelectorAll('.item-pill').forEach(pill => pill.classList.remove('active'));
 
     fetch(scriptUrl.replace('?action=api', ''), { 
       method: "POST", 
