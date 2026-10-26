@@ -2,14 +2,15 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>美甲服務預約選單</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=ChenYuluoyan&family=Cinzel:wght@600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/zh.js" crossorigin="anonymous"></script>
 <style>
 :root{color-scheme:light;--ink:#4b4039;--soft:#8a7a6e;--line:#6b5d53;--paper:#fbf8f1;--sage:#8fa595;--blush:#efc4b8;--sand:#ebe2d3}
 *{box-sizing:border-box;font-family:'ChenYuluoyan','PingFang TC','Microsoft JhengHei',sans-serif}
@@ -107,6 +108,7 @@ select,input[type=text],.flatpickr-input{transition:border-color .2s}
 .addon-badge::after{content:"加購";font-size:13px}
 .addon-item-box.active .addon-badge::after{content:"已加購"}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+select:disabled{opacity:.6}
 </style>
 </head>
 <body oncontextmenu="return false;" ondragstart="return false;">
@@ -132,12 +134,8 @@ select,input[type=text],.flatpickr-input{transition:border-color .2s}
   <div class="section">
     <div class="section-title">預約暱稱</div>
     <div style="display:flex;gap:8px">
-      <input type="text" id="customerName" placeholder="請輸入您的預約暱稱" oninput="checkAdminMode(this.value)" style="flex:1">
+      <input type="text" id="customerName" placeholder="請輸入您的預約暱稱" maxlength="30" autocomplete="off" style="flex:1">
       <button type="button" class="draw-btn" onclick="loginWithLine()" style="white-space:nowrap;background:#06c755;color:#fff;border-color:#05a847">連動 LINE 暱稱</button>
-    </div>
-    <div id="adminPanel" class="hidden" style="margin-top:8px;padding:8px;background:#fbf0d8;border-radius:14px 10px 15px 10px;border:1.4px dashed #d3a85a;text-align:center">
-      <span style="font-size:13px;color:#8a6420">管理者模式：</span>
-      <button type="button" onclick="enableAdminOverride()" style="padding:4px 10px;font-size:12.5px;background:#8a6420;color:#fff;border:none;border-radius:10px 8px 11px 8px;cursor:pointer">手動解鎖所有日曆日期 (加班/換班)</button>
     </div>
   </div>
 
@@ -237,7 +235,7 @@ select,input[type=text],.flatpickr-input{transition:border-color .2s}
           <select id="catEyeType"><option value="指定單色貓眼">指定單色貓眼</option><option value="雙色貓眼">雙色貓眼</option></select>
         </div>
         <div id="customInputDiv" class="sub-input hidden">
-          <input type="text" id="customPattern" placeholder="請填寫指定圖案細節 (必填)">
+          <input type="text" id="customPattern" maxlength="60" autocomplete="off" placeholder="請填寫指定圖案細節 (必填)">
         </div>
       </div>
     </div>
@@ -270,7 +268,265 @@ select,input[type=text],.flatpickr-input{transition:border-color .2s}
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>(function(){var t=document.getElementById("totalPrice");if(!t||!window.MutationObserver)return;var b=t.closest(".total-box");new MutationObserver(function(){b.classList.remove("bump");void b.offsetWidth;b.classList.add("bump")}).observe(t,{childList:true,characterData:true,subtree:true})})();</script>
-<!-- ▼▼▼ 請把你原本程式碼裡的整段 <script> ... </script>（從 LINE_OFFICIAL_ACCOUNT_ID 開始的那段）原封不動貼在這裡 ▼▼▼ -->
+<script>
+const LINE_OFFICIAL_ACCOUNT_ID="@344gjuzg";
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
+const LIFF_ID="2011884932-heTsoGVG", CACHE_KEY="nail_app_backend_cache";
+const ALL_COLORS=["紅色","粉色","橘色","黃色","紅咖色","深咖/可可色","淺咖色","綠色","藍色","紫色","黑色","銀色/白色","灰色","金色/香檳色"];
+const $=id=>document.getElementById(id);
+const isObj=v=>v&&typeof v==="object"&&!Array.isArray(v);
+let bGroup="B",bType="夜班",bMonthly={},bSched={},bookings=[],picker=null,showJump=false,showStyle=false,needRemoval=false;
+
+/* 輸入淨化：去控制字元、限長、移除開頭的 = + - @（防 Google Sheets 公式注入） */
+function cleanText(v,max){return String(v||"").replace(/[\u0000-\u001f\u007f]/g,"").trim().slice(0,max).replace(/^[=+\-@]+/,"")}
+function flash(el){el.classList.remove("flash-highlight");void el.offsetWidth;el.classList.add("flash-highlight")}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  const d=new Date().getDate(); if(d>=15&&d<=20)$("frontendReminder").style.display="block";
+  initLiff(); loadCache(); initPicker(); fetchBackend();
+});
+window.addEventListener("pageshow",()=>{const b=document.querySelector(".submit-btn");if(b){b.textContent="送出預約單 (開啟 LINE)";b.disabled=false}});
+
+/* ---------- 後端資料（型別檢查；快取不存預約名單） ---------- */
+function applyData(d){
+  if(!isObj(d))return;
+  if(typeof d.shiftGroup==="string")bGroup=d.shiftGroup;
+  if(typeof d.shiftType==="string")bType=d.shiftType;
+  if(isObj(d.schedules))bSched=d.schedules;
+  if(isObj(d.monthlyShiftTypes))bMonthly=d.monthlyShiftTypes;
+  if(Array.isArray(d.bookings))bookings=d.bookings.filter(isObj);
+}
+function loadCache(){try{const d=JSON.parse(localStorage.getItem(CACHE_KEY)||"null");if(isObj(d)){d.bookings=undefined;applyData(d)}}catch(e){}}
+function saveCache(){try{localStorage.setItem(CACHE_KEY,JSON.stringify({shiftGroup:bGroup,shiftType:bType,schedules:bSched,monthlyShiftTypes:bMonthly}))}catch(e){}}
+async function fetchBackend(){
+  const ac=new AbortController(),to=setTimeout(()=>ac.abort(),10000);
+  try{
+    const r=await fetch(SCRIPT_URL,{mode:"cors",signal:ac.signal});
+    applyData(await r.json()); saveCache();
+    requestAnimationFrame(()=>{if(picker){picker.redraw();validateTime()}});
+  }catch(e){console.warn("背景同步失敗")}finally{clearTimeout(to)}
+}
+
+/* ---------- LINE ---------- */
+async function initLiff(){
+  if(typeof liff==="undefined")return;
+  try{
+    await liff.init({liffId:LIFF_ID});
+    if(liff.isLoggedIn()){const p=await liff.getProfile(),n=$("customerName");n.value=cleanText(p.displayName,30);n.readOnly=true;n.style.background="#f5f2ed"}
+  }catch(e){}
+}
+function loginWithLine(){if(typeof liff!=="undefined"&&!liff.isLoggedIn())liff.login();else alert("目前已在 LINE 環境或已完成登入！")}
+
+/* ---------- 班表 / 日期 ---------- */
+const pad=n=>String(n).padStart(2,"0");
+const fmt=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+function getTaipeiDate(){return new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Taipei"}))}
+function getShiftCycleInfo(d){
+  const mc=bMonthly[`${d.getFullYear()}-${pad(d.getMonth()+1)}`];
+  const group=mc?mc.shiftGroup:bGroup, type=mc?mc.shiftType:bType;
+  const diff=Math.round((new Date(d.getFullYear(),d.getMonth(),d.getDate())-new Date("2026-10-23T00:00:00"))/864e5);
+  let c=((diff%4)+4)%4; if(group==="A")c=(c+2)%4;
+  return{cycleDay:c,isWorkDay:c===0||c===1,shiftType:type};
+}
+function findFirstAvailableDate(start){
+  const c=new Date(start);
+  for(let i=0;i<14;i++){
+    const s=bSched[fmt(c)];
+    if(s&&s.status==="開放")return c;
+    if(!getShiftCycleInfo(c).isWorkDay&&(!s||s.status!=="關閉"))return c;
+    c.setDate(c.getDate()+1);
+  }
+  return start;
+}
+function initPicker(){
+  const now=getTaipeiDate(),max=new Date(now.getFullYear(),now.getMonth()+2,0);
+  picker=flatpickr("#bookingDate",{
+    locale:"zh",dateFormat:"Y-m-d",minDate:now,maxDate:max,defaultDate:findFirstAvailableDate(now),
+    disable:[d=>{const s=bSched[fmt(d)];if(s){if(s.status==="開放")return false;if(s.status==="關閉")return true}return getShiftCycleInfo(d).isWorkDay}],
+    onDayCreate:(a,b,fp,el)=>{
+      const s=bSched[fmt(el.dateObj)],ok=s?s.status==="開放":!getShiftCycleInfo(el.dateObj).isWorkDay;
+      if(ok&&el.dateObj>=now)el.classList.add(getShiftCycleInfo(el.dateObj).shiftType==="白班"?"available-day-yellow":"available-day-blue");
+    },
+    onChange:validateTime
+  });
+  validateTime();
+}
+
+/* ---------- 時間選單 ---------- */
+function isTimeBlocked(ds,h,m){
+  const t=h*60+m;
+  return bookings.some(b=>{
+    if(b.date!==ds||b.status==="已取消"||typeof b.time!=="string")return false;
+    const[bh,bm]=b.time.split(":").map(Number),it=String(b.items||"");
+    const onlyRemoval=it.includes("需要卸甲")&&!["單色款式","跳色","局部造型","十指造型"].some(k=>it.includes(k));
+    const st=bh*60+bm;return t>=st&&t<st+(onlyRemoval?2:5)*60;
+  });
+}
+function setOpts(sel,arr,f){sel.textContent="";arr.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=f(v);sel.appendChild(o)})}
+function validateTime(){
+  const hs=$("bookingHour"),ms=$("bookingMinute"),ds=$("bookingDate").value;if(!ds)return;
+  const pH=hs.value,pM=ms.value,si=bSched[ds];
+  const allowed=si&&typeof si.slots==="string"?si.slots.split(",").map(x=>x.trim().split(":")[0]):null;
+  const now=getTaipeiDate(),isToday=ds===fmt(now),cH=now.getHours(),cM=now.getMinutes(),MINS=[0,15,30,45];
+  const okMin=(h,m)=>!(isToday&&h===cH&&m<=cM)&&!isTimeBlocked(ds,h,m);
+  const hours=[];
+  for(let h=0;h<24;h++){if(isToday&&h<cH)continue;if(allowed&&!allowed.includes(pad(h)))continue;if(!MINS.some(m=>okMin(h,m)))continue;hours.push(pad(h))}
+  if(!hours.length){setOpts(hs,[""],()=>"今日已無可預約時段");setOpts(ms,[""],()=>"無");return}
+  setOpts(hs,hours,v=>v+" 時");hs.value=hours.includes(pH)?pH:hours[0];
+  const mins=MINS.filter(m=>okMin(+hs.value,m)).map(pad);
+  if(!mins.length){setOpts(ms,[""],()=>"無");return}
+  setOpts(ms,mins,v=>v+" 分");ms.value=mins.includes(pM)?pM:mins[0];
+}
+
+/* ---------- 選項互動 ---------- */
+function setRemoval(v){needRemoval=v;$("removalYesCard").classList.toggle("active",v);$("removalNoCard").classList.toggle("active",!v);onSelectionChange()}
+function resetStyleUI(){
+  ["radioPartial","radioFull"].forEach(i=>$(i).checked=false);
+  ["typePartialCard","typeFullCard"].forEach(i=>$(i).classList.remove("active"));
+  ["partialStyleGroup","fullStyleGroup","customInputDiv"].forEach(i=>$(i).classList.add("hidden"));
+  document.querySelectorAll('input[name="style"],input[name="fullStyle"]').forEach(c=>c.checked=false);
+  $("customPattern").value="";
+}
+function toggleOption(id,ev){
+  if(ev)ev.stopPropagation();
+  if(id==="jumpColorSection"){showJump=!showJump;$(id).classList.toggle("hidden",!showJump);$("boxJumpColor").classList.toggle("active",showJump)}
+  else if(id==="styleSection"){showStyle=!showStyle;$(id).classList.toggle("hidden",!showStyle);$("boxStyle").classList.toggle("active",showStyle);if(showStyle)resetStyleUI()}
+  onSelectionChange();
+}
+function setStyleType(t){
+  const p=t==="partial";
+  $("radioPartial").checked=p;$("radioFull").checked=!p;
+  $("typePartialCard").classList.toggle("active",p);$("typeFullCard").classList.toggle("active",!p);
+  $("partialStyleGroup").classList.toggle("hidden",!p);$("fullStyleGroup").classList.toggle("hidden",p);
+  document.querySelectorAll(p?'input[name="fullStyle"]':'input[name="style"]').forEach(c=>c.checked=false);
+  if(!($("customStyleCb").checked||$("fullCustomStyleCb").checked)){$("customPattern").value="";$("customInputDiv").classList.add("hidden")}
+  onSelectionChange();
+}
+function limitCheck(cb,name,cid,label){
+  if(document.querySelectorAll(`input[name="${name}"]:checked`).length>4){alert(label+"最多只能勾選 4 個喔！");cb.checked=false}
+  const on=$(cid).checked;$("customInputDiv").classList.toggle("hidden",!on);if(!on)$("customPattern").value="";
+  onSelectionChange();
+}
+function checkLimit(cb){limitCheck(cb,"style","customStyleCb","局部造型")}
+function checkFullLimit(cb){limitCheck(cb,"fullStyle","fullCustomStyleCb","十指造型")}
+function onMainColorChange(){
+  const on=$("mainColor").value!=="";
+  ["step3Section","step4Section"].forEach(i=>$(i).classList.toggle("disabled-step",!on));
+  if(!on){
+    showJump=false;showStyle=false;
+    ["jumpColorSection","styleSection"].forEach(i=>$(i).classList.add("hidden"));
+    ["boxJumpColor","boxStyle"].forEach(i=>$(i).classList.remove("active"));
+    $("jumpColor").value="";resetStyleUI();
+  }
+  onSelectionChange();
+}
+function selectToneDot(el,v){document.querySelectorAll(".tone-option").forEach(o=>o.classList.remove("active"));el.classList.add("active");$("selectedTone").value=v}
+function onSelectionChange(){autoDetermineCatEye();calculateTotal()}
+function autoDetermineCatEye(){
+  const on=$("catEyeCb").checked||$("fullCatEyeCb").checked,box=$("catEyeDetailDiv"),sel=$("catEyeType");
+  if(!on||!showStyle){box.classList.add("hidden");return}
+  box.classList.remove("hidden");
+  const two=showJump&&$("jumpColor").value!=="";
+  sel.disabled=!two;
+  if(!two)sel.value="指定單色貓眼";else if(!["雙色貓眼","指定單色貓眼"].includes(sel.value))sel.value="雙色貓眼";
+}
+
+/* ---------- 抽選 ---------- */
+function isValidColorPair(a,b){
+  if(!a||!b)return true;if(a===b)return false;
+  if((a==="藍色"&&b==="紫色")||(a==="紫色"&&b==="藍色"))return false;
+  const g=["紅色","紫色","粉色"];
+  if((a==="綠色"&&g.includes(b))||(b==="綠色"&&g.includes(a)))return false;
+  return![["紅色","粉色"],["橘色","黃色"],["紅咖色","深咖/可可色","淺咖色"]].some(x=>x.includes(a)&&x.includes(b));
+}
+function drawSmartJumpColor(ev){
+  if(ev)ev.stopPropagation();
+  const main=$("mainColor").value;
+  let pool=ALL_COLORS.filter(c=>isValidColorPair(main,c));
+  if(!pool.length)pool=ALL_COLORS.filter(c=>c!==main);
+  if(main&&pool.includes("銀色/白色"))pool.push("銀色/白色","銀色/白色","銀色/白色","銀色/白色");
+  const s=$("jumpColor");s.value=pool[Math.floor(Math.random()*pool.length)];flash(s);onSelectionChange();
+}
+function drawMainColor(){const s=$("mainColor");s.selectedIndex=1+Math.floor(Math.random()*(s.options.length-1));flash(s);onMainColorChange()}
+function drawStyle(ev){
+  if(ev)ev.stopPropagation();
+  if(!showStyle){showStyle=true;$("styleSection").classList.remove("hidden");$("boxStyle").classList.add("active")}
+  const t=Math.random()<.5?"partial":"full",name=t==="partial"?"style":"fullStyle";
+  setStyleType(t);
+  const pool=[["貓眼",65],["暈染",25],["小飾品/貼紙",2],["格紋",1],["法式",1],["立體不規則造型",1],["漸層",.5],["海莉款",.5],["鏡面銀",.5],["指定圖案",14]];
+  const n=1+Math.floor(Math.random()*3),chosen=[];
+  for(let i=0;i<n;i++){
+    const av=pool.filter(x=>!chosen.includes(x[0]));if(!av.length)break;
+    let r=Math.random()*av.reduce((a,x)=>a+x[1],0);
+    for(const x of av){if(r<x[1]){chosen.push(x[0]);break}r-=x[1]}
+  }
+  document.querySelectorAll(`input[name="${name}"]`).forEach(cb=>{if(chosen.includes(cb.value)){cb.checked=true;limitCheck(cb,name,t==="partial"?"customStyleCb":"fullCustomStyleCb",t==="partial"?"局部造型":"十指造型")}});
+  if($(t==="partial"?"customStyleCb":"fullCustomStyleCb").checked){const o=["隨機花花","隨機蝴蝶結","隨機星星"];$("customPattern").value=o[Math.floor(Math.random()*o.length)]}
+  flash($("boxStyle"));onSelectionChange();
+}
+
+/* ---------- 金額（僅供顯示；實際金額必須由後端重算） ---------- */
+function calculateTotal(){
+  let t=0;const main=$("mainColor").value!=="",jump=showJump&&$("jumpColor").value!=="";
+  const ti=document.querySelector('input[name="styleType"]:checked'),type=ti?ti.value:"";
+  if(needRemoval)t+=(main||jump||showStyle)?150:200;
+  if(main)t+=700;if(jump)t+=50;
+  if(showStyle&&type){
+    const n=document.querySelectorAll(`input[name="${type==="partial"?"style":"fullStyle"}"]:checked`).length;
+    if(type==="partial"){t+=n*50;if($("customStyleCb").checked)t+=30}else{t+=50+n*50;if($("fullCustomStyleCb").checked)t+=30}
+  }
+  $("totalPrice").textContent=t;
+}
+
+/* ---------- 送出 ---------- */
+async function sendBooking(){
+  const btn=document.querySelector(".submit-btn");if(btn.disabled)return;
+  const name=cleanText($("customerName").value,30);if(!name){alert("請填寫您的預約暱稱！");return}
+  const date=$("bookingDate").value;if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){alert("請先選擇預約日期！");return}
+  const h=$("bookingHour").value,m=$("bookingMinute").value;
+  if(!h||!m){alert("此日期已無可預約時段，請改選其他日期！");return}
+  if(isTimeBlocked(date,+h,+m)){alert("此時段剛被預約了，請重新選擇時間！");validateTime();return}
+  const main=$("mainColor").value,jump=$("jumpColor").value;
+  if(showJump&&!jump){alert("請選擇跳色色系，或關閉該項目！");return}
+  let type="",chosen=[],custom="";
+  if(showStyle){
+    const ti=document.querySelector('input[name="styleType"]:checked');
+    if(!ti){alert("您開啟了「款式造型」，請先選擇是要【局部造型】還是【十指造型】！");return}
+    type=ti.value;
+    chosen=[...document.querySelectorAll(`input[name="${type==="full"?"fullStyle":"style"}"]:checked`)].map(c=>c.value);
+    const hasCustom=$(type==="full"?"fullCustomStyleCb":"customStyleCb").checked;
+    if(!chosen.length&&!hasCustom){alert("請勾選"+(type==="full"?"十指":"局部")+"造型款式，或關閉該項目！");return}
+    if(hasCustom){custom=cleanText($("customPattern").value,60);if(!custom){alert("您勾選了指定圖案，請填寫指定圖案細節！");return}}
+  }
+  const tone=$("selectedTone").value,tName=type==="full"?"十指造型":"局部造型",items=[],lines=[`• 預約暱稱：${name}`,`• 預約時間：${date} ${h}:${m}`];
+  if(needRemoval){items.push("需要卸甲");lines.push("• 卸甲服務：需要卸甲")}
+  if(main){items.push(`單色款式: ${main}`);lines.push(`• 單色款式：${main}`)}
+  if(showJump&&jump){items.push(`跳色: ${jump}`);lines.push(`• 跳色：${jump}`)}
+  if(type){
+    if(chosen.length)items.push(`${tName}: ${chosen.join(", ")}`);
+    if(custom)items.push(`指定圖案細節: ${custom}`);
+    lines.push(`• 款式造型：${tName}`);
+    if(chosen.length)lines.push(`  - 項目：${chosen.join(", ")}`);
+    if(custom)lines.push(`  - 指定圖案細節：${custom}`);
+  }
+  items.push(`色調風格: ${tone}`);lines.push(`• 色調風格：${tone}`);
+  const total=parseInt($("totalPrice").textContent,10)||0;
+  const data={bookingId:"M"+Array.from(crypto.getRandomValues(new Uint8Array(4)),b=>pad(b.toString(16))).join(""),customerName:name,date,time:`${h}:${m}`,items:items.join(" / "),totalPrice:total};
+  try{if(typeof liff!=="undefined"&&liff.isLoggedIn())data.idToken=liff.getIDToken()||""}catch(e){}
+  btn.textContent="預約送出中...";btn.disabled=true;
+  const ac=new AbortController(),to=setTimeout(()=>ac.abort(),15000);
+  try{
+    await fetch(SCRIPT_URL,{method:"POST",mode:"no-cors",body:JSON.stringify(data),signal:ac.signal});
+    clearTimeout(to);
+    const msg=`【美甲服務預約單】\n----------------------------\n${lines.join("\n")}\n----------------------------\n預計總金額：NT$ ${total} 元`;
+    alert("預約成功！");
+    location.href=`https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodeURIComponent(msg)}`;
+  }catch(e){
+    clearTimeout(to);alert("送出失敗，請再試一次或直接聯繫官方 LINE。");
+    btn.textContent="送出預約單 (開啟 LINE)";btn.disabled=false;
+  }
+}
+</script>
 
 </body>
 </html>
