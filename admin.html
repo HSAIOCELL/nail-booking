@@ -145,6 +145,29 @@
       color: var(--text-main);
       outline: none;
     }
+
+    /* 常用項目快捷標籤 */
+    .tag-container {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin: 6px 0 8px 0;
+    }
+    .tag-btn {
+      background: #efece6;
+      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--text-main);
+      transition: all 0.2s;
+    }
+    .tag-btn:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
     
     .btn-action {
       background: var(--primary);
@@ -185,6 +208,16 @@
       font-weight: 500;
       margin-bottom: 10px;
       width: 100%;
+    }
+
+    /* 行內編輯輸入框樣式 */
+    .inline-input {
+      width: 100%;
+      padding: 4px 6px;
+      font-size: 12px;
+      border: 1px solid var(--primary);
+      border-radius: 4px;
+      box-sizing: border-box;
     }
 
     .flatpickr-calendar { background: #faf8f5 !important; border: 1px solid #e2dad1 !important; box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important; border-radius: 12px !important; margin: 0 auto; }
@@ -358,14 +391,22 @@
           <option value="支出">🔴 支出</option>
           <option value="收入">🟢 收入</option>
         </select>
-        <input type="text" id="accItem" placeholder="項目說明 (例: 房租/材料費/其他收入)" required>
+        <input type="text" id="accItem" placeholder="項目說明" required>
         <input type="number" id="accCost" placeholder="金額 (NT$)" required min="0" value="0">
         <button class="btn-action" onclick="manualAddAccounting()">新增紀錄</button>
+      </div>
+      <!-- 快捷點擊標籤 -->
+      <div class="tag-container">
+        <span style="font-size: 11.5px; color: var(--text-muted); align-self: center;">快捷帶入：</span>
+        <button class="tag-btn" onclick="quickSetItem('材料費', '支出')">💅 材料費</button>
+        <button class="tag-btn" onclick="quickSetItem('房租', '支出')">🏠 房租</button>
+        <button class="tag-btn" onclick="quickSetItem('上課費', '支出')">📚 上課費</button>
+        <button class="tag-btn" onclick="quickSetItem('美甲膠', '支出')">🎨 美甲膠</button>
       </div>
     </div>
 
     <div class="add-section" style="background: #ffffff; padding: 10px 0;">
-      <div style="padding: 0 10px 8px 10px; font-weight: bold; font-size: 13.5px; color: var(--primary-dark);">📊 記帳永久留存紀錄 (收入與支出)</div>
+      <div style="padding: 0 10px 8px 10px; font-weight: bold; font-size: 13.5px; color: var(--primary-dark);">📊 記帳永久留存紀錄</div>
       <div class="table-wrapper">
         <table>
           <thead>
@@ -421,6 +462,12 @@
     document.getElementById(tabId).classList.add('active');
   }
 
+  // 快捷設置項目名稱與類型
+  function quickSetItem(itemName, typeName) {
+    document.getElementById('accItem').value = itemName;
+    document.getElementById('accType').value = typeName;
+  }
+
   function fetchData() {
     const tableBody = document.getElementById('bookingTableBody');
     const accTableBody = document.getElementById('accountingTableBody');
@@ -452,7 +499,7 @@
       showPreviewCalendar(activePreviewYM);
     }
 
-    // 1. 渲染客戶預約紀錄
+    // 1. 渲染預約紀錄
     const tableBody = document.getElementById('bookingTableBody');
     if (globalBookings.length === 0) {
       tableBody.innerHTML = `<tr><td colspan="8" class="loading">目前沒有預約資料</td></tr>`;
@@ -480,28 +527,29 @@
         let displayStatus = (status === "已完成" || isAutoCompleted) ? "已完成" : "預約中";
 
         const tr = document.createElement('tr');
+        tr.id = `booking-row-${originalId}`;
         tr.innerHTML = `
           <td>${displayId}</td>
           <td>${customerName}</td>
           <td>${date}</td>
           <td>${time}</td>
           <td>${items}</td>
-          <td>
-            NT$ <span id="price-text-${originalId}">${price}</span>
-            <button class="btn-action" style="padding: 2px 6px; font-size: 11px; background: var(--primary); margin-left: 4px;" onclick="editBookingPrice('${originalId}', ${price})">✏️</button>
-          </td>
+          <td>NT$ <span>${price}</span></td>
           <td>
             <span style="cursor: pointer; padding: 3px 8px; background: ${displayStatus === '已完成' ? '#e5ece9' : '#fdf6e2'}; border-radius: 6px; font-weight: bold;" onclick="toggleStatus('${originalId}')">
               ${displayStatus}${isAutoCompleted ? ' (自動)' : ''}
             </span>
           </td>
-          <td><button class="btn-action" style="padding: 4px 8px; font-size: 11.5px; background: #cf1322;" onclick="cancelBooking('${originalId}')">刪除</button></td>
+          <td>
+            <button class="btn-action" style="padding: 3px 6px; font-size: 11px;" onclick="enableBookingInlineEdit('${originalId}', ${price})">✏️</button>
+            <button class="btn-action" style="padding: 3px 6px; font-size: 11px; background: #cf1322;" onclick="cancelBooking('${originalId}')">刪除</button>
+          </td>
         `;
         tableBody.appendChild(tr);
       });
     }
 
-    // 2. 渲染記帳紀錄 (支援收入/支出與修改)
+    // 2. 渲染記帳紀錄 (行內編輯)
     const accTableBody = document.getElementById('accountingTableBody');
     if (globalAccounting.length === 0) {
       accTableBody.innerHTML = `<tr><td colspan="6" class="loading">尚無記帳紀錄</td></tr>`;
@@ -511,16 +559,17 @@
         const typeColor = acc.type === '收入' ? '#237804' : '#cf1322';
         const typeBg = acc.type === '收入' ? '#f6ffed' : '#fff2f0';
         const tr = document.createElement('tr');
+        tr.id = `acc-row-${acc.id}`;
         tr.innerHTML = `
           <td>${String(index + 1).padStart(3, '0')}</td>
           <td>${acc.date}</td>
           <td><span style="padding: 2px 6px; background: ${typeBg}; color: ${typeColor}; border-radius: 4px; font-weight: bold;">${acc.type || '支出'}</span></td>
           <td>${acc.item}</td>
+          <td>NT$ ${acc.amount}</td>
           <td>
-            NT$ <span id="acc-amount-${acc.id}">${acc.amount}</span>
-            <button class="btn-action" style="padding: 2px 6px; font-size: 11px; background: var(--primary); margin-left: 4px;" onclick="editAccountingRecord('${acc.id}', '${acc.date}', '${acc.type || '支出'}', '${acc.item}', ${acc.amount})">✏️</button>
+            <button class="btn-action" style="padding: 3px 6px; font-size: 11px;" onclick="enableAccInlineEdit('${acc.id}')">✏️</button>
+            <button class="btn-action" style="padding: 3px 6px; font-size: 11px; background: #cf1322;" onclick="deleteAccounting('${acc.id}')">刪除</button>
           </td>
-          <td><button class="btn-action" style="padding: 4px 8px; font-size: 11.5px; background: #cf1322;" onclick="deleteAccounting('${acc.id}')">刪除</button></td>
         `;
         accTableBody.appendChild(tr);
       });
@@ -529,62 +578,64 @@
     calculateFinanceAndRender();
   }
 
-  // 💡 修改預約金額
-  async function editBookingPrice(bookingId, currentPrice) {
-    const input = prompt(`請輸入預約單 [${bookingId}] 的新金額：`, currentPrice);
-    if (input === null) return;
+  /* ⚡ 預約金額 - 行內直接編輯 */
+  function enableBookingInlineEdit(bookingId, currentPrice) {
+    const tr = document.getElementById(`booking-row-${bookingId}`);
+    if (!tr) return;
+    const priceCell = tr.children[5];
 
-    const newPrice = parseInt(input.trim(), 10);
-    if (isNaN(newPrice) || newPrice < 0) {
-      alert("❌ 請輸入有效的金額數字！");
-      return;
-    }
-
-    if (newPrice === currentPrice) return;
-
-    const booking = globalBookings.find(b => (b.bookingId || '') === String(bookingId));
-    if (booking) {
-      booking.totalPrice = newPrice;
-      renderAllTables();
-    }
-
-    try {
-      await fetch(scriptUrl.replace('?action=api', ''), {
-        method: "POST",
-        mode: "no-cors",
-        body: JSON.stringify({
-          action: "updatePrice",
-          bookingId: bookingId,
-          newPrice: newPrice
-        })
-      });
-      alert(`✅ 預約單金額已成功更新為 NT$ ${newPrice} 元！`);
-    } catch (err) {
-      console.error("修改金額失敗", err);
-      alert("❌ 修改金額失敗，請稍後再試！");
-    }
+    priceCell.innerHTML = `NT$ <input type="number" id="inline-price-${bookingId}" class="inline-input" style="width: 70px;" value="${currentPrice}">`;
+    tr.children[7].innerHTML = `
+      <button class="btn-action" style="padding: 3px 6px; font-size: 11px; background: var(--accent-green);" onclick="saveBookingInlinePrice('${bookingId}')">💾</button>
+      <button class="btn-action" style="padding: 3px 6px; font-size: 11px; background: var(--text-muted);" onclick="renderAllTables()">✕</button>
+    `;
   }
 
-  // 💡 修改記帳紀錄 (收入/支出、日期、項目、金額)
-  async function editAccountingRecord(id, oldDate, oldType, oldItem, oldAmount) {
-    const newDate = prompt("修改日期 (YYYY-MM-DD)：", oldDate);
-    if (newDate === null) return;
-    const newType = prompt("修改類型 (請輸入「收入」或「支出」)：", oldType);
-    if (newType === null) return;
-    if (newType !== "收入" && newType !== "支出") {
-      alert("❌ 類型只能是「收入」或「支出」！");
-      return;
-    }
-    const newItem = prompt("修改項目說明：", oldItem);
-    if (newItem === null) return;
-    const newAmountInput = prompt("修改金額：", oldAmount);
-    if (newAmountInput === null) return;
+  function saveBookingInlinePrice(bookingId) {
+    const newPrice = parseInt(document.getElementById(`inline-price-${bookingId}`).value, 10);
+    if (isNaN(newPrice) || newPrice < 0) return;
+
+    const booking = globalBookings.find(b => (b.bookingId || '') === String(bookingId));
+    if (booking) booking.totalPrice = newPrice;
     
-    const newAmount = parseInt(newAmountInput.trim(), 10);
-    if (isNaN(newAmount) || newAmount < 0) {
-      alert("❌ 請輸入有效的金額數字！");
-      return;
-    }
+    renderAllTables();
+
+    fetch(scriptUrl.replace('?action=api', ''), {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify({ action: "updatePrice", bookingId, newPrice })
+    });
+  }
+
+  /* ⚡ 記帳紀錄 - 行內直接編輯 */
+  function enableAccInlineEdit(id) {
+    const acc = globalAccounting.find(a => a.id === String(id));
+    if (!acc) return;
+    const tr = document.getElementById(`acc-row-${id}`);
+
+    tr.children[1].innerHTML = `<input type="date" id="inline-date-${id}" class="inline-input" value="${acc.date}">`;
+    tr.children[2].innerHTML = `
+      <select id="inline-type-${id}" class="inline-input">
+        <option value="支出" ${acc.type === '支出' ? 'selected' : ''}>支出</option>
+        <option value="收入" ${acc.type === '收入' ? 'selected' : ''}>收入</option>
+      </select>
+    `;
+    tr.children[3].innerHTML = `<input type="text" id="inline-item-${id}" class="inline-input" value="${acc.item}">`;
+    tr.children[4].innerHTML = `<input type="number" id="inline-amt-${id}" class="inline-input" style="width: 70px;" value="${acc.amount}">`;
+
+    tr.children[5].innerHTML = `
+      <button class="btn-action" style="padding: 3px 6px; font-size: 11px; background: var(--accent-green);" onclick="saveAccInlineEdit('${id}')">💾</button>
+      <button class="btn-action" style="padding: 3px 6px; font-size: 11px; background: var(--text-muted);" onclick="renderAllTables()">✕</button>
+    `;
+  }
+
+  function saveAccInlineEdit(id) {
+    const newDate = document.getElementById(`inline-date-${id}`).value;
+    const newType = document.getElementById(`inline-type-${id}`).value;
+    const newItem = document.getElementById(`inline-item-${id}`).value;
+    const newAmount = parseInt(document.getElementById(`inline-amt-${id}`).value, 10);
+
+    if (!newDate || !newItem || isNaN(newAmount)) return;
 
     const acc = globalAccounting.find(a => a.id === String(id));
     if (acc) {
@@ -592,27 +643,15 @@
       acc.type = newType;
       acc.item = newItem;
       acc.amount = newAmount;
-      renderAllTables();
     }
 
-    try {
-      await fetch(scriptUrl.replace('?action=api', ''), {
-        method: "POST",
-        mode: "no-cors",
-        body: JSON.stringify({
-          action: "updateAccounting",
-          id: id,
-          date: newDate,
-          type: newType,
-          item: newItem,
-          amount: newAmount
-        })
-      });
-      alert("✅ 記帳紀錄已成功更新！");
-    } catch (err) {
-      console.error("修改記帳失敗", err);
-      alert("❌ 修改記帳失敗，請稍後再試！");
-    }
+    renderAllTables();
+
+    fetch(scriptUrl.replace('?action=api', ''), {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify({ action: "updateAccounting", id, date: newDate, type: newType, item: newItem, amount: newAmount })
+    });
   }
 
   // ⚡ 點擊即時切換狀態
@@ -655,7 +694,6 @@
     let totalRev = 0, totalCost = 0;
     const now = new Date();
 
-    // 1. 計算預約營收與成本
     globalBookings.forEach(row => {
       if (row.status !== "已取消") {
         let isAutoCompleted = false;
@@ -670,13 +708,12 @@
       }
     });
 
-    // 2. 計算手動記帳的收入與支出
     globalAccounting.forEach(acc => {
       const amt = Number(acc.amount) || 0;
       if (acc.type === "收入") {
         totalRev += amt;
       } else {
-        totalCost += amt; // 預設支出
+        totalCost += amt;
       }
     });
 
@@ -906,7 +943,6 @@
             if (currentChartType === 'revenue') {
               if (acc.type === '收入') monthlyData[monthIdx] += amt;
             } else {
-              // 淨利 = 營收 - 支出 + 記帳收入 - 記帳支出
               if (acc.type === '收入') monthlyData[monthIdx] += amt;
               else monthlyData[monthIdx] -= amt;
             }
