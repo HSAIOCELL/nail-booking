@@ -133,7 +133,9 @@ details.box[open] summary{margin-bottom:12px}
 .hist small{display:block;margin-top:2px;color:var(--soft)}
 .flatpickr-calendar{background:var(--paper)!important;border:1.6px solid var(--line)!important;box-shadow:3px 4px 0 var(--sand)!important;border-radius:20px 16px 22px 14px!important;margin:6px auto 0;width:100%!important;max-width:340px}
 .flatpickr-calendar.inline .dayContainer,.flatpickr-calendar .flatpickr-innerContainer,.flatpickr-calendar .flatpickr-rContainer,.flatpickr-days{width:100%!important;min-width:0!important;max-width:none!important}
-.flatpickr-day{max-width:none!important;height:40px!important;line-height:40px!important}
+.flatpickr-calendar .dayContainer{display:grid!important;grid-template-columns:repeat(7,1fr);gap:3px 0;padding:2px 4px 6px;justify-items:center}
+.flatpickr-calendar .flatpickr-weekdays{width:100%!important}
+.flatpickr-day{width:min(40px,100%)!important;max-width:none!important;flex-basis:auto!important;height:auto!important;aspect-ratio:1/1;line-height:1!important;margin:0!important;display:flex!important;align-items:center;justify-content:center;border-radius:50%!important}
 .flatpickr-day.ya{background:#fbefcf!important;color:#9a6d1c!important;border:1.4px solid #e6c47a!important;border-radius:50%!important}
 .flatpickr-day.yb{background:var(--blue-bg)!important;color:var(--blue-ink)!important;border:1.4px solid var(--blue-line)!important;border-radius:50%!important}
 .flatpickr-day.ov-o{box-shadow:inset 0 0 0 2px var(--blue)!important;border-radius:50%!important}
@@ -269,12 +271,14 @@ details.box[open] summary{margin-bottom:12px}
         <button class="btn full" type="button" onclick="manualAddBooking()">新增預約</button>
       </div>
     </details>
-    <div class="step" style="margin:0 2px 12px">
+    <div class="sg" style="margin-bottom:10px"><button type="button" id="bkM" class="on" data-a="bkall" data-id="0">按月份看</button><button type="button" id="bkA" data-a="bkall" data-id="1">看全部</button></div>
+    <div class="step" id="bkStep" style="margin:0 2px 12px">
       <button class="ib" type="button" data-a="ym" data-id="bk" data-d="-1" aria-label="上個月"><svg class="ic"><use href="#i-l"/></svg></button>
       <b id="lbl-bk"></b>
       <button class="ib" type="button" data-a="ym" data-id="bk" data-d="1" aria-label="下個月"><svg class="ic"><use href="#i-r"/></svg></button>
     </div>
     <div id="bookingList"></div>
+    <div class="muted" id="bkInfo" style="text-align:center;margin-bottom:10px"></div>
     <div style="text-align:center"><button class="btn alt" type="button" onclick="fetchData()"><svg class="ic"><use href="#i-refresh"/></svg>重新整理</button></div>
   </section>
 
@@ -351,6 +355,7 @@ const ymLabel=ym=>{const[y,m]=ym.split("-");return`${y} 年 ${+m} 月`};
 const WD=["日","一","二","三","四","五","六"];
 
 let B=[],A=[],F=[],S={},M={},ANCHOR="2026-10-23",chart=null,picker=null,ovPicker=null,MS={};
+let bkAll=false,firstLoad=true;
 let selYM=curYM,accYM=curYM,bkYM=curYM,cmode="revenue",accType="支出",ovDate="",ovStatus="開放";
 let shYM=ymd(new Date()).slice(8)>="12"?shiftYM(curYM,1):curYM,shGroup="B",shType="夜班";
 const CHIPS={"支出":["材料費","房租","上課費","美甲膠","訂閱費"],"收入":["美甲收入","卸甲收入"]};
@@ -409,7 +414,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
 function onClick(e){
   const el=e.target.closest("[data-a]");if(!el)return;
   const f={toggle:toggleStatus,bedit:editBooking,bsave:saveBooking,bcancel:cancelBooking,rerender:renderAll,aedit:editAcc,asave:saveAcc,adel:delAcc,sdel:delOverride,
-    fedit:editFixed,fsave:saveFixed,fdel:delFixed,hist:id=>{shYM=id;syncShift()},ym:(id)=>stepYM(id,+el.dataset.d),cm:setChartMode,acct:setAccType,
+    fedit:editFixed,fsave:saveFixed,fdel:delFixed,hist:id=>{shYM=id;syncShift()},ym:(id)=>stepYM(id,+el.dataset.d),bkall:id=>{bkAll=id==="1";renderBookings()},cm:setChartMode,acct:setAccType,
     chip:pickChip,fxchip:id=>{$("fxItem").value=id},shg:id=>{shGroup=id;syncShift(true)},sht:id=>{shType=id;syncShift(true)},ovs:id=>{ovStatus=id;syncOv()}}[el.dataset.a];
   if(f)f(el.dataset.id);
 }
@@ -434,6 +439,8 @@ async function fetchData(){
   B=r.bookings||[];A=r.accountingRecords||[];F=r.fixedExpenses||[];S=r.schedules||{};M=r.monthlyShiftTypes||{};
   if(/^\d{4}-\d{2}-\d{2}$/.test(r.anchorDate))ANCHOR=r.anchorDate;
   if(M[shYM]){shGroup=M[shYM].shiftGroup;shType=M[shYM].shiftType}
+  if(firstLoad){firstLoad=false;const ds=B.filter(b=>b.status!=="已取消"&&b.date).map(b=>b.date.slice(0,7));
+    if(ds.length&&!ds.includes(bkYM))bkYM=ds.sort((a,b)=>Math.abs(+a.replace("-","")-+curYM.replace("-",""))-Math.abs(+b.replace("-","")-+curYM.replace("-","")))[0]}
   syncShift();renderAll();if(ovPicker)ovPicker.redraw();
 }
 const isPast=(r,now)=>r.status==="預約中"&&r.date&&r.time&&new Date(`${r.date}T${r.time}`)<now;
@@ -502,11 +509,14 @@ function drawChart(){
 /* ---------- 預約 ---------- */
 function renderBookings(){
   labels();const now=new Date();
-  const list=B.filter(r=>r.status!=="已取消"&&r.date&&r.date.slice(0,7)===bkYM).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
+  $("bkM").classList.toggle("on",!bkAll);$("bkA").classList.toggle("on",bkAll);$("bkStep").hidden=bkAll;
+  const live=B.filter(r=>r.status!=="已取消");
+  const list=(bkAll?live:live.filter(r=>r.date&&r.date.slice(0,7)===bkYM)).sort((a,b)=>((b.date||"")+(b.time||"")).localeCompare((a.date||"")+(a.time||"")));
   $("bookingList").innerHTML=list.length?list.map(r=>{
     const dn=r.status==="已完成"||isPast(r,now),id=esc(r.bookingId);
-    return`<div class="bk" id="b-${id}"><div class="bk-top"><b>${esc(r.customerName)}</b><span class="st ${dn?"done":"wait"}" data-a="toggle" data-id="${id}">${dn?"已完成":"預約中"}</span></div><div class="bk-m">${esc(r.date)}　${esc(r.time)}</div><div class="bk-i">${esc(r.items)}</div><div class="bk-bot"><span class="pr">${money(+r.totalPrice||0)}</span><span class="act">${ib("bedit",id,"pencil","改金額")}${ib("bcancel",id,"trash","刪除","danger")}</span></div></div>`;
-  }).join(""):'<div class="empty">這個月沒有預約</div>';
+    return`<div class="bk" id="b-${id}"><div class="bk-top"><b>${esc(r.customerName||"（未填名稱）")}</b><span class="st ${dn?"done":"wait"}" data-a="toggle" data-id="${id}">${dn?"已完成":"預約中"}</span></div><div class="bk-m">${esc(r.date||"日期不明")}　${esc(r.time)}</div><div class="bk-i">${esc(r.items)}</div><div class="bk-bot"><span class="pr">${money(+r.totalPrice||0)}</span><span class="act">${ib("bedit",id,"pencil","改金額")}${ib("bcancel",id,"trash","刪除","danger")}</span></div></div>`;
+  }).join(""):`<div class="empty">${B.length?"這個月沒有預約，可以按「看全部」或切換月份":"後台沒有讀到任何預約資料"}</div>`;
+  $("bkInfo").textContent=`目前共讀到 ${live.length} 筆預約${B.length-live.length?`（另有 ${B.length-live.length} 筆已取消）`:""}`;
 }
 function toggleStatus(id){const b=B.find(x=>x.bookingId===id);if(!b)return;b.status=b.status==="已完成"?"預約中":"已完成";renderAll();bg({action:"update",bookingId:id,status:b.status})}
 async function cancelBooking(id){if(!await ask("確定要刪除這筆預約嗎？"))return;B=B.filter(x=>x.bookingId!==id);renderAll();bg({action:"update",bookingId:id,status:"已取消"})}
