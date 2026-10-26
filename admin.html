@@ -1,1089 +1,376 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>後台管理儀表板</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
-  <style>
-    :root {
-      --bg-color: #f4f2ee;
-      --card-bg: #ffffff;
-      --primary: #8a7968;
-      --primary-dark: #6e5f50;
-      --accent-green: #738276;
-      --accent-sand: #d4c5b9;
-      --text-main: #4a4541;
-      --text-muted: #8c827a;
-      --border-color: #e6e0d8;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg-color);
-      margin: 0;
-      padding: 10px;
-      color: var(--text-main);
-    }
-
-    .container {
-      max-width: 1050px;
-      margin: 0 auto;
-      background: var(--card-bg);
-      padding: 16px 12px;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(138, 121, 104, 0.06);
-      border: 1px solid var(--border-color);
-    }
-
-    h2 {
-      text-align: center;
-      color: var(--primary-dark);
-      font-weight: 600;
-      letter-spacing: 1px;
-      margin: 0 0 14px 0;
-      font-size: 19px;
-    }
-
-    .tab-nav {
-      display: flex;
-      gap: 4px;
-      overflow-x: auto;
-      padding-bottom: 6px;
-      margin-bottom: 15px;
-      border-bottom: 1.5px solid var(--border-color);
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 8px 10px;
-      background: #eee8e0;
-      color: var(--text-muted);
-      border: none;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: bold;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s ease;
-      text-align: center;
-    }
-
-    .tab-btn.active {
-      background: var(--primary);
-      color: #ffffff;
-      box-shadow: 0 2px 8px rgba(138, 121, 104, 0.25);
-    }
-
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    .stats-container {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .stat-card {
-      background: #f7f5f0;
-      padding: 12px 6px;
-      border-radius: 12px;
-      text-align: center;
-      border: 1px solid var(--border-color);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .stat-card:hover { border-color: var(--primary); background: #f2ece4; }
-    .stat-card h3 { margin: 0 0 4px 0; font-size: 11.5px; color: var(--text-muted); font-weight: normal; }
-    .stat-card p { margin: 0; font-size: 15px; font-weight: bold; color: var(--primary-dark); }
-    @media (min-width: 600px) {
-      .stat-card p { font-size: 18px; }
-    }
-
-    #chartSection {
-      display: none;
-      background: #faf8f5;
-      border: 1px solid var(--border-color);
-      padding: 14px 10px;
-      border-radius: 12px;
-      margin-top: 15px;
-    }
-
-    .add-section {
-      background: #faf8f5;
-      border: 1px solid var(--border-color);
-      padding: 14px 10px;
-      border-radius: 12px;
-      margin-bottom: 14px;
-    }
-    .add-section h3 { margin-top: 0; color: var(--primary-dark); font-size: 14px; margin-bottom: 10px; font-weight: 600; }
-    
-    .form-row {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 4px;
-    }
-    @media (min-width: 600px) {
-      .form-row { flex-direction: row; align-items: center; }
-    }
-
-    .form-row input, .form-row select {
-      width: 100%;
-      padding: 9px 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      font-size: 13.5px;
-      background: #fff;
-      color: var(--text-main);
-      outline: none;
-    }
-
-    /* 收入/支出 雙色切換按鈕群組 */
-    .type-toggle-group {
-      display: flex;
-      gap: 6px;
-      width: 100%;
-    }
-    .type-btn {
-      flex: 1;
-      padding: 9px 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      background: #fff;
-      font-size: 13.5px;
-      font-weight: bold;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.2s;
-    }
-    .type-btn.expense.active {
-      background: #fff2f0;
-      color: #cf1322;
-      border-color: #ffccc7;
-      box-shadow: 0 2px 6px rgba(207, 19, 34, 0.15);
-    }
-    .type-btn.income.active {
-      background: #f6ffed;
-      color: #237804;
-      border-color: #b7eb8f;
-      box-shadow: 0 2px 6px rgba(35, 120, 4, 0.15);
-    }
-
-    /* 免打字項目點擊按鈕 (Pills) */
-    .item-pill-container {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-top: 8px;
-      margin-bottom: 4px;
-    }
-    .item-pill {
-      background: #fff;
-      border: 1px solid var(--border-color);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 13px;
-      cursor: pointer;
-      color: var(--text-main);
-      transition: all 0.2s;
-    }
-    .item-pill:hover {
-      border-color: var(--primary);
-      background: #f2ece4;
-    }
-    .item-pill.active {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-      font-weight: bold;
-      box-shadow: 0 2px 6px rgba(138, 121, 104, 0.25);
-    }
-    
-    .btn-action {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 10px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 13.5px;
-      font-weight: 500;
-      transition: background 0.2s;
-      white-space: nowrap;
-    }
-    .btn-action:hover { background: var(--primary-dark); }
-
-    .history-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin-top: 8px; }
-    .history-item { background: #fdfbf7; border: 1.5px dashed #c2b5aa; border-radius: 10px; padding: 8px; text-align: center; cursor: pointer; transition: all 0.2s; }
-    .history-item:hover { border-color: #7a6b63; background: #f5efe8; }
-    .history-item.active { border-style: solid; border-color: #7a6b63; background: #ebdcd3; font-weight: bold; }
-    .history-item .ym { font-size: 13.5px; color: #4a423d; }
-    .history-item .badge { font-size: 11px; display: inline-block; margin-top: 3px; padding: 2px 6px; border-radius: 10px; background: #e5ded7; }
-
-    .table-wrapper { width: 100%; overflow-x: auto; border-radius: 8px; border: 1px solid var(--border-color); -webkit-overflow-scrolling: touch; }
-    table { width: 100%; border-collapse: collapse; min-width: 520px; }
-    th, td { border: 1px solid var(--border-color); padding: 8px 6px; text-align: center; font-size: 12.5px; }
-    th { background: #f7f5f0; color: var(--text-muted); font-weight: 500; white-space: nowrap; }
-    tr:nth-child(even) { background: #faf9f6; }
-    .loading { text-align: center; padding: 15px; color: var(--text-muted); }
-
-    .btn-refresh {
-      background: var(--accent-sand);
-      color: var(--primary-dark);
-      border: none;
-      padding: 9px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      margin-bottom: 10px;
-      width: 100%;
-    }
-
-    .inline-input {
-      width: 100%;
-      padding: 4px 6px;
-      font-size: 12px;
-      border: 1px solid var(--primary);
-      border-radius: 4px;
-      box-sizing: border-box;
-    }
-
-    .flatpickr-calendar { background: #faf8f5 !important; border: 1px solid #e2dad1 !important; box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important; border-radius: 12px !important; margin: 0 auto; }
-    .flatpickr-day.available-day-yellow { background-color: #fdf6e2 !important; color: #a37512 !important; font-weight: bold !important; border-radius: 50% !important; border: 1px solid #f2d896 !important; }
-    .flatpickr-day.available-day-blue { background-color: #e5ece9 !important; color: #4c6b61 !important; font-weight: bold !important; border-radius: 50% !important; border: 1px solid #b8c9c4 !important; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>後台管理儀表板</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/zh.js" crossorigin="anonymous"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f2ee;--primary:#8a7968;--dark:#6e5f50;--ok:#7f8c70;--sand:#d4c5b9;--text:#4a4541;--muted:#8c827a;--line:#e6e0d8}
+*{box-sizing:border-box;font-family:'LXGW WenKai TC','PingFang TC','Microsoft JhengHei',sans-serif}
+body{background:var(--bg);margin:0;padding:10px;color:var(--text);-webkit-tap-highlight-color:transparent}
+.container{max-width:1050px;margin:0 auto;background:#fff;padding:16px 12px;border-radius:16px;box-shadow:0 4px 20px rgba(138,121,104,.06);border:1px solid var(--line)}
+h2{text-align:center;color:var(--dark);font-weight:700;letter-spacing:.14em;margin:0 0 14px;font-size:20px}
+button,select,input{touch-action:manipulation}
+.tab-nav{display:flex;gap:4px;overflow-x:auto;padding-bottom:6px;margin-bottom:15px;border-bottom:1.5px solid var(--line)}
+.tab-btn{flex:1;padding:8px 10px;background:#eee8e0;color:var(--muted);border:none;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background-color .18s,color .18s}
+.tab-btn.active{background:var(--primary);color:#fff}
+.tab-content{display:none}.tab-content.active{display:block;animation:fade .25s ease-out}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}}
+.stats-container{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat-card{background:#f7f5f0;padding:12px 6px;border-radius:12px;text-align:center;border:1px solid var(--line);cursor:pointer;transition:background-color .18s,border-color .18s}
+.stat-card:hover{border-color:var(--primary);background:#f2ece4}
+.stat-card h3{margin:0 0 4px;font-size:11.5px;color:var(--muted);font-weight:400}
+.stat-card p{margin:0;font-size:15px;font-weight:700;color:var(--dark)}
+@media(min-width:600px){.stat-card p{font-size:18px}}
+#chartSection{display:none;background:#faf8f5;border:1px solid var(--line);padding:14px 10px;border-radius:12px;margin-top:15px}
+.add-section{background:#faf8f5;border:1px solid var(--line);padding:14px 10px;border-radius:12px;margin-bottom:14px}
+.add-section h3{margin:0 0 10px;color:var(--dark);font-size:14px}
+.form-row{display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
+@media(min-width:600px){.form-row{flex-direction:row;align-items:center}}
+.form-row input,.form-row select{width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--line);font-size:13.5px;background:#fff;color:var(--text);outline:none}
+.type-toggle-group{display:flex;gap:6px;width:100%}
+.type-btn{flex:1;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:13.5px;font-weight:700;cursor:pointer;transition:background-color .18s}
+.type-btn.expense.active{background:#fff2f0;color:#cf1322;border-color:#ffccc7}
+.type-btn.income.active{background:#f4f0e2;color:#7a6a2c;border-color:#e2d49a}
+.item-pill-container{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 4px}
+.item-pill{background:#fff;border:1px solid var(--line);padding:6px 12px;border-radius:20px;font-size:13px;cursor:pointer;color:var(--text);transition:background-color .18s,border-color .18s}
+.item-pill:hover{border-color:var(--primary);background:#f2ece4}
+.item-pill.active{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:700}
+.btn-action{background:var(--primary);color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;font-size:13.5px;white-space:nowrap;transition:background-color .18s,transform .12s}
+.btn-action:hover{background:var(--dark)}.btn-action:active{transform:scale(.96)}
+.btn-action.sm{padding:3px 6px;font-size:11px}.btn-action.danger{background:#c0504d}.btn-action.ok{background:var(--ok)}.btn-action.gray{background:var(--muted)}
+.history-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:8px}
+.history-item{background:#fdfbf7;border:1.5px dashed #c2b5aa;border-radius:10px;padding:8px;text-align:center;cursor:pointer;transition:background-color .18s,border-color .18s}
+.history-item:hover{border-color:#7a6b63;background:#f5efe8}
+.history-item.active{border-style:solid;border-color:#7a6b63;background:#ebdcd3;font-weight:700}
+.history-item .badge{font-size:11px;display:inline-block;margin-top:3px;padding:2px 6px;border-radius:10px;background:#e5ded7}
+.table-wrapper{width:100%;overflow-x:auto;border-radius:8px;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;min-width:520px}
+th,td{border:1px solid var(--line);padding:8px 6px;text-align:center;font-size:12.5px}
+th{background:#f7f5f0;color:var(--muted);font-weight:400;white-space:nowrap}
+tr:nth-child(even){background:#faf9f6}
+.loading{text-align:center;padding:15px;color:var(--muted)}
+.btn-refresh{background:var(--sand);color:var(--dark);border:none;padding:9px;border-radius:8px;cursor:pointer;font-size:13px;margin-bottom:10px;width:100%}
+.inline-input{width:100%;padding:4px 6px;font-size:12px;border:1px solid var(--primary);border-radius:4px}
+.st{cursor:pointer;padding:3px 8px;border-radius:6px;font-weight:700}.st.done{background:#eceee0;color:#5f6b50}.st.wait{background:#fdf6e2}
+.muted{font-size:12px;color:var(--muted)}
+.flatpickr-calendar{background:#faf8f5!important;border:1px solid #e2dad1!important;box-shadow:0 4px 12px rgba(0,0,0,.08)!important;border-radius:12px!important;margin:0 auto}
+.flatpickr-day.available-day-yellow{background:#fdf6e2!important;color:#a37512!important;font-weight:700!important;border-radius:50%!important;border:1px solid #f2d896!important}
+.flatpickr-day.available-day-blue{background:#eceee0!important;color:#5f6b50!important;font-weight:700!important;border-radius:50%!important;border:1px solid #c9d1b6!important}
+</style>
 </head>
 <body>
-
 <div class="container">
   <h2>後台管理儀表板</h2>
-
-  <div id="adminShiftReminder" style="display: none; background: #fff2f0; border: 1.5px solid #ffccc7; color: #cf1322; padding: 10px; border-radius: 8px; margin-bottom: 12px; text-align: center; font-weight: bold; font-size: 13px;"></div>
+  <div id="adminShiftReminder" style="display:none;background:#fff2f0;border:1.5px solid #ffccc7;color:#cf1322;padding:10px;border-radius:8px;margin-bottom:12px;text-align:center;font-weight:700;font-size:13px"></div>
 
   <div class="tab-nav">
-    <button class="tab-btn active" onclick="switchTab('tab-stats')">📈 營收</button>
-    <button class="tab-btn" onclick="switchTab('tab-schedule')">📅 班表</button>
-    <button class="tab-btn" onclick="switchTab('tab-bookings')">📋 預約紀錄</button>
-    <button class="tab-btn" onclick="switchTab('tab-accounting')">💰 記帳管理</button>
+    <button class="tab-btn active" onclick="switchTab('tab-stats',this)">📈 營收</button>
+    <button class="tab-btn" onclick="switchTab('tab-schedule',this)">📅 班表</button>
+    <button class="tab-btn" onclick="switchTab('tab-bookings',this)">📋 預約紀錄</button>
+    <button class="tab-btn" onclick="switchTab('tab-accounting',this)">💰 記帳管理</button>
   </div>
 
-  <!-- Tab 1: 營收 -->
   <div id="tab-stats" class="tab-content active">
     <div class="stats-container">
-      <div class="stat-card" onclick="toggleChart('revenue')">
-        <h3>總累計營收</h3>
-        <p id="totalRevenue">NT$ 0</p>
-      </div>
-      <div class="stat-card">
-        <h3>總材料成本</h3>
-        <p id="totalCost">NT$ 0</p>
-      </div>
-      <div class="stat-card" onclick="toggleChart('profit')">
-        <h3>淨利</h3>
-        <p id="netProfit">NT$ 0</p>
-      </div>
+      <div class="stat-card" onclick="toggleChart('revenue')"><h3>總累計營收</h3><p id="totalRevenue">NT$ 0</p></div>
+      <div class="stat-card"><h3>總材料成本</h3><p id="totalCost">NT$ 0</p></div>
+      <div class="stat-card" onclick="toggleChart('profit')"><h3>淨利</h3><p id="netProfit">NT$ 0</p></div>
     </div>
-    <p style="font-size: 11.5px; color: var(--text-muted); text-align: center; margin-top: 4px;">💡 點擊營收或淨利卡片可展開/收合年度趨勢折線圖</p>
-
+    <p class="muted" style="text-align:center">💡 點擊營收或淨利卡片可展開/收合年度趨勢折線圖</p>
     <div id="chartSection">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <h3 id="chartTitle" style="margin: 0; color: var(--primary-dark); font-size: 14px;">📈 年度每月營收趨勢</h3>
-        <select id="selectYear" onchange="renderChart()" style="padding: 4px 6px; border-radius: 6px; font-size: 12.5px; width: auto;"></select>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <h3 id="chartTitle" style="margin:0;color:var(--dark);font-size:14px"></h3>
+        <select id="selectYear" onchange="renderChart()" style="padding:4px 6px;border-radius:6px;font-size:12.5px"></select>
       </div>
-      <div style="position: relative; height: 240px; width: 100%;">
-        <canvas id="trendChart"></canvas>
-      </div>
+      <div style="position:relative;height:240px;width:100%"><canvas id="trendChart"></canvas></div>
     </div>
   </div>
 
-  <!-- Tab 2: 班表 -->
   <div id="tab-schedule" class="tab-content">
     <div class="add-section">
       <h3>月份班別設定</h3>
       <div class="form-row">
         <input type="month" id="targetMonth">
-        <select id="shiftGroup">
-          <option value="B">B 組</option>
-          <option value="A">A 組</option>
-        </select>
-        <select id="shiftType">
-          <option value="夜班">夜班</option>
-          <option value="白班">白班</option>
-        </select>
+        <select id="shiftGroup"><option value="B">B 組</option><option value="A">A 組</option></select>
+        <select id="shiftType"><option value="夜班">夜班</option><option value="白班">白班</option></select>
         <button class="btn-action" onclick="saveMonthlyShift()">💾</button>
       </div>
-
-      <div style="margin-top: 12px;">
-        <div style="font-size: 12.5px; font-weight: bold; color: var(--text-muted); margin-bottom: 6px;">已設定月份紀錄：</div>
-        <div id="historyList" class="history-list">
-          <span style="font-size: 12px; color: var(--text-muted);">載入中...</span>
-        </div>
+      <div style="margin-top:12px">
+        <div class="muted" style="font-weight:700;margin-bottom:6px">已設定月份紀錄：</div>
+        <div id="historyList" class="history-list"></div>
       </div>
-
-      <div id="previewContainer" style="margin-top: 12px; text-align: center; display: none; padding-top: 10px; border-top: 1px dashed var(--border-color);">
-        <div style="font-size: 13px; font-weight: bold; margin-bottom: 6px; color: var(--primary-dark);" id="previewTitle">日曆預覽</div>
-        <input type="text" id="inlinePreviewCalendar" style="display: none;">
+      <div id="previewContainer" style="margin-top:12px;text-align:center;display:none;padding-top:10px;border-top:1px dashed var(--line)">
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px;color:var(--dark)" id="previewTitle"></div>
+        <input type="text" id="inlinePreviewCalendar" style="display:none">
       </div>
     </div>
-
     <div class="add-section">
       <h3>日期微調</h3>
       <div class="form-row">
         <input type="date" id="scheduleDate">
-        <select id="scheduleStatus">
-          <option value="開放">開放預約</option>
-          <option value="關閉">關閉預約</option>
-        </select>
-        <button class="btn-action" style="background: var(--accent-green);" onclick="updateScheduleOverride()">💾</button>
+        <select id="scheduleStatus"><option value="開放">開放預約</option><option value="關閉">關閉預約</option></select>
+        <button class="btn-action ok" onclick="updateScheduleOverride()">💾</button>
       </div>
-
-      <div style="margin-top: 10px;">
-        <div style="font-size: 12.5px; font-weight: bold; color: var(--text-muted); margin-bottom: 6px;">微調紀錄</div>
-        <div class="table-wrapper" style="max-height: 150px;">
-          <div id="overrideRecordContainer">
-            <span style="font-size: 12px; color: var(--text-muted);">尚無微調紀錄</span>
-          </div>
-        </div>
+      <div style="margin-top:10px">
+        <div class="muted" style="font-weight:700;margin-bottom:6px">微調紀錄</div>
+        <div class="table-wrapper" style="max-height:150px"><div id="overrideRecordContainer"></div></div>
       </div>
     </div>
   </div>
 
-  <!-- Tab 3: 預約紀錄 -->
   <div id="tab-bookings" class="tab-content">
     <div class="add-section">
       <h3>手動新增預約</h3>
       <div class="form-row">
-        <input type="text" id="newName" placeholder="客戶名稱" required>
-        <input type="date" id="newDate" required>
-        
-        <div style="display: flex; gap: 4px;">
-          <select id="newHour" style="flex: 1;">
-            <option value="00">00時</option><option value="01">01時</option><option value="02">02時</option>
-            <option value="03">03時</option><option value="04">04時</option><option value="05">05時</option>
-            <option value="06">06時</option><option value="07">07時</option><option value="08">08時</option>
-            <option value="09">09時</option><option value="10">10時</option><option value="11">11時</option>
-            <option value="12" selected>12時</option><option value="13">13時</option><option value="14">14時</option>
-            <option value="15">15時</option><option value="16">16時</option><option value="17">17時</option>
-            <option value="18">18時</option><option value="19">19時</option><option value="20">20時</option>
-            <option value="21">21時</option><option value="22">22時</option><option value="23">23時</option>
-          </select>
-          <select id="newMinute" style="flex: 1;">
-            <option value="00">00分</option><option value="15">15分</option>
-            <option value="30">30分</option><option value="45">45分</option>
-          </select>
+        <input type="text" id="newName" placeholder="客戶名稱" maxlength="30">
+        <input type="date" id="newDate">
+        <div style="display:flex;gap:4px;width:100%">
+          <select id="newHour" style="flex:1"></select>
+          <select id="newMinute" style="flex:1"><option value="00">00分</option><option value="15">15分</option><option value="30">30分</option><option value="45">45分</option></select>
         </div>
-
-        <input type="text" id="newItems" placeholder="項目 (例: 單色光療)" required>
-        <input type="number" id="newPrice" placeholder="金額 (NT$)" required min="0">
+        <input type="text" id="newItems" placeholder="項目 (例: 單色光療)" maxlength="100">
+        <input type="number" id="newPrice" placeholder="金額 (NT$)" min="0">
         <button class="btn-action" onclick="manualAddBooking()">新增預約</button>
       </div>
     </div>
-
-    <div class="add-section" style="background: #ffffff; padding: 10px 0;">
-      <div style="padding: 0 10px 8px 10px;">
-        <button class="btn-refresh" onclick="fetchData()">🔄 重新整理預約紀錄</button>
-      </div>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>編號</th>
-              <th>客戶</th>
-              <th>日期</th>
-              <th>時間</th>
-              <th>項目</th>
-              <th>金額</th>
-              <th>狀態</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody id="bookingTableBody">
-            <tr><td colspan="8" class="loading">正在讀取預約資料...</td></tr>
-          </tbody>
-        </table>
-      </div>
+    <div class="add-section" style="background:#fff;padding:10px 0">
+      <div style="padding:0 10px 8px"><button class="btn-refresh" onclick="fetchData()">🔄 重新整理預約紀錄</button></div>
+      <div class="table-wrapper"><table>
+        <thead><tr><th>編號</th><th>客戶</th><th>日期</th><th>時間</th><th>項目</th><th>金額</th><th>狀態</th><th>操作</th></tr></thead>
+        <tbody id="bookingTableBody"></tbody>
+      </table></div>
     </div>
   </div>
 
-  <!-- Tab 4: 記帳管理 -->
   <div id="tab-accounting" class="tab-content">
     <div class="add-section">
       <h3>手動新增收支</h3>
-      
-      <!-- 1. 選擇收支類型 (雙色按鈕) -->
-      <div class="form-row" style="margin-bottom: 6px;">
+      <div class="form-row" style="margin-bottom:6px">
         <div class="type-toggle-group">
           <button type="button" id="btnExpense" class="type-btn expense active" onclick="setAccType('支出')">🔴 支出</button>
-          <button type="button" id="btnIncome" class="type-btn income" onclick="setAccType('收入')">🟢 收入</button>
+          <button type="button" id="btnIncome" class="type-btn income" onclick="setAccType('收入')">🟡 收入</button>
         </div>
         <input type="hidden" id="accType" value="支出">
       </div>
-
-      <!-- 2. 免打字項目標籤按鈕 (Pills) -->
-      <div style="margin-bottom: 8px;">
-        <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 4px;">點擊下方項目直接帶入（免手動打字）：</div>
+      <div style="margin-bottom:8px">
+        <div class="muted" style="margin-bottom:4px">點擊下方項目直接帶入（免手動打字）：</div>
         <div class="item-pill-container">
-          <button type="button" class="item-pill" onclick="selectItem('材料費', '支出', this)">💅 材料費</button>
-          <button type="button" class="item-pill" onclick="selectItem('房租', '支出', this)">🏠 房租</button>
-          <button type="button" class="item-pill" onclick="selectItem('上課費', '支出', this)">📚 上課費</button>
-          <button type="button" class="item-pill" onclick="selectItem('美甲膠', '支出', this)">🎨 美甲膠</button>
-          <button type="button" class="item-pill" onclick="selectItem('其他收入', '收入', this)">✨ 其他收入</button>
+          <button type="button" class="item-pill" onclick="selectItem('材料費','支出',this)">💅 材料費</button>
+          <button type="button" class="item-pill" onclick="selectItem('房租','支出',this)">🏠 房租</button>
+          <button type="button" class="item-pill" onclick="selectItem('上課費','支出',this)">📚 上課費</button>
+          <button type="button" class="item-pill" onclick="selectItem('美甲膠','支出',this)">🎨 美甲膠</button>
+          <button type="button" class="item-pill" onclick="selectItem('其他收入','收入',this)">✨ 其他收入</button>
         </div>
       </div>
-
-      <!-- 3. 日期、項目欄位與金額輸入 -->
       <div class="form-row">
-        <input type="date" id="accDate" required style="flex: 1;">
-        <!-- 隱藏或保留文字框，點擊上方按鈕會自動填入，也可以手動微調 -->
-        <input type="text" id="accItem" placeholder="點上方按鈕或自行輸入項目" required style="flex: 2;">
-        <input type="number" id="accCost" placeholder="金額 (NT$)" required min="0" value="0" style="flex: 1;">
+        <input type="date" id="accDate" style="flex:1">
+        <input type="text" id="accItem" placeholder="點上方按鈕或自行輸入項目" maxlength="100" style="flex:2">
+        <input type="number" id="accCost" placeholder="金額 (NT$)" min="0" value="0" style="flex:1">
         <button class="btn-action" onclick="manualAddAccounting()">新增紀錄</button>
       </div>
     </div>
-
-    <div class="add-section" style="background: #ffffff; padding: 10px 0;">
-      <div style="padding: 0 10px 8px 10px; font-weight: bold; font-size: 13.5px; color: var(--primary-dark);">📊 記帳永久留存紀錄</div>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>編號</th>
-              <th>日期</th>
-              <th>類型</th>
-              <th>項目說明</th>
-              <th>金額</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody id="accountingTableBody">
-            <tr><td colspan="6" class="loading">正在讀取記帳紀錄...</td></tr>
-          </tbody>
-        </table>
-      </div>
+    <div class="add-section" style="background:#fff;padding:10px 0">
+      <div style="padding:0 10px 8px;font-weight:700;font-size:13.5px;color:var(--dark)">📊 記帳永久留存紀錄</div>
+      <div class="table-wrapper"><table>
+        <thead><tr><th>編號</th><th>日期</th><th>類型</th><th>項目說明</th><th>金額</th><th>操作</th></tr></thead>
+        <tbody id="accountingTableBody"></tbody>
+      </table></div>
     </div>
   </div>
 </div>
 
 <script>
-  const scriptUrl = "https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec?action=api";
+const API="https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,"0");
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));  /* 所有外來文字一律轉義，防 XSS */
+const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+let B=[],A=[],S={},M={},ANCHOR="2026-10-23",chart=null,ctype="revenue",copen=false,picker=null,activeYM="";
 
-  let globalBookings = []; 
-  let globalAccounting = [];
-  let globalSchedules = {};
-  let globalMonthlyShiftTypes = {}; 
-  let trendChartInstance = null;
-  let currentChartType = 'revenue';
-  let isChartOpen = false;
-  let previewPicker = null;
-  let activePreviewYM = ""; 
+/* ---------- 管理密碼（只存在這個分頁，關閉就消失） ---------- */
+function token(){let t=sessionStorage.getItem("adm_tok");if(!t){t=(prompt("請輸入管理密碼")||"").trim();if(t)sessionStorage.setItem("adm_tok",t)}return t}
+async function api(body){
+  const t=token();if(!t)return null;
+  try{
+    const j=await(await fetch(API,{method:"POST",body:JSON.stringify({...body,adminToken:t})})).json();
+    if(j.message==="unauthorized"){sessionStorage.removeItem("adm_tok");alert("管理密碼錯誤，請重新整理頁面後再輸入");return null}
+    return j;
+  }catch(e){return null}
+}
+function bg(body){api(body).then(r=>{if(!r||r.result!=="success"){alert((r&&r.message)||"儲存失敗，將重新載入資料");fetchData()}})}
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-    const currentYearMonth = today.toISOString().slice(0, 7);
-    
-    document.getElementById('newDate').value = todayStr;
-    document.getElementById('accDate').value = todayStr;
-    document.getElementById('scheduleDate').value = todayStr;
-    document.getElementById('targetMonth').value = currentYearMonth;
-    
-    fetchData();
-  });
+document.addEventListener("DOMContentLoaded",()=>{
+  const ts=ymd(new Date());
+  ["newDate","accDate","scheduleDate"].forEach(i=>$(i).value=ts);$("targetMonth").value=ts.slice(0,7);
+  $("newHour").innerHTML=Array.from({length:24},(_,h)=>`<option value="${pad(h)}"${h===12?" selected":""}>${pad(h)}時</option>`).join("");
+  document.body.addEventListener("click",onClick);
+  fetchData();
+});
+function onClick(e){
+  const el=e.target.closest("[data-a]");if(!el)return;
+  const id=el.dataset.id,f={toggle:toggleStatus,bedit:editBooking,bsave:saveBooking,bcancel:cancelBooking,rerender:renderAll,aedit:editAcc,asave:saveAcc,adel:delAcc,hist:showPreview,sdel:delOverride}[el.dataset.a];
+  if(f)f(id);
+}
+function switchTab(id,btn){
+  document.querySelectorAll(".tab-btn,.tab-content").forEach(x=>x.classList.remove("active"));
+  btn.classList.add("active");$(id).classList.add("active");
+}
+function setAccType(t){$("accType").value=t;$("btnExpense").classList.toggle("active",t==="支出");$("btnIncome").classList.toggle("active",t==="收入")}
+function selectItem(name,type,btn){$("accItem").value=name;setAccType(type);document.querySelectorAll(".item-pill").forEach(p=>p.classList.remove("active"));btn.classList.add("active")}
 
-  function switchTab(tabId) {
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-    
-    event.target.classList.add('active');
-    document.getElementById(tabId).classList.add('active');
+/* ---------- 讀取 ---------- */
+async function fetchData(){
+  $("bookingTableBody").innerHTML='<tr><td colspan="8" class="loading">正在讀取資料...</td></tr>';
+  $("accountingTableBody").innerHTML='<tr><td colspan="6" class="loading">正在讀取記帳紀錄...</td></tr>';
+  const r=await api({action:"adminGet"});
+  if(!r||r.result!=="success"){
+    const m='<tr><td colspan="8" class="loading" style="color:#c0392b">連線失敗或密碼錯誤，請重新整理頁面</td></tr>';
+    $("bookingTableBody").innerHTML=m;$("accountingTableBody").innerHTML=m;return;
   }
-
-  // 🎨 切換收支按鈕狀態
-  function setAccType(type) {
-    document.getElementById('accType').value = type;
-    const btnExp = document.getElementById('btnExpense');
-    const btnInc = document.getElementById('btnIncome');
-    if (type === '支出') {
-      btnExp.classList.add('active');
-      btnInc.classList.remove('active');
-    } else {
-      btnInc.classList.add('active');
-      btnExp.classList.remove('active');
-    }
-  }
-
-  // 🖱️ 點擊免打字項目按鈕 (自動填入項目 + 自動切換收支顏色 + 按鈕高亮)
-  function selectItem(itemName, typeName, btnElement) {
-    document.getElementById('accItem').value = itemName;
-    setAccType(typeName);
-
-    // 移除其他按鈕的 active 狀態，並將點擊的按鈕加上 active
-    document.querySelectorAll('.item-pill').forEach(pill => pill.classList.remove('active'));
-    btnElement.classList.add('active');
-  }
-
-  function fetchData() {
-    const tableBody = document.getElementById('bookingTableBody');
-    const accTableBody = document.getElementById('accountingTableBody');
-    tableBody.innerHTML = `<tr><td colspan="8" class="loading">正在讀取資料...</td></tr>`;
-    accTableBody.innerHTML = `<tr><td colspan="6" class="loading">正在讀取記帳紀錄...</td></tr>`;
-
-    fetch(scriptUrl, { method: 'GET', mode: 'cors' })
-      .then(response => response.json())
-      .then(resData => {
-        globalBookings = resData.bookings || [];
-        globalAccounting = resData.accountingRecords || [];
-        globalSchedules = resData.schedules || {};
-        globalMonthlyShiftTypes = resData.monthlyShiftTypes || {};
-        
-        renderAllTables();
-      })
-      .catch(err => {
-        tableBody.innerHTML = `<tr><td colspan="8" class="loading" style="color: red;">連線失敗！</td></tr>`;
-        accTableBody.innerHTML = `<tr><td colspan="6" class="loading" style="color: red;">連線失敗！</td></tr>`;
-      });
-  }
-
-  function renderAllTables() {
-    renderHistoryList();
-    renderOverrideRecords();
-    checkMonthlyShiftReminder();
-
-    if (activePreviewYM) {
-      showPreviewCalendar(activePreviewYM);
-    }
-
-    // 1. 渲染預約紀錄
-    const tableBody = document.getElementById('bookingTableBody');
-    if (globalBookings.length === 0) {
-      tableBody.innerHTML = `<tr><td colspan="8" class="loading">目前沒有預約資料</td></tr>`;
-    } else {
-      tableBody.innerHTML = "";
-      globalBookings.forEach((row, index) => {
-        const displayId = String(index + 1).padStart(3, '0');
-        const originalId = row.bookingId || displayId;
-        const customerName = row.customerName || "";
-        const date = row.date || "";
-        const time = row.time || "";
-        const items = row.items || "";
-        const price = Number(row.totalPrice) || 0;
-        let status = row.status || "預約中";
-
-        if (status === "已取消") return;
-
-        let isAutoCompleted = false;
-        const now = new Date();
-        if (status === "預約中" && date && time) {
-          let bookingDT = new Date(`${date}T${time}`);
-          if (!isNaN(bookingDT) && bookingDT < now) isAutoCompleted = true;
-        }
-
-        let displayStatus = (status === "已完成" || isAutoCompleted) ? "已完成" : "預約中";
-
-        const tr = document.createElement('tr');
-        tr.id = `booking-row-${originalId}`;
-        tr.innerHTML = `
-          <td>${displayId}</td>
-          <td>${customerName}</td>
-          <td>${date}</td>
-          <td>${time}</td>
-          <td>${items}</td>
-          <td>NT$ <span>${price}</span></td>
-          <td>
-            <span style="cursor: pointer; padding: 3px 8px; background: ${displayStatus === '已完成' ? '#e5ece9' : '#fdf6e2'}; border-radius: 6px; font-weight: bold;" onclick="toggleStatus('${originalId}')">
-              ${displayStatus}${isAutoCompleted ? ' (自動)' : ''}
-            </span>
-          </td>
-          <td>
-            <button class="btn-action" style="padding: 3px 6px; font-size: 11px;" onclick="enableBookingInlineEdit('${originalId}', ${price})">✏️</button>
-            <button class="btn-action" style="padding: 3px 6px; font-size: 11px; background: #cf1322;" onclick="cancelBooking('${originalId}')">刪除</button>
-          </td>
-        `;
-        tableBody.appendChild(tr);
-      });
-    }
-
-    // 2. 渲染記帳紀錄 (行內編輯)
-    const accTableBody = document.getElementById('accountingTableBody');
-    if (globalAccounting.length === 0) {
-      accTableBody.innerHTML = `<tr><td colspan="6" class="loading">尚無記帳紀錄</td></tr>`;
-    } else {
-      accTableBody.innerHTML = "";
-      globalAccounting.forEach((acc, index) => {
-        const typeColor = acc.type === '收入' ? '#237804' : '#cf1322';
-        const typeBg = acc.type === '收入' ? '#f6ffed' : '#fff2f0';
-        const tr = document.createElement('tr');
-        tr.id = `acc-row-${acc.id}`;
-        tr.innerHTML = `
-          <td>${String(index + 1).padStart(3, '0')}</td>
-          <td>${acc.date}</td>
-          <td><span style="padding: 2px 6px; background: ${typeBg}; color: ${typeColor}; border-radius: 4px; font-weight: bold;">${acc.type || '支出'}</span></td>
-          <td>${acc.item}</td>
-          <td>NT$ ${acc.amount}</td>
-          <td>
-            <button class="btn-action" style="padding: 3px 6px; font-size: 11px;" onclick="enableAccInlineEdit('${acc.id}')">✏️</button>
-            <button class="btn-action" style="padding: 3px 6px; font-size: 11px; background: #cf1322;" onclick="deleteAccounting('${acc.id}')">刪除</button>
-          </td>
-        `;
-        accTableBody.appendChild(tr);
-      });
-    }
-
-    calculateFinanceAndRender();
-  }
-
-  /* ⚡ 預約金額 - 行內直接編輯 */
-  function enableBookingInlineEdit(bookingId, currentPrice) {
-    const tr = document.getElementById(`booking-row-${bookingId}`);
-    if (!tr) return;
-    const priceCell = tr.children[5];
-
-    priceCell.innerHTML = `NT$ <input type="number" id="inline-price-${bookingId}" class="inline-input" style="width: 70px;" value="${currentPrice}">`;
-    tr.children[7].innerHTML = `
-      <button class="btn-action" style="padding: 3px 6px; font-size: 11px; background: var(--accent-green);" onclick="saveBookingInlinePrice('${bookingId}')">💾</button>
-      <button class="btn-action" style="padding: 3px 6px; font-size: 11px; background: var(--text-muted);" onclick="renderAllTables()">✕</button>
-    `;
-  }
-
-  function saveBookingInlinePrice(bookingId) {
-    const newPrice = parseInt(document.getElementById(`inline-price-${bookingId}`).value, 10);
-    if (isNaN(newPrice) || newPrice < 0) return;
-
-    const booking = globalBookings.find(b => (b.bookingId || '') === String(bookingId));
-    if (booking) booking.totalPrice = newPrice;
-    
-    renderAllTables();
-
-    fetch(scriptUrl.replace('?action=api', ''), {
-      method: "POST",
-      mode: "no-cors",
-      body: JSON.stringify({ action: "updatePrice", bookingId, newPrice })
-    });
-  }
-
-  /* ⚡ 記帳紀錄 - 行內直接編輯 */
-  function enableAccInlineEdit(id) {
-    const acc = globalAccounting.find(a => a.id === String(id));
-    if (!acc) return;
-    const tr = document.getElementById(`acc-row-${id}`);
-
-    tr.children[1].innerHTML = `<input type="date" id="inline-date-${id}" class="inline-input" value="${acc.date}">`;
-    tr.children[2].innerHTML = `
-      <select id="inline-type-${id}" class="inline-input">
-        <option value="支出" ${acc.type === '支出' ? 'selected' : ''}>支出</option>
-        <option value="收入" ${acc.type === '收入' ? 'selected' : ''}>收入</option>
-      </select>
-    `;
-    tr.children[3].innerHTML = `<input type="text" id="inline-item-${id}" class="inline-input" value="${acc.item}">`;
-    tr.children[4].innerHTML = `<input type="number" id="inline-amt-${id}" class="inline-input" style="width: 70px;" value="${acc.amount}">`;
-
-    tr.children[5].innerHTML = `
-      <button class="btn-action" style="padding: 3px 6px; font-size: 11px; background: var(--accent-green);" onclick="saveAccInlineEdit('${id}')">💾</button>
-      <button class="btn-action" style="padding: 3px 6px; font-size: 11px; background: var(--text-muted);" onclick="renderAllTables()">✕</button>
-    `;
-  }
-
-  function saveAccInlineEdit(id) {
-    const newDate = document.getElementById(`inline-date-${id}`).value;
-    const newType = document.getElementById(`inline-type-${id}`).value;
-    const newItem = document.getElementById(`inline-item-${id}`).value;
-    const newAmount = parseInt(document.getElementById(`inline-amt-${id}`).value, 10);
-
-    if (!newDate || !newItem || isNaN(newAmount)) return;
-
-    const acc = globalAccounting.find(a => a.id === String(id));
-    if (acc) {
-      acc.date = newDate;
-      acc.type = newType;
-      acc.item = newItem;
-      acc.amount = newAmount;
-    }
-
-    renderAllTables();
-
-    fetch(scriptUrl.replace('?action=api', ''), {
-      method: "POST",
-      mode: "no-cors",
-      body: JSON.stringify({ action: "updateAccounting", id, date: newDate, type: newType, item: newItem, amount: newAmount })
-    });
-  }
-
-  function toggleStatus(bookingId) {
-    const booking = globalBookings.find(b => (b.bookingId || '') === String(bookingId));
-    if (booking) {
-      booking.status = (booking.status === "已完成" ? "預約中" : "已完成");
-      renderAllTables();
-    }
-    fetch(scriptUrl.replace('?action=api', ''), { 
-      method: "POST", 
-      mode: "no-cors",
-      body: JSON.stringify({ action: "update", bookingId, status: booking ? booking.status : "已完成" }) 
-    });
-  }
-
-  function cancelBooking(bookingId) {
-    globalBookings = globalBookings.filter(b => (b.bookingId || '') !== String(bookingId));
-    renderAllTables();
-    fetch(scriptUrl.replace('?action=api', ''), { 
-      method: "POST", 
-      mode: "no-cors",
-      body: JSON.stringify({ action: "update", bookingId, status: "已取消" }) 
-    });
-  }
-
-  function deleteAccounting(id) {
-    globalAccounting = globalAccounting.filter(acc => acc.id !== String(id));
-    renderAllTables();
-    fetch(scriptUrl.replace('?action=api', ''), { 
-      method: "POST", 
-      mode: "no-cors",
-      body: JSON.stringify({ action: "deleteAccounting", id }) 
-    });
-  }
-
-  function calculateFinanceAndRender() {
-    let totalRev = 0, totalCost = 0;
-    const now = new Date();
-
-    globalBookings.forEach(row => {
-      if (row.status !== "已取消") {
-        let isAutoCompleted = false;
-        if (row.status === "預約中" && row.date && row.time) {
-          let bookingDT = new Date(`${row.date}T${row.time}`);
-          if (!isNaN(bookingDT) && bookingDT < now) isAutoCompleted = true;
-        }
-        if (row.status === "已完成" || isAutoCompleted) {
-          totalRev += Number(row.totalPrice) || 0;
-        }
-        totalCost += Number(row.cost) || 0;
-      }
-    });
-
-    globalAccounting.forEach(acc => {
-      const amt = Number(acc.amount) || 0;
-      if (acc.type === "收入") {
-        totalRev += amt;
-      } else {
-        totalCost += amt;
-      }
-    });
-
-    document.getElementById('totalRevenue').innerText = `NT$ ${totalRev}`;
-    document.getElementById('totalCost').innerText = `NT$ ${totalCost}`;
-    document.getElementById('netProfit').innerText = `NT$ ${totalRev - totalCost}`;
-  }
-
-  function checkMonthlyShiftReminder() {
-    const today = new Date();
-    const currentDay = today.getDate();
-    const nextMonthObj = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-    const nextYM = `${nextMonthObj.getFullYear()}-${String(nextMonthObj.getMonth() + 1).padStart(2, '0')}`;
-    const isNextMonthSet = !!globalMonthlyShiftTypes[nextYM];
-    const reminderEl = document.getElementById('adminShiftReminder');
-
-    if (currentDay >= 12 && !isNextMonthSet) {
-      reminderEl.innerHTML = `🚨 提醒：今天是 ${currentDay} 號，尚未設定下個月 (${nextYM}) 班表！`;
-      reminderEl.style.display = 'block';
-    } else {
-      reminderEl.style.display = 'none';
-    }
-  }
-
-  function renderHistoryList() {
-    const listEl = document.getElementById('historyList');
-    listEl.innerHTML = "";
-    const sortedYM = Object.keys(globalMonthlyShiftTypes).sort();
-    if (sortedYM.length === 0) {
-      listEl.innerHTML = `<span style="font-size: 12px; color: var(--text-muted);">尚無設定紀錄</span>`;
-      return;
-    }
-
-    sortedYM.forEach(ym => {
-      const item = globalMonthlyShiftTypes[ym];
-      const div = document.createElement('div');
-      div.className = `history-item ${activePreviewYM === ym ? 'active' : ''}`;
-      div.onclick = () => showPreviewCalendar(ym);
-      div.innerHTML = `
-        <div class="ym">📅 ${ym}</div>
-        <div class="badge">${item.shiftGroup}組/${item.shiftType}</div>
-      `;
-      listEl.appendChild(div);
-    });
-  }
-
-  function showPreviewCalendar(ym) {
-    activePreviewYM = ym;
-    document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
-    event && event.currentTarget && event.currentTarget.classList.add('active');
-
-    const previewContainer = document.getElementById('previewContainer');
-    previewContainer.style.display = 'block';
-    
-    const item = globalMonthlyShiftTypes[ym] || { shiftGroup: 'B', shiftType: '夜班' };
-    document.getElementById('previewTitle').innerText = `🗓️ 預覽 ${ym} (${item.shiftGroup}組/${item.shiftType})`;
-
-    const [year, month] = ym.split('-').map(Number);
-    const defaultDate = new Date(year, month - 1, 1);
-
-    if (previewPicker) previewPicker.destroy();
-
-    previewPicker = flatpickr("#inlinePreviewCalendar", {
-      inline: true,
-      locale: "zh",
-      defaultDate: defaultDate,
-      onDayCreate: function(dObj, dStr, fp, dayElement) {
-        const dateObj = dayElement.dateObj;
-        const dYear = dateObj.getFullYear();
-        const dMonth = String(dateObj.getMonth() + 1).padStart(2, '0');
-        const dDay = String(dateObj.getDate()).padStart(2, '0');
-        const dateStr = `${dYear}-${dMonth}-${dDay}`;
-        const dYM = `${dYear}-${dMonth}`;
-
-        if (dYM === ym) {
-          let isAvailable = false;
-          if (globalSchedules[dateStr]) {
-            if (globalSchedules[dateStr].status === "開放") isAvailable = true;
-            else if (globalSchedules[dateStr].status === "關閉") isAvailable = false;
-          } else {
-            const anchorDate = new Date("2026-10-23T00:00:00");
-            const targetDate = new Date(dYear, dateObj.getMonth(), dateObj.getDate());
-            const diffDays = Math.round((targetDate - anchorDate) / (1000 * 60 * 60 * 24));
-            let cycleDay = ((diffDays % 4) + 4) % 4;
-            if (item.shiftGroup === "A") cycleDay = (cycleDay + 2) % 4;
-            if (!(cycleDay === 0 || cycleDay === 1)) isAvailable = true;
-          }
-
-          if (isAvailable) {
-            const className = (item.shiftType === "白班") ? "available-day-yellow" : "available-day-blue";
-            dayElement.classList.add(className);
-          }
-        }
-      }
-    });
-  }
-
-  function renderOverrideRecords() {
-    const container = document.getElementById('overrideRecordContainer');
-    const dates = Object.keys(globalSchedules).sort();
-
-    if (dates.length === 0) {
-      container.innerHTML = `<span style="font-size: 12px; color: var(--text-muted);">尚無微調紀錄</span>`;
-      return;
-    }
-
-    let html = `<table class="mini-table"><tr><th>日期</th><th>狀態</th><th>操作</th></tr>`;
-    dates.forEach(d => {
-      const info = globalSchedules[d];
-      html += `<tr><td>${d}</td><td>${info.status === '開放' ? '開放' : '關閉'}</td><td><button class="btn-action" style="padding: 2px 6px; font-size: 11px; background: #cf1322;" onclick="deleteScheduleOverride('${d}')">刪除</button></td></tr>`;
-    });
-    html += `</table>`;
-    container.innerHTML = html;
-  }
-
-  function deleteScheduleOverride(targetDate) {
-    delete globalSchedules[targetDate];
-    renderOverrideRecords();
-    if (activePreviewYM) showPreviewCalendar(activePreviewYM);
-    fetch(scriptUrl.replace('?action=api', ''), { 
-      method: "POST", 
-      mode: "no-cors",
-      body: JSON.stringify({ action: "deleteSchedule", targetDate }) 
-    });
-  }
-
-  function saveMonthlyShift() {
-    const targetMonth = document.getElementById('targetMonth').value;
-    const shiftGroup = document.getElementById('shiftGroup').value;
-    const shiftType = document.getElementById('shiftType').value;
-
-    if (!targetMonth) return;
-
-    globalMonthlyShiftTypes[targetMonth] = { shiftGroup, shiftType };
-    renderHistoryList();
-    showPreviewCalendar(targetMonth);
-    checkMonthlyShiftReminder();
-
-    fetch(scriptUrl.replace('?action=api', ''), { 
-      method: "POST", 
-      mode: "no-cors",
-      body: JSON.stringify({ action: "updateBaseShift", targetMonth, monthlyShiftTypes: globalMonthlyShiftTypes }) 
-    });
-  }
-
-  function updateScheduleOverride() {
-    const targetDate = document.getElementById('scheduleDate').value;
-    const status = document.getElementById('scheduleStatus').value;
-
-    if (!targetDate) return;
-
-    globalSchedules[targetDate] = { status, slots: "" };
-    renderOverrideRecords();
-    if (activePreviewYM) showPreviewCalendar(activePreviewYM);
-
-    fetch(scriptUrl.replace('?action=api', ''), { 
-      method: "POST", 
-      mode: "no-cors",
-      body: JSON.stringify({ action: "updateSchedule", targetDate, status }) 
-    });
-  }
-
-  function toggleChart(type) {
-    const chartSection = document.getElementById('chartSection');
-    if (isChartOpen && currentChartType === type) {
-      chartSection.style.display = 'none';
-      isChartOpen = false;
-      return;
-    }
-
-    currentChartType = type;
-    document.getElementById('chartTitle').innerText = (type === 'revenue') ? "📈 年度每月營收趨勢" : "📈 年度每月淨利趨勢";
-    chartSection.style.display = 'block';
-    isChartOpen = true;
-    
-    setYearDropdown();
-    renderChart();
-  }
-
-  function setYearDropdown() {
-    const yearSelect = document.getElementById('selectYear');
-    let years = new Set([new Date().getFullYear()]);
-    globalBookings.forEach(row => { if (row.date) years.add(row.date.split('-')[0]); });
-    globalAccounting.forEach(acc => { if (acc.date) years.add(acc.date.split('-')[0]); });
-    yearSelect.innerHTML = "";
-    Array.from(years).sort().reverse().forEach(y => {
-      const opt = document.createElement('option');
-      opt.value = y; opt.innerText = `${y} 年`;
-      yearSelect.appendChild(opt);
-    });
-  }
-
-  function renderChart() {
-    const selectedYear = document.getElementById('selectYear').value || new Date().getFullYear();
-    let monthlyData = new Array(12).fill(0);
-    const now = new Date();
-
-    globalBookings.forEach(row => {
-      if (row.date && row.status !== "已取消") {
-        let isAutoCompleted = false;
-        if (row.status === "預約中" && row.date && row.time) {
-          let bookingDT = new Date(`${row.date}T${row.time}`);
-          if (!isNaN(bookingDT) && bookingDT < now) isAutoCompleted = true;
-        }
-
-        if (row.status === "已完成" || isAutoCompleted) {
-          const parts = row.date.split('-');
-          if (parts.length === 3 && parts[0] === String(selectedYear)) {
-            const monthIdx = parseInt(parts[1], 10) - 1;
-            if (monthIdx >= 0 && monthIdx < 12) {
-              const price = Number(row.totalPrice) || 0;
-              const cost = Number(row.cost) || 0;
-              monthlyData[monthIdx] += (currentChartType === 'revenue') ? price : (price - cost);
-            }
-          }
-        }
-      }
-    });
-
-    globalAccounting.forEach(acc => {
-      if (acc.date) {
-        const parts = acc.date.split('-');
-        if (parts.length === 3 && parts[0] === String(selectedYear)) {
-          const monthIdx = parseInt(parts[1], 10) - 1;
-          if (monthIdx >= 0 && monthIdx < 12) {
-            const amt = Number(acc.amount) || 0;
-            if (currentChartType === 'revenue') {
-              if (acc.type === '收入') monthlyData[monthIdx] += amt;
-            } else {
-              if (acc.type === '收入') monthlyData[monthIdx] += amt;
-              else monthlyData[monthIdx] -= amt;
-            }
-          }
-        }
-      }
-    });
-
-    const ctx = document.getElementById('trendChart').getContext('2d');
-    if (trendChartInstance) trendChartInstance.destroy();
-
-    const chartColor = currentChartType === 'revenue' ? '#8a7968' : '#738276';
-    trendChartInstance = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
-        datasets: [{
-          label: `${selectedYear} 年 (${currentChartType === 'revenue' ? '營收' : '淨利'})`,
-          data: monthlyData,
-          borderColor: chartColor,
-          backgroundColor: currentChartType === 'revenue' ? 'rgba(138, 121, 104, 0.08)' : 'rgba(115, 130, 118, 0.08)',
-          borderWidth: 2, fill: true, tension: 0.3
-        }]
-      },
-      options: { responsive: true, maintainAspectRatio: false }
-    });
-  }
-
-  function manualAddBooking() {
-    const customerName = document.getElementById('newName').value;
-    const date = document.getElementById('newDate').value;
-    const hour = document.getElementById('newHour').value;
-    const minute = document.getElementById('newMinute').value;
-    const time = `${hour}:${minute}`;
-    const items = document.getElementById('newItems').value;
-    const totalPrice = document.getElementById('newPrice').value;
-
-    if (!customerName || !date || !items || !totalPrice) return;
-
-    globalBookings.push({
-      bookingId: 'M' + Date.now().toString().slice(-6),
-      customerName, date, time, items, totalPrice: Number(totalPrice), status: '預約中', cost: 0
-    });
-    renderAllTables();
-
-    document.getElementById('newName').value = "";
-    document.getElementById('newItems').value = "";
-    document.getElementById('newPrice').value = "";
-
-    fetch(scriptUrl.replace('?action=api', ''), { 
-      method: "POST", 
-      mode: "no-cors",
-      body: JSON.stringify({ customerName, date, time, items, totalPrice: Number(totalPrice), cost: 0 }) 
-    });
-  }
-
-  function manualAddAccounting() {
-    const date = document.getElementById('accDate').value;
-    const type = document.getElementById('accType').value;
-    const item = document.getElementById('accItem').value;
-    const amount = document.getElementById('accCost').value;
-
-    if (!date || !item || !amount) return;
-
-    globalAccounting.push({
-      id: 'ACC' + Date.now().toString().slice(-6),
-      date, type, item, amount: Number(amount) || 0
-    });
-    renderAllTables();
-
-    document.getElementById('accItem').value = "";
-    document.getElementById('accCost').value = "0";
-    document.querySelectorAll('.item-pill').forEach(pill => pill.classList.remove('active'));
-
-    fetch(scriptUrl.replace('?action=api', ''), { 
-      method: "POST", 
-      mode: "no-cors",
-      body: JSON.stringify({ action: "addAccounting", date, type, item, amount: Number(amount) || 0 }) 
-    });
-  }
+  B=r.bookings||[];A=r.accountingRecords||[];S=r.schedules||{};M=r.monthlyShiftTypes||{};
+  if(/^\d{4}-\d{2}-\d{2}$/.test(r.anchorDate))ANCHOR=r.anchorDate;
+  renderAll();
+}
+const isPast=(r,now)=>r.status==="預約中"&&r.date&&r.time&&new Date(`${r.date}T${r.time}`)<now;
+
+function renderAll(){
+  renderHistory();renderOverrides();shiftReminder();
+  if(activeYM)showPreview(activeYM);
+  const now=new Date();
+  const rows=B.map((r,i)=>{
+    if(r.status==="已取消")return"";
+    const auto=isPast(r,now),dn=r.status==="已完成"||auto,id=esc(r.bookingId);
+    return`<tr id="b-${id}"><td>${pad(i+1).padStart(3,"0")}</td><td>${esc(r.customerName)}</td><td>${esc(r.date)}</td><td>${esc(r.time)}</td><td>${esc(r.items)}</td><td>NT$ <span>${+r.totalPrice||0}</span></td><td><span class="st ${dn?"done":"wait"}" data-a="toggle" data-id="${id}">${dn?"已完成":"預約中"}${auto?" (自動)":""}</span></td><td><button class="btn-action sm" data-a="bedit" data-id="${id}">✏️</button> <button class="btn-action sm danger" data-a="bcancel" data-id="${id}">刪除</button></td></tr>`;
+  }).join("");
+  $("bookingTableBody").innerHTML=rows||'<tr><td colspan="8" class="loading">目前沒有預約資料</td></tr>';
+  $("accountingTableBody").innerHTML=A.length?A.map((a,i)=>{
+    const inc=a.type==="收入",id=esc(a.id);
+    return`<tr id="a-${id}"><td>${pad(i+1).padStart(3,"0")}</td><td>${esc(a.date)}</td><td><span style="padding:2px 6px;background:${inc?"#f4f0e2":"#fff2f0"};color:${inc?"#7a6a2c":"#cf1322"};border-radius:4px;font-weight:700">${inc?"收入":"支出"}</span></td><td>${esc(a.item)}</td><td>NT$ ${+a.amount||0}</td><td><button class="btn-action sm" data-a="aedit" data-id="${id}">✏️</button> <button class="btn-action sm danger" data-a="adel" data-id="${id}">刪除</button></td></tr>`;
+  }).join(""):'<tr><td colspan="6" class="loading">尚無記帳紀錄</td></tr>';
+  finance();
+}
+
+/* ---------- 預約 ---------- */
+function toggleStatus(id){const b=B.find(x=>x.bookingId===id);if(!b)return;b.status=b.status==="已完成"?"預約中":"已完成";renderAll();bg({action:"update",bookingId:id,status:b.status})}
+function cancelBooking(id){if(!confirm("確定刪除這筆預約？"))return;B=B.filter(x=>x.bookingId!==id);renderAll();bg({action:"update",bookingId:id,status:"已取消"})}
+function editBooking(id){
+  const tr=$("b-"+id),b=B.find(x=>x.bookingId===id);if(!tr||!b)return;
+  tr.children[5].innerHTML=`NT$ <input type="number" id="ip-${esc(id)}" class="inline-input" style="width:70px" value="${+b.totalPrice||0}">`;
+  tr.children[7].innerHTML=`<button class="btn-action sm ok" data-a="bsave" data-id="${esc(id)}">💾</button> <button class="btn-action sm gray" data-a="rerender">✕</button>`;
+}
+function saveBooking(id){
+  const v=parseInt($("ip-"+id).value,10),b=B.find(x=>x.bookingId===id);
+  if(isNaN(v)||v<0||!b)return;
+  b.totalPrice=v;renderAll();bg({action:"updatePrice",bookingId:id,newPrice:v});
+}
+async function manualAddBooking(){
+  const customerName=$("newName").value.trim(),date=$("newDate").value,time=`${$("newHour").value}:${$("newMinute").value}`,items=$("newItems").value.trim(),totalPrice=Number($("newPrice").value);
+  if(!customerName||!date||!items||!$("newPrice").value||totalPrice<0)return alert("請把名稱、日期、項目、金額填完整");
+  const r=await api({action:"addBooking",customerName,date,time,items,totalPrice,cost:0});
+  if(!r||r.result!=="success")return alert((r&&r.message)||"新增失敗");
+  ["newName","newItems","newPrice"].forEach(i=>$(i).value="");fetchData();
+}
+
+/* ---------- 記帳 ---------- */
+function editAcc(id){
+  const a=A.find(x=>x.id===id),tr=$("a-"+id);if(!a||!tr)return;const k=esc(id);
+  tr.children[1].innerHTML=`<input type="date" id="ad-${k}" class="inline-input" value="${esc(a.date)}">`;
+  tr.children[2].innerHTML=`<select id="at-${k}" class="inline-input"><option${a.type==="支出"?" selected":""}>支出</option><option${a.type==="收入"?" selected":""}>收入</option></select>`;
+  tr.children[3].innerHTML=`<input type="text" id="ai-${k}" class="inline-input" maxlength="100" value="${esc(a.item)}">`;
+  tr.children[4].innerHTML=`<input type="number" id="am-${k}" class="inline-input" style="width:70px" value="${+a.amount||0}">`;
+  tr.children[5].innerHTML=`<button class="btn-action sm ok" data-a="asave" data-id="${k}">💾</button> <button class="btn-action sm gray" data-a="rerender">✕</button>`;
+}
+function saveAcc(id){
+  const date=$("ad-"+id).value,type=$("at-"+id).value,item=$("ai-"+id).value.trim(),amount=parseInt($("am-"+id).value,10),a=A.find(x=>x.id===id);
+  if(!date||!item||isNaN(amount)||amount<0||!a)return;
+  Object.assign(a,{date,type,item,amount});renderAll();bg({action:"updateAccounting",id,date,type,item,amount});
+}
+function delAcc(id){if(!confirm("確定刪除這筆記帳？"))return;A=A.filter(x=>x.id!==id);renderAll();bg({action:"deleteAccounting",id})}
+async function manualAddAccounting(){
+  const date=$("accDate").value,type=$("accType").value,item=$("accItem").value.trim(),amount=Number($("accCost").value);
+  if(!date||!item||!(amount>=0))return alert("請把日期、項目、金額填完整");
+  const r=await api({action:"addAccounting",date,type,item,amount});
+  if(!r||r.result!=="success")return alert((r&&r.message)||"新增失敗");
+  $("accItem").value="";$("accCost").value="0";document.querySelectorAll(".item-pill").forEach(p=>p.classList.remove("active"));fetchData();
+}
+
+/* ---------- 營收 / 圖表 ---------- */
+function finance(){
+  let rev=0,cost=0;const now=new Date();
+  B.forEach(r=>{if(r.status==="已取消")return;if(r.status==="已完成"||isPast(r,now))rev+=+r.totalPrice||0;cost+=+r.cost||0});
+  A.forEach(a=>{const n=+a.amount||0;if(a.type==="收入")rev+=n;else cost+=n});
+  $("totalRevenue").textContent=`NT$ ${rev}`;$("totalCost").textContent=`NT$ ${cost}`;$("netProfit").textContent=`NT$ ${rev-cost}`;
+}
+function toggleChart(type){
+  if(copen&&ctype===type){$("chartSection").style.display="none";copen=false;return}
+  ctype=type;copen=true;$("chartSection").style.display="block";
+  $("chartTitle").textContent=type==="revenue"?"📈 年度每月營收趨勢":"📈 年度每月淨利趨勢";
+  const ys=new Set([String(new Date().getFullYear())]);
+  B.forEach(r=>r.date&&ys.add(r.date.split("-")[0]));A.forEach(a=>a.date&&ys.add(a.date.split("-")[0]));
+  $("selectYear").innerHTML=[...ys].sort().reverse().map(y=>`<option value="${esc(y)}">${esc(y)} 年</option>`).join("");
+  renderChart();
+}
+function renderChart(){
+  const y=$("selectYear").value,data=new Array(12).fill(0),now=new Date(),rev=ctype==="revenue";
+  const slot=d=>{const p=(d||"").split("-");return p.length===3&&p[0]===y?parseInt(p[1],10)-1:-1};
+  B.forEach(r=>{if(r.status==="已取消"||!(r.status==="已完成"||isPast(r,now)))return;const m=slot(r.date);if(m>=0)data[m]+=rev?(+r.totalPrice||0):(+r.totalPrice||0)-(+r.cost||0)});
+  A.forEach(a=>{const m=slot(a.date);if(m<0)return;const n=+a.amount||0;if(a.type==="收入")data[m]+=n;else if(!rev)data[m]-=n});
+  if(chart)chart.destroy();
+  const c=rev?"#8a7968":"#a08f5c";
+  chart=new Chart($("trendChart").getContext("2d"),{type:"line",data:{labels:Array.from({length:12},(_,i)=>`${i+1}月`),datasets:[{label:`${y} 年 (${rev?"營收":"淨利"})`,data,borderColor:c,backgroundColor:c+"14",borderWidth:2,fill:true,tension:.3}]},options:{responsive:true,maintainAspectRatio:false}});
+}
+
+/* ---------- 班表 ---------- */
+function shiftReminder(){
+  const t=new Date(),n=new Date(t.getFullYear(),t.getMonth()+1,1),ym=`${n.getFullYear()}-${pad(n.getMonth()+1)}`,el=$("adminShiftReminder");
+  if(t.getDate()>=12&&!M[ym]){el.textContent=`🚨 提醒：今天是 ${t.getDate()} 號，尚未設定下個月 (${ym}) 班表！`;el.style.display="block"}else el.style.display="none";
+}
+function renderHistory(){
+  const ks=Object.keys(M).sort();
+  $("historyList").innerHTML=ks.length?ks.map(k=>`<div class="history-item${activeYM===k?" active":""}" data-a="hist" data-id="${esc(k)}"><div>📅 ${esc(k)}</div><div class="badge">${esc(M[k].shiftGroup)}組/${esc(M[k].shiftType)}</div></div>`).join(""):'<span class="muted">尚無設定紀錄</span>';
+}
+function showPreview(ym){
+  activeYM=ym;renderHistory();
+  const it=M[ym]||{shiftGroup:"B",shiftType:"夜班"};
+  $("previewContainer").style.display="block";
+  $("previewTitle").textContent=`🗓️ 預覽 ${ym} (${it.shiftGroup}組/${it.shiftType})`;
+  const[y,m]=ym.split("-").map(Number),[ay,am,ad]=ANCHOR.split("-").map(Number);
+  if(picker)picker.destroy();
+  picker=flatpickr("#inlinePreviewCalendar",{inline:true,locale:"zh",defaultDate:new Date(y,m-1,1),
+    onDayCreate:(a,b,fp,el)=>{
+      const d=el.dateObj,ds=ymd(d);if(ds.slice(0,7)!==ym)return;
+      const s=S[ds];let ok;
+      if(s&&s.status==="開放")ok=true;else if(s&&s.status==="關閉")ok=false;
+      else{let c=((Math.round((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(ay,am-1,ad))/864e5)%4)+4)%4;if(it.shiftGroup==="A")c=(c+2)%4;ok=!(c===0||c===1)}
+      if(ok)el.classList.add(it.shiftType==="白班"?"available-day-yellow":"available-day-blue");
+    }});
+}
+function renderOverrides(){
+  const ds=Object.keys(S).sort();
+  $("overrideRecordContainer").innerHTML=ds.length?`<table><tr><th>日期</th><th>狀態</th><th>操作</th></tr>${ds.map(d=>`<tr><td>${esc(d)}</td><td>${S[d].status==="開放"?"開放":"關閉"}</td><td><button class="btn-action sm danger" data-a="sdel" data-id="${esc(d)}">刪除</button></td></tr>`).join("")}</table>`:'<span class="muted">尚無微調紀錄</span>';
+}
+function delOverride(d){delete S[d];renderOverrides();if(activeYM)showPreview(activeYM);bg({action:"deleteSchedule",targetDate:d})}
+function saveMonthlyShift(){
+  const targetMonth=$("targetMonth").value,shiftGroup=$("shiftGroup").value,shiftType=$("shiftType").value;
+  if(!targetMonth)return;
+  M[targetMonth]={shiftGroup,shiftType};showPreview(targetMonth);shiftReminder();
+  bg({action:"updateBaseShift",targetMonth,shiftGroup,shiftType,monthlyShiftTypes:M});
+}
+function updateScheduleOverride(){
+  const targetDate=$("scheduleDate").value,status=$("scheduleStatus").value;
+  if(!targetDate)return;
+  S[targetDate]={status,slots:""};renderOverrides();if(activeYM)showPreview(activeYM);
+  bg({action:"updateSchedule",targetDate,status});
+}
 </script>
-
 </body>
 </html>
