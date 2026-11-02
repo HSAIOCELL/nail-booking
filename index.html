@@ -423,12 +423,14 @@ function setOpts(sel,arr,f){sel.textContent="";arr.forEach(v=>{const o=document.
 function validateTime(){
   const hs=$("bookingHour"),ms=$("bookingMinute"),ds=$("bookingDate").value;if(!ds)return;
   const pH=hs.value,pM=ms.value,si=bSched[ds];
-  const allowed=si&&typeof si.slots==="string"?si.slots.split(",").map(x=>x.trim().split(":")[0]):null;
+  /* 只有真的有填「可用時段」才限制小時；空白＝整天都可以約（之前空白會被當成「沒有任何時段」） */
+  const slotStr=si&&typeof si.slots==="string"?si.slots.trim():"";
+  const allowed=slotStr?slotStr.split(",").map(x=>x.trim()).filter(Boolean).map(x=>pad(x.split(":")[0])):null;
   const now=getTaipeiDate(),isToday=ds===fmt(now),cH=now.getHours(),cM=now.getMinutes(),MINS=[0,15,30,45];
   const okMin=(h,m)=>!(isToday&&h===cH&&m<=cM)&&!isTimeBlocked(ds,h,m);
   const hours=[];
   for(let h=0;h<24;h++){if(isToday&&h<cH)continue;if(allowed&&!allowed.includes(pad(h)))continue;if(!MINS.some(m=>okMin(h,m)))continue;hours.push(pad(h))}
-  if(!hours.length){setOpts(hs,[""],()=>"今日已無可預約時段");setOpts(ms,[""],()=>"無");return}
+  if(!hours.length){setOpts(hs,[""],()=>isToday?"今日已無可預約時段":"這天已約滿");setOpts(ms,[""],()=>"無");return}
   setOpts(hs,hours,v=>v+" 時");hs.value=hours.includes(pH)?pH:hours[0];
   const mins=MINS.filter(m=>okMin(+hs.value,m)).map(pad);
   if(!mins.length){setOpts(ms,[""],()=>"無");return}
