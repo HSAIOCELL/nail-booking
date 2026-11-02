@@ -134,15 +134,26 @@ details.box[open] summary{margin-bottom:12px}
 .d.off{color:#b9ad9f}
 .d.ya{background:#fbefcf;color:#8a621a;border-color:#e6c47a}
 .d.yb{background:var(--blue-bg);color:var(--blue-ink);border-color:var(--blue-line)}
-.d.man::after{content:"";position:absolute;top:1px;right:1px;width:8px;height:8px;border-radius:50%;background:var(--rose);border:1.5px solid #fff}
-.d.man.off{text-decoration:line-through;text-decoration-color:var(--rose)}
+.d.man::after{content:"";position:absolute;top:1px;right:1px;width:8px;height:8px;border-radius:50%;background:var(--gold);border:1.5px solid #fff}
+.d.man.off{text-decoration:line-through;text-decoration-color:var(--gold)}
 .d.today{box-shadow:0 0 0 2px var(--ink)}
 .d.past{opacity:.38;cursor:default}
-.d .bk-dot{position:absolute;bottom:3px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--ink)}
+.d.has{font-weight:700}
+.d .bk-n{position:absolute;right:-5px;bottom:-4px;min-width:19px;height:19px;padding:0 4px;border-radius:10px;background:var(--rose);color:#fff;border:1.6px solid #fff;font-size:11.5px;line-height:16px;font-weight:700;font-style:normal;text-align:center;box-shadow:1px 1px 0 rgba(75,64,57,.15)}
+.mb{margin-top:14px}
+.mb h4{margin:0 0 8px;font-size:15px;display:flex;align-items:center;gap:6px}
+.mb .dg{display:flex;gap:10px;padding:9px 4px;border-bottom:1px dashed #d8cdbd}
+.mb .dg:last-child{border-bottom:0}
+.mb .dt{flex:0 0 64px;text-align:center;background:var(--rose-bg);color:var(--rose);border-radius:12px 9px 13px 8px;padding:5px 0;font-weight:700;line-height:1.25;align-self:flex-start}
+.mb .dt small{display:block;font-weight:400;font-size:12px}
+.mb .it{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.mb .it div{display:flex;justify-content:space-between;gap:8px;font-size:14.5px}
+.mb .it span:first-child{white-space:nowrap;color:var(--soft)}
+.mb .it b{font-weight:400;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .d.empty-cell{visibility:hidden;cursor:default}
 .lg{display:flex;gap:6px 14px;justify-content:center;flex-wrap:wrap;margin:10px 0 2px;font-size:13px;color:var(--soft)}
 .lg i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:5px;vertical-align:-1px;border:1.2px solid transparent}
-.lg i.a{background:#fbefcf;border-color:#e6c47a}.lg i.b{background:var(--blue-bg);border-color:var(--blue-line)}.lg i.m{background:var(--rose);width:8px;height:8px;vertical-align:1px}.lg i.k{background:var(--ink);width:6px;height:6px;vertical-align:2px}
+.lg i.a{background:#fbefcf;border-color:#e6c47a}.lg i.b{background:var(--blue-bg);border-color:var(--blue-line)}.lg i.m{background:var(--gold);width:8px;height:8px;vertical-align:1px}.lg i.k{background:var(--rose);border-color:#fff;box-shadow:0 0 0 1px var(--rose)}
 .sum{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px}
 .sum span{font-size:13.5px;padding:4px 12px;border-radius:12px 9px 13px 8px;background:#f3ebdf}
 .sh-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
@@ -239,9 +250,11 @@ details.box[open] summary{margin-bottom:12px}
         <div class="cal-wd"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
         <div class="cal-g" id="calGrid"></div>
       </div>
-      <div class="lg"><span><i class="a"></i>白班可約</span><span><i class="b"></i>夜班可約</span><span><i class="m"></i>手動調整</span><span><i class="k"></i>有預約</span></div>
+      <div class="lg"><span><i class="a"></i>白班可約</span><span><i class="b"></i>夜班可約</span><span><i class="m"></i>手動調整</span><span><i class="k"></i>有預約（數字＝筆數）</span></div>
       <div class="sum" id="shSum"></div>
       <p class="muted" style="text-align:center;margin:10px 0 0">點日期就能切換「可約 ↔ 休息」，會自動儲存。<br>再點一次就恢復原本班表。</p>
+      <div class="mb" id="shBk"></div>
+
     </div>
   </section>
 
@@ -608,16 +621,21 @@ function renderCal(){
   for(let d=1;d<=days;d++){
     const ds=`${shYM}-${pad(d)}`,o=dayOpen(ds,sh.shiftGroup),mn=!!S[ds],past=ds<today;
     if(o)open++;if(mn)man++;
-    const cls=["d",o?(sh.shiftType==="白班"?"ya":"yb"):"off",mn?"man":"",ds===today?"today":"",past?"past":""].join(" ");
-    h+=`<button type="button" class="${cls}" data-a="day" data-id="${ds}" aria-label="${m}月${d}日 ${o?"可約":"休息"}${cnt[ds]?"，有"+cnt[ds]+"筆預約":""}">${d}${cnt[ds]?'<i class="bk-dot"></i>':""}</button>`;
+    const cls=["d",cnt[ds]?"has":"",o?(sh.shiftType==="白班"?"ya":"yb"):"off",mn?"man":"",ds===today?"today":"",past?"past":""].join(" ");
+    h+=`<button type="button" class="${cls}" data-a="day" data-id="${ds}" aria-label="${m}月${d}日 ${o?"可約":"休息"}${cnt[ds]?"，有"+cnt[ds]+"筆預約":""}">${d}${cnt[ds]?`<i class="bk-n">${cnt[ds]}</i>`:""}</button>`;
   }
   $("calGrid").innerHTML=h;
   const bk=Object.values(cnt).reduce((a,b)=>a+b,0);
   $("shSum").innerHTML=`<span>可約 ${open} 天</span><span>休息 ${days-open} 天</span>${man?`<span>手動調整 ${man} 天</span>`:""}${bk?`<span>預約 ${bk} 筆</span>`:""}`;
+  const by={};B.filter(b=>b.status!=="已取消"&&b.date&&b.date.slice(0,7)===shYM).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).forEach(b=>(by[b.date]=by[b.date]||[]).push(b));
+  const dks=Object.keys(by);
+  $("shBk").innerHTML=dks.length?`<h4>${ic("list")}這個月的預約</h4>`+dks.map(ds=>{const t=new Date(ds+"T00:00");return`<div class="dg"><div class="dt">${t.getMonth()+1}/${t.getDate()}<small>週${WD[t.getDay()]}</small></div><div class="it">${by[ds].map(b=>`<div><span>${esc(b.time||"--:--")}</span><b>${esc(b.customerName||"（未填名稱）")}</b></div>`).join("")}</div></div>`}).join(""):"";
 }
-function tapDay(ds){
+async function tapDay(ds){
   if(ds<ymd(new Date()))return;
   const sh=curShift(shYM),now=dayOpen(ds,sh.shiftGroup),want=!now;
+  const n=B.filter(b=>b.status!=="已取消"&&b.date===ds).length;
+  if(!want&&n&&!await ask(`這天已經有 ${n} 筆預約，\n確定要改成休息嗎？\n（已有的預約不會被刪除）`))return;
   if(want===baseOpen(ds,sh.shiftGroup)){delete S[ds];bg({action:"deleteSchedule",targetDate:ds})}
   else{S[ds]={status:want?"開放":"關閉",slots:""};bg({action:"updateSchedule",targetDate:ds,status:want?"開放":"關閉"})}
   renderCal();
