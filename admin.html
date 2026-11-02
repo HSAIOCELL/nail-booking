@@ -231,7 +231,7 @@ details.box[open] summary{margin-bottom:12px}
 
     <div class="cc">
       <h3><svg class="ic"><use href="#i-coin"/></svg>客人真實利潤</h3>
-      <div class="muted">扣掉你的時薪、材料、房租分攤、電費之後，這個月做客人真正賺多少</div>
+      <div class="muted">依每位客人的款式，扣掉你的時薪、材料、房租分攤、電費之後，這個月做客人真正賺多少</div>
       <div class="three"><div><span>客人數</span><b id="cN">0</b></div><div><span>成本合計</span><b id="cC">NT$ 0</b></div><div><span>真實利潤</span><b id="cP">NT$ 0</b></div></div>
       <div class="cl" id="cOne"></div>
     </div>
@@ -464,38 +464,69 @@ async function fetchData(){
 const isPast=(r,now)=>r.status==="預約中"&&r.date&&r.time&&new Date(`${r.date}T${r.time}`)<now;
 function renderAll(){MS={};renderStats();renderBookings();renderAcc();shiftReminder();if($("calGrid"))renderCal()}
 
-/* ---------- 每位客人成本（要改數字跟 Claude 說，或直接改這裡） ---------- */
+/* ---------- 每位客人成本：依預約款式自動判斷工時與材料（要改數字跟 Claude 說，或直接改這裡） ---------- */
 const COST={
-  hours:5.5,          // 一位客人平均做幾小時（5～6 小時）
   wage:196,           // 時薪：2026 年基本工資
   kwhPrice:6,         // 每度電費（租屋常見 5～6 元）
   rentShare:1600,     // 每月房租分攤（自訂）
   perMonth:3,         // 每月大約幾位客人一起分攤房租
   summer:[6,7,8,9],   // 開冷氣的月份
   watt:{device:51,light:25,fan:40,ac:1000}, // 設備平均功率、電燈、電風扇、冷氣（瓦）
-  material:{base:10,color:12,builder:25,top:10,tools:8,supply:30} // 每位客人材料粗估（元）
+  // 工時（小時）：單色 3、卸甲另加 2（卸甲＋單色＝5）、只卸甲 2
+  hours:{solo:3,removal:2,removalOnly:2,jump:0.25},
+  // 基本材料（元）：有做凝膠才算
+  mat:{base:10,color:12,builder:25,top:10,tools:8,supply:15,removal:15,jump:6},
+  // 造型：[局部工時, 十指工時, 局部材料, 十指材料]
+  //  貓眼：一罐約 120～360 元（取 240）、約 6g；十指約用 0.4g → 約 16 元，局部約 6 元
+  //  暈染：暈染膠一罐約 150 元、約 7.5g；十指約用 0.3g → 約 6 元，局部約 3 元
+  style:{
+    "貓眼":[0.25,0.5,6,16],"暈染":[0.5,1,3,6],"法式":[0.3,0.75,3,6],"漸層":[0.3,0.75,3,6],
+    "鏡面銀":[0.25,0.5,4,10],"格紋":[0.5,1,3,6],"海莉款":[0.5,1,4,8],"小飾品/貼紙":[0.25,0.5,10,25],
+    "立體不規則造型":[0.5,1.25,8,20],"指定圖案":[0.5,1.5,5,12]
+  }
 };
-const MAT_NAMES={base:"底膠",color:"色膠",builder:"建構膠",top:"上層膠",tools:"筆、磁鐵等工具折舊",supply:"消耗品（卸甲液、棉片、錫箔、磨棒）"};
-function costOf(dateStr){
-  const m=+String(dateStr||"").slice(5,7),h=COST.hours,k=w=>w*h/1000*COST.kwhPrice;
-  const mat=Object.values(COST.material).reduce((a,b)=>a+b,0);
-  const r={wage:COST.wage*h,material:mat,rent:COST.rentShare/Math.max(1,COST.perMonth),device:k(COST.watt.device),light:k(COST.watt.light),fan:k(COST.watt.fan),ac:COST.summer.includes(m)?k(COST.watt.ac):0};
-  r.total=Object.values(r).reduce((a,b)=>a+b,0);return r;
+function parseSvc(items){
+  const t=String(items||""),o={removal:t.includes("卸甲"),main:/單色/.test(t),jump:/跳色/.test(t),type:"",styles:[]};
+  const m=t.match(/(局部造型|十指造型)\s*[:：]\s*([^/]+)/);
+  if(m){o.type=m[1];o.styles=m[2].split(/[,，、]/).map(x=>x.trim()).filter(x=>COST.style[x])}
+  else Object.keys(COST.style).forEach(k=>{if(t.includes(k))o.styles.push(k)});
+  if(!o.type&&o.styles.length)o.type="局部造型";
+  if(!o.main&&(o.jump||o.type))o.main=true;
+  if(!o.removal&&!o.main)o.main=true; // 手動輸入看不出來時，當作單色
+  return o;
 }
-const COST_ROWS=[["wage",()=>`時薪 ${COST.wage} × ${COST.hours} 小時`],["material","材料（粗估）"],["rent",()=>`房租分攤 ${COST.rentShare} ÷ ${COST.perMonth} 位`],["device","設備電費"],["light","電燈"],["fan","電風扇"],["ac","冷氣（夏天）"]];
+function costOf(b){
+  const o=parseSvc(b.items),H=COST.hours,M=COST.mat,full=o.type==="十指造型",mm=+String(b.date||"").slice(5,7);
+  let hours=0;const mat=[];
+  if(o.main){
+    hours=H.solo+(o.removal?H.removal:0);
+    mat.push(["底膠",M.base],["色膠",M.color],["建構膠",M.builder],["上層膠",M.top],["筆、磁鐵等工具折舊",M.tools],["基本消耗品（磨棒、酒精、紙巾）",M.supply]);
+    if(o.jump){hours+=H.jump;mat.push(["跳色色膠",M.jump])}
+    o.styles.forEach(k=>{const s=COST.style[k];hours+=full?s[1]:s[0];mat.push([`${k}（${full?"十指":"局部"}）`,full?s[3]:s[2]])});
+  }else hours=H.removalOnly;
+  if(o.removal)mat.push(["卸甲耗材（卸甲液、棉片、錫箔）",M.removal]);
+  const k=w=>w*hours/1000*COST.kwhPrice,material=mat.reduce((a,x)=>a+x[1],0);
+  const r={hours,mat,wage:COST.wage*hours,material,rent:COST.rentShare/Math.max(1,COST.perMonth),device:k(COST.watt.device),light:k(COST.watt.light),fan:k(COST.watt.fan),ac:COST.summer.includes(mm)?k(COST.watt.ac):0};
+  r.total=r.wage+r.material+r.rent+r.device+r.light+r.fan+r.ac;return r;
+}
 const m1=n=>"NT$ "+(n<10&&n>0?n.toFixed(1):Math.round(n).toLocaleString("en-US"));
 function costList(c,price){
-  return COST_ROWS.filter(([k])=>k!=="ac"||c.ac).map(([k,l])=>`<div><span>${typeof l==="function"?l():l}</span><span>${m1(c[k])}</span></div>`).join("")+
+  const rows=[[`時薪 ${COST.wage} × ${c.hours} 小時`,c.wage],["材料",c.material],[`房租分攤 ${COST.rentShare} ÷ ${COST.perMonth} 位`,c.rent],["設備電費",c.device],["電燈",c.light],["電風扇",c.fan]];
+  if(c.ac)rows.push(["冷氣（夏天）",c.ac]);
+  return rows.map(([l,v])=>`<div><span>${l}</span><span>${m1(v)}</span></div>`).join("")+
+    `<small>材料：${c.mat.map(([n,v])=>`${esc(n)} ${v}`).join("、")}</small>`+
     `<div class="tt"><span>成本合計</span><span>${money(c.total)}</span></div>`+(price!=null?`<div class="tt"><span>這筆利潤</span><span class="${price-c.total<0?"neg":"pos"}">${price-c.total<0?"-":""}${money(Math.abs(price-c.total))}</span></div>`:"");
 }
+const EXAMPLES=[["單色（不卸甲）","單色款式: 粉色"],["卸甲＋單色","需要卸甲 / 單色款式: 粉色"],["卸甲＋單色＋局部貓眼","需要卸甲 / 單色款式: 粉色 / 局部造型: 貓眼"],["卸甲＋單色＋十指暈染","需要卸甲 / 單色款式: 粉色 / 十指造型: 暈染"],["只卸甲","需要卸甲"]];
 function renderCost(){
   const now=new Date(),list=B.filter(b=>b.status!=="已取消"&&b.date&&b.date.slice(0,7)===selYM&&(b.status==="已完成"||isPast(b,now)));
-  let cost=0,rev=0;list.forEach(b=>{cost+=costOf(b.date).total;rev+=+b.totalPrice||0});
+  let cost=0,rev=0;list.forEach(b=>{cost+=costOf(b).total;rev+=+b.totalPrice||0});
   $("cN").textContent=list.length+" 位";$("cC").textContent=money(cost);
   const p=rev-cost;$("cP").textContent=(p<0?"-":"")+money(Math.abs(p));$("cP").className=p<0?"neg":"pos";
-  const c=costOf(selYM+"-01");
-  $("cOne").innerHTML=`<div style="font-weight:700;color:var(--ink)"><span style="color:var(--ink)">一位客人的成本（${+selYM.slice(5)} 月）</span><span></span></div>`+costList(c)+
-    `<small>材料明細：${Object.entries(COST.material).map(([k,v])=>`${MAT_NAMES[k]} ${v}`).join("、")}。功能膠由學費贈送，不另計。</small>`;
+  const d=selYM+"-15";
+  $("cOne").innerHTML=`<div style="font-weight:700"><span style="color:var(--ink)">常見款式的成本參考（${+selYM.slice(5)} 月）</span><span></span></div>`+
+    EXAMPLES.map(([n,it])=>{const c=costOf({items:it,date:d});return`<div><span>${n}・${c.hours} 小時</span><span>${money(c.total)}</span></div>`}).join("")+
+    `<small>每筆預約會依客人選的款式自動判斷工時和材料，到「預約」頁點「明細 ›」看每一項。</small>`;
 }
 
 /* ---------- 營收 ---------- */
@@ -566,7 +597,7 @@ function renderBookings(){
   const list=(bkAll?live:live.filter(r=>r.date&&r.date.slice(0,7)===bkYM)).sort((a,b)=>((b.date||"")+(b.time||"")).localeCompare((a.date||"")+(a.time||"")));
   $("bookingList").innerHTML=list.length?list.map(r=>{
     const dn=r.status==="已完成"||isPast(r,now),id=esc(r.bookingId);
-    return`<div class="bk" id="b-${id}"><div class="bk-top"><b>${esc(r.customerName||"（未填名稱）")}</b><span class="st ${dn?"done":"wait"}" data-a="toggle" data-id="${id}">${dn?"已完成":"預約中"}</span></div><div class="bk-m">${esc(r.date||"日期不明")}　${esc(r.time)}</div><div class="bk-i">${esc(r.items)}</div><div class="bk-bot"><span class="pr">${money(+r.totalPrice||0)}</span><span class="act">${ib("bedit",id,"pencil","改金額")}${ib("bcancel",id,"trash","刪除","danger")}</span></div>${(()=>{const c=costOf(r.date),pf=(+r.totalPrice||0)-c.total;return`<div class="bk-c" data-a="cshow" data-id="${id}"><span>成本 ${money(c.total)}</span><span>利潤 <b class="${pf<0?"neg":"pos"}">${pf<0?"-":""}${money(Math.abs(pf))}</b>　明細 ›</span></div><div class="cl" id="cl-${id}" hidden>${costList(c,+r.totalPrice||0)}</div>`})()}</div>`;
+    return`<div class="bk" id="b-${id}"><div class="bk-top"><b>${esc(r.customerName||"（未填名稱）")}</b><span class="st ${dn?"done":"wait"}" data-a="toggle" data-id="${id}">${dn?"已完成":"預約中"}</span></div><div class="bk-m">${esc(r.date||"日期不明")}　${esc(r.time)}</div><div class="bk-i">${esc(r.items)}</div><div class="bk-bot"><span class="pr">${money(+r.totalPrice||0)}</span><span class="act">${ib("bedit",id,"pencil","改金額")}${ib("bcancel",id,"trash","刪除","danger")}</span></div>${(()=>{const c=costOf(r),pf=(+r.totalPrice||0)-c.total;return`<div class="bk-c" data-a="cshow" data-id="${id}"><span>成本 ${money(c.total)}</span><span>利潤 <b class="${pf<0?"neg":"pos"}">${pf<0?"-":""}${money(Math.abs(pf))}</b>　明細 ›</span></div><div class="cl" id="cl-${id}" hidden>${costList(c,+r.totalPrice||0)}</div>`})()}</div>`;
   }).join(""):`<div class="empty">${B.length?"這個月沒有預約":"沒有預約資料"}</div>`;
 }
 function toggleStatus(id){const b=B.find(x=>x.bookingId===id);if(!b)return;b.status=b.status==="已完成"?"預約中":"已完成";renderAll();bg({action:"update",bookingId:id,status:b.status})}
