@@ -6,9 +6,6 @@
 <meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>後台管理</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" crossorigin="anonymous"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/zh.js" crossorigin="anonymous"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&display=swap" rel="stylesheet">
@@ -126,35 +123,30 @@ details.box[open] summary{margin-bottom:12px}
 .ef{display:grid;gap:6px;width:100%}
 .sec{margin-bottom:16px}
 
-/* 班表 */
-.hist{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:8px}
-.hist div.h{padding:9px 6px;text-align:center;border:1.4px dashed #b9aa9b;border-radius:14px 10px 15px 9px;background:#fff;cursor:pointer;font-size:14.5px}
-.hist div.h.on{border-style:solid;border-color:#5d7a94;background:var(--blue-bg)}
-.hist small{display:block;margin-top:2px;color:var(--soft)}
-.flatpickr-calendar{background:var(--paper)!important;border:1.6px solid var(--line)!important;box-shadow:3px 4px 0 var(--sand)!important;border-radius:20px 16px 22px 14px!important;margin:6px auto 0;width:100%!important;max-width:340px}
-.flatpickr-calendar.inline .dayContainer,.flatpickr-calendar .flatpickr-innerContainer,.flatpickr-calendar .flatpickr-rContainer,.flatpickr-days{width:100%!important;min-width:0!important;max-width:none!important}
-.flatpickr-calendar .dayContainer{display:grid!important;grid-template-columns:repeat(7,1fr);gap:3px 0;padding:2px 4px 6px;justify-items:center}
-.flatpickr-calendar .flatpickr-weekdays{width:100%!important}
-.flatpickr-months{min-height:50px;align-items:center}
-.flatpickr-months .flatpickr-month{height:50px!important;overflow:visible!important}
-.flatpickr-months .flatpickr-prev-month,.flatpickr-months .flatpickr-next-month{height:50px!important;display:flex;align-items:center;justify-content:center}
-.flatpickr-current-month{position:static!important;width:100%!important;height:50px!important;padding:0!important;line-height:1!important;font-size:17px!important;display:flex!important;align-items:center;justify-content:center;gap:6px}
-.flatpickr-calendar select.flatpickr-monthDropdown-months{min-height:0;width:auto;height:auto;padding:2px 4px;margin:0;border:0;border-radius:0;background:none!important;box-shadow:none;font:700 17px/1.3 inherit;font-family:inherit;color:var(--ink);appearance:none;-webkit-appearance:none;text-align:center}
-.flatpickr-calendar .numInputWrapper{width:auto!important;height:auto!important}
-.flatpickr-calendar input.numInput.cur-year{min-height:0;width:4.4ch;height:auto;padding:2px 0;margin:0;border:0;border-radius:0;background:none;box-shadow:none;font:700 17px/1.3 inherit;font-family:inherit;color:var(--ink);text-align:center}
-.flatpickr-calendar .numInputWrapper span{display:none!important}
-.flatpickr-day{width:min(40px,100%)!important;max-width:none!important;flex-basis:auto!important;height:auto!important;aspect-ratio:1/1;line-height:1!important;margin:0!important;display:flex!important;align-items:center;justify-content:center;border-radius:50%!important}
-.flatpickr-day.ya{background:#fbefcf!important;color:#9a6d1c!important;border:1.4px solid #e6c47a!important;border-radius:50%!important}
-.flatpickr-day.yb{background:var(--blue-bg)!important;color:var(--blue-ink)!important;border:1.4px solid var(--blue-line)!important;border-radius:50%!important}
-.flatpickr-day.ov-o{box-shadow:inset 0 0 0 2px var(--blue)!important;border-radius:50%!important}
-.flatpickr-day.ov-c{background:var(--rose-bg)!important;color:var(--rose)!important;text-decoration:line-through;border-radius:50%!important}
-.flatpickr-day.selected{background:var(--ink)!important;color:#fff!important;border-color:var(--ink)!important;border-radius:50%!important}
-.lg{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:8px 0;font-size:13px;color:var(--soft)}
-.lg i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:5px;vertical-align:-1px}
-.ov{display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px dashed #d8cdbd}
-.ov span:first-child{flex:1}
-.tag{display:inline-block;padding:2px 11px;border-radius:12px 9px 13px 8px;font-size:13.5px}.tag.o{background:var(--blue-bg);color:var(--blue-ink)}.tag.c{background:var(--rose-bg);color:var(--rose)}
-.pick{text-align:center;font-size:15.5px;margin:6px 0 10px;min-height:24px}.pick:empty{display:none}
+/* 班表（單一月曆：班別＋點日期微調） */
+.cal{margin-top:12px;background:#fff;border:1.6px solid var(--line);border-radius:20px 16px 22px 14px;box-shadow:3px 4px 0 var(--sand);padding:10px 6px 8px}
+.cal-wd,.cal-g{display:grid;grid-template-columns:repeat(7,1fr);justify-items:center}
+.cal-wd span{font-size:13px;color:var(--soft);padding:2px 0 6px}
+.cal-wd span:first-child,.cal-wd span:last-child{color:#b5847a}
+.cal-g{row-gap:6px}
+.d{position:relative;width:100%;max-width:42px;aspect-ratio:1/1;height:auto;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;font-size:16px;border:1.4px solid transparent;background:transparent;color:var(--ink);cursor:pointer;transition:transform .12s,background-color .15s}
+.d:active{transform:scale(.9);transition:none}
+.d.off{color:#b9ad9f}
+.d.ya{background:#fbefcf;color:#8a621a;border-color:#e6c47a}
+.d.yb{background:var(--blue-bg);color:var(--blue-ink);border-color:var(--blue-line)}
+.d.man::after{content:"";position:absolute;top:1px;right:1px;width:8px;height:8px;border-radius:50%;background:var(--rose);border:1.5px solid #fff}
+.d.man.off{text-decoration:line-through;text-decoration-color:var(--rose)}
+.d.today{box-shadow:0 0 0 2px var(--ink)}
+.d.past{opacity:.38;cursor:default}
+.d .bk-dot{position:absolute;bottom:3px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--ink)}
+.d.empty-cell{visibility:hidden;cursor:default}
+.lg{display:flex;gap:6px 14px;justify-content:center;flex-wrap:wrap;margin:10px 0 2px;font-size:13px;color:var(--soft)}
+.lg i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:5px;vertical-align:-1px;border:1.2px solid transparent}
+.lg i.a{background:#fbefcf;border-color:#e6c47a}.lg i.b{background:var(--blue-bg);border-color:var(--blue-line)}.lg i.m{background:var(--rose);width:8px;height:8px;vertical-align:1px}.lg i.k{background:var(--ink);width:6px;height:6px;vertical-align:2px}
+.sum{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.sum span{font-size:13.5px;padding:4px 12px;border-radius:12px 9px 13px 8px;background:#f3ebdf}
+.sh-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.unsaved{font-size:13px;color:var(--rose);text-align:center;margin-top:6px}
 
 /* 提示框 */
 .dlg{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(75,64,57,.3);animation:fade .15s ease-out}
@@ -232,32 +224,24 @@ details.box[open] summary{margin-bottom:12px}
   <!-- ===== 班表 ===== -->
   <section id="tab-schedule" class="pane">
     <div class="box">
-      <h3><svg class="ic"><use href="#i-cal"/></svg>月份班別</h3>
+      <h3><svg class="ic"><use href="#i-cal"/></svg>班表</h3>
       <div class="step">
         <button class="ib" type="button" data-a="ym" data-id="sh" data-d="-1" aria-label="上個月"><svg class="ic"><use href="#i-l"/></svg></button>
         <b id="lbl-sh"></b>
         <button class="ib" type="button" data-a="ym" data-id="sh" data-d="1" aria-label="下個月"><svg class="ic"><use href="#i-r"/></svg></button>
       </div>
-      <div class="two" style="margin-top:12px">
-        <div class="sg blue" id="sgG"><button type="button" data-a="shg" data-id="B">B 組</button><button type="button" data-a="shg" data-id="A">A 組</button></div>
-        <div class="sg blue" id="sgT"><button type="button" data-a="sht" data-id="夜班">夜班</button><button type="button" data-a="sht" data-id="白班">白班</button></div>
+      <div class="sh-row">
+        <div class="sg blue" id="sgG"><button type="button" data-a="shg" data-id="A">A 組</button><button type="button" data-a="shg" data-id="B">B 組</button></div>
+        <div class="sg blue" id="sgT"><button type="button" data-a="sht" data-id="白班">白班</button><button type="button" data-a="sht" data-id="夜班">夜班</button></div>
       </div>
-      <div id="previewContainer" style="margin:12px 0 4px;text-align:center">
-        <input type="text" id="inlinePreviewCalendar" style="display:none">
+      <div class="unsaved" id="shUnset" hidden>這個月還沒設定班別，點上面的組別／班別就會套用</div>
+      <div class="cal">
+        <div class="cal-wd"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+        <div class="cal-g" id="calGrid"></div>
       </div>
-      <button class="btn blue full" type="button" onclick="saveMonthlyShift()"><svg class="ic"><use href="#i-check"/></svg>儲存這個月的班別</button>
-      <div class="muted" style="margin-top:14px">已設定的月份</div>
-      <div id="historyList" class="hist"></div>
-    </div>
-
-    <div class="box">
-      <h3><svg class="ic"><use href="#i-pencil"/></svg>日期微調</h3>
-      <input type="text" id="ovCalIn" style="display:none">
-      <div class="pick" id="ovPick"></div>
-      <div class="sg" id="sgO"><button type="button" data-a="ovs" data-id="開放">開放預約</button><button type="button" data-a="ovs" data-id="關閉">關閉預約</button></div>
-      <button class="btn full" type="button" id="ovSave" style="margin-top:10px" onclick="updateScheduleOverride()" disabled><svg class="ic"><use href="#i-check"/></svg>儲存這一天</button>
-      <div class="muted" style="margin:14px 0 4px">已微調的日期</div>
-      <div id="overrideRecordContainer" style="max-height:230px;overflow:auto"></div>
+      <div class="lg"><span><i class="a"></i>白班可約</span><span><i class="b"></i>夜班可約</span><span><i class="m"></i>手動調整</span><span><i class="k"></i>有預約</span></div>
+      <div class="sum" id="shSum"></div>
+      <p class="muted" style="text-align:center;margin:10px 0 0">點日期就能切換「可約 ↔ 休息」，會自動儲存。<br>再點一次就恢復原本班表。</p>
     </div>
   </section>
 
@@ -355,9 +339,9 @@ const shiftYM=(ym,d)=>{const[y,m]=ym.split("-").map(Number),t=new Date(y,m-1+d,1
 const ymLabel=ym=>{const[y,m]=ym.split("-");return`${y} 年 ${+m} 月`};
 const WD=["日","一","二","三","四","五","六"];
 
-let B=[],A=[],F=[],S={},M={},ANCHOR="2026-10-23",chart=null,picker=null,ovPicker=null,MS={};
+let B=[],A=[],F=[],S={},M={},ANCHOR="2026-10-23",chart=null,MS={};
 let bkAll=false,firstLoad=true;
-let selYM=curYM,accYM=curYM,bkYM=curYM,cmode="revenue",accType="支出",ovDate="",ovStatus="開放";
+let selYM=curYM,accYM=curYM,bkYM=curYM,cmode="revenue",accType="支出";
 let shYM=ymd(new Date()).slice(8)>="12"?shiftYM(curYM,1):curYM,shGroup="B",shType="夜班";
 const CHIPS={"支出":["材料費","房租","上課費","美甲膠","訂閱費"],"收入":["美甲收入","卸甲收入"]};
 const FX_CHIPS=["房租","訂閱費","水電","網路"];
@@ -409,14 +393,14 @@ document.addEventListener("DOMContentLoaded",async()=>{
   $("fxChips").innerHTML=FX_CHIPS.map(n=>`<span class="chip" data-a="fxchip" data-id="${esc(n)}">${esc(n)}</span>`).join("");
   document.body.addEventListener("click",onClick);
   document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>switchTab(b.dataset.t,b));
-  setAccType("支出");syncShift();initOv();labels();renderAll();
+  setAccType("支出");labels();renderAll();syncShift();
   if(await login())fetchData();
 });
 function onClick(e){
   const el=e.target.closest("[data-a]");if(!el)return;
-  const f={toggle:toggleStatus,bedit:editBooking,bsave:saveBooking,bcancel:cancelBooking,rerender:renderAll,aedit:editAcc,asave:saveAcc,adel:delAcc,sdel:delOverride,
-    fedit:editFixed,fsave:saveFixed,fdel:delFixed,hist:id=>{shYM=id;syncShift()},ym:(id)=>stepYM(id,+el.dataset.d),bkall:id=>{bkAll=id==="1";renderBookings()},cm:setChartMode,acct:setAccType,
-    chip:pickChip,fxchip:id=>{$("fxItem").value=id},shg:id=>{shGroup=id;syncShift(true)},sht:id=>{shType=id;syncShift(true)},ovs:id=>{ovStatus=id;syncOv()}}[el.dataset.a];
+  const f={toggle:toggleStatus,bedit:editBooking,bsave:saveBooking,bcancel:cancelBooking,rerender:renderAll,aedit:editAcc,asave:saveAcc,adel:delAcc,
+    fedit:editFixed,fsave:saveFixed,fdel:delFixed,day:tapDay,ym:(id)=>stepYM(id,+el.dataset.d),bkall:id=>{bkAll=id==="1";renderBookings()},cm:setChartMode,acct:setAccType,
+    chip:pickChip,fxchip:id=>{$("fxItem").value=id},shg:id=>setShift("g",id),sht:id=>setShift("t",id)}[el.dataset.a];
   if(f)f(el.dataset.id);
 }
 function switchTab(id,btn){
@@ -439,13 +423,12 @@ async function fetchData(){
   $("authBox").hidden=true;
   B=r.bookings||[];A=r.accountingRecords||[];F=r.fixedExpenses||[];S=r.schedules||{};M=r.monthlyShiftTypes||{};
   if(/^\d{4}-\d{2}-\d{2}$/.test(r.anchorDate))ANCHOR=r.anchorDate;
-  if(M[shYM]){shGroup=M[shYM].shiftGroup;shType=M[shYM].shiftType}
   if(firstLoad){firstLoad=false;const ds=B.filter(b=>b.status!=="已取消"&&b.date).map(b=>b.date.slice(0,7));
     if(ds.length&&!ds.includes(bkYM))bkYM=ds.sort((a,b)=>Math.abs(+a.replace("-","")-+curYM.replace("-",""))-Math.abs(+b.replace("-","")-+curYM.replace("-","")))[0]}
-  syncShift();renderAll();if(ovPicker)ovPicker.redraw();
+  renderAll();syncShift();
 }
 const isPast=(r,now)=>r.status==="預約中"&&r.date&&r.time&&new Date(`${r.date}T${r.time}`)<now;
-function renderAll(){MS={};renderStats();renderBookings();renderAcc();renderHistory();renderOverrides();shiftReminder()}
+function renderAll(){MS={};renderStats();renderBookings();renderAcc();shiftReminder();if($("calGrid"))renderCal()}
 
 /* ---------- 營收 ---------- */
 const add=(o,k,n)=>{o[k]=(o[k]||0)+n};
@@ -597,64 +580,52 @@ function saveFixed(id){
 }
 async function delFixed(id){if(!await ask("確定要刪除這個固定支出嗎？"))return;F=F.filter(x=>x.id!==id);renderAll();bg({action:"deleteFixed",id})}
 
-/* ---------- 班表 ---------- */
+/* ---------- 班表（一個月曆搞定：班別＋單日微調） ---------- */
 function shiftReminder(){
   const t=new Date(),n=new Date(t.getFullYear(),t.getMonth()+1,1),ym=`${n.getFullYear()}-${pad(n.getMonth()+1)}`,el=$("adminShiftReminder");
   if(t.getDate()>=12&&!M[ym]){el.textContent=`今天是 ${t.getDate()} 號，還沒設定下個月（${ym}）的班表喔`;el.hidden=false}else el.hidden=true;
 }
-function renderHistory(){
-  const ks=Object.keys(M).sort().reverse();
-  $("historyList").innerHTML=ks.length?ks.map(k=>`<div class="h${shYM===k?" on":""}" data-a="hist" data-id="${esc(k)}">${esc(k)}<small>${esc(M[k].shiftGroup)} 組・${esc(M[k].shiftType)}</small></div>`).join(""):'<span class="muted">還沒有設定紀錄</span>';
+const curShift=ym=>M[ym]||{shiftGroup:shGroup,shiftType:shType};
+function baseOpen(ds,group){
+  const[ay,am,ad]=ANCHOR.split("-").map(Number),[y,m,d]=ds.split("-").map(Number);
+  let c=((Math.round((Date.UTC(y,m-1,d)-Date.UTC(ay,am-1,ad))/864e5)%4)+4)%4;if(group==="A")c=(c+2)%4;
+  return !(c===0||c===1);
 }
-function syncShift(fromBtn){
-  if(!fromBtn&&M[shYM]){shGroup=M[shYM].shiftGroup;shType=M[shYM].shiftType}
+function dayOpen(ds,group){const s=S[ds];if(s&&s.status==="開放")return true;if(s&&s.status==="關閉")return false;return baseOpen(ds,group)}
+function syncShift(){
   labels();
-  document.querySelectorAll("#sgG button").forEach(b=>b.classList.toggle("on",b.dataset.id===shGroup));
-  document.querySelectorAll("#sgT button").forEach(b=>b.classList.toggle("on",b.dataset.id===shType));
-  renderHistory();showPreview(shYM,{shiftGroup:shGroup,shiftType:shType});
+  document.querySelectorAll("#sgG button").forEach(b=>b.classList.toggle("on",!!M[shYM]&&b.dataset.id===shGroup));
+  document.querySelectorAll("#sgT button").forEach(b=>b.classList.toggle("on",!!M[shYM]&&b.dataset.id===shType));
+  $("shUnset").hidden=!!M[shYM];
+  renderCal();
 }
-function showPreview(ym,it){
-  if(typeof flatpickr==="undefined")return;
-  const[y,m]=ym.split("-").map(Number),[ay,am,ad]=ANCHOR.split("-").map(Number);
-  if(picker)picker.destroy();
-  picker=flatpickr("#inlinePreviewCalendar",{inline:true,locale:"zh",clickOpens:false,defaultDate:new Date(y,m-1,1),
-    onDayCreate:(a,b,fp,el)=>{
-      const d=el.dateObj,ds=ymd(d);if(ds.slice(0,7)!==ym)return;
-      const s=S[ds];let ok;
-      if(s&&s.status==="開放")ok=true;else if(s&&s.status==="關閉")ok=false;
-      else{let c=((Math.round((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(ay,am-1,ad))/864e5)%4)+4)%4;if(it.shiftGroup==="A")c=(c+2)%4;ok=!(c===0||c===1)}
-      if(ok)el.classList.add(it.shiftType==="白班"?"ya":"yb");
-    }});
-  picker.calendarContainer.addEventListener("click",e=>e.stopPropagation(),true);
+function renderCal(){
+  const[y,m]=shYM.split("-").map(Number),first=new Date(y,m-1,1).getDay(),days=new Date(y,m,0).getDate();
+  const sh=curShift(shYM),today=ymd(new Date()),cnt={};
+  B.forEach(b=>{if(b.status!=="已取消"&&b.date&&b.date.slice(0,7)===shYM)cnt[b.date]=(cnt[b.date]||0)+1});
+  let h="",open=0,man=0;
+  for(let i=0;i<first;i++)h+='<span class="d empty-cell"></span>';
+  for(let d=1;d<=days;d++){
+    const ds=`${shYM}-${pad(d)}`,o=dayOpen(ds,sh.shiftGroup),mn=!!S[ds],past=ds<today;
+    if(o)open++;if(mn)man++;
+    const cls=["d",o?(sh.shiftType==="白班"?"ya":"yb"):"off",mn?"man":"",ds===today?"today":"",past?"past":""].join(" ");
+    h+=`<button type="button" class="${cls}" data-a="day" data-id="${ds}" aria-label="${m}月${d}日 ${o?"可約":"休息"}${cnt[ds]?"，有"+cnt[ds]+"筆預約":""}">${d}${cnt[ds]?'<i class="bk-dot"></i>':""}</button>`;
+  }
+  $("calGrid").innerHTML=h;
+  const bk=Object.values(cnt).reduce((a,b)=>a+b,0);
+  $("shSum").innerHTML=`<span>可約 ${open} 天</span><span>休息 ${days-open} 天</span>${man?`<span>手動調整 ${man} 天</span>`:""}${bk?`<span>預約 ${bk} 筆</span>`:""}`;
 }
-function saveMonthlyShift(){
-  M[shYM]={shiftGroup:shGroup,shiftType:shType};renderHistory();shiftReminder();
-  bg({action:"updateBaseShift",targetMonth:shYM,shiftGroup:shGroup,shiftType:shType,monthlyShiftTypes:M});say(`已儲存 ${ymLabel(shYM)} 的班別`,true);
+function tapDay(ds){
+  if(ds<ymd(new Date()))return;
+  const sh=curShift(shYM),now=dayOpen(ds,sh.shiftGroup),want=!now;
+  if(want===baseOpen(ds,sh.shiftGroup)){delete S[ds];bg({action:"deleteSchedule",targetDate:ds})}
+  else{S[ds]={status:want?"開放":"關閉",slots:""};bg({action:"updateSchedule",targetDate:ds,status:want?"開放":"關閉"})}
+  renderCal();
 }
-
-/* 日期微調：點日曆 → 選開放/關閉 → 儲存 */
-function initOv(){
-  if(typeof flatpickr==="undefined")return;
-  ovPicker=flatpickr("#ovCalIn",{inline:true,locale:"zh",
-    onChange:d=>{ovDate=d[0]?ymd(d[0]):"";if(S[ovDate])ovStatus=S[ovDate].status;syncOv()},
-    onDayCreate:(a,b,fp,el)=>{const s=S[ymd(el.dateObj)];if(s)el.classList.add(s.status==="開放"?"ov-o":"ov-c")}});
-  syncOv();
-}
-function syncOv(){
-  document.querySelectorAll("#sgO button").forEach(b=>b.classList.toggle("on",b.dataset.id===ovStatus));
-  $("ovSave").disabled=!ovDate;
-  if(ovDate){const d=new Date(ovDate+"T00:00");$("ovPick").innerHTML=`<b>${d.getMonth()+1} 月 ${d.getDate()} 日（週${WD[d.getDay()]}）</b>`}else $("ovPick").textContent="";
-}
-function renderOverrides(){
-  const ds=Object.keys(S).sort().reverse();
-  $("overrideRecordContainer").innerHTML=ds.length?ds.map(d=>{const o=S[d].status==="開放",t=new Date(d+"T00:00");return`<div class="ov"><span>${esc(d)}（週${WD[t.getDay()]||""}）</span><span class="tag ${o?"o":"c"}">${o?"開放":"關閉"}</span>${ib("sdel",esc(d),"trash","刪除","danger")}</div>`}).join(""):'<div class="empty">還沒有微調紀錄</div>';
-  if(ovPicker)ovPicker.redraw();
-}
-function delOverride(d){delete S[d];renderOverrides();syncShift();bg({action:"deleteSchedule",targetDate:d})}
-function updateScheduleOverride(){
-  if(!ovDate)return;
-  S[ovDate]={status:ovStatus,slots:""};renderOverrides();syncShift();
-  bg({action:"updateSchedule",targetDate:ovDate,status:ovStatus});say(`已儲存：${ovDate} ${ovStatus==="開放"?"開放預約":"關閉預約"}`,true);
+function setShift(k,v){
+  const cur=curShift(shYM),nx={shiftGroup:k==="g"?v:cur.shiftGroup,shiftType:k==="t"?v:cur.shiftType};
+  shGroup=nx.shiftGroup;shType=nx.shiftType;M[shYM]=nx;syncShift();shiftReminder();
+  bg({action:"updateBaseShift",targetMonth:shYM,shiftGroup:nx.shiftGroup,shiftType:nx.shiftType});
 }
 </script>
 </body>
