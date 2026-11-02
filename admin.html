@@ -101,6 +101,17 @@ label.f{display:block;font-size:13px;color:var(--soft);margin:2px 0 4px}
 .bk-c b{font-weight:700}
 .bk .cl{margin-top:6px}
 
+/* 修改預約項目 */
+.ie{margin:8px 0;padding:10px;border:1.4px dashed #cdbfae;border-radius:14px 10px 15px 9px;background:#fdfbf6}
+.ie h5{margin:8px 0 6px;font-size:13.5px;color:var(--soft);font-weight:400}.ie h5:first-child{margin-top:0}
+.ie .chips{margin:0}
+.ie .chip{font-size:14.5px;padding:7px 12px}
+.ie .chip.dis{opacity:.35;pointer-events:none}
+.ie .live{margin-top:10px;padding:8px 10px;border-radius:12px 9px 13px 8px;background:#f3ebdf;font-size:14px;line-height:1.7}
+.ie label{display:flex;align-items:center;gap:8px;font-size:14px;margin-top:8px;color:var(--ink)}
+.ie label input{width:20px;height:20px;min-height:0;padding:0;appearance:auto;-webkit-appearance:checkbox;accent-color:var(--ink)}
+.ie .btns{display:flex;gap:8px;margin-top:10px}.ie .btns .btn{flex:1;min-height:42px}
+
 /* 預約卡片 */
 .bk{background:#fff;border:1.5px solid var(--line);border-radius:18px 13px 20px 12px;box-shadow:2px 3px 0 var(--sand);padding:11px 12px;margin-bottom:10px}
 .bk-top,.bk-bot{display:flex;justify-content:space-between;align-items:center;gap:8px}
@@ -433,7 +444,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
 function onClick(e){
   const el=e.target.closest("[data-a]");if(!el)return;
   const f={toggle:toggleStatus,bedit:editBooking,bsave:saveBooking,bcancel:cancelBooking,rerender:renderAll,aedit:editAcc,asave:saveAcc,adel:delAcc,
-    fedit:editFixed,fsave:saveFixed,fdel:delFixed,day:tapDay,cshow:id=>{const e=$("cl-"+id);if(e)e.hidden=!e.hidden},ym:(id)=>stepYM(id,+el.dataset.d),bkall:id=>{bkAll=id==="1";renderBookings()},cm:setChartMode,acct:setAccType,
+    fedit:editFixed,fsave:saveFixed,fdel:delFixed,day:tapDay,bitems:editItems,ie:ieTap,isave:saveItems,cshow:id=>{const e=$("cl-"+id);if(e)e.hidden=!e.hidden},ym:(id)=>stepYM(id,+el.dataset.d),bkall:id=>{bkAll=id==="1";renderBookings()},cm:setChartMode,acct:setAccType,
     chip:pickChip,fxchip:id=>{$("fxItem").value=id},shg:id=>setShift("g",id),sht:id=>setShift("t",id)}[el.dataset.a];
   if(f)f(el.dataset.id);
 }
@@ -597,7 +608,7 @@ function renderBookings(){
   const list=(bkAll?live:live.filter(r=>r.date&&r.date.slice(0,7)===bkYM)).sort((a,b)=>((b.date||"")+(b.time||"")).localeCompare((a.date||"")+(a.time||"")));
   $("bookingList").innerHTML=list.length?list.map(r=>{
     const dn=r.status==="已完成"||isPast(r,now),id=esc(r.bookingId);
-    return`<div class="bk" id="b-${id}"><div class="bk-top"><b>${esc(r.customerName||"（未填名稱）")}</b><span class="st ${dn?"done":"wait"}" data-a="toggle" data-id="${id}">${dn?"已完成":"預約中"}</span></div><div class="bk-m">${esc(r.date||"日期不明")}　${esc(r.time)}</div><div class="bk-i">${esc(r.items)}</div><div class="bk-bot"><span class="pr">${money(+r.totalPrice||0)}</span><span class="act">${ib("bedit",id,"pencil","改金額")}${ib("bcancel",id,"trash","刪除","danger")}</span></div>${(()=>{const c=costOf(r),pf=(+r.totalPrice||0)-c.total;return`<div class="bk-c" data-a="cshow" data-id="${id}"><span>成本 ${money(c.total)}</span><span>利潤 <b class="${pf<0?"neg":"pos"}">${pf<0?"-":""}${money(Math.abs(pf))}</b>　明細 ›</span></div><div class="cl" id="cl-${id}" hidden>${costList(c,+r.totalPrice||0)}</div>`})()}</div>`;
+    return`<div class="bk" id="b-${id}"><div class="bk-top"><b>${esc(r.customerName||"（未填名稱）")}</b><span class="st ${dn?"done":"wait"}" data-a="toggle" data-id="${id}">${dn?"已完成":"預約中"}</span></div><div class="bk-m">${esc(r.date||"日期不明")}　${esc(r.time)}</div><div class="bk-i">${esc(r.items)}</div><div class="bk-bot"><span class="pr">${money(+r.totalPrice||0)}</span><span class="act">${ib("bitems",id,"list","改項目")}${ib("bedit",id,"pencil","改金額")}${ib("bcancel",id,"trash","刪除","danger")}</span></div>${(()=>{const c=costOf(r),pf=(+r.totalPrice||0)-c.total;return`<div class="bk-c" data-a="cshow" data-id="${id}"><span>成本 ${money(c.total)}</span><span>利潤 <b class="${pf<0?"neg":"pos"}">${pf<0?"-":""}${money(Math.abs(pf))}</b>　明細 ›</span></div><div class="cl" id="cl-${id}" hidden>${costList(c,+r.totalPrice||0)}</div>`})()}</div>`;
   }).join(""):`<div class="empty">${B.length?"這個月沒有預約":"沒有預約資料"}</div>`;
 }
 function toggleStatus(id){const b=B.find(x=>x.bookingId===id);if(!b)return;b.status=b.status==="已完成"?"預約中":"已完成";renderAll();bg({action:"update",bookingId:id,status:b.status})}
@@ -613,6 +624,61 @@ async function manualAddBooking(){
   const r=await api({action:"addBooking",customerName,date,time,items,totalPrice,cost:0});
   if(!r||r.result!=="success")return say((r&&r.message)||"新增失敗");
   ["newName","newItems","newPrice"].forEach(i=>$(i).value="");bkYM=date.slice(0,7);$("newName").closest("details").open=false;fetchData();
+}
+
+/* ---------- 點選修改預約項目 ---------- */
+const STYLE_LIST=["貓眼","立體不規則造型","法式","鏡面銀","漸層","小飾品/貼紙","格紋","暈染","海莉款","指定圖案"];
+let ED={};
+function listPrice(e){let t=0;const gel=e.main||e.jump||e.type;if(e.removal)t+=gel?150:200;if(e.main)t+=700;if(e.jump)t+=50;
+  if(e.type){const n=e.styles.length;t+=e.type==="局部造型"?n*50:50+n*50;if(e.styles.includes("指定圖案"))t+=30}return t}
+function buildItems(e,orig){
+  const g=re=>{const m=String(orig||"").match(re);return m?m[1].trim():""};
+  const a=[];if(e.removal)a.push("需要卸甲");
+  if(e.main)a.push("單色款式: "+(g(/單色款式\s*[:：]\s*([^/]+)/)||"未指定"));
+  if(e.jump)a.push("跳色: "+(g(/跳色\s*[:：]\s*([^/]+)/)||"未指定"));
+  if(e.type&&e.styles.length)a.push(e.type+": "+e.styles.join(", "));
+  const cu=g(/指定圖案細節\s*[:：]\s*([^/]+)/);if(cu&&e.styles.includes("指定圖案"))a.push("指定圖案細節: "+cu);
+  const tn=g(/色調風格\s*[:：]\s*([^/]+)/);if(tn&&(e.main||e.jump))a.push("色調風格: "+tn);
+  return a.join(" / ");
+}
+function editItems(id){
+  const b=B.find(x=>x.bookingId===id);if(!b)return;const o=parseSvc(b.items),t=String(b.items||"");
+  ED[id]={removal:o.removal,main:/單色/.test(t)||(o.main&&!o.removal)||!!o.type,jump:o.jump,type:o.styles.length?(o.type||"局部造型"):"",styles:o.styles.slice(0,4),setPrice:true};
+  drawIE(id);
+}
+function drawIE(id){
+  const e=ED[id],b=B.find(x=>x.bookingId===id),c=$("b-"+id);if(!e||!b||!c)return;
+  let p=c.querySelector(".ie");if(!p){p=document.createElement("div");p.className="ie";c.querySelector(".bk-i").after(p)}
+  const ch=(k,v,l,on,dis)=>`<span class="chip${on?" on":""}${dis?" dis":""}" data-a="ie" data-id="${id}|${k}|${v}">${l}</span>`;
+  const items=buildItems(e,b.items),c2=costOf({items,date:b.date}),lp=listPrice(e),ok=e.removal||e.main;
+  p.innerHTML=`<h5>服務</h5><div class="chips">${ch("removal",1,"卸甲",e.removal)}${ch("main",1,"單色",e.main)}${ch("jump",1,"跳色",e.jump,!e.main)}</div>
+  <h5>造型</h5><div class="chips">${ch("type","","不做造型",!e.type,!e.main)}${ch("type","局部造型","局部",e.type==="局部造型",!e.main)}${ch("type","十指造型","十指",e.type==="十指造型",!e.main)}</div>
+  ${e.type?`<h5>款式（最多 4 個，已選 ${e.styles.length}）</h5><div class="chips">${STYLE_LIST.map(s=>ch("style",s,s,e.styles.includes(s),!e.styles.includes(s)&&e.styles.length>=4)).join("")}</div>`:""}
+  <div class="live">${ok?`工時 <b>${c2.hours}</b> 小時・成本 <b>${money(c2.total)}</b><br>價目表價格 <b>${money(lp)}</b>`:"請至少選「卸甲」或「單色」"}</div>
+  <label><input type="checkbox" ${e.setPrice?"checked":""} onchange="ED['${id}'].setPrice=this.checked">金額一起改成價目表價格（${money(lp)}）</label>
+  <div class="btns"><button class="btn alt" type="button" data-a="rerender">取消</button><button class="btn" type="button" data-a="isave" data-id="${id}" ${ok?"":"disabled"}>${ic("check")}儲存項目</button></div>`;
+}
+function ieTap(v){
+  const[id,k,val]=v.split("|"),e=ED[id];if(!e)return;
+  if(k==="removal")e.removal=!e.removal;
+  else if(k==="main"){e.main=!e.main;if(!e.main){e.jump=false;e.type="";e.styles=[]}}
+  else if(k==="jump")e.jump=!e.jump;
+  else if(k==="type"){e.type=val;if(!val)e.styles=[];else if(!e.styles.length)e.styles=[]}
+  else if(k==="style"){const i=e.styles.indexOf(val);if(i>=0)e.styles.splice(i,1);else if(e.styles.length<4)e.styles.push(val)}
+  if(e.type&&!e.styles.length&&k!=="type"&&k!=="style"){}
+  drawIE(id);
+}
+async function saveItems(id){
+  const e=ED[id],b=B.find(x=>x.bookingId===id);if(!e||!b)return;
+  if(e.type&&!e.styles.length)return say("選了造型的話，請至少選一個款式；或改成「不做造型」");
+  const items=buildItems(e,b.items),body={action:"updateItems",bookingId:id,items};
+  if(e.setPrice)body.totalPrice=listPrice(e);
+  const r=await api(body);
+  if(!r||r.result!=="success"){
+    if(r&&r.message==="unknown_action")return say("Google 後台還沒加入「修改項目」功能，\n請先照 Claude 給的步驟更新 Apps Script。");
+    return say((r&&r.message)||"儲存失敗");
+  }
+  b.items=items;if(e.setPrice)b.totalPrice=body.totalPrice;delete ED[id];renderAll();say("已更新預約項目",true);
 }
 
 /* ---------- 記帳（只到月份） ---------- */
