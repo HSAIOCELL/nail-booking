@@ -275,7 +275,6 @@ details.box[open] summary{margin-bottom:12px}
       <div class="cc">
         <div class="step"><button class="ib" type="button" data-a="ym" data-id="sel" data-d="-1" aria-label="上個月"><svg class="ic"><use href="#i-l"/></svg></button><b class="lbl" data-k="sel"></b><button class="ib" type="button" data-a="ym" data-id="sel" data-d="1" aria-label="下個月"><svg class="ic"><use href="#i-r"/></svg></button></div>
         <h3 style="margin-top:12px"><svg class="ic"><use href="#i-coin"/></svg>客人真實利潤</h3>
-        <div class="muted">依每位客人的款式，扣掉材料、房租分攤、電費之後，這個月做客人真正賺多少（不算你的時薪）</div>
         <div class="three"><div><span>客人數</span><b id="cN">0</b></div><div><span>成本合計</span><b id="cC">NT$ 0</b></div><div><span>真實利潤</span><b id="cP">NT$ 0</b></div></div>
         <div class="cl" id="cOne"></div>
       </div>
@@ -305,14 +304,13 @@ details.box[open] summary{margin-bottom:12px}
           <div class="sg blue" id="sgG"><button type="button" data-a="shg" data-id="A">A 組</button><button type="button" data-a="shg" data-id="B">B 組</button></div>
           <div class="sg blue" id="sgT"><button type="button" data-a="sht" data-id="白班">白班</button><button type="button" data-a="sht" data-id="夜班">夜班</button></div>
         </div>
-        <div class="unsaved" id="shUnset" hidden>這個月還沒設定班別，點上面的組別／班別就會套用</div>
+        <div id="shUnset" hidden></div>
         <div class="cal">
           <div class="cal-wd"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
           <div class="cal-g" id="calGrid"></div>
         </div>
         <div class="lg"><span><i class="a"></i>白班可約</span><span><i class="b"></i>夜班可約</span><span><i class="m"></i>手動調整</span><span><i class="k"></i>有預約（數字＝筆數）</span></div>
         <div class="sum" id="shSum"></div>
-        <p class="muted" style="text-align:center;margin:10px 0 0">點日期就能切換「可約 ↔ 休息」，會自動儲存。<br>再點一次就恢復原本班表。</p>
       </div>
     </div>
     <div class="sub" data-s="list">
@@ -336,11 +334,11 @@ details.box[open] summary{margin-bottom:12px}
       <div class="box">
         <h3><svg class="ic"><use href="#i-plus"/></svg>新增預約</h3>
         <div class="row">
-          <div><label class="f">連結會員（選填，選了會自動帶入名稱）</label><select id="newMember" onchange="pickNewMember()"></select></div>
+          <div><label class="f">連結會員</label><select id="newMember" onchange="pickNewMember()"></select></div>
           <input type="text" id="newName" placeholder="客戶名稱" maxlength="30">
           <input type="date" id="newDate">
           <div class="two"><select id="newHour"></select><select id="newMinute"><option value="00">00 分</option><option value="15">15 分</option><option value="30">30 分</option><option value="45">45 分</option></select></div>
-          <input type="text" id="newItems" placeholder="項目（例如：卸甲、單色、局部貓眼）" maxlength="100">
+          <input type="text" id="newItems" placeholder="項目" maxlength="100">
           <input type="number" id="newPrice" placeholder="金額" min="0" inputmode="numeric">
           <button class="btn full" type="button" onclick="manualAddBooking()">新增預約</button>
         </div>
@@ -353,7 +351,6 @@ details.box[open] summary{margin-bottom:12px}
     <div class="sub" data-s="mem">
       <div class="box">
         <h3><svg class="ic"><use href="#i-user"/></svg>會員名單<small class="muted" id="memCount" style="margin-left:auto"></small></h3>
-        <p class="muted" style="margin:0 0 10px">客人在預約頁按「連動 LINE」就會自動成為會員，不用填任何資料。</p>
         <input type="text" id="mSearch" placeholder="搜尋名稱或備註" maxlength="30" oninput="mQuery=this.value.trim();renderMembers()">
         <div class="chips" id="mTags" style="margin-top:10px"></div>
         <div id="memList"></div>
@@ -369,8 +366,8 @@ details.box[open] summary{margin-bottom:12px}
         <div class="chips" id="cpTitles"></div>
         <div class="row">
           <input type="text" id="cpTitle" placeholder="例如：回饋券" maxlength="20">
-          <div class="two"><div><label class="f">折抵金額</label><div class="amt"><i>NT$</i><input type="number" id="cpAmt" placeholder="100" min="1" inputmode="numeric"></div></div><div><label class="f">最低消費（0＝不限）</label><div class="amt"><i>NT$</i><input type="number" id="cpMin" placeholder="0" min="0" inputmode="numeric"></div></div></div>
-          <div><label class="f">到期日（空白＝不限期）</label><input type="date" id="cpExp"></div>
+          <div class="two"><div><label class="f">折抵金額</label><div class="amt"><i>NT$</i><input type="number" id="cpAmt" placeholder="100" min="1" inputmode="numeric"></div></div><div><label class="f">最低消費</label><div class="amt"><i>NT$</i><input type="number" id="cpMin" placeholder="0" min="0" inputmode="numeric"></div></div></div>
+          <div><label class="f">到期日</label><input type="date" id="cpExp"></div>
           <div class="muted" id="cpCount" style="text-align:center"></div>
           <button class="btn full gold" type="button" onclick="issueCoupon()"><svg class="ic"><use href="#i-ticket"/></svg>發出折價券</button>
         </div>
@@ -619,7 +616,7 @@ const m1=n=>"NT$ "+(n<10&&n>0?n.toFixed(1):Math.round(n).toLocaleString("en-US")
 function costList(c,price){
   const rows=[["材料",c.material],[`房租分攤 ${COST.rentShare} ÷ ${COST.perMonth} 位`,c.rent],["設備電費",c.device],["電燈",c.light],["電風扇",c.fan]];
   if(c.ac)rows.push(["冷氣（夏天）",c.ac]);
-  return `<div><span>工時（不算成本）</span><span>約 ${c.hours} 小時</span></div>`+rows.map(([l,v])=>`<div><span>${l}</span><span>${m1(v)}</span></div>`).join("")+
+  return `<div><span>工時</span><span>約 ${c.hours} 小時</span></div>`+rows.map(([l,v])=>`<div><span>${l}</span><span>${m1(v)}</span></div>`).join("")+
     `<small>材料：${c.mat.map(([n,v])=>`${esc(n)} ${v}`).join("、")}</small>`+
     `<div class="tt"><span>成本合計</span><span>${money(c.total)}</span></div>`+(price!=null?`<div class="tt"><span>這筆利潤</span><span class="${price-c.total<0?"neg":"pos"}">${price-c.total<0?"-":""}${money(Math.abs(price-c.total))}</span></div>`:"");
 }
@@ -631,8 +628,7 @@ function renderCost(){
   const p=rev-cost;$("cP").textContent=(p<0?"-":"")+money(Math.abs(p));$("cP").className=p<0?"neg":"pos";
   const d=selYM+"-15";
   $("cOne").innerHTML=`<div style="font-weight:700"><span style="color:var(--ink)">常見款式的成本參考（${+selYM.slice(5)} 月）</span><span></span></div>`+
-    EXAMPLES.map(([n,it])=>{const c=costOf({items:it,date:d});return`<div><span>${n}・${c.hours} 小時</span><span>${money(c.total)}</span></div>`}).join("")+
-    `<small>每筆預約會依客人選的款式自動判斷工時和材料，到「預約」頁點「明細 ›」看每一項。</small>`;
+    EXAMPLES.map(([n,it])=>{const c=costOf({items:it,date:d});return`<div><span>${n}・${c.hours} 小時</span><span>${money(c.total)}</span></div>`}).join("");
 }
 
 /* ---------- 營收 ---------- */
@@ -803,7 +799,7 @@ function renderMembers(){
       <div class="tags">${s.n===0?'<span class="tag new">還沒來過</span>':""}${m.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>
       <div class="mc-s">來訪 ${s.n} 次・累計 ${money(s.spent)}${s.last?`・最近 ${md(s.last)}`:""}${s.next?`・下次 ${md(s.next)}`:""}<br>加入 ${esc(m.joined||"—")}</div>
       ${m.note?`<div class="mc-n">備註：${esc(m.note)}</div>`:""}${k?`<span class="mc-c">${ic("ticket")} 持有 ${k} 張折價券</span>`:""}</div>`}).join("")
-    :`<div class="empty">${MB.length?"沒有符合的會員":"還沒有會員。<br>客人在預約頁連動 LINE 後就會出現在這裡。"}</div>`;
+    :`<div class="empty">${MB.length?"沒有符合的會員":"還沒有會員"}</div>`;
 }
 function editMember(id){
   const m=MB.find(x=>x.id===id),c=$("m-"+id);if(!m||!c)return;
@@ -813,9 +809,9 @@ function drawME(id){
   const e=ME[id],c=$("m-"+id);if(!e||!c)return;
   let p=c.querySelector(".me");if(!p){p=document.createElement("div");p.className="me";c.appendChild(p)}
   const tags=[...new Set([...allTags(),...e.tags])];
-  p.innerHTML=`<label class="f">標籤（點一下切換）</label><div class="chips">${tags.map(t=>`<span class="chip${e.tags.includes(t)?" on":""}" data-a="mtag" data-id="${esc(id)}|${esc(t)}">${esc(t)}</span>`).join("")}</div>
+  p.innerHTML=`<label class="f">標籤</label><div class="chips">${tags.map(t=>`<span class="chip${e.tags.includes(t)?" on":""}" data-a="mtag" data-id="${esc(id)}|${esc(t)}">${esc(t)}</span>`).join("")}</div>
     <div class="two"><input type="text" id="mt-${esc(id)}" class="inl" placeholder="自訂標籤" maxlength="10"><button class="btn alt" type="button" data-a="maddtag" data-id="${esc(id)}">${ic("plus")}加標籤</button></div>
-    <input type="text" id="mn-${esc(id)}" class="inl" placeholder="備註（例如：喜歡貓眼、對酒精過敏）" maxlength="100" value="${esc(e.note)}" oninput="ME['${esc(id)}'].note=this.value">
+    <input type="text" id="mn-${esc(id)}" class="inl" placeholder="備註" maxlength="100" value="${esc(e.note)}" oninput="ME['${esc(id)}'].note=this.value">
     <div class="btns" style="display:flex;gap:8px;margin-top:8px"><button class="btn alt" style="flex:1" type="button" data-a="rerender">取消</button><button class="btn" style="flex:1" type="button" data-a="msave" data-id="${esc(id)}">${ic("check")}儲存</button></div>`;
 }
 function mTagTap(v){const i=v.indexOf("|"),id=v.slice(0,i),t=v.slice(i+1),e=ME[id];if(!e)return;const k=e.tags.indexOf(t);k>=0?e.tags.splice(k,1):e.tags.length<8&&e.tags.push(t);drawME(id)}
@@ -848,8 +844,8 @@ function renderCpForm(){
   if(!$("cpWho"))return;
   document.querySelectorAll("#cpMode button").forEach(b=>b.classList.toggle("on",b.dataset.id===cpT.mode));
   if(cpT.mode==="one")$("cpWho").innerHTML=MB.length?`<select id="cpOne" onchange="cpT.id=this.value;renderCpCount()"><option value="">請選擇會員</option>${MB.map(m=>`<option value="${esc(m.id)}"${m.id===cpT.id?" selected":""}>${esc(m.name)}</option>`).join("")}</select>`:'<div class="muted">還沒有會員</div>';
-  else if(cpT.mode==="tag"){const used=[...new Set(MB.flatMap(m=>m.tags))];$("cpWho").innerHTML=used.length?`<div class="chips" style="margin:0">${used.map(t=>`<span class="chip${cpT.tags.includes(t)?" on":""}" data-a="cptag" data-id="${esc(t)}">${esc(t)}</span>`).join("")}</div>`:'<div class="muted">會員還沒有標籤，先到「會員名單」幫客人加標籤</div>'}
-  else $("cpWho").innerHTML=`<div class="muted">全部 ${MB.length} 位會員都會收到</div>`;
+  else if(cpT.mode==="tag"){const used=[...new Set(MB.flatMap(m=>m.tags))];$("cpWho").innerHTML=used.length?`<div class="chips" style="margin:0">${used.map(t=>`<span class="chip${cpT.tags.includes(t)?" on":""}" data-a="cptag" data-id="${esc(t)}">${esc(t)}</span>`).join("")}</div>`:'<div class="muted">還沒有標籤</div>'}
+  else $("cpWho").innerHTML="";
   renderCpCount();
 }
 function renderCpCount(){const n=cpTargets().length;$("cpCount").textContent=n?`將發給 ${n} 位會員`:"請選擇要發給誰"}

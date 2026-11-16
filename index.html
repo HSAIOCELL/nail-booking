@@ -11,9 +11,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=ChenYuluoyan&family=Cinzel:wght@600&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/zh.js" crossorigin="anonymous"></script>
 <style>
 :root{color-scheme:light;--ink:#4b4039;--soft:#8a7a6e;--line:#6b5d53;--paper:#fbf8f1;--sage:#8fa595;--blush:#efc4b8;--sand:#ebe2d3}
 *{box-sizing:border-box;font-family:'ChenYuluoyan','PingFang TC','Microsoft JhengHei',sans-serif}
@@ -140,6 +137,7 @@ select:disabled{opacity:.6}
 .dlg-card button{background:var(--ink);color:#fff;border:1.6px solid var(--ink);padding:8px 30px;border-radius:20px 14px 22px 13px;font-size:16px;cursor:pointer;box-shadow:2px 3px 0 var(--sand);letter-spacing:.2em}
 .dlg-card button:active{transform:scale(.95)}
 @keyframes fadein{from{opacity:0}}
+[hidden]{display:none!important}
 /* ===== v5：會員 / 折價券 / 所有剩餘時段 ===== */
 .member{display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px 12px;border-radius:14px 10px 15px 10px;background:#eef1e4;border:1.4px solid #c9d1b6;color:#4f5a42;font-size:14.5px;animation:pop .22s ease-out}
 .member b{font-weight:700}
@@ -172,6 +170,44 @@ select:disabled{opacity:.6}
 .cp.on{border-style:solid;border-color:#b8964f;background:#fbefcf;box-shadow:3px 3px 0 var(--sand)}
 .cp.on .dot{background:var(--ink);box-shadow:inset 0 0 0 3px #fff}
 .cp.no{opacity:.55}
+/* ===== v6：一目了然的月曆（日期＋可預約時間合一） ===== */
+.bc-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.bc-head b{font-size:18px;letter-spacing:.1em}
+.bc-nav{width:38px;height:38px;display:flex;align-items:center;justify-content:center;padding:0;border:1.5px solid var(--line);background:#fff;color:var(--ink);border-radius:13px 10px 14px 9px;cursor:pointer;box-shadow:2px 2px 0 var(--sand)}
+.bc-nav:disabled{opacity:.25;box-shadow:none;cursor:default}
+.bc-nav:not(:disabled):active{transform:scale(.92)}
+.bc-wd,.bc-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.bc-wd span{text-align:center;font-size:13px;color:var(--soft);padding-bottom:2px}
+.bc-wd span:first-child,.bc-wd span:last-child{color:#c08a7d}
+.bc-c{min-height:62px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px 5px;border:1.3px solid #e8decf;border-radius:12px 9px 13px 8px;background:#fff;color:var(--ink);font:inherit;cursor:pointer;transition:transform .12s,background-color .15s,border-color .15s;touch-action:manipulation}
+.bc-c b{font-size:15.5px;line-height:1.25;padding:0 3px}
+.bc-c:not(.off):active{transform:scale(.94);transition:none}
+.bc-c.off{background:transparent;border-color:transparent;cursor:default}
+.bc-c.off b{color:#cdc1b2;font-weight:400}
+.bc-c.blank{visibility:hidden}
+.bc-c.today b{background:linear-gradient(transparent 58%,rgba(240,204,120,.65) 58% 92%,transparent 92%)}
+.bc-c.sel{background:var(--ink);border-color:var(--ink);box-shadow:2px 3px 0 var(--sand)}
+.bc-c.sel b{color:#fff;background:none}
+.ch{display:block;width:100%;max-width:46px;padding:2px 0 1px;border-radius:7px 5px 8px 5px;background:#f6e9c6;color:#86601a;font-size:10.5px;font-weight:700;font-style:normal;text-align:center;line-height:1.25;letter-spacing:-.02em}
+.ch small{display:block;font-size:9.5px;font-weight:400;opacity:.85}
+.ch.all{background:#e4ebd7;color:#55654a}
+.ch.full{background:#f0eae0;color:#a99b8b;font-weight:400}
+.ch.more{background:transparent;color:var(--soft);font-weight:400;padding:0}
+.bc-c.sel .ch{background:rgba(255,255,255,.17);color:#fff}
+.bc-tip{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 12px;margin:10px 0 2px;font-size:12.5px;color:var(--soft)}
+.bc-tip i{display:inline-block;width:11px;height:11px;border-radius:4px;margin-right:4px;vertical-align:-1px}
+.tp{margin-top:12px;padding:12px;border:1.5px solid var(--line);border-radius:18px 13px 20px 12px;background:#fdfbf6;box-shadow:3px 3px 0 var(--sand);animation:pop .22s ease-out}
+.tp-t{font-size:16px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.tp-t .ic{color:#c9a55e}
+.tp-l{font-size:12.5px;color:var(--soft);margin:0 0 6px}
+.tp-h,.tp-m{display:grid;gap:6px}
+.tp-h{grid-template-columns:repeat(6,1fr)}
+.tp-m{grid-template-columns:repeat(4,1fr);margin-top:10px;padding-top:10px;border-top:1px dashed #e2d8c9}
+.tp button{padding:8px 0;border:1.3px dashed #c9bbaa;border-radius:11px 8px 12px 7px;background:#fff;font:inherit;font-size:14.5px;color:var(--ink);cursor:pointer;touch-action:manipulation}
+.tp button:active{transform:scale(.94)}
+.tp button.on{background:var(--ink);color:#fff;border:1.3px solid var(--ink)}
+.tp-sum{margin-top:12px;padding:8px;text-align:center;font-size:15.5px;border-radius:12px 9px 13px 8px;background:#f2e0d9}
+.tp-hint{text-align:center;color:var(--soft);font-size:14.5px;padding:6px 0}
 .price-note{text-align:center;font-size:14px;color:#9a6d1c;margin:-10px 0 14px}
 @keyframes dlgpop{from{opacity:0;transform:translateY(8px) scale(.94)}}
 </style>
@@ -186,6 +222,8 @@ select:disabled{opacity:.6}
   <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3.5C12.6 8.5 14.5 10.8 20 12c-5.5 1.4-7.4 3.4-8 8.5-.6-5.1-2.4-7.1-8-8.5 5.6-1.2 7.4-3.5 8-8.5Z"/></symbol>
   <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5.2 5.6Q12 3.2 18.8 5.6Q21 6.6 20.7 11.2Q20.4 15.6 17 16.4L12.8 16.6 8.2 20 8.6 16.4Q4.2 15.8 3.6 11.3 3.4 6.8 5.2 5.6Z"/><path d="M8.5 10.2H15.5M8.5 12.8H13"/></symbol>
   <symbol id="i-ok" viewBox="0 0 24 24"><path d="M12 3.6c4.8-.1 8.3 3.5 8.2 8.2-.1 4.7-3.6 8.5-8.3 8.4-4.8 0-8.3-3.7-8.2-8.4.1-4.6 3.5-8.2 8.3-8.2Z"/><path d="M8 12.4L11 15.4 16.2 9"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M14.8 5.2L8.4 12 14.6 18.8"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M9.2 5.2L15.6 12 9.4 18.8"/></symbol>
   <symbol id="i-clock" viewBox="0 0 24 24"><path d="M12 3.8c4.6-.1 8.2 3.6 8.1 8.2-.1 4.6-3.6 8.3-8.2 8.2-4.6 0-8.1-3.7-8-8.3.1-4.4 3.5-8 8.1-8.1Z"/><path d="M12 7.6V12.2L15 14.2"/></symbol>
   <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9.4L12 15.2 18.2 9.2"/></symbol>
   <symbol id="i-gift" viewBox="0 0 24 24"><path d="M4.4 9Q12 8.4 19.6 9V12.4H4.4Z"/><path d="M5.6 12.4L6 19.6Q12 20.2 18 19.6L18.4 12.4M12 9V19.8"/><path d="M12 8.8C10.6 5.4 7 5.4 7.6 7.4 8 8.6 10.4 8.8 12 8.8 13.6 8.8 16 8.6 16.4 7.4 17 5.4 13.4 5.4 12 8.8Z"/></symbol>
@@ -214,22 +252,21 @@ select:disabled{opacity:.6}
       <input type="text" id="customerName" placeholder="請輸入您的預約暱稱" maxlength="30" autocomplete="off" style="flex:1">
       <button type="button" class="draw-btn line-btn" id="lineBtn" onclick="loginWithLine()"><svg class="ic"><use href="#i-chat"/></svg>連動 LINE</button>
     </div>
-    <div class="join-hint" id="joinHint">連動 LINE 就會自動成為會員，不用另外填資料，還能收到折價券</div>
     <div class="member" id="memberBox" hidden></div>
   </div>
 
   <div class="section">
     <div class="section-title">Step 1. 預約日期與時間</div>
-    <div class="datetime-container">
-      <div><label>預約日期</label><input type="text" id="bookingDate" placeholder="請選擇預約日期"></div>
-      <div><label>預約時間</label>
-        <div class="time-picker-group">
-          <select id="bookingHour" onchange="validateTime()"></select>
-          <select id="bookingMinute" onchange="validateTime()"></select>
-        </div>
+    <div class="bc">
+      <div class="bc-head">
+        <button type="button" class="bc-nav" id="bcPrev" onclick="calMove(-1)" aria-label="上個月"><svg class="ic"><use href="#i-left"/></svg></button>
+        <b id="bcLabel"></b>
+        <button type="button" class="bc-nav" id="bcNext" onclick="calMove(1)" aria-label="下個月"><svg class="ic"><use href="#i-right"/></svg></button>
       </div>
-      <button type="button" class="slot-toggle" id="slotToggle" onclick="toggleSlots()"><svg class="ic"><use href="#i-clock"/></svg><span>查看所有可預約時段</span><svg class="ic chev"><use href="#i-down"/></svg></button>
-      <div class="slot-panel" id="slotPanel" hidden></div>
+      <div class="bc-wd"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+      <div class="bc-g" id="bcGrid"></div>
+      <div class="tp" id="timePanel"></div>
+      <input type="hidden" id="bookingDate"><input type="hidden" id="bookingHour"><input type="hidden" id="bookingMinute">
     </div>
   </div>
 
@@ -350,7 +387,7 @@ select:disabled{opacity:.6}
     <span>預計總金額：NT$ <span id="totalPrice">0</span> 元</span>
   </div>
   <div class="price-note" id="priceNote" hidden></div>
-  <button class="submit-btn" onclick="sendBooking()">送出預約單 (開啟 LINE)</button>
+  <button class="submit-btn" onclick="sendBooking()">送出預約</button>
 </div>
 
 <div id="dlg" class="dlg" hidden role="dialog" aria-modal="true"><div class="dlg-card"><svg class="ic dlg-ic"><use id="dlgIc" href="#i-note"/></svg><p id="dlgMsg"></p><button id="dlgBtn" type="button">好的</button></div></div>
@@ -378,7 +415,7 @@ const ADMIN_URL="https://liff.line.me/2011884932-2EMCidxw"; // 後台（只有�
 const ALL_COLORS=["紅色","粉色","橘色","黃色","紅咖色","深咖/可可色","淺咖色","綠色","藍色","紫色","黑色","銀色/白色","灰色","金色/香檳色"];
 const $=id=>document.getElementById(id);
 const isObj=v=>v&&typeof v==="object"&&!Array.isArray(v);
-let bAnchor="2026-10-23",bGroup="B",bType="夜班",bMonthly={},bSched={},bookings=[],picker=null,showJump=false,showStyle=false,needRemoval=false;
+let bAnchor="2026-10-23",bGroup="B",bType="夜班",bMonthly={},bSched={},bookings=[],calY=0,calM=0,showJump=false,showStyle=false,needRemoval=false;
 let member=null,coupons=[],selCoupon="",basePrice=0;
 
 /* 輸入淨化：去控制字元、限長、移除開頭的 = + - @（防 Google Sheets 公式注入） */
@@ -387,9 +424,9 @@ function flash(el){try{el.animate([{transform:"scale(1)"},{transform:"scale(1.02
 
 document.addEventListener("DOMContentLoaded",()=>{
   const d=new Date().getDate(); if(d>=15&&d<=20)$("frontendReminder").style.display="block";
-  initLiff(); loadCache(); initPicker(); fetchBackend();
+  initLiff(); loadCache(); initCal(); fetchBackend();
 });
-window.addEventListener("pageshow",()=>{const b=document.querySelector(".submit-btn");if(b){b.textContent="送出預約單 (開啟 LINE)";b.disabled=false}});
+window.addEventListener("pageshow",()=>{const b=document.querySelector(".submit-btn");if(b){b.textContent="送出預約";b.disabled=false}});
 
 /* ---------- 後端資料（型別檢查；快取不存預約名單） ---------- */
 function applyData(d){
@@ -408,7 +445,7 @@ async function fetchBackend(){
   try{
     const r=await fetch(SCRIPT_URL,{mode:"cors",signal:ac.signal});
     applyData(await r.json()); saveCache();
-    requestAnimationFrame(()=>{if(picker){picker.redraw();validateTime()}if(!$("slotPanel").hidden)renderSlots()});
+    requestAnimationFrame(()=>{if(!$("bookingDate").value)autoPick();validateTime()});
   }catch(e){console.warn("背景同步失敗")}finally{clearTimeout(to)}
 }
 
@@ -434,7 +471,7 @@ async function joinMember(manual){
 }
 function renderMember(){
   if(!member)return;
-  $("joinHint").hidden=true;const b=$("lineBtn");b.innerHTML='<svg class="ic"><use href="#i-ok"/></svg>已連動';
+  const b=$("lineBtn");b.innerHTML='<svg class="ic"><use href="#i-ok"/></svg>已連動';
   const box=$("memberBox");box.hidden=false;
   box.innerHTML=`<svg class="ic"><use href="#i-gift"/></svg><span><b></b> 會員${coupons.length?`・有 ${coupons.length} 張折價券`:""}</span>`;
   box.querySelector("b").textContent=cleanText(member.name||$("customerName").value,30)||"LINE";
@@ -467,30 +504,8 @@ function getShiftCycleInfo(d){
   let c=((diff%4)+4)%4; if(group==="A")c=(c+2)%4;
   return{cycleDay:c,isWorkDay:c===0||c===1,shiftType:type};
 }
-function findFirstAvailableDate(start){
-  const c=new Date(start);
-  for(let i=0;i<14;i++){
-    const s=bSched[fmt(c)];
-    if(s&&s.status==="開放")return c;
-    if(!getShiftCycleInfo(c).isWorkDay&&(!s||s.status!=="關閉"))return c;
-    c.setDate(c.getDate()+1);
-  }
-  return start;
-}
 function isDateOpen(d){const s=bSched[fmt(d)];if(s){if(s.status==="開放")return true;if(s.status==="關閉")return false}return !getShiftCycleInfo(d).isWorkDay}
-function initPicker(){
-  const now=getTaipeiDate(),max=new Date(now.getFullYear(),now.getMonth()+2,0);
-  picker=flatpickr("#bookingDate",{
-    locale:"zh",dateFormat:"Y-m-d",minDate:now,maxDate:max,defaultDate:findFirstAvailableDate(now),
-    disable:[d=>!isDateOpen(d)],
-    onDayCreate:(a,b,fp,el)=>{
-      const s=bSched[fmt(el.dateObj)],ok=s?s.status==="開放":!getShiftCycleInfo(el.dateObj).isWorkDay;
-      if(ok&&el.dateObj>=now)el.classList.add(getShiftCycleInfo(el.dateObj).shiftType==="白班"?"available-day-yellow":"available-day-blue");
-    },
-    onChange:validateTime
-  });
-  validateTime();
-}
+const maxBookDate=()=>{const n=getTaipeiDate();return new Date(n.getFullYear(),n.getMonth()+2,0)}; // 可以約到下個月月底
 
 /* ---------- 時間選單 ---------- */
 function isTimeBlocked(ds,h,m){
@@ -514,57 +529,60 @@ function availMinutes(ds){
   }
   return out;
 }
-function validateTime(){
-  const hs=$("bookingHour"),ms=$("bookingMinute"),ds=$("bookingDate").value;if(!ds)return;
-  const pH=hs.value,pM=ms.value,isToday=ds===fmt(getTaipeiDate()),av=availMinutes(ds);
-  const hours=[...new Set(av.map(t=>pad(Math.floor(t/60))))];
-  if(!hours.length){setOpts(hs,[""],()=>isToday?"今日已無可預約時段":"這天已約滿");setOpts(ms,[""],()=>"無");return}
-  setOpts(hs,hours,v=>v+" 時");hs.value=hours.includes(pH)?pH:hours[0];
-  const mins=av.filter(t=>Math.floor(t/60)===+hs.value).map(t=>pad(t%60));
-  if(!mins.length){setOpts(ms,[""],()=>"無");return}
-  setOpts(ms,mins,v=>v+" 分");ms.value=mins.includes(pM)?pM:mins[0];
-  const p=$("slotPanel");if(p&&!p.hidden)p.querySelectorAll(".sp-row").forEach(r=>r.classList.toggle("on",r.dataset.ds===ds));
-}
-
-/* ---------- 展開所有剩餘時段 ---------- */
+/* ---------- 一目了然的月曆：每一格直接顯示可以開始的時間 ---------- */
 const hm=t=>`${pad(Math.floor(t/60))}:${pad(t%60)}`;
+const WDS="日一二三四五六";
 function toRanges(av){const r=[];av.forEach(t=>{const l=r[r.length-1];if(l&&t-l[1]===15)l[1]=t;else r.push([t,t])});return r}
-function toggleSlots(){
-  const p=$("slotPanel"),b=$("slotToggle"),open=p.hidden;
-  p.hidden=!open;b.classList.toggle("open",open);b.querySelector("span").textContent=open?"收起所有時段":"查看所有可預約時段";
-  if(open)renderSlots();
-}
-function renderSlots(){
-  const p=$("slotPanel"),now=getTaipeiDate(),max=new Date(now.getFullYear(),now.getMonth()+2,0),cur=$("bookingDate").value;
-  const rows=[];
-  for(const d=new Date(now.getFullYear(),now.getMonth(),now.getDate());d<=max;d.setDate(d.getDate()+1)){
-    if(!isDateOpen(d))continue;const ds=fmt(d),av=availMinutes(ds);if(!av.length)continue;
-    rows.push({ds,d:new Date(d),av,y:getShiftCycleInfo(d).shiftType==="白班"});
+function autoPick(){
+  const n=getTaipeiDate(),max=maxBookDate();
+  for(const d=new Date(n.getFullYear(),n.getMonth(),n.getDate());d<=max;d.setDate(d.getDate()+1)){
+    if(isDateOpen(d)&&availMinutes(fmt(d)).length){$("bookingDate").value=fmt(d);calY=d.getFullYear();calM=d.getMonth();return}
   }
-  p.textContent="";
-  const h=document.createElement("div");h.className="sp-h";
-  h.textContent=rows.length?`共 ${rows.length} 天可以約・下面是「可以開始做」的時間，點一下就幫你選好`:"目前沒有可預約的時段";
-  p.appendChild(h);
-  const WD="日一二三四五六";
-  rows.forEach(r=>{
-    const row=document.createElement("div");row.className="sp-row"+(r.ds===cur?" on":"");row.dataset.ds=r.ds;
-    const dd=document.createElement("div");dd.className="sp-d "+(r.y?"y":"b");
-    dd.innerHTML=`${r.d.getMonth()+1}/${r.d.getDate()}<small>週${WD[r.d.getDay()]}</small>`;
-    dd.onclick=()=>pickSlot(r.ds,r.av[0]);
-    const tt=document.createElement("div");tt.className="sp-t";
-    const rg=toRanges(r.av);
-    if(r.av.length===96){const s=document.createElement("span");s.textContent="全天都可以";s.onclick=()=>pickSlot(r.ds,r.av[0]);tt.appendChild(s)}
-    else rg.forEach(([a,b])=>{const s=document.createElement("span");s.textContent=a===b?hm(a):`${hm(a)}–${hm(b)}`;s.onclick=()=>pickSlot(r.ds,a);tt.appendChild(s)});
-    row.append(dd,tt);p.appendChild(row);
-  });
 }
-function pickSlot(ds,t){
-  if(!picker)return;picker.setDate(ds,true);
-  const hs=$("bookingHour"),ms=$("bookingMinute");
-  if([...hs.options].some(o=>o.value===pad(Math.floor(t/60)))){hs.value=pad(Math.floor(t/60));validateTime();if([...ms.options].some(o=>o.value===pad(t%60)))ms.value=pad(t%60)}
-  flash($("bookingDate"));flash(hs);
-  $("bookingDate").scrollIntoView({behavior:"smooth",block:"center"});
+function initCal(){const n=getTaipeiDate();calY=n.getFullYear();calM=n.getMonth();autoPick();validateTime()}
+function calMove(d){
+  const n=getTaipeiDate(),i=calY*12+calM+d,lo=n.getFullYear()*12+n.getMonth();
+  if(i<lo||i>lo+1)return;calY=Math.floor(i/12);calM=i%12;renderCal();
 }
+function renderCal(){
+  const n=getTaipeiDate(),today=fmt(n),max=maxBookDate(),sel=$("bookingDate").value,i=calY*12+calM,lo=n.getFullYear()*12+n.getMonth();
+  $("bcLabel").textContent=`${calY} 年 ${calM+1} 月`;$("bcPrev").disabled=i<=lo;$("bcNext").disabled=i>=lo+1;
+  const first=new Date(calY,calM,1).getDay(),days=new Date(calY,calM+1,0).getDate();
+  let h="";for(let k=0;k<first;k++)h+='<span class="bc-c blank"></span>';
+  for(let day=1;day<=days;day++){
+    const d=new Date(calY,calM,day),ds=fmt(d),past=ds<today,open=!past&&d<=max&&isDateOpen(d),av=open?availMinutes(ds):[];
+    let chips="";
+    if(open&&!av.length)chips='<i class="ch full">約滿</i>';
+    else if(av.length===96)chips='<i class="ch all">全天</i>';
+    else if(av.length){const rg=toRanges(av);chips=rg.slice(0,2).map(([a,b])=>`<i class="ch">${hm(a)}${a===b?"":`<small>~${hm(b)}</small>`}</i>`).join("")+(rg.length>2?`<i class="ch more">+${rg.length-2} 段</i>`:"")}
+    const can=av.length>0,cls="bc-c"+(can?"":" off")+(ds===sel&&can?" sel":"")+(ds===today?" today":"");
+    h+=can?`<button type="button" class="${cls}" data-ds="${ds}" aria-label="${calM+1}月${day}日 可預約"><b>${day}</b>${chips}</button>`:`<span class="${cls}"><b>${day}</b>${chips}</span>`;
+  }
+  $("bcGrid").innerHTML=h;
+}
+function renderTimes(){
+  const ds=$("bookingDate").value,tp=$("timePanel"),H=$("bookingHour"),M=$("bookingMinute");
+  if(!ds){H.value=M.value="";tp.innerHTML='<div class="tp-hint">目前沒有可預約的時段，請稍後再來看看</div>';return}
+  const d=new Date(ds+"T00:00:00"),lbl=`${d.getMonth()+1}/${d.getDate()}（週${WDS[d.getDay()]}）`,av=availMinutes(ds);
+  if(!av.length){H.value=M.value="";tp.innerHTML=`<div class="tp-hint">${lbl}${ds===fmt(getTaipeiDate())?"今天已經沒有可預約的時段了":"已經約滿了"}，請選其他日期</div>`;return}
+  const hours=[...new Set(av.map(t=>pad(Math.floor(t/60))))];
+  if(!hours.includes(H.value))H.value=hours[0];
+  const mins=av.filter(t=>Math.floor(t/60)===+H.value).map(t=>pad(t%60));
+  if(!mins.includes(M.value))M.value=mins[0];
+  tp.innerHTML=`<div class="tp-t"><svg class="ic"><use href="#i-clock"/></svg>${lbl} 選擇開始時間</div>
+    <div class="tp-h">${hours.map(x=>`<button type="button" data-h="${x}" class="${x===H.value?"on":""}">${x}:00</button>`).join("")}</div>
+    <div class="tp-m">${mins.map(x=>`<button type="button" data-m="${x}" class="${x===M.value?"on":""}">${H.value}:${x}</button>`).join("")}</div>
+    <div class="tp-sum">已選 <b>${lbl} ${H.value}:${M.value}</b> 開始</div>`;
+}
+function validateTime(){renderCal();renderTimes()}
+document.addEventListener("click",e=>{
+  const c=e.target.closest(".bc-c[data-ds]");
+  if(c){$("bookingDate").value=c.dataset.ds;$("bookingHour").value="";$("bookingMinute").value="";validateTime();
+    const tp=$("timePanel");if(tp.getBoundingClientRect().bottom>innerHeight)tp.scrollIntoView({behavior:"smooth",block:"nearest"});return}
+  const b=e.target.closest("#timePanel button");if(!b)return;
+  if(b.dataset.h){$("bookingHour").value=b.dataset.h;$("bookingMinute").value=""}else if(b.dataset.m)$("bookingMinute").value=b.dataset.m;
+  renderTimes();
+});
 
 /* ---------- 選項互動 ---------- */
 function setRemoval(v){needRemoval=v;$("removalYesCard").classList.toggle("active",v);$("removalNoCard").classList.toggle("active",!v);onSelectionChange()}
@@ -714,15 +732,19 @@ async function sendBooking(){
     const r=await fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify(data),signal:ac.signal});
     clearTimeout(to);
     const res=await r.json();
-    if(res.result!=="success"){alert(res.message||"送出失敗，請再試一次或直接聯繫官方 LINE。");btn.textContent="送出預約單 (開啟 LINE)";btn.disabled=false;fetchBackend();return}
+    if(res.result!=="success"){alert(res.message||"送出失敗，請再試一次或直接聯繫官方 LINE。");btn.textContent="送出預約";btn.disabled=false;fetchBackend();return}
     const finalTotal=Number.isFinite(res.totalPrice)?res.totalPrice:total;
     if(res.discount>0&&cp){lines.push(`• 折價券：${cp.title}（−NT$ ${res.discount}）`);coupons=coupons.filter(x=>x.id!==cp.id);selCoupon=""}
     const msg=`【美甲服務預約單】\n----------------------------\n${lines.join("\n")}\n----------------------------\n預計總金額：NT$ ${finalTotal} 元`;
+    if(res.lineSent||res.adminNotified){
+      await say(res.lineSent?"預約成功！\n預約確認已經傳到你的 LINE。":"預約成功！\n我們已經收到你的預約。",true);
+      btn.textContent="已完成預約";return;
+    }
     await say("預約成功！\n接著會開啟 LINE，請按「傳送」把預約單送給我們。",true);
     location.href=`https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodeURIComponent(msg)}`;
   }catch(e){
     clearTimeout(to);alert("送出失敗，請再試一次或直接聯繫官方 LINE。");
-    btn.textContent="送出預約單 (開啟 LINE)";btn.disabled=false;
+    btn.textContent="送出預約";btn.disabled=false;
   }
 }
 </script>
