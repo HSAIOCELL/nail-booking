@@ -32,8 +32,14 @@ h1 span{background:linear-gradient(transparent 62%,rgba(240,204,120,.5) 62% 90%,
 @keyframes grow{from{transform:scaleX(0)}}
 
 /* 側邊分頁標籤（像筆記本的索引貼） */
-body{padding-right:56px}
-.side{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:25;display:flex;flex-direction:column;gap:7px;padding-right:env(safe-area-inset-right)}
+/* 收合式側邊標籤：平常只露出一小條，點一下才展開，不擋畫面 */
+.side{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:30;padding-right:env(safe-area-inset-right)}
+.side-h{writing-mode:vertical-rl;display:flex;align-items:center;gap:5px;padding:12px 4px 12px 5px;background:var(--c);border:1.5px solid var(--line);border-right:0;border-radius:12px 0 0 12px;color:var(--ink);font-size:13px;letter-spacing:.18em;cursor:pointer;box-shadow:-2px 2px 0 var(--sand);transition:opacity .2s}
+.side-h .ic{writing-mode:horizontal-tb;width:15px;height:15px}
+.side-p{position:absolute;right:0;top:50%;display:flex;flex-direction:column;gap:7px;transform:translate(115%,-50%);transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.side.open .side-p{transform:translate(0,-50%)}
+.side.open .side-h{opacity:0;pointer-events:none}
+.side-mask{position:fixed;inset:0;z-index:29;background:rgba(75,64,57,.16);animation:fade .2s ease-out}
 .st-tab{writing-mode:vertical-rl;display:flex;align-items:center;gap:7px;padding:13px 9px 13px 10px;background:var(--c);border:1.6px solid var(--line);border-right:0;border-radius:15px 0 0 15px;color:var(--soft);font-size:15px;letter-spacing:.2em;cursor:pointer;opacity:.78;transition:transform .18s cubic-bezier(.2,.8,.2,1),opacity .15s;box-shadow:-2px 2px 0 rgba(75,64,57,.08)}
 .st-tab .ic{writing-mode:horizontal-tb;width:19px;height:19px}
 .st-tab.on{opacity:1;color:var(--ink);font-weight:700;transform:translateX(-7px);box-shadow:-3px 3px 0 var(--sand)}
@@ -426,6 +432,7 @@ details.box[open] summary{margin-bottom:12px}
 </div>
 
 <!-- 側邊分頁標籤（主要頁面） -->
+<div class="side-mask" id="sideMask" data-a="sideclose" hidden></div>
 <aside class="side" id="side" aria-label="主要頁面"></aside>
 <!-- 底部頁籤（同一頁裡的子頁面） -->
 <nav class="nav"><div class="nav-in" id="subNav"></div></nav>
@@ -512,7 +519,7 @@ function onClick(e){
   const f={toggle:toggleStatus,bedit:editBooking,bsave:saveBooking,bcancel:cancelBooking,rerender:renderAll,aedit:editAcc,asave:saveAcc,adel:delAcc,
     fedit:editFixed,fsave:saveFixed,fdel:delFixed,day:tapDay,bitems:editItems,ie:ieTap,isave:saveItems,cshow:id=>{const e=$("cl-"+id);if(e)e.hidden=!e.hidden},ym:(id)=>stepYM(id,+el.dataset.d),bkall:id=>{bkAll=id==="1";renderBookings()},cm:setChartMode,acct:setAccType,
     chip:pickChip,fxchip:id=>{$("fxItem").value=id},shg:id=>setShift("g",id),sht:id=>setShift("t",id),
-    sec:id=>goTab(id),sub:id=>goTab(curSec,id),
+    sec:id=>goTab(id),sideopen:()=>sideOpen(true),sideclose:()=>sideOpen(false),sub:id=>goTab(curSec,id),
     mfilter:id=>{mFilter=id;renderMembers()},medit:editMember,mtag:mTagTap,maddtag:mAddTag,msave:saveMember,mgive:giveTo,
     cpmode:id=>{cpT.mode=id;renderCpForm()},cptag:id=>{const i=cpT.tags.indexOf(id);i>=0?cpT.tags.splice(i,1):cpT.tags.push(id);renderCpForm()},
     cptitle:id=>{$("cpTitle").value=id;document.querySelectorAll("#cpTitles .chip").forEach(c=>c.classList.toggle("on",c.dataset.id===id))},
@@ -529,16 +536,19 @@ const SECS=[
 ];
 let curSec="stats",curSub={};
 function initNav(){
-  $("side").innerHTML=SECS.map(x=>`<button class="st-tab" type="button" data-a="sec" data-id="${x.id}" style="--c:${x.c}">${ic(x.ic)}<span>${x.name}</span></button>`).join("");
+  $("side").innerHTML=`<button class="side-h" id="sideH" type="button" data-a="sideopen" aria-label="切換頁面"></button><div class="side-p">${SECS.map(x=>`<button class="st-tab" type="button" data-a="sec" data-id="${x.id}" style="--c:${x.c}">${ic(x.ic)}<span>${x.name}</span></button>`).join("")}</div>`;
   let st=null;try{st=JSON.parse(localStorage.getItem("adm_tab")||"null")}catch(_){}
   if(st&&SECS.some(x=>x.id===st.sec)){curSub[st.sec]=st.sub;goTab(st.sec,st.sub,true)}else goTab("stats",null,true);
 }
+function sideOpen(v){$("side").classList.toggle("open",v);$("sideMask").hidden=!v}
 function goTab(sec,sub,quiet){
   const S0=SECS.find(x=>x.id===sec);if(!S0)return;
   if(!S0.subs.some(x=>x[0]===sub))sub=curSub[sec]&&S0.subs.some(x=>x[0]===curSub[sec])?curSub[sec]:S0.subs[0][0];
   const changed=sec!==curSec||sub!==curSub[sec];curSec=sec;curSub[sec]=sub;
   document.querySelectorAll(".pane").forEach(x=>x.classList.toggle("active",x.id==="tab-"+sec));
   document.querySelectorAll(".st-tab").forEach(x=>x.classList.toggle("on",x.dataset.id===sec));
+  const h=$("sideH");if(h){h.style.setProperty("--c",S0.c);h.innerHTML=`${ic(S0.ic)}<span>${S0.name}</span>`}
+  sideOpen(false);
   document.querySelectorAll("#tab-"+sec+" .sub").forEach(x=>x.classList.toggle("on",x.dataset.s===sub));
   const n=$("subNav");n.style.setProperty("--n",S0.subs.length);
   n.innerHTML=S0.subs.map(([k,l])=>`<button class="tab${k===sub?" active":""}" type="button" data-a="sub" data-id="${k}">${l}</button>`).join("");
