@@ -207,6 +207,15 @@ select:disabled{opacity:.6}
 .tp button:active{transform:scale(.94)}
 .tp button.on{background:var(--ink);color:#fff;border:1.3px solid var(--ink)}
 .tp-sum{margin-top:12px;padding:8px;text-align:center;font-size:15.5px;border-radius:12px 9px 13px 8px;background:#f2e0d9}
+.tp-sum{display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;padding:8px 8px 8px 12px}
+.tp .tp-ok{flex-shrink:0;padding:7px 20px;background:var(--ink);color:#fff;border:1.3px solid var(--ink);border-radius:14px 10px 15px 9px;letter-spacing:.15em;box-shadow:2px 2px 0 var(--sand)}
+.s1-t.done{cursor:pointer}
+.s1-sum{display:flex;width:100%;align-items:center;justify-content:space-between;padding:11px 14px;border:1.5px solid var(--ink);border-radius:16px 12px 18px 11px;background:var(--ink);color:#fff;font:inherit;font-size:17px;letter-spacing:.06em;cursor:pointer;box-shadow:3px 3px 0 var(--sand);animation:pop .22s ease-out;touch-action:manipulation}
+.s1-sum:active{transform:scale(.98)}
+.s1-sum .ic{width:18px;height:18px}
+.busy{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(251,248,241,.55);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);animation:fadein .15s ease-out}
+.busy-c{display:flex;align-items:center;gap:10px;padding:14px 22px;background:var(--paper);border:1.6px solid var(--line);border-radius:20px 14px 22px 13px;box-shadow:3px 4px 0 var(--sand);font-size:16px;letter-spacing:.1em}
+.spin{width:20px;height:20px;border-radius:50%;border:2.4px solid #e6dccd;border-top-color:#c9a55e;animation:spin .7s linear infinite}
 .tp-hint{text-align:center;color:var(--soft);font-size:14.5px;padding:6px 0}
 .price-note{text-align:center;font-size:14px;color:#9a6d1c;margin:-10px 0 14px}
 @keyframes dlgpop{from{opacity:0;transform:translateY(8px) scale(.94)}}
@@ -256,8 +265,9 @@ select:disabled{opacity:.6}
   </div>
 
   <div class="section">
-    <div class="section-title">Step 1. 預約日期與時間</div>
-    <div class="bc">
+    <div class="section-title s1-t" id="s1Head" onclick="openStep1()">Step 1. 預約日期與時間</div>
+    <button type="button" class="s1-sum" id="s1Sum" onclick="openStep1()" hidden></button>
+    <div class="bc" id="s1Body">
       <div class="bc-head">
         <button type="button" class="bc-nav" id="bcPrev" onclick="calMove(-1)" aria-label="上個月"><svg class="ic"><use href="#i-left"/></svg></button>
         <b id="bcLabel"></b>
@@ -390,6 +400,7 @@ select:disabled{opacity:.6}
   <button class="submit-btn" onclick="sendBooking()">送出預約</button>
 </div>
 
+<div id="busy" class="busy" hidden><div class="busy-c"><i class="spin"></i>預約送出中</div></div>
 <div id="dlg" class="dlg" hidden role="dialog" aria-modal="true"><div class="dlg-card"><svg class="ic dlg-ic"><use id="dlgIc" href="#i-note"/></svg><p id="dlgMsg"></p><button id="dlgBtn" type="button">好的</button></div></div>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>(function(){var t=document.getElementById("totalPrice");if(!t||!window.MutationObserver)return;var b=t.closest(".total-box");new MutationObserver(function(){b.classList.remove("bump");void b.offsetWidth;b.classList.add("bump")}).observe(t,{childList:true,characterData:true,subtree:true})})();</script>
@@ -529,7 +540,11 @@ function getShiftCycleInfo(d){
   let c=((diff%4)+4)%4; if(group==="A")c=(c+2)%4;
   return{cycleDay:c,isWorkDay:c===0||c===1,shiftType:type};
 }
-function isDateOpen(d){const s=bSched[fmt(d)];if(s){if(s.status==="開放")return true;if(s.status==="關閉")return false}return !getShiftCycleInfo(d).isWorkDay}
+/* 預設可預約的開始時間（分鐘）：
+   白班：休假日 07:00～20:00
+   夜班（19:20～隔天 07:20）：休假第1天 15:30 起、休假第2天整天、上班第1天 00:00～07:00、上班第2天不開放 */
+function windowsOf(d){const i=getShiftCycleInfo(d),c=i.cycleDay;if(i.shiftType==="白班")return c>=2?[[420,1200]]:null;return[[[0,420]],null,[[930,1425]],[[0,1425]]][c]}
+function isDateOpen(d){const s=bSched[fmt(d)];if(s){if(s.status==="開放")return true;if(s.status==="關閉")return false}return !!windowsOf(d)}
 const maxBookDate=()=>{const n=getTaipeiDate();return new Date(n.getFullYear(),n.getMonth()+2,0)}; // 可以約到下個月月底
 
 /* ---------- 時間選單 ---------- */
@@ -548,13 +563,12 @@ function isTimeBlocked(ds,h,m){
 function setOpts(sel,arr,f){sel.textContent="";arr.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=f(v);sel.appendChild(o)})}
 /* 某天所有還能預約的開始時間（分鐘）；可用時段空白＝整天都可以約，只排除已過去和已被佔用的時段 */
 function availMinutes(ds){
-  const si=bSched[ds],slotStr=si&&typeof si.slots==="string"?si.slots.trim():"";
-  const allowed=slotStr?slotStr.split(",").map(x=>x.trim()).filter(Boolean).map(x=>pad(x.split(":")[0])):null;
+  const si=bSched[ds];if(si&&si.status==="關閉")return[];
+  let ok;
+  if(si&&si.status==="開放"){const slotStr=typeof si.slots==="string"?si.slots.trim():"",allowed=slotStr?slotStr.split(",").map(x=>x.trim()).filter(Boolean).map(x=>pad(x.split(":")[0])):null;ok=t=>!allowed||allowed.includes(pad(Math.floor(t/60)))}
+  else{const w=windowsOf(new Date(ds+"T00:00:00"));if(!w)return[];ok=t=>w.some(([a,b])=>t>=a&&t<=b)}
   const now=getTaipeiDate(),isToday=ds===fmt(now),nowM=now.getHours()*60+now.getMinutes(),out=[];
-  for(let h=0;h<24;h++){
-    if(allowed&&!allowed.includes(pad(h)))continue;
-    for(const m of [0,15,30,45]){const t=h*60+m;if(isToday&&t<=nowM)continue;if(isTimeBlocked(ds,h,m))continue;out.push(t)}
-  }
+  for(let t=0;t<1440;t+=15){if(!ok(t)||(isToday&&t<=nowM)||isTimeBlocked(ds,Math.floor(t/60),t%60))continue;out.push(t)}
   return out;
 }
 /* ---------- 一目了然的月曆：每一格直接顯示可以開始的時間 ---------- */
@@ -600,14 +614,26 @@ function renderTimes(){
   tp.innerHTML=`<div class="tp-t"><svg class="ic"><use href="#i-clock"/></svg>${lbl} 選擇開始時間</div>
     <div class="tp-h">${hours.map(x=>`<button type="button" data-h="${x}" class="${x===H.value?"on":""}">${x}:00</button>`).join("")}</div>
     <div class="tp-m">${mins.map(x=>`<button type="button" data-m="${x}" class="${x===M.value?"on":""}">${H.value}:${x}</button>`).join("")}</div>
-    <div class="tp-sum">已選 <b>${lbl} ${H.value}:${M.value}</b> 開始</div>`;
+    <div class="tp-sum"><span>已選 <b>${lbl} ${H.value}:${M.value}</b></span><button type="button" class="tp-ok" data-ok="1">確定</button></div>`;
+  if(s1Done&&s1Done!==ds+" "+H.value+":"+M.value)openStep1(); // 時段被約走或款式改變導致時間變動 → 自動展開
 }
+/* Step 1 收合：按「確定」就收起來，只顯示選好的日期時間 */
+let s1Done="";
+function closeStep1(){
+  const ds=$("bookingDate").value,h=$("bookingHour").value,m=$("bookingMinute").value;if(!ds||!h||!m)return;
+  const d=new Date(ds+"T00:00:00");s1Done=ds+" "+h+":"+m;
+  $("s1Body").hidden=true;const sm=$("s1Sum");sm.hidden=false;
+  sm.innerHTML=`<span>${d.getMonth()+1}/${d.getDate()}（週${WDS[d.getDay()]}）${h}:${m}</span><svg class="ic"><use href="#i-down"/></svg>`;
+  $("s1Head").classList.add("done");$("s1Head").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function openStep1(){if(!s1Done)return;s1Done="";$("s1Body").hidden=false;$("s1Sum").hidden=true;$("s1Head").classList.remove("done")}
 function validateTime(){renderCal();renderTimes()}
 document.addEventListener("click",e=>{
   const c=e.target.closest(".bc-c[data-ds]");
   if(c){$("bookingDate").value=c.dataset.ds;$("bookingHour").value="";$("bookingMinute").value="";validateTime();
     const tp=$("timePanel");if(tp.getBoundingClientRect().bottom>innerHeight)tp.scrollIntoView({behavior:"smooth",block:"nearest"});return}
   const b=e.target.closest("#timePanel button");if(!b)return;
+  if(b.dataset.ok){closeStep1();return}
   if(b.dataset.h){$("bookingHour").value=b.dataset.h;$("bookingMinute").value=""}else if(b.dataset.m)$("bookingMinute").value=b.dataset.m;
   renderTimes();
 });
@@ -718,6 +744,8 @@ function calculateTotal(){
 }
 
 /* ---------- 送出 ---------- */
+/* 成功訊息自動消失，不用再按一次 */
+function quick(msg,ms){const p=say(msg,true);setTimeout(()=>{const b=$("dlgBtn");if(!$("dlg").hidden)b.click()},ms);return p}
 async function sendBooking(){
   const btn=document.querySelector(".submit-btn");if(btn.disabled)return;
   const name=cleanText($("customerName").value,30);if(!name){alert("請填寫您的預約暱稱！");return}
@@ -755,12 +783,13 @@ async function sendBooking(){
   const data={bookingId:"M"+Array.from(crypto.getRandomValues(new Uint8Array(4)),b=>pad(b.toString(16))).join(""),customerName:name,date,time:`${h}:${m}`,items:items.join(" / "),totalPrice:total};
   try{if(typeof liff!=="undefined"&&liff.isLoggedIn())data.idToken=liff.getIDToken()||""}catch(e){}
   if(cp&&data.idToken)data.couponId=cp.id;
-  btn.textContent="預約送出中...";btn.disabled=true;
+  btn.textContent="預約送出中...";btn.disabled=true;$("busy").hidden=false;
   const ac=new AbortController(),to=setTimeout(()=>ac.abort(),15000);
   try{
     const r=await fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify(data),signal:ac.signal});
     clearTimeout(to);
     const res=await r.json();
+    $("busy").hidden=true;
     if(res.result!=="success"){alert(res.message||"送出失敗，請再試一次或直接聯繫官方 LINE。");btn.textContent="送出預約";btn.disabled=false;fetchBackend();return}
     const finalTotal=Number.isFinite(res.totalPrice)?res.totalPrice:total;
     if(res.discount>0&&cp){lines.push(`• 折價券：${cp.title}（−NT$ ${res.discount}）`);coupons=coupons.filter(x=>x.id!==cp.id);selCoupon=""}
@@ -769,16 +798,16 @@ async function sendBooking(){
     if(fromOaChat()){
       try{
         await liff.sendMessages([{type:"text",text:msg.slice(0,4900)}]);
-        await say("預約成功！\n預約單已經自動傳給我們了。",true);
         btn.textContent="已完成預約";
+        await quick("預約成功！\n預約單已經自動傳給我們了。",1400);
         try{liff.closeWindow()}catch(_){}
         return;
       }catch(e){/* 沒有傳送權限或不在聊天室 → 改用下面原本的方式 */}
     }
-    await say("預約成功！\n接著會開啟 LINE，請按「傳送」把預約單送給我們。",true);
+    await quick("預約成功！\n接著會開啟 LINE，請按「傳送」把預約單送給我們。",1600);
     location.href=`https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodeURIComponent(msg)}`;
   }catch(e){
-    clearTimeout(to);alert("送出失敗，請再試一次或直接聯繫官方 LINE。");
+    clearTimeout(to);$("busy").hidden=true;alert("送出失敗，請再試一次或直接聯繫官方 LINE。");
     btn.textContent="送出預約";btn.disabled=false;
   }
 }

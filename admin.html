@@ -236,7 +236,7 @@ details.box[open] summary{margin-bottom:12px}
 .hrs button{min-height:38px;white-space:nowrap;padding:0;border:1.3px dashed #c9bbaa;border-radius:11px 8px 12px 7px;background:#fff;color:var(--soft);font-size:14px;cursor:pointer}
 .hrs button.on{background:var(--gold-bg);border:1.3px solid #c9a55e;color:var(--gold-ink);font-weight:700}
 .hrs button:active{transform:scale(.93)}
-.dp .two .btn{min-height:42px;font-size:15px}
+.three-b{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.three-b .btn{min-height:42px;font-size:14.5px;padding:6px 4px}
 .sh-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
 .unsaved{font-size:13px;color:var(--rose);text-align:center;margin-top:6px}
 
@@ -529,7 +529,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
 function onClick(e){
   const el=e.target.closest("[data-a]");if(!el)return;
   const f={toggle:toggleStatus,bedit:editBooking,bsave:saveBooking,bcancel:cancelBooking,rerender:renderAll,aedit:editAcc,asave:saveAcc,adel:delAcc,
-    fedit:editFixed,fsave:saveFixed,fdel:delFixed,day:tapDay,bdate:editDate,dsave:saveDate,dclose:()=>{shSel="";renderCal()},dopen:dayOpenTap,dhr:dayHrTap,dall:dayAll,dmonth:dayMonth,bitems:editItems,ie:ieTap,isave:saveItems,cshow:id=>{const e=$("cl-"+id);if(e)e.hidden=!e.hidden},ym:(id)=>stepYM(id,+el.dataset.d),bkall:id=>{bkAll=id==="1";renderBookings()},cm:setChartMode,acct:setAccType,
+    fedit:editFixed,fsave:saveFixed,fdel:delFixed,day:tapDay,bdate:editDate,dsave:saveDate,dclose:()=>{shSel="";renderCal()},dopen:dayOpenTap,dhr:dayHrTap,dall:dayAll,ddef:dayDef,dmonth:dayMonth,bitems:editItems,ie:ieTap,isave:saveItems,cshow:id=>{const e=$("cl-"+id);if(e)e.hidden=!e.hidden},ym:(id)=>stepYM(id,+el.dataset.d),bkall:id=>{bkAll=id==="1";renderBookings()},cm:setChartMode,acct:setAccType,
     chip:pickChip,fxchip:id=>{$("fxItem").value=id},shg:id=>setShift("g",id),sht:id=>setShift("t",id),
     sec:id=>goTab(id),sideopen:()=>sideOpen(true),sideclose:()=>sideOpen(false),sub:id=>goTab(curSec,id),
     mfilter:id=>{mFilter=id;renderMembers()},medit:editMember,mtag:mTagTap,maddtag:mAddTag,msave:saveMember,mgive:giveTo,
@@ -991,11 +991,11 @@ function shiftReminder(){
   if(t.getDate()>=12&&!M[ym]){el.textContent=`今天是 ${t.getDate()} 號，還沒設定下個月（${ym}）的班表喔`;el.hidden=false}else el.hidden=true;
 }
 const curShift=ym=>M[ym]||{shiftGroup:shGroup,shiftType:shType};
-function baseOpen(ds,group){
-  const[ay,am,ad]=ANCHOR.split("-").map(Number),[y,m,d]=ds.split("-").map(Number);
-  let c=((Math.round((Date.UTC(y,m-1,d)-Date.UTC(ay,am-1,ad))/864e5)%4)+4)%4;if(group==="A")c=(c+2)%4;
-  return !(c===0||c===1);
-}
+/* 班別循環：0＝上班第1天、1＝上班第2天、2＝休假第1天、3＝休假第2天
+   預設可預約開始時間：白班休假日 07:00～20:00；夜班 休1 15:30 起、休2 整天、上班第1天 00:00～07:00、上班第2天不開放 */
+function cyc(ds,group){const[ay,am,ad]=ANCHOR.split("-").map(Number),[y,m,d]=ds.split("-").map(Number);let c=((Math.round((Date.UTC(y,m-1,d)-Date.UTC(ay,am-1,ad))/864e5)%4)+4)%4;return group==="A"?(c+2)%4:c}
+function defWin(ds){const sh=curShift(ds.slice(0,7)),c=cyc(ds,sh.shiftGroup);if(sh.shiftType==="白班")return c>=2?[[420,1200]]:null;return[[[0,420]],null,[[930,1425]],[[0,1425]]][c]}
+function baseOpen(ds){return !!defWin(ds)}
 function dayOpen(ds,group){const s=S[ds];if(s&&s.status==="開放")return true;if(s&&s.status==="關閉")return false;return baseOpen(ds,group)}
 function syncShift(){
   labels();
@@ -1014,7 +1014,7 @@ function renderCal(){
   for(let d=1;d<=days;d++){
     const ds=`${shYM}-${pad(d)}`,o=dayOpen(ds,sh.shiftGroup),mn=!!S[ds],past=ds<today;
     if(o)open++;if(mn)man++;
-    const lim=o&&S[ds]&&S[ds].slots;
+    const lim=o&&dayHours(ds).length<24;
     const cls=["d",cnt[ds]?"has":"",o?(sh.shiftType==="白班"?"ya":"yb"):"off",mn?"man":"",lim?"lim":"",ds===shSel?"pick":"",ds===today?"today":"",past?"past":""].join(" ");
     h+=`<button type="button" class="${cls}" data-a="day" data-id="${ds}" aria-label="${m}月${d}日 ${o?"可約":"休息"}${cnt[ds]?"，有"+cnt[ds]+"筆預約":""}">${d}${cnt[ds]?`<i class="bk-n">${cnt[ds]}</i>`:""}</button>`;
   }
@@ -1027,7 +1027,11 @@ function renderCal(){
 let shSel="",dayQ=new Set(),dayT=null;
 const HRS=Array.from({length:24},(_,i)=>pad(i));
 function tapDay(ds){if(ds<ymd(new Date()))return;shSel=shSel===ds?"":ds;renderCal()}
-function dayHours(ds){const s=S[ds];return s&&s.slots?s.slots.split(",").map(x=>x.slice(0,2)):HRS.slice()}
+function dayHours(ds){
+  const s=S[ds];if(s&&s.status==="開放")return s.slots?s.slots.split(",").map(x=>x.slice(0,2)):HRS.slice();
+  if(s&&s.status==="關閉")return[];
+  const w=defWin(ds);return w?HRS.filter(h=>w.some(([a,b])=>a<=+h*60+45&&b>=+h*60)):[];
+}
 function renderDay(){
   const p=$("dayPanel");if(!p)return;
   if(!shSel||shSel.slice(0,7)!==shYM){p.hidden=true;return}
@@ -1038,12 +1042,11 @@ function renderDay(){
     ${bks.length?`<div class="dp-bk">${bks.map(b=>`<span>${esc(b.time)} ${esc(b.customerName||"")}</span>`).join("")}</div>`:""}
     <div class="sg"><button type="button" class="${o?"on":""}" data-a="dopen" data-id="1">可約</button><button type="button" class="${o?"":"on"}" data-a="dopen" data-id="0">休息</button></div>
     ${o?`<div class="hrs">${HRS.map(h=>`<button type="button" class="${hs.includes(h)?"on":""}" data-a="dhr" data-id="${h}">${h}:00</button>`).join("")}</div>
-    <div class="two"><button class="btn alt" type="button" data-a="dall">全天</button><button class="btn alt" type="button" data-a="dmonth">套用到整個月</button></div>`:""}`;
+    <div class="three-b"><button class="btn alt" type="button" data-a="dall">全天</button><button class="btn alt" type="button" data-a="ddef"${S[ds]?"":" disabled"}>預設</button><button class="btn alt" type="button" data-a="dmonth">套用整月</button></div>`:""}`;
 }
-function setDay(ds,open,hours){
-  const g=curShift(ds.slice(0,7)).shiftGroup,base=baseOpen(ds,g);
-  const slots=open&&hours&&hours.length&&hours.length<24?hours.slice().sort().map(h=>h+":00").join(","):"";
-  if(open===base&&!slots)delete S[ds];else S[ds]={status:open?"開放":"關閉",slots};
+function setDay(ds,open,hours,useDefault){
+  const base=baseOpen(ds),slots=open&&hours&&hours.length&&hours.length<24?hours.slice().sort().map(h=>h+":00").join(","):"";
+  if(useDefault||(!open&&!base))delete S[ds];else S[ds]={status:open?"開放":"關閉",slots};
   dayQ.add(ds);clearTimeout(dayT);dayT=setTimeout(flushDays,700);
 }
 async function flushDays(){
@@ -1055,14 +1058,16 @@ async function dayOpenTap(v){
   const ds=shSel;if(!ds)return;const want=v==="1";
   const n=B.filter(b=>b.status!=="已取消"&&b.date===ds).length;
   if(!want&&n&&!await ask(`這天已經有 ${n} 筆預約，\n確定要改成休息嗎？\n（已有的預約不會被刪除）`))return;
-  setDay(ds,want,want?dayHours(ds):null);renderCal();
+  if(want===dayOpen(ds))return;
+  if(want)setDay(ds,true,null,baseOpen(ds));else setDay(ds,false);renderCal();
 }
 function dayHrTap(h){
   const ds=shSel;if(!ds)return;const hs=dayHours(ds),i=hs.indexOf(h);
   if(i>=0){if(hs.length===1)return;hs.splice(i,1)}else hs.push(h);
   setDay(ds,true,hs);renderCal();
 }
-function dayAll(){if(shSel){setDay(shSel,true,null);renderCal()}}
+function dayAll(){if(!shSel)return;const w=defWin(shSel),allDef=w&&w.length===1&&w[0][0]===0&&w[0][1]>=1425;setDay(shSel,true,null,allDef);renderCal()}
+function dayDef(){if(shSel&&S[shSel]){setDay(shSel,false,null,true);renderCal()}}
 async function dayMonth(){
   const ds=shSel;if(!ds)return;const hs=dayHours(ds),g=curShift(shYM).shiftGroup,today=ymd(new Date());
   const[y,m]=shYM.split("-").map(Number),days=new Date(y,m,0).getDate(),list=[];
