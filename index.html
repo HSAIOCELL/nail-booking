@@ -210,9 +210,10 @@ select:disabled{opacity:.6}
 .tp-sum{display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;padding:8px 8px 8px 12px}
 .tp .tp-ok{flex-shrink:0;padding:7px 20px;background:var(--ink);color:#fff;border:1.3px solid var(--ink);border-radius:14px 10px 15px 9px;letter-spacing:.15em;box-shadow:2px 2px 0 var(--sand)}
 .s1-t.done{cursor:pointer}
-.s1-sum{display:flex;width:100%;align-items:center;justify-content:space-between;padding:11px 14px;border:1.5px solid var(--ink);border-radius:16px 12px 18px 11px;background:var(--ink);color:#fff;font:inherit;font-size:17px;letter-spacing:.06em;cursor:pointer;box-shadow:3px 3px 0 var(--sand);animation:pop .22s ease-out;touch-action:manipulation}
+.s1-sum{display:flex;width:100%;align-items:center;justify-content:space-between;padding:11px 14px;border:1.5px solid var(--line);border-radius:16px 12px 18px 11px;background:#f2e0d9;color:var(--ink);font:inherit;font-size:17px;letter-spacing:.06em;cursor:pointer;box-shadow:3px 3px 0 var(--sand);animation:pop .22s ease-out;touch-action:manipulation}
 .s1-sum:active{transform:scale(.98)}
-.s1-sum .ic{width:18px;height:18px}
+.s1-sum .ic{width:18px;height:18px;color:#c98f80}
+.s1-sum span{display:flex;align-items:center;gap:8px}
 .sending{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(251,248,241,.55);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);animation:fadein .15s ease-out}
 .sending-c{display:flex;align-items:center;gap:10px;padding:14px 22px;background:var(--paper);border:1.6px solid var(--line);border-radius:20px 14px 22px 13px;box-shadow:3px 4px 0 var(--sand);font-size:16px;letter-spacing:.1em}
 .spin{width:20px;height:20px;border-radius:50%;border:2.4px solid #e6dccd;border-top-color:#c9a55e;animation:spin .7s linear infinite}
@@ -623,7 +624,7 @@ function closeStep1(){
   const ds=$("bookingDate").value,h=$("bookingHour").value,m=$("bookingMinute").value;if(!ds||!h||!m)return;
   const d=new Date(ds+"T00:00:00");s1Done=ds+" "+h+":"+m;
   $("s1Body").hidden=true;const sm=$("s1Sum");sm.hidden=false;
-  sm.innerHTML=`<span>${d.getMonth()+1}/${d.getDate()}（週${WDS[d.getDay()]}）${h}:${m}</span><svg class="ic"><use href="#i-down"/></svg>`;
+  sm.innerHTML=`<span><svg class="ic"><use href="#i-clock"/></svg>${d.getMonth()+1}/${d.getDate()}（週${WDS[d.getDay()]}）${h}:${m}</span><svg class="ic"><use href="#i-down"/></svg>`;
   $("s1Head").classList.add("done");$("s1Head").scrollIntoView({behavior:"smooth",block:"start"});
 }
 function openStep1(){if(!s1Done)return;s1Done="";$("s1Body").hidden=false;$("s1Sum").hidden=true;$("s1Head").classList.remove("done")}
