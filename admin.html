@@ -31,11 +31,21 @@ h1 span{background:linear-gradient(transparent 62%,rgba(240,204,120,.5) 62% 90%,
 @keyframes rise{from{opacity:0;transform:translateY(8px)}}
 @keyframes grow{from{transform:scaleX(0)}}
 
-/* 底部導覽（單手好按） */
+/* 側邊分頁標籤（像筆記本的索引貼） */
+body{padding-right:56px}
+.side{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:25;display:flex;flex-direction:column;gap:7px;padding-right:env(safe-area-inset-right)}
+.st-tab{writing-mode:vertical-rl;display:flex;align-items:center;gap:7px;padding:13px 9px 13px 10px;background:var(--c);border:1.6px solid var(--line);border-right:0;border-radius:15px 0 0 15px;color:var(--soft);font-size:15px;letter-spacing:.2em;cursor:pointer;opacity:.78;transition:transform .18s cubic-bezier(.2,.8,.2,1),opacity .15s;box-shadow:-2px 2px 0 rgba(75,64,57,.08)}
+.st-tab .ic{writing-mode:horizontal-tb;width:19px;height:19px}
+.st-tab.on{opacity:1;color:var(--ink);font-weight:700;transform:translateX(-7px);box-shadow:-3px 3px 0 var(--sand)}
+.st-tab:active{transform:translateX(-3px) scale(.96);transition:none}
+.sub{display:none}.sub.on{display:block;animation:rise .28s ease-out}
+
+/* 底部頁籤（同一頁的子頁面） */
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:center;padding:14px 10px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(0deg,rgba(246,241,231,.98) 55%,rgba(246,241,231,0))}
-.nav-in{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;width:100%;max-width:560px;background:var(--paper);border:1.6px solid var(--line);border-radius:24px 18px 26px 16px;padding:6px;box-shadow:3px 4px 0 var(--sand)}
+.nav-in{display:grid;grid-template-columns:repeat(var(--n,3),1fr);gap:4px;width:100%;max-width:560px;background:var(--paper);border:1.6px solid var(--line);border-radius:24px 18px 26px 16px;padding:6px;box-shadow:3px 4px 0 var(--sand)}
 .tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 0 6px;border:1.5px dashed transparent;border-radius:16px 12px 18px 11px;background:transparent;color:var(--soft);cursor:pointer;font-size:13px;transition:transform .12s,background-color .15s}
 .tab .ic{width:23px;height:23px}
+.tab{font-size:15px;padding:11px 0;min-height:48px;justify-content:center}
 .tab.active{background:#f3ebdf;border:1.5px solid var(--line);color:var(--ink)}
 .tab:active{transform:scale(.94);transition:none}
 
@@ -100,6 +110,28 @@ label.f{display:block;font-size:13px;color:var(--soft);margin:2px 0 4px}
 .bk-c{font-size:13px;color:var(--soft);margin-top:6px;display:flex;justify-content:space-between;cursor:pointer}
 .bk-c b{font-weight:700}
 .bk .cl{margin-top:6px}
+
+/* 會員 */
+.mc{background:#fff;border:1.5px solid var(--line);border-radius:18px 13px 20px 12px;box-shadow:2px 3px 0 var(--sand);padding:11px 12px;margin-top:10px}
+.mc-top{display:flex;justify-content:space-between;align-items:center;gap:8px}.mc-top b{font-size:16.5px}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 4px}
+.tag{display:inline-block;padding:1px 9px;border-radius:10px 7px 11px 6px;background:#dfe7d6;color:#55654a;font-size:12.5px}
+.tag.new{background:var(--gold-bg);color:var(--gold-ink)}
+.mc-s{font-size:13.5px;color:var(--soft);line-height:1.6}
+.mc-n{font-size:13.5px;margin-top:4px}
+.mc-c{display:inline-block;margin-top:6px;font-size:13px;padding:2px 10px;border-radius:10px 7px 11px 6px;background:var(--gold-bg);color:var(--gold-ink)}
+.me{margin-top:8px;padding:10px;border:1.4px dashed #cdbfae;border-radius:14px 10px 15px 9px;background:#fdfbf6}
+.me .chips{margin-bottom:8px}.me .two{margin-bottom:8px}
+.cpr{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px dashed #d8cdbd}
+.cpr:last-child{border-bottom:0}
+.cpr .am{flex:0 0 78px;text-align:center;font-weight:700;padding:6px 0;border-radius:12px 9px 13px 8px;background:var(--gold-bg);color:var(--gold-ink);border:1.3px dashed #e0c78a}
+.cpr.used .am,.cpr.exp .am{background:#efe9dc;color:var(--soft);border-color:#d8cdbd}
+.cpr .mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;font-size:14.5px}
+.cpr small{color:var(--soft);font-size:12.5px}
+.pill{font-size:12px;padding:1px 8px;border-radius:9px 6px 10px 6px;margin-left:6px}
+.pill.ok{background:var(--gold-bg);color:var(--gold-ink)}.pill.used{background:var(--blue-bg);color:var(--blue-ink)}.pill.exp{background:#efe9dc;color:var(--soft)}
+.bk-cp{font-size:13px;color:var(--gold-ink);margin:-2px 0 6px}
+.sg button{font-size:14.5px}
 
 /* 修改預約項目 */
 .ie{margin:8px 0;padding:10px;border:1.4px dashed #cdbfae;border-radius:14px 10px 15px 9px;background:#fdfbf6}
@@ -214,6 +246,8 @@ details.box[open] summary{margin-bottom:12px}
   <symbol id="i-l" viewBox="0 0 24 24"><path d="M14.8 5.2L8.4 12 14.6 18.8"/></symbol>
   <symbol id="i-r" viewBox="0 0 24 24"><path d="M9.2 5.2L15.6 12 9.4 18.8"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5.2V18.8M5.2 12H18.8"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M12 4.2C14.4 4.1 16 6 15.9 8.2 15.8 10.6 14.2 12.2 12 12.2 9.7 12.2 8.1 10.5 8.2 8.2 8.2 6 9.7 4.3 12 4.2Z"/><path d="M4.8 19.6C5.6 15.8 8.4 14 12 14S18.5 15.8 19.2 19.4"/></symbol>
+  <symbol id="i-ticket" viewBox="0 0 24 24"><path d="M3.8 7.2Q12 6.4 20.2 7.2V10.2Q18.4 10.6 18.4 12.2 18.6 13.8 20.2 14V17Q12 17.8 3.8 17V14Q5.6 13.6 5.6 12 5.4 10.4 3.8 10.2Z"/><path d="M14.6 7.4V9M14.6 11.2V12.8M14.6 15V16.6" stroke-width="1.4"/></symbol>
   <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M5 11V9.6Q5 7 7.6 7H17"/><path d="M14.6 4.4L17.4 7 14.6 9.6"/><path d="M19 13v1.4Q19 17 16.4 17H7"/><path d="M9.4 14.4L6.6 17l2.8 2.6"/></symbol>
 </svg>
 
@@ -227,142 +261,177 @@ details.box[open] summary{margin-bottom:12px}
   <div id="adminShiftReminder" class="note" hidden></div>
 
   <!-- ===== 營收 ===== -->
-  <section id="tab-stats" class="pane active">
-    <div class="rc">
-      <div class="step">
-        <button class="ib" type="button" data-a="ym" data-id="sel" data-d="-1" aria-label="上個月"><svg class="ic"><use href="#i-l"/></svg></button>
-        <b id="lbl-sel"></b>
-        <button class="ib" type="button" data-a="ym" data-id="sel" data-d="1" aria-label="下個月"><svg class="ic"><use href="#i-r"/></svg></button>
+  <section id="tab-stats" class="pane">
+    <div class="sub" data-s="month">
+      <div class="rc">
+        <div class="step"><button class="ib" type="button" data-a="ym" data-id="sel" data-d="-1" aria-label="上個月"><svg class="ic"><use href="#i-l"/></svg></button><b class="lbl" data-k="sel"></b><button class="ib" type="button" data-a="ym" data-id="sel" data-d="1" aria-label="下個月"><svg class="ic"><use href="#i-r"/></svg></button></div>
+        <div class="rc-t">本月營收</div>
+        <div class="big" id="mRev">NT$ 0</div>
+        <div class="mini"><div><span>支出</span><b id="mExp">NT$ 0</b></div><div><span>淨利</span><b id="mNet">NT$ 0</b></div></div>
+        <div id="mLists"></div>
       </div>
-      <div class="rc-t">本月營收</div>
-      <div class="big" id="mRev">NT$ 0</div>
-      <div class="mini"><div><span>支出</span><b id="mExp">NT$ 0</b></div><div><span>淨利</span><b id="mNet">NT$ 0</b></div></div>
-      <div id="mLists"></div>
     </div>
-
-    <div class="cc">
-      <h3><svg class="ic"><use href="#i-coin"/></svg>客人真實利潤</h3>
-      <div class="muted">依每位客人的款式，扣掉你的時薪、材料、房租分攤、電費之後，這個月做客人真正賺多少</div>
-      <div class="three"><div><span>客人數</span><b id="cN">0</b></div><div><span>成本合計</span><b id="cC">NT$ 0</b></div><div><span>真實利潤</span><b id="cP">NT$ 0</b></div></div>
-      <div class="cl" id="cOne"></div>
+    <div class="sub" data-s="profit">
+      <div class="cc">
+        <div class="step"><button class="ib" type="button" data-a="ym" data-id="sel" data-d="-1" aria-label="上個月"><svg class="ic"><use href="#i-l"/></svg></button><b class="lbl" data-k="sel"></b><button class="ib" type="button" data-a="ym" data-id="sel" data-d="1" aria-label="下個月"><svg class="ic"><use href="#i-r"/></svg></button></div>
+        <h3 style="margin-top:12px"><svg class="ic"><use href="#i-coin"/></svg>客人真實利潤</h3>
+        <div class="muted">依每位客人的款式，扣掉材料、房租分攤、電費之後，這個月做客人真正賺多少（不算你的時薪）</div>
+        <div class="three"><div><span>客人數</span><b id="cN">0</b></div><div><span>成本合計</span><b id="cC">NT$ 0</b></div><div><span>真實利潤</span><b id="cP">NT$ 0</b></div></div>
+        <div class="cl" id="cOne"></div>
+      </div>
     </div>
-
-    <div class="rc yr">
-      <div class="step">
-        <button class="ib" type="button" data-a="ym" data-id="selY" data-d="-1" aria-label="上一年"><svg class="ic"><use href="#i-l"/></svg></button>
-        <b id="lbl-selY"></b>
-        <button class="ib" type="button" data-a="ym" data-id="selY" data-d="1" aria-label="下一年"><svg class="ic"><use href="#i-r"/></svg></button>
+    <div class="sub" data-s="year">
+      <div class="rc yr">
+        <div class="step"><button class="ib" type="button" data-a="ym" data-id="selY" data-d="-1" aria-label="上一年"><svg class="ic"><use href="#i-l"/></svg></button><b class="lbl" data-k="selY"></b><button class="ib" type="button" data-a="ym" data-id="selY" data-d="1" aria-label="下一年"><svg class="ic"><use href="#i-r"/></svg></button></div>
+        <div class="rc-t">全年營收</div>
+        <div class="big" id="yRev">NT$ 0</div>
+        <div class="mini"><div><span>支出</span><b id="yExp">NT$ 0</b></div><div><span>淨利</span><b id="yNet">NT$ 0</b></div></div>
+        <div class="sg blue" style="margin-top:14px">
+          <button type="button" class="on" data-a="cm" data-id="revenue">營收</button>
+          <button type="button" data-a="cm" data-id="profit">淨利</button>
+        </div>
+        <div class="cwrap"><canvas id="trendChart"></canvas></div>
       </div>
-      <div class="rc-t">全年營收</div>
-      <div class="big" id="yRev">NT$ 0</div>
-      <div class="mini"><div><span>支出</span><b id="yExp">NT$ 0</b></div><div><span>淨利</span><b id="yNet">NT$ 0</b></div></div>
-      <div class="sg blue" style="margin-top:14px">
-        <button type="button" class="on" data-a="cm" data-id="revenue">營收</button>
-        <button type="button" data-a="cm" data-id="profit">淨利</button>
-      </div>
-      <div class="cwrap"><canvas id="trendChart"></canvas></div>
     </div>
   </section>
 
   <!-- ===== 班表 ===== -->
   <section id="tab-schedule" class="pane">
-    <div class="box">
-      <h3><svg class="ic"><use href="#i-cal"/></svg>班表</h3>
-      <div class="step">
-        <button class="ib" type="button" data-a="ym" data-id="sh" data-d="-1" aria-label="上個月"><svg class="ic"><use href="#i-l"/></svg></button>
-        <b id="lbl-sh"></b>
-        <button class="ib" type="button" data-a="ym" data-id="sh" data-d="1" aria-label="下個月"><svg class="ic"><use href="#i-r"/></svg></button>
+    <div class="sub" data-s="cal">
+      <div class="box">
+        <h3><svg class="ic"><use href="#i-cal"/></svg>班表</h3>
+        <div class="step"><button class="ib" type="button" data-a="ym" data-id="sh" data-d="-1" aria-label="上個月"><svg class="ic"><use href="#i-l"/></svg></button><b class="lbl" data-k="sh"></b><button class="ib" type="button" data-a="ym" data-id="sh" data-d="1" aria-label="下個月"><svg class="ic"><use href="#i-r"/></svg></button></div>
+        <div class="sh-row">
+          <div class="sg blue" id="sgG"><button type="button" data-a="shg" data-id="A">A 組</button><button type="button" data-a="shg" data-id="B">B 組</button></div>
+          <div class="sg blue" id="sgT"><button type="button" data-a="sht" data-id="白班">白班</button><button type="button" data-a="sht" data-id="夜班">夜班</button></div>
+        </div>
+        <div class="unsaved" id="shUnset" hidden>這個月還沒設定班別，點上面的組別／班別就會套用</div>
+        <div class="cal">
+          <div class="cal-wd"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+          <div class="cal-g" id="calGrid"></div>
+        </div>
+        <div class="lg"><span><i class="a"></i>白班可約</span><span><i class="b"></i>夜班可約</span><span><i class="m"></i>手動調整</span><span><i class="k"></i>有預約（數字＝筆數）</span></div>
+        <div class="sum" id="shSum"></div>
+        <p class="muted" style="text-align:center;margin:10px 0 0">點日期就能切換「可約 ↔ 休息」，會自動儲存。<br>再點一次就恢復原本班表。</p>
       </div>
-      <div class="sh-row">
-        <div class="sg blue" id="sgG"><button type="button" data-a="shg" data-id="A">A 組</button><button type="button" data-a="shg" data-id="B">B 組</button></div>
-        <div class="sg blue" id="sgT"><button type="button" data-a="sht" data-id="白班">白班</button><button type="button" data-a="sht" data-id="夜班">夜班</button></div>
+    </div>
+    <div class="sub" data-s="list">
+      <div class="box">
+        <h3><svg class="ic"><use href="#i-list"/></svg>預約一覽</h3>
+        <div class="step"><button class="ib" type="button" data-a="ym" data-id="sh" data-d="-1" aria-label="上個月"><svg class="ic"><use href="#i-l"/></svg></button><b class="lbl" data-k="sh"></b><button class="ib" type="button" data-a="ym" data-id="sh" data-d="1" aria-label="下個月"><svg class="ic"><use href="#i-r"/></svg></button></div>
+        <div class="mb" id="shBk"></div>
       </div>
-      <div class="unsaved" id="shUnset" hidden>這個月還沒設定班別，點上面的組別／班別就會套用</div>
-      <div class="cal">
-        <div class="cal-wd"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
-        <div class="cal-g" id="calGrid"></div>
-      </div>
-      <div class="lg"><span><i class="a"></i>白班可約</span><span><i class="b"></i>夜班可約</span><span><i class="m"></i>手動調整</span><span><i class="k"></i>有預約（數字＝筆數）</span></div>
-      <div class="sum" id="shSum"></div>
-      <p class="muted" style="text-align:center;margin:10px 0 0">點日期就能切換「可約 ↔ 休息」，會自動儲存。<br>再點一次就恢復原本班表。</p>
-      <div class="mb" id="shBk"></div>
-
     </div>
   </section>
 
   <!-- ===== 預約 ===== -->
   <section id="tab-bookings" class="pane">
-    <details class="box">
-      <summary><svg class="ic" style="color:var(--gold)"><use href="#i-plus"/></svg>新增預約</summary>
-      <div class="row">
-        <input type="text" id="newName" placeholder="客戶名稱" maxlength="30">
-        <input type="date" id="newDate">
-        <div class="two"><select id="newHour"></select><select id="newMinute"><option value="00">00 分</option><option value="15">15 分</option><option value="30">30 分</option><option value="45">45 分</option></select></div>
-        <input type="text" id="newItems" placeholder="項目" maxlength="100">
-        <input type="number" id="newPrice" placeholder="金額" min="0" inputmode="numeric">
-        <button class="btn full" type="button" onclick="manualAddBooking()">新增預約</button>
-      </div>
-    </details>
-    <div class="sg" style="margin-bottom:10px"><button type="button" id="bkM" class="on" data-a="bkall" data-id="0">按月份看</button><button type="button" id="bkA" data-a="bkall" data-id="1">看全部</button></div>
-    <div class="step" id="bkStep" style="margin:0 2px 12px">
-      <button class="ib" type="button" data-a="ym" data-id="bk" data-d="-1" aria-label="上個月"><svg class="ic"><use href="#i-l"/></svg></button>
-      <b id="lbl-bk"></b>
-      <button class="ib" type="button" data-a="ym" data-id="bk" data-d="1" aria-label="下個月"><svg class="ic"><use href="#i-r"/></svg></button>
+    <div class="sub" data-s="list">
+      <div class="sg" style="margin-bottom:10px"><button type="button" id="bkM" class="on" data-a="bkall" data-id="0">按月份看</button><button type="button" id="bkA" data-a="bkall" data-id="1">看全部</button></div>
+      <div id="bkStep" style="margin:0 2px 12px"><div class="step"><button class="ib" type="button" data-a="ym" data-id="bk" data-d="-1" aria-label="上個月"><svg class="ic"><use href="#i-l"/></svg></button><b class="lbl" data-k="bk"></b><button class="ib" type="button" data-a="ym" data-id="bk" data-d="1" aria-label="下個月"><svg class="ic"><use href="#i-r"/></svg></button></div></div>
+      <div id="bookingList"></div>
+      <div style="text-align:center"><button class="btn alt" type="button" onclick="fetchData()"><svg class="ic"><use href="#i-refresh"/></svg>重新整理</button></div>
     </div>
-    <div id="bookingList"></div>
-    <div style="text-align:center"><button class="btn alt" type="button" onclick="fetchData()"><svg class="ic"><use href="#i-refresh"/></svg>重新整理</button></div>
+    <div class="sub" data-s="new">
+      <div class="box">
+        <h3><svg class="ic"><use href="#i-plus"/></svg>新增預約</h3>
+        <div class="row">
+          <div><label class="f">連結會員（選填，選了會自動帶入名稱）</label><select id="newMember" onchange="pickNewMember()"></select></div>
+          <input type="text" id="newName" placeholder="客戶名稱" maxlength="30">
+          <input type="date" id="newDate">
+          <div class="two"><select id="newHour"></select><select id="newMinute"><option value="00">00 分</option><option value="15">15 分</option><option value="30">30 分</option><option value="45">45 分</option></select></div>
+          <input type="text" id="newItems" placeholder="項目（例如：卸甲、單色、局部貓眼）" maxlength="100">
+          <input type="number" id="newPrice" placeholder="金額" min="0" inputmode="numeric">
+          <button class="btn full" type="button" onclick="manualAddBooking()">新增預約</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 會員 ===== -->
+  <section id="tab-members" class="pane">
+    <div class="sub" data-s="mem">
+      <div class="box">
+        <h3><svg class="ic"><use href="#i-user"/></svg>會員名單<small class="muted" id="memCount" style="margin-left:auto"></small></h3>
+        <p class="muted" style="margin:0 0 10px">客人在預約頁按「連動 LINE」就會自動成為會員，不用填任何資料。</p>
+        <input type="text" id="mSearch" placeholder="搜尋名稱或備註" maxlength="30" oninput="mQuery=this.value.trim();renderMembers()">
+        <div class="chips" id="mTags" style="margin-top:10px"></div>
+        <div id="memList"></div>
+      </div>
+    </div>
+    <div class="sub" data-s="cp">
+      <div class="box">
+        <h3><svg class="ic"><use href="#i-ticket"/></svg>發折價券</h3>
+        <label class="f">發給誰</label>
+        <div class="sg" id="cpMode"><button type="button" data-a="cpmode" data-id="one">單一會員</button><button type="button" data-a="cpmode" data-id="tag">依標籤</button><button type="button" data-a="cpmode" data-id="all">全部會員</button></div>
+        <div id="cpWho" style="margin:10px 0"></div>
+        <label class="f">折價券名稱</label>
+        <div class="chips" id="cpTitles"></div>
+        <div class="row">
+          <input type="text" id="cpTitle" placeholder="例如：回饋券" maxlength="20">
+          <div class="two"><div><label class="f">折抵金額</label><div class="amt"><i>NT$</i><input type="number" id="cpAmt" placeholder="100" min="1" inputmode="numeric"></div></div><div><label class="f">最低消費（0＝不限）</label><div class="amt"><i>NT$</i><input type="number" id="cpMin" placeholder="0" min="0" inputmode="numeric"></div></div></div>
+          <div><label class="f">到期日（空白＝不限期）</label><input type="date" id="cpExp"></div>
+          <div class="muted" id="cpCount" style="text-align:center"></div>
+          <button class="btn full gold" type="button" onclick="issueCoupon()"><svg class="ic"><use href="#i-ticket"/></svg>發出折價券</button>
+        </div>
+      </div>
+      <div class="box">
+        <h3><svg class="ic"><use href="#i-list"/></svg>已發出的折價券</h3>
+        <div class="sg" id="cpF" style="margin-bottom:10px"><button type="button" data-a="cpf" data-id="未使用">未使用</button><button type="button" data-a="cpf" data-id="已使用">已使用</button><button type="button" data-a="cpf" data-id="全部">全部</button></div>
+        <div id="cpList"></div>
+      </div>
+    </div>
   </section>
 
   <!-- ===== 記帳 ===== -->
   <section id="tab-accounting" class="pane">
-    <div class="box">
-      <div class="step">
-        <button class="ib" type="button" data-a="ym" data-id="acc" data-d="-1" aria-label="上個月"><svg class="ic"><use href="#i-l"/></svg></button>
-        <b id="lbl-acc"></b>
-        <button class="ib" type="button" data-a="ym" data-id="acc" data-d="1" aria-label="下個月"><svg class="ic"><use href="#i-r"/></svg></button>
-      </div>
-      <div class="tt" style="margin-top:12px">
-        <button type="button" class="tbtn out on" data-a="acct" data-id="支出"><svg class="ic"><use href="#i-out"/></svg>支出</button>
-        <button type="button" class="tbtn in" data-a="acct" data-id="收入"><svg class="ic"><use href="#i-in"/></svg>收入</button>
-      </div>
-      <div id="accForm" data-t="支出">
-        <div class="chips" id="chips"></div>
-        <div class="row">
-          <input type="text" id="accItem" placeholder="項目" maxlength="100">
-          <div class="amt"><i>NT$</i><input type="number" id="accAmt" placeholder="0" min="0" inputmode="numeric"></div>
-          <button class="btn full rose" type="button" id="accSubmit" onclick="manualAddAccounting()">記一筆支出</button>
+    <div class="sub" data-s="add">
+      <div class="box">
+        <div class="step"><button class="ib" type="button" data-a="ym" data-id="acc" data-d="-1" aria-label="上個月"><svg class="ic"><use href="#i-l"/></svg></button><b class="lbl" data-k="acc"></b><button class="ib" type="button" data-a="ym" data-id="acc" data-d="1" aria-label="下個月"><svg class="ic"><use href="#i-r"/></svg></button></div>
+        <div class="tt" style="margin-top:12px">
+          <button type="button" class="tbtn out on" data-a="acct" data-id="支出"><svg class="ic"><use href="#i-out"/></svg>支出</button>
+          <button type="button" class="tbtn in" data-a="acct" data-id="收入"><svg class="ic"><use href="#i-in"/></svg>收入</button>
+        </div>
+        <div id="accForm" data-t="支出">
+          <div class="chips" id="chips"></div>
+          <div class="row">
+            <input type="text" id="accItem" placeholder="項目" maxlength="100">
+            <div class="amt"><i>NT$</i><input type="number" id="accAmt" placeholder="0" min="0" inputmode="numeric"></div>
+            <button class="btn full rose" type="button" id="accSubmit" onclick="manualAddAccounting()">記一筆支出</button>
+          </div>
         </div>
       </div>
     </div>
-
-    <div class="box">
-      <div id="accInc" class="sec"></div>
-      <div id="accExp" class="sec" style="margin-bottom:0"></div>
+    <div class="sub" data-s="list">
+      <div class="box">
+        <div class="step"><button class="ib" type="button" data-a="ym" data-id="acc" data-d="-1" aria-label="上個月"><svg class="ic"><use href="#i-l"/></svg></button><b class="lbl" data-k="acc"></b><button class="ib" type="button" data-a="ym" data-id="acc" data-d="1" aria-label="下個月"><svg class="ic"><use href="#i-r"/></svg></button></div>
+        <div id="accInc" class="sec" style="margin-top:12px"></div>
+        <div id="accExp" class="sec" style="margin-bottom:0"></div>
+      </div>
     </div>
-
-    <div class="box">
-      <h3><svg class="ic"><use href="#i-repeat"/></svg>每月固定支出</h3>
-      <div id="fixedList"></div>
-      <details style="margin-top:10px">
-        <summary class="btn alt full" style="list-style:none"><svg class="ic"><use href="#i-plus"/></svg>新增固定支出</summary>
-        <div class="row" style="margin-top:12px">
-          <div class="chips" id="fxChips"></div>
-          <input type="text" id="fxItem" placeholder="項目" maxlength="60">
-          <div class="amt"><i>NT$</i><input type="number" id="fxAmt" placeholder="每月金額" min="0" inputmode="numeric"></div>
-          <div class="two"><div><label class="f">開始月</label><input type="month" id="fxStart"></div><div><label class="f">結束月</label><input type="month" id="fxEnd"></div></div>
-          <button class="btn full rose" type="button" onclick="addFixed()">儲存固定支出</button>
-        </div>
-      </details>
+    <div class="sub" data-s="fixed">
+      <div class="box">
+        <h3><svg class="ic"><use href="#i-repeat"/></svg>每月固定支出</h3>
+        <div id="fixedList"></div>
+        <details style="margin-top:10px">
+          <summary class="btn alt full" style="list-style:none"><svg class="ic"><use href="#i-plus"/></svg>新增固定支出</summary>
+          <div class="row" style="margin-top:12px">
+            <div class="chips" id="fxChips"></div>
+            <input type="text" id="fxItem" placeholder="項目" maxlength="60">
+            <div class="amt"><i>NT$</i><input type="number" id="fxAmt" placeholder="每月金額" min="0" inputmode="numeric"></div>
+            <div class="two"><div><label class="f">開始月</label><input type="month" id="fxStart"></div><div><label class="f">結束月</label><input type="month" id="fxEnd"></div></div>
+            <button class="btn full rose" type="button" onclick="addFixed()">儲存固定支出</button>
+          </div>
+        </details>
+      </div>
     </div>
   </section>
 </div>
 
-<nav class="nav"><div class="nav-in">
-  <button class="tab active" type="button" data-t="tab-stats"><svg class="ic"><use href="#i-chart"/></svg>營收</button>
-  <button class="tab" type="button" data-t="tab-schedule"><svg class="ic"><use href="#i-cal"/></svg>班表</button>
-  <button class="tab" type="button" data-t="tab-bookings"><svg class="ic"><use href="#i-list"/></svg>預約</button>
-  <button class="tab" type="button" data-t="tab-accounting"><svg class="ic"><use href="#i-coin"/></svg>記帳</button>
-</div></nav>
+<!-- 側邊分頁標籤（主要頁面） -->
+<aside class="side" id="side" aria-label="主要頁面"></aside>
+<!-- 底部頁籤（同一頁裡的子頁面） -->
+<nav class="nav"><div class="nav-in" id="subNav"></div></nav>
 
 <div id="dlg" class="dlg" hidden role="dialog" aria-modal="true"><div class="dc"><svg class="ic"><use id="dlgIc" href="#i-note"/></svg><p id="dlgMsg"></p><div class="btns"><button id="dlgNo" class="btn alt" type="button">取消</button><button id="dlgYes" class="btn" type="button">好的</button></div></div></div>
 
@@ -384,7 +453,7 @@ const shiftYM=(ym,d)=>{const[y,m]=ym.split("-").map(Number),t=new Date(y,m-1+d,1
 const ymLabel=ym=>{const[y,m]=ym.split("-");return`${y} 年 ${+m} 月`};
 const WD=["日","一","二","三","四","五","六"];
 
-let B=[],A=[],F=[],S={},M={},ANCHOR="2026-10-23",chart=null,MS={};
+let B=[],A=[],F=[],S={},M={},MB=[],CP=[],ANCHOR="2026-10-23",chart=null,MS={};
 let bkAll=false,firstLoad=true;
 let selYM=curYM,accYM=curYM,bkYM=curYM,cmode="revenue",accType="支出";
 let shYM=ymd(new Date()).slice(8)>="12"?shiftYM(curYM,1):curYM,shGroup="B",shType="夜班";
@@ -437,7 +506,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
   $("newHour").innerHTML=Array.from({length:24},(_,h)=>`<option value="${pad(h)}"${h===12?" selected":""}>${pad(h)} 時</option>`).join("");
   $("fxChips").innerHTML=FX_CHIPS.map(n=>`<span class="chip" data-a="fxchip" data-id="${esc(n)}">${esc(n)}</span>`).join("");
   document.body.addEventListener("click",onClick);
-  document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>switchTab(b.dataset.t,b));
+  initNav();initCpForm();
   setAccType("支出");labels();renderAll();syncShift();
   if(await login())fetchData();
 });
@@ -445,15 +514,42 @@ function onClick(e){
   const el=e.target.closest("[data-a]");if(!el)return;
   const f={toggle:toggleStatus,bedit:editBooking,bsave:saveBooking,bcancel:cancelBooking,rerender:renderAll,aedit:editAcc,asave:saveAcc,adel:delAcc,
     fedit:editFixed,fsave:saveFixed,fdel:delFixed,day:tapDay,bitems:editItems,ie:ieTap,isave:saveItems,cshow:id=>{const e=$("cl-"+id);if(e)e.hidden=!e.hidden},ym:(id)=>stepYM(id,+el.dataset.d),bkall:id=>{bkAll=id==="1";renderBookings()},cm:setChartMode,acct:setAccType,
-    chip:pickChip,fxchip:id=>{$("fxItem").value=id},shg:id=>setShift("g",id),sht:id=>setShift("t",id)}[el.dataset.a];
+    chip:pickChip,fxchip:id=>{$("fxItem").value=id},shg:id=>setShift("g",id),sht:id=>setShift("t",id),
+    sec:id=>goTab(id),sub:id=>goTab(curSec,id),
+    mfilter:id=>{mFilter=id;renderMembers()},medit:editMember,mtag:mTagTap,maddtag:mAddTag,msave:saveMember,mgive:giveTo,
+    cpmode:id=>{cpT.mode=id;renderCpForm()},cptag:id=>{const i=cpT.tags.indexOf(id);i>=0?cpT.tags.splice(i,1):cpT.tags.push(id);renderCpForm()},
+    cptitle:id=>{$("cpTitle").value=id;document.querySelectorAll("#cpTitles .chip").forEach(c=>c.classList.toggle("on",c.dataset.id===id))},
+    cpf:id=>{cpFilter=id;renderCoupons()},cpdel:delCoupon}[el.dataset.a];
   if(f)f(el.dataset.id);
 }
-function switchTab(id,btn){
-  document.querySelectorAll(".pane").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-  btn.classList.add("active");$(id).classList.add("active");window.scrollTo({top:0});
-  if(id==="tab-stats"&&chart)setTimeout(()=>{chart.resize();chart.update()},30);
+/* ---------- 導覽：側邊分頁標籤＋底部子頁籤 ---------- */
+const SECS=[
+  {id:"stats",name:"營收",ic:"chart",c:"#f3e6c0",subs:[["month","本月"],["profit","真實利潤"],["year","全年"]]},
+  {id:"schedule",name:"班表",ic:"cal",c:"#dce8f2",subs:[["cal","月曆"],["list","預約一覽"]]},
+  {id:"bookings",name:"預約",ic:"list",c:"#f5ddd6",subs:[["list","預約列表"],["new","新增預約"]]},
+  {id:"members",name:"會員",ic:"user",c:"#dfe8d5",subs:[["mem","會員名單"],["cp","折價券"]]},
+  {id:"accounting",name:"記帳",ic:"coin",c:"#ece2d1",subs:[["add","記一筆"],["list","明細"],["fixed","固定支出"]]}
+];
+let curSec="stats",curSub={};
+function initNav(){
+  $("side").innerHTML=SECS.map(x=>`<button class="st-tab" type="button" data-a="sec" data-id="${x.id}" style="--c:${x.c}">${ic(x.ic)}<span>${x.name}</span></button>`).join("");
+  let st=null;try{st=JSON.parse(localStorage.getItem("adm_tab")||"null")}catch(_){}
+  if(st&&SECS.some(x=>x.id===st.sec)){curSub[st.sec]=st.sub;goTab(st.sec,st.sub,true)}else goTab("stats",null,true);
 }
-function labels(){$("lbl-sel").textContent=ymLabel(selYM);$("lbl-selY").textContent=selYM.slice(0,4)+" 年";$("lbl-acc").textContent=ymLabel(accYM);$("lbl-bk").textContent=ymLabel(bkYM);$("lbl-sh").textContent=ymLabel(shYM)}
+function goTab(sec,sub,quiet){
+  const S0=SECS.find(x=>x.id===sec);if(!S0)return;
+  if(!S0.subs.some(x=>x[0]===sub))sub=curSub[sec]&&S0.subs.some(x=>x[0]===curSub[sec])?curSub[sec]:S0.subs[0][0];
+  const changed=sec!==curSec||sub!==curSub[sec];curSec=sec;curSub[sec]=sub;
+  document.querySelectorAll(".pane").forEach(x=>x.classList.toggle("active",x.id==="tab-"+sec));
+  document.querySelectorAll(".st-tab").forEach(x=>x.classList.toggle("on",x.dataset.id===sec));
+  document.querySelectorAll("#tab-"+sec+" .sub").forEach(x=>x.classList.toggle("on",x.dataset.s===sub));
+  const n=$("subNav");n.style.setProperty("--n",S0.subs.length);
+  n.innerHTML=S0.subs.map(([k,l])=>`<button class="tab${k===sub?" active":""}" type="button" data-a="sub" data-id="${k}">${l}</button>`).join("");
+  if(!quiet&&changed)window.scrollTo({top:0});
+  if(sec==="stats"&&sub==="year"&&chart)setTimeout(()=>{chart.resize();chart.update()},30);
+  try{localStorage.setItem("adm_tab",JSON.stringify({sec,sub}))}catch(_){}
+}
+function labels(){const v={sel:ymLabel(selYM),selY:selYM.slice(0,4)+" 年",acc:ymLabel(accYM),bk:ymLabel(bkYM),sh:ymLabel(shYM)};document.querySelectorAll(".lbl").forEach(e=>{e.textContent=v[e.dataset.k]||""})}
 function stepYM(k,d){
   if(k==="sel")selYM=shiftYM(selYM,d);else if(k==="selY")selYM=shiftYM(selYM,d*12);
   else if(k==="acc")accYM=shiftYM(accYM,d);else if(k==="bk")bkYM=shiftYM(bkYM,d);else if(k==="sh"){shYM=shiftYM(shYM,d);syncShift();return}
@@ -466,24 +562,23 @@ async function fetchData(){
   const r=await api({action:"adminGet"});
   if(!r||r.result!=="success"){$("bookingList").innerHTML='<div class="empty">無法讀取資料，請確認已用管理者的 LINE 帳號登入</div>';return}
   $("authBox").hidden=true;
-  B=r.bookings||[];A=r.accountingRecords||[];F=r.fixedExpenses||[];S=r.schedules||{};M=r.monthlyShiftTypes||{};
+  B=r.bookings||[];A=r.accountingRecords||[];F=r.fixedExpenses||[];S=r.schedules||{};M=r.monthlyShiftTypes||{};MB=r.members||[];CP=r.coupons||[];
   if(/^\d{4}-\d{2}-\d{2}$/.test(r.anchorDate))ANCHOR=r.anchorDate;
   if(firstLoad){firstLoad=false;const ds=B.filter(b=>b.status!=="已取消"&&b.date).map(b=>b.date.slice(0,7));
     if(ds.length&&!ds.includes(bkYM))bkYM=ds.sort((a,b)=>Math.abs(+a.replace("-","")-+curYM.replace("-",""))-Math.abs(+b.replace("-","")-+curYM.replace("-","")))[0]}
   renderAll();syncShift();
 }
 const isPast=(r,now)=>r.status==="預約中"&&r.date&&r.time&&new Date(`${r.date}T${r.time}`)<now;
-function renderAll(){MS={};renderStats();renderBookings();renderAcc();shiftReminder();if($("calGrid"))renderCal()}
+function renderAll(){MS={};renderStats();renderBookings();renderAcc();shiftReminder();if($("calGrid"))renderCal();renderMembers();renderCoupons();renderCpForm();fillMemberSelect()}
 
 /* ---------- 每位客人成本：依預約款式自動判斷工時與材料（要改數字跟 Claude 說，或直接改這裡） ---------- */
 const COST={
-  wage:196,           // 時薪：2026 年基本工資
   kwhPrice:6,         // 每度電費（租屋常見 5～6 元）
   rentShare:1600,     // 每月房租分攤（自訂）
   perMonth:3,         // 每月大約幾位客人一起分攤房租
   summer:[6,7,8,9],   // 開冷氣的月份
   watt:{device:51,light:25,fan:40,ac:1000}, // 設備平均功率、電燈、電風扇、冷氣（瓦）
-  // 工時（小時）：單色 3、卸甲另加 2（卸甲＋單色＝5）、只卸甲 2
+  // 工時（小時，只用來估電費，不算時薪）：單色 3、卸甲另加 2（卸甲＋單色＝5）、只卸甲 2
   hours:{solo:3,removal:2,removalOnly:2,jump:0.25},
   // 基本材料（元）：有做凝膠才算
   mat:{base:10,color:12,builder:25,top:10,tools:8,supply:15,removal:15,jump:6},
@@ -517,14 +612,14 @@ function costOf(b){
   }else hours=H.removalOnly;
   if(o.removal)mat.push(["卸甲耗材（卸甲液、棉片、錫箔）",M.removal]);
   const k=w=>w*hours/1000*COST.kwhPrice,material=mat.reduce((a,x)=>a+x[1],0);
-  const r={hours,mat,wage:COST.wage*hours,material,rent:COST.rentShare/Math.max(1,COST.perMonth),device:k(COST.watt.device),light:k(COST.watt.light),fan:k(COST.watt.fan),ac:COST.summer.includes(mm)?k(COST.watt.ac):0};
-  r.total=r.wage+r.material+r.rent+r.device+r.light+r.fan+r.ac;return r;
+  const r={hours,mat,material,rent:COST.rentShare/Math.max(1,COST.perMonth),device:k(COST.watt.device),light:k(COST.watt.light),fan:k(COST.watt.fan),ac:COST.summer.includes(mm)?k(COST.watt.ac):0};
+  r.total=r.material+r.rent+r.device+r.light+r.fan+r.ac;return r;
 }
 const m1=n=>"NT$ "+(n<10&&n>0?n.toFixed(1):Math.round(n).toLocaleString("en-US"));
 function costList(c,price){
-  const rows=[[`時薪 ${COST.wage} × ${c.hours} 小時`,c.wage],["材料",c.material],[`房租分攤 ${COST.rentShare} ÷ ${COST.perMonth} 位`,c.rent],["設備電費",c.device],["電燈",c.light],["電風扇",c.fan]];
+  const rows=[["材料",c.material],[`房租分攤 ${COST.rentShare} ÷ ${COST.perMonth} 位`,c.rent],["設備電費",c.device],["電燈",c.light],["電風扇",c.fan]];
   if(c.ac)rows.push(["冷氣（夏天）",c.ac]);
-  return rows.map(([l,v])=>`<div><span>${l}</span><span>${m1(v)}</span></div>`).join("")+
+  return `<div><span>工時（不算成本）</span><span>約 ${c.hours} 小時</span></div>`+rows.map(([l,v])=>`<div><span>${l}</span><span>${m1(v)}</span></div>`).join("")+
     `<small>材料：${c.mat.map(([n,v])=>`${esc(n)} ${v}`).join("、")}</small>`+
     `<div class="tt"><span>成本合計</span><span>${money(c.total)}</span></div>`+(price!=null?`<div class="tt"><span>這筆利潤</span><span class="${price-c.total<0?"neg":"pos"}">${price-c.total<0?"-":""}${money(Math.abs(price-c.total))}</span></div>`:"");
 }
@@ -608,7 +703,8 @@ function renderBookings(){
   const list=(bkAll?live:live.filter(r=>r.date&&r.date.slice(0,7)===bkYM)).sort((a,b)=>((b.date||"")+(b.time||"")).localeCompare((a.date||"")+(a.time||"")));
   $("bookingList").innerHTML=list.length?list.map(r=>{
     const dn=r.status==="已完成"||isPast(r,now),id=esc(r.bookingId);
-    return`<div class="bk" id="b-${id}"><div class="bk-top"><b>${esc(r.customerName||"（未填名稱）")}</b><span class="st ${dn?"done":"wait"}" data-a="toggle" data-id="${id}">${dn?"已完成":"預約中"}</span></div><div class="bk-m">${esc(r.date||"日期不明")}　${esc(r.time)}</div><div class="bk-i">${esc(r.items)}</div><div class="bk-bot"><span class="pr">${money(+r.totalPrice||0)}</span><span class="act">${ib("bitems",id,"list","改項目")}${ib("bedit",id,"pencil","改金額")}${ib("bcancel",id,"trash","刪除","danger")}</span></div>${(()=>{const c=costOf(r),pf=(+r.totalPrice||0)-c.total;return`<div class="bk-c" data-a="cshow" data-id="${id}"><span>成本 ${money(c.total)}</span><span>利潤 <b class="${pf<0?"neg":"pos"}">${pf<0?"-":""}${money(Math.abs(pf))}</b>　明細 ›</span></div><div class="cl" id="cl-${id}" hidden>${costList(c,+r.totalPrice||0)}</div>`})()}</div>`;
+    const mm=r.memberId&&MB.find(x=>x.id===r.memberId);
+    return`<div class="bk" id="b-${id}"><div class="bk-top"><b>${esc(r.customerName||"（未填名稱）")}${mm?'<span class="tg">會員</span>':""}</b><span class="st ${dn?"done":"wait"}" data-a="toggle" data-id="${id}">${dn?"已完成":"預約中"}</span></div><div class="bk-m">${esc(r.date||"日期不明")}　${esc(r.time)}</div><div class="bk-i">${esc(r.items)}</div>${+r.discount?`<div class="bk-cp">${ic("ticket")} 使用折價券，已折抵 ${money(r.discount)}</div>`:""}<div class="bk-bot"><span class="pr">${money(+r.totalPrice||0)}</span><span class="act">${ib("bitems",id,"list","改項目")}${ib("bedit",id,"pencil","改金額")}${ib("bcancel",id,"trash","刪除","danger")}</span></div>${(()=>{const c=costOf(r),pf=(+r.totalPrice||0)-c.total;return`<div class="bk-c" data-a="cshow" data-id="${id}"><span>成本 ${money(c.total)}</span><span>利潤 <b class="${pf<0?"neg":"pos"}">${pf<0?"-":""}${money(Math.abs(pf))}</b>　明細 ›</span></div><div class="cl" id="cl-${id}" hidden>${costList(c,+r.totalPrice||0)}</div>`})()}</div>`;
   }).join(""):`<div class="empty">${B.length?"這個月沒有預約":"沒有預約資料"}</div>`;
 }
 function toggleStatus(id){const b=B.find(x=>x.bookingId===id);if(!b)return;b.status=b.status==="已完成"?"預約中":"已完成";renderAll();bg({action:"update",bookingId:id,status:b.status})}
@@ -621,9 +717,9 @@ function saveBooking(id){const v=parseInt($("ip-"+id).value,10),b=B.find(x=>x.bo
 async function manualAddBooking(){
   const customerName=$("newName").value.trim(),date=$("newDate").value,time=`${$("newHour").value}:${$("newMinute").value}`,items=$("newItems").value.trim(),totalPrice=Number($("newPrice").value);
   if(!customerName||!date||!items||!$("newPrice").value||totalPrice<0)return say("請把名稱、日期、項目、金額填完整");
-  const r=await api({action:"addBooking",customerName,date,time,items,totalPrice,cost:0});
+  const r=await api({action:"addBooking",customerName,date,time,items,totalPrice,cost:0,memberId:$("newMember").value});
   if(!r||r.result!=="success")return say((r&&r.message)||"新增失敗");
-  ["newName","newItems","newPrice"].forEach(i=>$(i).value="");bkYM=date.slice(0,7);$("newName").closest("details").open=false;fetchData();
+  ["newName","newItems","newPrice"].forEach(i=>$(i).value="");$("newMember").value="";bkYM=date.slice(0,7);bkAll=false;goTab("bookings","list");fetchData();
 }
 
 /* ---------- 點選修改預約項目 ---------- */
@@ -655,7 +751,7 @@ function drawIE(id){
   <h5>造型</h5><div class="chips">${ch("type","","不做造型",!e.type,!e.main)}${ch("type","局部造型","局部",e.type==="局部造型",!e.main)}${ch("type","十指造型","十指",e.type==="十指造型",!e.main)}</div>
   ${e.type?`<h5>款式（最多 4 個，已選 ${e.styles.length}）</h5><div class="chips">${STYLE_LIST.map(s=>ch("style",s,s,e.styles.includes(s),!e.styles.includes(s)&&e.styles.length>=4)).join("")}</div>`:""}
   <div class="live">${ok?`工時 <b>${c2.hours}</b> 小時・成本 <b>${money(c2.total)}</b><br>價目表價格 <b>${money(lp)}</b>`:"請至少選「卸甲」或「單色」"}</div>
-  <label><input type="checkbox" ${e.setPrice?"checked":""} onchange="ED['${id}'].setPrice=this.checked">金額一起改成價目表價格（${money(lp)}）</label>
+  <label><input type="checkbox" ${e.setPrice?"checked":""} onchange="ED['${id}'].setPrice=this.checked">金額一起改成價目表價格（${money(Math.max(0,lp-(+b.discount||0)))}${+b.discount?"，已扣折價券":""}）</label>
   <div class="btns"><button class="btn alt" type="button" data-a="rerender">取消</button><button class="btn" type="button" data-a="isave" data-id="${id}" ${ok?"":"disabled"}>${ic("check")}儲存項目</button></div>`;
 }
 function ieTap(v){
@@ -672,7 +768,7 @@ async function saveItems(id){
   const e=ED[id],b=B.find(x=>x.bookingId===id);if(!e||!b)return;
   if(e.type&&!e.styles.length)return say("選了造型的話，請至少選一個款式；或改成「不做造型」");
   const items=buildItems(e,b.items),body={action:"updateItems",bookingId:id,items};
-  if(e.setPrice)body.totalPrice=listPrice(e);
+  if(e.setPrice)body.totalPrice=Math.max(0,listPrice(e)-(+b.discount||0));
   const r=await api(body);
   if(!r||r.result!=="success"){
     if(r&&r.message==="unknown_action")return say("Google 後台還沒加入「修改項目」功能，\n請先照 Claude 給的步驟更新 Apps Script。");
@@ -680,6 +776,105 @@ async function saveItems(id){
   }
   b.items=items;if(e.setPrice)b.totalPrice=body.totalPrice;delete ED[id];renderAll();say("已更新預約項目",true);
 }
+
+/* ---------- 會員 ---------- */
+const TAGS=["朋友","熟客","新客","VIP","家人"],CP_TITLES=["回饋券","生日禮","新客禮","介紹好友禮"];
+let mFilter="全部",mQuery="",ME={},cpFilter="未使用",cpT={mode:"one",id:"",tags:[]};
+const mName=id=>{const m=MB.find(x=>x.id===id);return m?m.name:"（已不在名單）"};
+const md=ds=>ds?`${+ds.slice(5,7)}/${+ds.slice(8,10)}`:"";
+function mStats(m){
+  const now=new Date(),l=B.filter(b=>b.status!=="已取消"&&(b.memberId===m.id||(!b.memberId&&m.name&&b.customerName===m.name)));
+  const done=l.filter(b=>b.status==="已完成"||isPast(b,now));
+  return{n:done.length,spent:done.reduce((t,b)=>t+(+b.totalPrice||0),0),last:done.map(b=>b.date).sort().pop()||"",next:l.filter(b=>!done.includes(b)).map(b=>b.date).sort()[0]||""};
+}
+const cpLive=c=>c.status==="未使用"&&(!c.expiry||c.expiry>=ymd(new Date()));
+function allTags(){const t=new Set(TAGS);MB.forEach(m=>m.tags.forEach(x=>t.add(x)));return[...t]}
+function renderMembers(){
+  if(!$("memList"))return;
+  const used=new Set();MB.forEach(m=>m.tags.forEach(t=>used.add(t)));
+  $("mTags").innerHTML=["全部",...[...used]].map(t=>`<span class="chip${mFilter===t?" on":""}" data-a="mfilter" data-id="${esc(t)}">${esc(t)}</span>`).join("");
+  const q=mQuery.toLowerCase();
+  const list=MB.filter(m=>(mFilter==="全部"||m.tags.includes(mFilter))&&(!q||(m.name+" "+m.note).toLowerCase().includes(q)))
+    .map(m=>({m,s:mStats(m)})).sort((a,b)=>(b.s.last||b.m.joined||"").localeCompare(a.s.last||a.m.joined||""));
+  $("memCount").textContent=MB.length?`共 ${MB.length} 位`:"";
+  $("memList").innerHTML=list.length?list.map(({m,s})=>{
+    const id=esc(m.id),k=CP.filter(c=>c.memberId===m.id&&cpLive(c)).length;
+    return`<div class="mc" id="m-${id}"><div class="mc-top"><b>${esc(m.name||"LINE 會員")}</b><span class="act">${ib("mgive",id,"ticket","發折價券")}${ib("medit",id,"pencil","編輯標籤")}</span></div>
+      <div class="tags">${s.n===0?'<span class="tag new">還沒來過</span>':""}${m.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>
+      <div class="mc-s">來訪 ${s.n} 次・累計 ${money(s.spent)}${s.last?`・最近 ${md(s.last)}`:""}${s.next?`・下次 ${md(s.next)}`:""}<br>加入 ${esc(m.joined||"—")}</div>
+      ${m.note?`<div class="mc-n">備註：${esc(m.note)}</div>`:""}${k?`<span class="mc-c">${ic("ticket")} 持有 ${k} 張折價券</span>`:""}</div>`}).join("")
+    :`<div class="empty">${MB.length?"沒有符合的會員":"還沒有會員。<br>客人在預約頁連動 LINE 後就會出現在這裡。"}</div>`;
+}
+function editMember(id){
+  const m=MB.find(x=>x.id===id),c=$("m-"+id);if(!m||!c)return;
+  ME[id]=ME[id]||{tags:m.tags.slice(),note:m.note};drawME(id);
+}
+function drawME(id){
+  const e=ME[id],c=$("m-"+id);if(!e||!c)return;
+  let p=c.querySelector(".me");if(!p){p=document.createElement("div");p.className="me";c.appendChild(p)}
+  const tags=[...new Set([...allTags(),...e.tags])];
+  p.innerHTML=`<label class="f">標籤（點一下切換）</label><div class="chips">${tags.map(t=>`<span class="chip${e.tags.includes(t)?" on":""}" data-a="mtag" data-id="${esc(id)}|${esc(t)}">${esc(t)}</span>`).join("")}</div>
+    <div class="two"><input type="text" id="mt-${esc(id)}" class="inl" placeholder="自訂標籤" maxlength="10"><button class="btn alt" type="button" data-a="maddtag" data-id="${esc(id)}">${ic("plus")}加標籤</button></div>
+    <input type="text" id="mn-${esc(id)}" class="inl" placeholder="備註（例如：喜歡貓眼、對酒精過敏）" maxlength="100" value="${esc(e.note)}" oninput="ME['${esc(id)}'].note=this.value">
+    <div class="btns" style="display:flex;gap:8px;margin-top:8px"><button class="btn alt" style="flex:1" type="button" data-a="rerender">取消</button><button class="btn" style="flex:1" type="button" data-a="msave" data-id="${esc(id)}">${ic("check")}儲存</button></div>`;
+}
+function mTagTap(v){const i=v.indexOf("|"),id=v.slice(0,i),t=v.slice(i+1),e=ME[id];if(!e)return;const k=e.tags.indexOf(t);k>=0?e.tags.splice(k,1):e.tags.length<8&&e.tags.push(t);drawME(id)}
+function mAddTag(id){const e=ME[id],inp=$("mt-"+id);if(!e||!inp)return;const t=inp.value.trim().replace(/,/g,"").slice(0,10);if(t&&!e.tags.includes(t)&&e.tags.length<8)e.tags.push(t);drawME(id)}
+async function saveMember(id){
+  const e=ME[id],m=MB.find(x=>x.id===id);if(!e||!m)return;
+  const r=await api({action:"updateMember",memberId:id,tags:e.tags,note:e.note.trim()});
+  if(!r||r.result!=="success")return say(r&&r.message==="unknown_action"?"Google 後台還沒更新成有會員功能的版本，\n請先照 Claude 給的步驟更新 Apps Script。":(r&&r.message)||"儲存失敗");
+  m.tags=e.tags.slice();m.note=e.note.trim();delete ME[id];renderAll();
+}
+function giveTo(id){cpT={mode:"one",id,tags:[]};goTab("members","cp");renderCpForm();$("cpTitle").focus({preventScroll:true})}
+function fillMemberSelect(){
+  const s=$("newMember");if(!s)return;const v=s.value;
+  s.innerHTML='<option value="">不連結會員</option>'+MB.slice().sort((a,b)=>a.name.localeCompare(b.name,"zh-Hant")).map(m=>`<option value="${esc(m.id)}">${esc(m.name)}</option>`).join("");
+  s.value=MB.some(m=>m.id===v)?v:"";
+}
+function pickNewMember(){const m=MB.find(x=>x.id===$("newMember").value);if(m)$("newName").value=m.name}
+
+/* ---------- 折價券 ---------- */
+function initCpForm(){
+  $("cpTitles").innerHTML=CP_TITLES.map(t=>`<span class="chip" data-a="cptitle" data-id="${t}">${t}</span>`).join("");
+  const d=new Date();d.setDate(d.getDate()+60);$("cpExp").value=ymd(d);
+}
+function cpTargets(){
+  if(cpT.mode==="one")return cpT.id&&MB.some(m=>m.id===cpT.id)?[cpT.id]:[];
+  if(cpT.mode==="tag")return MB.filter(m=>m.tags.some(t=>cpT.tags.includes(t))).map(m=>m.id);
+  return MB.map(m=>m.id);
+}
+function renderCpForm(){
+  if(!$("cpWho"))return;
+  document.querySelectorAll("#cpMode button").forEach(b=>b.classList.toggle("on",b.dataset.id===cpT.mode));
+  if(cpT.mode==="one")$("cpWho").innerHTML=MB.length?`<select id="cpOne" onchange="cpT.id=this.value;renderCpCount()"><option value="">請選擇會員</option>${MB.map(m=>`<option value="${esc(m.id)}"${m.id===cpT.id?" selected":""}>${esc(m.name)}</option>`).join("")}</select>`:'<div class="muted">還沒有會員</div>';
+  else if(cpT.mode==="tag"){const used=[...new Set(MB.flatMap(m=>m.tags))];$("cpWho").innerHTML=used.length?`<div class="chips" style="margin:0">${used.map(t=>`<span class="chip${cpT.tags.includes(t)?" on":""}" data-a="cptag" data-id="${esc(t)}">${esc(t)}</span>`).join("")}</div>`:'<div class="muted">會員還沒有標籤，先到「會員名單」幫客人加標籤</div>'}
+  else $("cpWho").innerHTML=`<div class="muted">全部 ${MB.length} 位會員都會收到</div>`;
+  renderCpCount();
+}
+function renderCpCount(){const n=cpTargets().length;$("cpCount").textContent=n?`將發給 ${n} 位會員`:"請選擇要發給誰"}
+async function issueCoupon(){
+  const ids=cpTargets(),title=$("cpTitle").value.trim(),amount=Number($("cpAmt").value),minSpend=Number($("cpMin").value)||0,expiry=$("cpExp").value;
+  if(!ids.length)return say("請選擇要發給哪些會員");
+  if(!title)return say("請填寫折價券名稱");
+  if(!(amount>0))return say("請填寫折抵金額");
+  if(expiry&&expiry<ymd(new Date()))return say("到期日不能早於今天");
+  if(!await ask(`要發「${title}」折抵 ${money(amount)}${minSpend?`（滿 ${money(minSpend)} 可用）`:""}\n給 ${ids.length} 位會員嗎？`))return;
+  const r=await api({action:"addCoupon",memberIds:ids,title,amount,minSpend,expiry});
+  if(!r||r.result!=="success")return say(r&&r.message==="unknown_action"?"Google 後台還沒更新成有折價券功能的版本，\n請先照 Claude 給的步驟更新 Apps Script。":(r&&r.message)||"發送失敗");
+  $("cpAmt").value="";$("cpMin").value="";cpFilter="未使用";await say(`已發給 ${ids.length} 位會員！\n客人下次打開預約頁就會看到。`,true);fetchData();
+}
+function renderCoupons(){
+  if(!$("cpList"))return;
+  document.querySelectorAll("#cpF button").forEach(b=>b.classList.toggle("on",b.dataset.id===cpFilter));
+  const t=ymd(new Date());
+  const st=c=>c.status==="已使用"?"已使用":c.expiry&&c.expiry<t?"已過期":"未使用";
+  const list=CP.filter(c=>cpFilter==="全部"||st(c)===cpFilter).sort((a,b)=>(b.issued||"").localeCompare(a.issued||""));
+  $("cpList").innerHTML=list.length?list.map(c=>{const s=st(c),cls=s==="已使用"?"used":s==="已過期"?"exp":"";
+    return`<div class="cpr ${cls}"><div class="am">${money(c.amount)}</div><div class="mid"><span>${esc(c.title)}<span class="pill ${s==="未使用"?"ok":s==="已使用"?"used":"exp"}">${s}</span></span><small>${esc(mName(c.memberId))}・${c.minSpend?`滿 ${money(c.minSpend)} 可用`:"不限消費"}・${c.expiry?`到 ${esc(c.expiry)}`:"不限期"}</small></div>${c.status!=="已使用"?ib("cpdel",esc(c.id),"trash","刪除","danger"):""}</div>`}).join("")
+    :'<div class="empty">沒有折價券</div>';
+}
+async function delCoupon(id){if(!await ask("確定要刪除這張折價券嗎？\n（客人就不能再使用）"))return;CP=CP.filter(c=>c.id!==id);renderAll();bg({action:"deleteCoupon",couponId:id})}
 
 /* ---------- 記帳（只到月份） ---------- */
 function setAccType(t){
@@ -781,7 +976,7 @@ function renderCal(){
   $("shSum").innerHTML=`<span>可約 ${open} 天</span><span>休息 ${days-open} 天</span>${man?`<span>手動調整 ${man} 天</span>`:""}${bk?`<span>預約 ${bk} 筆</span>`:""}`;
   const by={};B.filter(b=>b.status!=="已取消"&&b.date&&b.date.slice(0,7)===shYM).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).forEach(b=>(by[b.date]=by[b.date]||[]).push(b));
   const dks=Object.keys(by);
-  $("shBk").innerHTML=dks.length?`<h4>${ic("list")}這個月的預約</h4>`+dks.map(ds=>{const t=new Date(ds+"T00:00");return`<div class="dg"><div class="dt">${t.getMonth()+1}/${t.getDate()}<small>週${WD[t.getDay()]}</small></div><div class="it">${by[ds].map(b=>`<div><span>${esc(b.time||"--:--")}</span><b>${esc(b.customerName||"（未填名稱）")}</b></div>`).join("")}</div></div>`}).join(""):"";
+  $("shBk").innerHTML=dks.length?dks.map(ds=>{const t=new Date(ds+"T00:00");return`<div class="dg"><div class="dt">${t.getMonth()+1}/${t.getDate()}<small>週${WD[t.getDay()]}</small></div><div class="it">${by[ds].map(b=>`<div><span>${esc(b.time||"--:--")}</span><b>${esc(b.customerName||"（未填名稱）")}</b></div>`).join("")}</div></div>`}).join(""):'<div class="empty">這個月還沒有預約</div>';
 }
 async function tapDay(ds){
   if(ds<ymd(new Date()))return;
