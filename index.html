@@ -213,8 +213,8 @@ select:disabled{opacity:.6}
 .s1-sum{display:flex;width:100%;align-items:center;justify-content:space-between;padding:11px 14px;border:1.5px solid var(--ink);border-radius:16px 12px 18px 11px;background:var(--ink);color:#fff;font:inherit;font-size:17px;letter-spacing:.06em;cursor:pointer;box-shadow:3px 3px 0 var(--sand);animation:pop .22s ease-out;touch-action:manipulation}
 .s1-sum:active{transform:scale(.98)}
 .s1-sum .ic{width:18px;height:18px}
-.busy{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(251,248,241,.55);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);animation:fadein .15s ease-out}
-.busy-c{display:flex;align-items:center;gap:10px;padding:14px 22px;background:var(--paper);border:1.6px solid var(--line);border-radius:20px 14px 22px 13px;box-shadow:3px 4px 0 var(--sand);font-size:16px;letter-spacing:.1em}
+.sending{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(251,248,241,.55);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);animation:fadein .15s ease-out}
+.sending-c{display:flex;align-items:center;gap:10px;padding:14px 22px;background:var(--paper);border:1.6px solid var(--line);border-radius:20px 14px 22px 13px;box-shadow:3px 4px 0 var(--sand);font-size:16px;letter-spacing:.1em}
 .spin{width:20px;height:20px;border-radius:50%;border:2.4px solid #e6dccd;border-top-color:#c9a55e;animation:spin .7s linear infinite}
 .tp-hint{text-align:center;color:var(--soft);font-size:14.5px;padding:6px 0}
 .price-note{text-align:center;font-size:14px;color:#9a6d1c;margin:-10px 0 14px}
@@ -400,7 +400,7 @@ select:disabled{opacity:.6}
   <button class="submit-btn" onclick="sendBooking()">送出預約</button>
 </div>
 
-<div id="busy" class="busy" hidden><div class="busy-c"><i class="spin"></i>預約送出中</div></div>
+<div id="sending" class="sending" hidden><div class="sending-c"><i class="spin"></i>預約送出中</div></div>
 <div id="dlg" class="dlg" hidden role="dialog" aria-modal="true"><div class="dlg-card"><svg class="ic dlg-ic"><use id="dlgIc" href="#i-note"/></svg><p id="dlgMsg"></p><button id="dlgBtn" type="button">好的</button></div></div>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>(function(){var t=document.getElementById("totalPrice");if(!t||!window.MutationObserver)return;var b=t.closest(".total-box");new MutationObserver(function(){b.classList.remove("bump");void b.offsetWidth;b.classList.add("bump")}).observe(t,{childList:true,characterData:true,subtree:true})})();</script>
@@ -783,13 +783,13 @@ async function sendBooking(){
   const data={bookingId:"M"+Array.from(crypto.getRandomValues(new Uint8Array(4)),b=>pad(b.toString(16))).join(""),customerName:name,date,time:`${h}:${m}`,items:items.join(" / "),totalPrice:total};
   try{if(typeof liff!=="undefined"&&liff.isLoggedIn())data.idToken=liff.getIDToken()||""}catch(e){}
   if(cp&&data.idToken)data.couponId=cp.id;
-  btn.textContent="預約送出中...";btn.disabled=true;$("busy").hidden=false;
+  btn.textContent="預約送出中...";btn.disabled=true;$("sending").hidden=false;
   const ac=new AbortController(),to=setTimeout(()=>ac.abort(),15000);
   try{
     const r=await fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify(data),signal:ac.signal});
     clearTimeout(to);
     const res=await r.json();
-    $("busy").hidden=true;
+    $("sending").hidden=true;
     if(res.result!=="success"){alert(res.message||"送出失敗，請再試一次或直接聯繫官方 LINE。");btn.textContent="送出預約";btn.disabled=false;fetchBackend();return}
     const finalTotal=Number.isFinite(res.totalPrice)?res.totalPrice:total;
     if(res.discount>0&&cp){lines.push(`• 折價券：${cp.title}（−NT$ ${res.discount}）`);coupons=coupons.filter(x=>x.id!==cp.id);selCoupon=""}
@@ -807,7 +807,7 @@ async function sendBooking(){
     await quick("預約成功！\n接著會開啟 LINE，請按「傳送」把預約單送給我們。",1600);
     location.href=`https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodeURIComponent(msg)}`;
   }catch(e){
-    clearTimeout(to);$("busy").hidden=true;alert("送出失敗，請再試一次或直接聯繫官方 LINE。");
+    clearTimeout(to);$("sending").hidden=true;alert("送出失敗，請再試一次或直接聯繫官方 LINE。");
     btn.textContent="送出預約";btn.disabled=false;
   }
 }
