@@ -523,13 +523,13 @@ document.addEventListener("DOMContentLoaded",async()=>{
   $("fxChips").innerHTML=FX_CHIPS.map(n=>`<span class="chip" data-a="fxchip" data-id="${esc(n)}">${esc(n)}</span>`).join("");
   document.body.addEventListener("click",onClick);
   initNav();initCpForm();
-  setAccType("支出");labels();renderAll();syncShift();
+  setAccType("支出");loadAdminCache();labels();renderAll();syncShift();
   if(await login())fetchData();
 });
 function onClick(e){
   const el=e.target.closest("[data-a]");if(!el)return;
   const f={toggle:toggleStatus,bedit:editBooking,bsave:saveBooking,bcancel:cancelBooking,rerender:renderAll,aedit:editAcc,asave:saveAcc,adel:delAcc,
-    fedit:editFixed,fsave:saveFixed,fdel:delFixed,day:tapDay,dclose:()=>{shSel="";renderCal()},dopen:dayOpenTap,dhr:dayHrTap,dall:dayAll,dmonth:dayMonth,bitems:editItems,ie:ieTap,isave:saveItems,cshow:id=>{const e=$("cl-"+id);if(e)e.hidden=!e.hidden},ym:(id)=>stepYM(id,+el.dataset.d),bkall:id=>{bkAll=id==="1";renderBookings()},cm:setChartMode,acct:setAccType,
+    fedit:editFixed,fsave:saveFixed,fdel:delFixed,day:tapDay,bdate:editDate,dsave:saveDate,dclose:()=>{shSel="";renderCal()},dopen:dayOpenTap,dhr:dayHrTap,dall:dayAll,dmonth:dayMonth,bitems:editItems,ie:ieTap,isave:saveItems,cshow:id=>{const e=$("cl-"+id);if(e)e.hidden=!e.hidden},ym:(id)=>stepYM(id,+el.dataset.d),bkall:id=>{bkAll=id==="1";renderBookings()},cm:setChartMode,acct:setAccType,
     chip:pickChip,fxchip:id=>{$("fxItem").value=id},shg:id=>setShift("g",id),sht:id=>setShift("t",id),
     sec:id=>goTab(id),sideopen:()=>sideOpen(true),sideclose:()=>sideOpen(false),sub:id=>goTab(curSec,id),
     mfilter:id=>{mFilter=id;renderMembers()},medit:editMember,mtag:mTagTap,maddtag:mAddTag,msave:saveMember,mgive:giveTo,
@@ -576,13 +576,20 @@ function stepYM(k,d){
 }
 
 /* ---------- 讀取 ---------- */
-async function fetchData(){
-  $("bookingList").innerHTML='<div class="empty">讀取中…</div>';
-  const r=await api({action:"adminGet"});
-  if(!r||r.result!=="success"){$("bookingList").innerHTML='<div class="empty">無法讀取資料，請確認已用管理者的 LINE 帳號登入</div>';return}
-  $("authBox").hidden=true;
+/* 上次讀到的資料先顯示（打開馬上看得到），背景再抓最新的 */
+const ADM_KEY="adm_cache_v1";
+function applyAdmin(r){
   B=r.bookings||[];A=r.accountingRecords||[];F=r.fixedExpenses||[];S=r.schedules||{};M=r.monthlyShiftTypes||{};MB=r.members||[];CP=r.coupons||[];
   if(/^\d{4}-\d{2}-\d{2}$/.test(r.anchorDate))ANCHOR=r.anchorDate;
+}
+function loadAdminCache(){try{const r=JSON.parse(localStorage.getItem(ADM_KEY)||"null");if(r&&r.result==="success"){applyAdmin(r);return true}}catch(_){}return false}
+async function fetchData(){
+  if(!B.length&&!MB.length)$("bookingList").innerHTML='<div class="empty">讀取中…</div>';
+  const r=await api({action:"adminGet"});
+  if(!r||r.result!=="success"){try{localStorage.removeItem(ADM_KEY)}catch(_){}$("bookingList").innerHTML='<div class="empty">無法讀取資料，請確認已用管理者的 LINE 帳號登入</div>';return}
+  try{localStorage.setItem(ADM_KEY,JSON.stringify(r))}catch(_){}
+  $("authBox").hidden=true;
+  applyAdmin(r);
   if(firstLoad){firstLoad=false;const ds=B.filter(b=>b.status!=="已取消"&&b.date).map(b=>b.date.slice(0,7));
     if(ds.length&&!ds.includes(bkYM))bkYM=ds.sort((a,b)=>Math.abs(+a.replace("-","")-+curYM.replace("-",""))-Math.abs(+b.replace("-","")-+curYM.replace("-","")))[0]}
   renderAll();syncShift();
@@ -723,7 +730,7 @@ function renderBookings(){
   $("bookingList").innerHTML=list.length?list.map(r=>{
     const dn=r.status==="已完成"||isPast(r,now),id=esc(r.bookingId);
     const mm=r.memberId&&MB.find(x=>x.id===r.memberId);
-    return`<div class="bk" id="b-${id}"><div class="bk-top"><b>${esc(r.customerName||"（未填名稱）")}${mm?'<span class="tg">會員</span>':""}</b><span class="st ${dn?"done":"wait"}" data-a="toggle" data-id="${id}">${dn?"已完成":"預約中"}</span></div><div class="bk-m">${esc(r.date||"日期不明")}　${esc(r.time)}</div><div class="bk-i">${esc(r.items)}</div>${+r.discount?`<div class="bk-cp">${ic("ticket")} 使用折價券，已折抵 ${money(r.discount)}</div>`:""}<div class="bk-bot"><span class="pr">${money(+r.totalPrice||0)}</span><span class="act">${ib("bitems",id,"list","改項目")}${ib("bedit",id,"pencil","改金額")}${ib("bcancel",id,"trash","刪除","danger")}</span></div>${(()=>{const c=costOf(r),pf=(+r.totalPrice||0)-c.total;return`<div class="bk-c" data-a="cshow" data-id="${id}"><span>成本 ${money(c.total)}</span><span>利潤 <b class="${pf<0?"neg":"pos"}">${pf<0?"-":""}${money(Math.abs(pf))}</b>　明細 ›</span></div><div class="cl" id="cl-${id}" hidden>${costList(c,+r.totalPrice||0)}</div>`})()}</div>`;
+    return`<div class="bk" id="b-${id}"><div class="bk-top"><b>${esc(r.customerName||"（未填名稱）")}${mm?'<span class="tg">會員</span>':""}</b><span class="st ${dn?"done":"wait"}" data-a="toggle" data-id="${id}">${dn?"已完成":"預約中"}</span></div><div class="bk-m">${esc(r.date||"日期不明")}　${esc(r.time)}</div><div class="bk-i">${esc(r.items)}</div>${+r.discount?`<div class="bk-cp">${ic("ticket")} 使用折價券，已折抵 ${money(r.discount)}</div>`:""}<div class="bk-bot"><span class="pr">${money(+r.totalPrice||0)}</span><span class="act">${ib("bdate",id,"cal","改日期時間")}${ib("bitems",id,"list","改項目")}${ib("bedit",id,"pencil","改金額")}${ib("bcancel",id,"trash","刪除","danger")}</span></div>${(()=>{const c=costOf(r),pf=(+r.totalPrice||0)-c.total;return`<div class="bk-c" data-a="cshow" data-id="${id}"><span>成本 ${money(c.total)}</span><span>利潤 <b class="${pf<0?"neg":"pos"}">${pf<0?"-":""}${money(Math.abs(pf))}</b>　明細 ›</span></div><div class="cl" id="cl-${id}" hidden>${costList(c,+r.totalPrice||0)}</div>`})()}</div>`;
   }).join(""):`<div class="empty">${B.length?"這個月沒有預約":"沒有預約資料"}</div>`;
 }
 function toggleStatus(id){const b=B.find(x=>x.bookingId===id);if(!b)return;b.status=b.status==="已完成"?"預約中":"已完成";renderAll();bg({action:"update",bookingId:id,status:b.status})}
@@ -731,6 +738,23 @@ async function cancelBooking(id){if(!await ask("確定要刪除這筆預約嗎�
 function editBooking(id){
   const c=$("b-"+id),b=B.find(x=>x.bookingId===id);if(!c||!b)return;const k=esc(id);
   c.querySelector(".bk-bot").innerHTML=`<span style="display:flex;align-items:center;gap:6px">NT$ <input type="number" id="ip-${k}" class="inl" style="width:110px" inputmode="numeric" value="${+b.totalPrice||0}"></span><span class="act">${ib("bsave",k,"check","儲存","ok")}${ib("rerender","","x","取消")}</span>`;
+}
+/* 改預約日期、時間（跟別人的預約時段重疊會先提醒） */
+const durOf=it=>{it=String(it||"");return it.includes("需要卸甲")&&!["單色款式","跳色","局部造型","十指造型"].some(k=>it.includes(k))?120:300};
+const absM=(ds,t)=>{const[y,m,d]=ds.split("-").map(Number);return Date.UTC(y,m-1,d)/6e4+t};
+function editDate(id){
+  const c=$("b-"+id),b=B.find(x=>x.bookingId===id);if(!c||!b)return;const k=esc(id),[h,m]=(b.time||"12:00").split(":");
+  c.querySelector(".bk-bot").innerHTML=`<div class="ef"><input type="date" id="dd-${k}" class="inl" value="${esc(b.date)}"><div class="two"><select id="dh-${k}" class="inl">${Array.from({length:24},(_,i)=>`<option value="${pad(i)}"${pad(i)===h?" selected":""}>${pad(i)} 時</option>`).join("")}</select><select id="dm-${k}" class="inl">${["00","15","30","45"].map(x=>`<option value="${x}"${x===m?" selected":""}>${x} 分</option>`).join("")}</select></div></div><span class="act">${ib("dsave",k,"check","儲存","ok")}${ib("rerender","","x","取消")}</span>`;
+}
+async function saveDate(id){
+  const b=B.find(x=>x.bookingId===id),date=$("dd-"+id).value,time=`${$("dh-"+id).value}:${$("dm-"+id).value}`;
+  if(!b||!/^\d{4}-\d{2}-\d{2}$/.test(date))return say("請選擇日期");
+  const[hh,mm]=time.split(":").map(Number),s1=absM(date,hh*60+mm),e1=s1+durOf(b.items);
+  const hit=B.find(x=>x!==b&&x.status!=="已取消"&&x.date&&x.time&&(()=>{const[a,c]=x.time.split(":").map(Number),s2=absM(x.date,a*60+c);return s1<s2+durOf(x.items)&&s2<e1})());
+  if(hit&&!await ask(`這個時間跟 ${hit.customerName||"其他客人"}（${hit.date.slice(5).replace("-","/")} ${hit.time}）的預約重疊，\n還是要改嗎？`))return;
+  const r=await api({action:"updateDateTime",bookingId:id,date,time});
+  if(!r||r.result!=="success")return say(r&&r.message==="unknown_action"?"Google 後台還沒更新成新版，\n請先用最新的程式碼.gs 更新 Apps Script。":(r&&r.message)||"儲存失敗");
+  b.date=date;b.time=time;if(!bkAll)bkYM=date.slice(0,7);renderAll();
 }
 function saveBooking(id){const v=parseInt($("ip-"+id).value,10),b=B.find(x=>x.bookingId===id);if(isNaN(v)||v<0||!b)return;b.totalPrice=v;renderAll();bg({action:"updatePrice",bookingId:id,newPrice:v})}
 async function manualAddBooking(){

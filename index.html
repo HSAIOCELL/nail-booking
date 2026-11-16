@@ -424,7 +424,7 @@ function flash(el){try{el.animate([{transform:"scale(1)"},{transform:"scale(1.02
 
 document.addEventListener("DOMContentLoaded",()=>{
   const d=new Date().getDate(); if(d>=15&&d<=20)$("frontendReminder").style.display="block";
-  initLiff(); loadCache(); initCal(); fetchBackend();
+  memberFromCache(); initLiff(); loadCache(); initCal(); fetchBackend();
 });
 window.addEventListener("pageshow",()=>{const b=document.querySelector(".submit-btn");if(b){b.textContent="送出預約";b.disabled=false}});
 
@@ -454,7 +454,13 @@ async function initLiff(){
   if(typeof liff==="undefined")return;
   try{
     await liff.init({liffId:LIFF_ID});
-    if(liff.isLoggedIn()){const p=await liff.getProfile(),n=$("customerName");n.value=cleanText(p.displayName,30);n.readOnly=true;n.style.background="#f5f2ed";joinMember()}
+    if(liff.isLoggedIn()){
+      joinMember(); // 跟取得暱稱同時進行，不用等
+      const p=await liff.getProfile(),n=$("customerName");n.value=cleanText(p.displayName,30);n.readOnly=true;n.style.background="#f5f2ed";
+    }else if(member){ // 沒有登入 LINE：拿掉先前快取顯示的會員資訊
+      member=null;coupons=[];selCoupon="";$("memberBox").hidden=true;const n=$("customerName");n.value="";n.readOnly=false;n.style.background="";
+      $("lineBtn").innerHTML='<svg class="ic"><use href="#i-chat"/></svg>連動 LINE';renderCoupons();calculateTotal();
+    }
   }catch(e){}
 }
 function loginWithLine(){if(typeof liff!=="undefined"&&!liff.isLoggedIn())liff.login();else if(member)alert("你已經是會員了！");else joinMember(true)}
@@ -468,12 +474,22 @@ function fromOaChat(){
   }catch(e){return false}
 }
 /* 連動 LINE ＝ 自動加入會員（不用填任何資料） */
+/* 上次連動過的會員資料先顯示（不用等網路），背景再更新 */
+const MEM_KEY="nail_member_v1";
+function memberFromCache(){
+  try{const c=JSON.parse(localStorage.getItem(MEM_KEY)||"null");if(!isObj(c))return;
+    member={name:String(c.name||""),isAdmin:c.isAdmin===true};coupons=Array.isArray(c.coupons)?c.coupons.filter(isObj):[];
+    const n=$("customerName");if(member.name&&!n.value){n.value=cleanText(member.name,30);n.readOnly=true;n.style.background="#f5f2ed"}
+    renderMember();renderCoupons();
+  }catch(_){}
+}
 async function joinMember(manual){
   try{
     const t=liff.getIDToken();if(!t)return;
     const r=await(await fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"member",idToken:t})})).json();
-    if(!r||r.result!=="success"){if(manual)alert("目前無法加入會員，請稍後再試");return}
+    if(!r||r.result!=="success"){if(manual)alert("目前無法加入會員，請稍後再試");try{localStorage.removeItem(MEM_KEY)}catch(_){}return}
     member=r;coupons=Array.isArray(r.coupons)?r.coupons.filter(isObj):[];
+    try{localStorage.setItem(MEM_KEY,JSON.stringify({name:r.name,isAdmin:r.isAdmin===true,coupons}))}catch(_){}
     renderMember();renderCoupons();calculateTotal();
     if(r.isNew)say(coupons.length?`已成為會員！\n你有 ${coupons.length} 張折價券可以使用。`:"已成為會員！\n之後收到的折價券都會出現在這裡。",true);
   }catch(e){}
@@ -481,7 +497,7 @@ async function joinMember(manual){
 function renderMember(){
   if(!member)return;
   const b=$("lineBtn");b.innerHTML='<svg class="ic"><use href="#i-ok"/></svg>已連動';
-  const box=$("memberBox");box.hidden=false;
+  const box=$("memberBox");box.hidden=false;box.textContent="";
   box.innerHTML=`<svg class="ic"><use href="#i-gift"/></svg><span><b></b> 會員${coupons.length?`・有 ${coupons.length} 張折價券`:""}</span>`;
   box.querySelector("b").textContent=cleanText(member.name||$("customerName").value,30)||"LINE";
   if(member.isAdmin===true){const a=document.createElement("a");a.className="admin-link";a.href=ADMIN_URL;a.textContent="進入後台 ›";a.onclick=e=>{try{if(liff.isInClient()){e.preventDefault();liff.openWindow({url:ADMIN_URL,external:true})}}catch(_){}};box.appendChild(a)}
@@ -517,13 +533,16 @@ function isDateOpen(d){const s=bSched[fmt(d)];if(s){if(s.status==="開放")retur
 const maxBookDate=()=>{const n=getTaipeiDate();return new Date(n.getFullYear(),n.getMonth()+2,0)}; // 可以約到下個月月底
 
 /* ---------- 時間選單 ---------- */
+/* 時段重疊就不能約：客人這次要做的時間（只卸甲 2 小時，其他 5 小時）跟已有預約的時間有任何交集都擋掉（可跨日） */
+const durOf=it=>{it=String(it||"");return it.includes("需要卸甲")&&!["單色款式","跳色","局部造型","十指造型"].some(k=>it.includes(k))?120:300};
+const myDur=()=>needRemoval&&!$("mainColor").value?120:300;
+const absM=(ds,t)=>{const[y,m,d]=ds.split("-").map(Number);return Date.UTC(y,m-1,d)/6e4+t};
 function isTimeBlocked(ds,h,m){
-  const t=h*60+m;
+  const s1=absM(ds,h*60+m),e1=s1+myDur();
   return bookings.some(b=>{
-    if(b.date!==ds||b.status==="已取消"||typeof b.time!=="string")return false;
-    const[bh,bm]=b.time.split(":").map(Number),it=String(b.items||"");
-    const onlyRemoval=it.includes("需要卸甲")&&!["單色款式","跳色","局部造型","十指造型"].some(k=>it.includes(k));
-    const st=bh*60+bm;return t>=st&&t<st+(onlyRemoval?2:5)*60;
+    if(b.status==="已取消"||typeof b.time!=="string"||typeof b.date!=="string")return false;
+    const[bh,bm]=b.time.split(":").map(Number),s2=absM(b.date,bh*60+bm);
+    return s1<s2+durOf(b.items)&&s2<e1;
   });
 }
 function setOpts(sel,arr,f){sel.textContent="";arr.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=f(v);sel.appendChild(o)})}
@@ -636,7 +655,8 @@ function onMainColorChange(){
   onSelectionChange();
 }
 function selectToneDot(el,v){document.querySelectorAll(".tone-option").forEach(o=>o.classList.remove("active"));el.classList.add("active");$("selectedTone").value=v}
-function onSelectionChange(){autoDetermineCatEye();calculateTotal()}
+let lastDur=300;
+function onSelectionChange(){autoDetermineCatEye();calculateTotal();const d=myDur();if(d!==lastDur){lastDur=d;validateTime()}}
 function autoDetermineCatEye(){
   const on=$("catEyeCb").checked||$("fullCatEyeCb").checked,box=$("catEyeDetailDiv"),sel=$("catEyeType");
   if(!on||!showStyle){box.classList.add("hidden");return}
