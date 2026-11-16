@@ -113,6 +113,12 @@ label.f{display:block;font-size:13px;color:var(--soft);margin:2px 0 4px}
 .cl div{display:flex;justify-content:space-between;font-size:14px;padding:3px 0}
 .cl div span:first-child{color:var(--soft)}.cl div.tt{font-weight:700;border-top:1px dashed #d8cdbd;margin-top:4px;padding-top:7px}
 .cl small{color:var(--soft);font-size:12px}
+.cl .pc{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:4px;align-items:center;padding:7px 0;border-bottom:1px dashed #e2d8c9;font-size:14.5px;text-align:right}
+.cl .pc:last-child{border-bottom:0}
+.cl .pc span:first-child{text-align:left;display:flex;flex-direction:column;color:var(--ink)}
+.cl .pc small{font-size:12px}
+.cl .pc-h{font-size:12.5px;color:var(--soft);padding:2px 0 6px}
+.cl .pc-h span:first-child{color:var(--soft)}
 .bk-c{font-size:13px;color:var(--soft);margin-top:6px;display:flex;justify-content:space-between;cursor:pointer}
 .bk-c b{font-weight:700}
 .bk .cl{margin-top:6px}
@@ -219,6 +225,18 @@ details.box[open] summary{margin-bottom:12px}
 .lg i.a{background:#fbefcf;border-color:#e6c47a}.lg i.b{background:var(--blue-bg);border-color:var(--blue-line)}.lg i.m{background:var(--gold);width:8px;height:8px;vertical-align:1px}.lg i.k{background:var(--rose);border-color:#fff;box-shadow:0 0 0 1px var(--rose)}
 .sum{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px}
 .sum span{font-size:13.5px;padding:4px 12px;border-radius:12px 9px 13px 8px;background:#f3ebdf}
+.d.pick{outline:2.5px solid var(--ink);outline-offset:2px}
+.d.lim::before{content:"";position:absolute;left:50%;bottom:3px;width:14px;height:3px;margin-left:-7px;border-radius:2px;background:var(--gold)}
+.lg i.t{width:14px;height:4px;border-radius:2px;background:var(--gold);vertical-align:2px}
+.dp{margin-top:14px;padding:12px;background:#fff;border:1.6px solid var(--line);border-radius:18px 13px 20px 12px;box-shadow:3px 4px 0 var(--sand);animation:rise .25s ease-out}
+.dp-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:17px}
+.dp-bk{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.dp-bk span{font-size:13px;padding:3px 10px;border-radius:10px 7px 11px 6px;background:var(--rose-bg);color:var(--rose)}
+.hrs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}
+.hrs button{min-height:38px;white-space:nowrap;padding:0;border:1.3px dashed #c9bbaa;border-radius:11px 8px 12px 7px;background:#fff;color:var(--soft);font-size:14px;cursor:pointer}
+.hrs button.on{background:var(--gold-bg);border:1.3px solid #c9a55e;color:var(--gold-ink);font-weight:700}
+.hrs button:active{transform:scale(.93)}
+.dp .two .btn{min-height:42px;font-size:15px}
 .sh-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
 .unsaved{font-size:13px;color:var(--rose);text-align:center;margin-top:6px}
 
@@ -315,15 +333,9 @@ details.box[open] summary{margin-bottom:12px}
           <div class="cal-wd"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
           <div class="cal-g" id="calGrid"></div>
         </div>
-        <div class="lg"><span><i class="a"></i>白班可約</span><span><i class="b"></i>夜班可約</span><span><i class="m"></i>手動調整</span><span><i class="k"></i>有預約（數字＝筆數）</span></div>
+        <div class="lg"><span><i class="a"></i>白班可約</span><span><i class="b"></i>夜班可約</span><span><i class="m"></i>手動調整</span><span><i class="k"></i>預約筆數</span><span><i class="t"></i>限定時段</span></div>
         <div class="sum" id="shSum"></div>
-      </div>
-    </div>
-    <div class="sub" data-s="list">
-      <div class="box">
-        <h3><svg class="ic"><use href="#i-list"/></svg>預約一覽</h3>
-        <div class="step"><button class="ib" type="button" data-a="ym" data-id="sh" data-d="-1" aria-label="上個月"><svg class="ic"><use href="#i-l"/></svg></button><b class="lbl" data-k="sh"></b><button class="ib" type="button" data-a="ym" data-id="sh" data-d="1" aria-label="下個月"><svg class="ic"><use href="#i-r"/></svg></button></div>
-        <div class="mb" id="shBk"></div>
+        <div class="dp" id="dayPanel" hidden></div>
       </div>
     </div>
   </section>
@@ -517,7 +529,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
 function onClick(e){
   const el=e.target.closest("[data-a]");if(!el)return;
   const f={toggle:toggleStatus,bedit:editBooking,bsave:saveBooking,bcancel:cancelBooking,rerender:renderAll,aedit:editAcc,asave:saveAcc,adel:delAcc,
-    fedit:editFixed,fsave:saveFixed,fdel:delFixed,day:tapDay,bitems:editItems,ie:ieTap,isave:saveItems,cshow:id=>{const e=$("cl-"+id);if(e)e.hidden=!e.hidden},ym:(id)=>stepYM(id,+el.dataset.d),bkall:id=>{bkAll=id==="1";renderBookings()},cm:setChartMode,acct:setAccType,
+    fedit:editFixed,fsave:saveFixed,fdel:delFixed,day:tapDay,dclose:()=>{shSel="";renderCal()},dopen:dayOpenTap,dhr:dayHrTap,dall:dayAll,dmonth:dayMonth,bitems:editItems,ie:ieTap,isave:saveItems,cshow:id=>{const e=$("cl-"+id);if(e)e.hidden=!e.hidden},ym:(id)=>stepYM(id,+el.dataset.d),bkall:id=>{bkAll=id==="1";renderBookings()},cm:setChartMode,acct:setAccType,
     chip:pickChip,fxchip:id=>{$("fxItem").value=id},shg:id=>setShift("g",id),sht:id=>setShift("t",id),
     sec:id=>goTab(id),sideopen:()=>sideOpen(true),sideclose:()=>sideOpen(false),sub:id=>goTab(curSec,id),
     mfilter:id=>{mFilter=id;renderMembers()},medit:editMember,mtag:mTagTap,maddtag:mAddTag,msave:saveMember,mgive:giveTo,
@@ -529,7 +541,7 @@ function onClick(e){
 /* ---------- 導覽：側邊分頁標籤＋底部子頁籤 ---------- */
 const SECS=[
   {id:"stats",name:"營收",ic:"chart",c:"#f3e6c0",subs:[["month","本月"],["profit","真實利潤"],["year","全年"]]},
-  {id:"schedule",name:"班表",ic:"cal",c:"#dce8f2",subs:[["cal","月曆"],["list","預約一覽"]]},
+  {id:"schedule",name:"班表",ic:"cal",c:"#dce8f2",subs:[["cal","月曆"]]},
   {id:"bookings",name:"預約",ic:"list",c:"#f5ddd6",subs:[["list","預約列表"],["new","新增預約"]]},
   {id:"members",name:"會員",ic:"user",c:"#dfe8d5",subs:[["mem","會員名單"],["cp","折價券"]]},
   {id:"accounting",name:"記帳",ic:"coin",c:"#ece2d1",subs:[["add","記一筆"],["list","明細"],["fixed","固定支出"]]}
@@ -550,7 +562,7 @@ function goTab(sec,sub,quiet){
   const h=$("sideH");if(h){h.style.setProperty("--c",S0.c);h.innerHTML=`${ic(S0.ic)}<span>${S0.name}</span>`}
   sideOpen(false);
   document.querySelectorAll("#tab-"+sec+" .sub").forEach(x=>x.classList.toggle("on",x.dataset.s===sub));
-  const n=$("subNav");n.style.setProperty("--n",S0.subs.length);
+  const n=$("subNav");n.style.setProperty("--n",S0.subs.length);n.parentElement.hidden=S0.subs.length<2;
   n.innerHTML=S0.subs.map(([k,l])=>`<button class="tab${k===sub?" active":""}" type="button" data-a="sub" data-id="${k}">${l}</button>`).join("");
   if(!quiet&&changed)window.scrollTo({top:0});
   if(sec==="stats"&&sub==="year"&&chart)setTimeout(()=>{chart.resize();chart.update()},30);
@@ -584,11 +596,11 @@ const COST={
   rentShare:1600,     // 每月房租分攤（自訂）
   perMonth:3,         // 每月大約幾位客人一起分攤房租
   summer:[6,7,8,9],   // 開冷氣的月份
-  watt:{device:51,light:25,fan:40,ac:1000}, // 設備平均功率、電燈、電風扇、冷氣（瓦）
+  watt:{drill:60,vacuum:50,lamp:10,light:25,fan:40,ac:1000}, // 卸甲磨甲機、卸甲吸塵器、手持燈、電燈、電風扇、冷氣（瓦）
   // 工時（小時，只用來估電費，不算時薪）：單色 3、卸甲另加 2（卸甲＋單色＝5）、只卸甲 2
   hours:{solo:3,removal:2,removalOnly:2,jump:0.25},
   // 基本材料（元）：有做凝膠才算
-  mat:{base:10,color:12,builder:25,top:10,tools:8,supply:15,removal:15,jump:6},
+  mat:{base:10,color:12,builder:40,top:10,tools:8,supply:15,removal:8,jump:6}, // 建構膠做得比較厚；卸甲用磨頭（磨頭折舊＋棉片）
   // 造型：[局部工時, 十指工時, 局部材料, 十指材料]
   //  貓眼：一罐約 120～360 元（取 240）、約 6g；十指約用 0.4g → 約 16 元，局部約 6 元
   //  暈染：暈染膠一罐約 150 元、約 7.5g；十指約用 0.3g → 約 6 元，局部約 3 元
@@ -617,28 +629,29 @@ function costOf(b){
     if(o.jump){hours+=H.jump;mat.push(["跳色色膠",M.jump])}
     o.styles.forEach(k=>{const s=COST.style[k];hours+=full?s[1]:s[0];mat.push([`${k}（${full?"十指":"局部"}）`,full?s[3]:s[2]])});
   }else hours=H.removalOnly;
-  if(o.removal)mat.push(["卸甲耗材（卸甲液、棉片、錫箔）",M.removal]);
-  const k=w=>w*hours/1000*COST.kwhPrice,material=mat.reduce((a,x)=>a+x[1],0);
-  const r={hours,mat,material,rent:COST.rentShare/Math.max(1,COST.perMonth),device:k(COST.watt.device),light:k(COST.watt.light),fan:k(COST.watt.fan),ac:COST.summer.includes(mm)?k(COST.watt.ac):0};
+  if(o.removal)mat.push(["卸甲磨頭折舊、棉片",M.removal]);
+  const W=COST.watt,kwh=(w,h)=>w*h/1000*COST.kwhPrice,k=w=>kwh(w,hours),material=mat.reduce((a,x)=>a+x[1],0);
+  const rmH=o.removal?(o.main?H.removal:H.removalOnly):0,gelH=Math.max(0,hours-rmH);
+  const device=kwh(W.drill+W.vacuum,rmH*0.5)+kwh(W.lamp,gelH); // 磨甲機和吸塵器在卸甲時間裡約一半時間開著；手持燈在做凝膠的時間
+  const r={hours,mat,material,rent:COST.rentShare/Math.max(1,COST.perMonth),device,light:k(W.light),fan:k(W.fan),ac:COST.summer.includes(mm)?k(W.ac):0};
   r.total=r.material+r.rent+r.device+r.light+r.fan+r.ac;return r;
 }
 const m1=n=>"NT$ "+(n<10&&n>0?n.toFixed(1):Math.round(n).toLocaleString("en-US"));
 function costList(c,price){
-  const rows=[["材料",c.material],[`房租分攤 ${COST.rentShare} ÷ ${COST.perMonth} 位`,c.rent],["設備電費",c.device],["電燈",c.light],["電風扇",c.fan]];
+  const rows=[["材料",c.material],[`房租分攤 ${COST.rentShare} ÷ ${COST.perMonth} 位`,c.rent],["設備電費（磨甲機、吸塵器、手持燈）",c.device],["電燈",c.light],["電風扇",c.fan]];
   if(c.ac)rows.push(["冷氣（夏天）",c.ac]);
   return `<div><span>工時</span><span>約 ${c.hours} 小時</span></div>`+rows.map(([l,v])=>`<div><span>${l}</span><span>${m1(v)}</span></div>`).join("")+
     `<small>材料：${c.mat.map(([n,v])=>`${esc(n)} ${v}`).join("、")}</small>`+
     `<div class="tt"><span>成本合計</span><span>${money(c.total)}</span></div>`+(price!=null?`<div class="tt"><span>這筆利潤</span><span class="${price-c.total<0?"neg":"pos"}">${price-c.total<0?"-":""}${money(Math.abs(price-c.total))}</span></div>`:"");
 }
-const EXAMPLES=[["單色（不卸甲）","單色款式: 粉色"],["卸甲＋單色","需要卸甲 / 單色款式: 粉色"],["卸甲＋單色＋局部貓眼","需要卸甲 / 單色款式: 粉色 / 局部造型: 貓眼"],["卸甲＋單色＋十指暈染","需要卸甲 / 單色款式: 粉色 / 十指造型: 暈染"],["只卸甲","需要卸甲"]];
 function renderCost(){
   const now=new Date(),list=B.filter(b=>b.status!=="已取消"&&b.date&&b.date.slice(0,7)===selYM&&(b.status==="已完成"||isPast(b,now)));
   let cost=0,rev=0;list.forEach(b=>{cost+=costOf(b).total;rev+=+b.totalPrice||0});
   $("cN").textContent=list.length+" 位";$("cC").textContent=money(cost);
   const p=rev-cost;$("cP").textContent=(p<0?"-":"")+money(Math.abs(p));$("cP").className=p<0?"neg":"pos";
-  const d=selYM+"-15";
-  $("cOne").innerHTML=`<div style="font-weight:700"><span style="color:var(--ink)">常見款式的成本參考（${+selYM.slice(5)} 月）</span><span></span></div>`+
-    EXAMPLES.map(([n,it])=>{const c=costOf({items:it,date:d});return`<div><span>${n}・${c.hours} 小時</span><span>${money(c.total)}</span></div>`}).join("");
+  $("cOne").innerHTML=list.length?`<div class="pc pc-h"><span>客人</span><span>收</span><span>成本</span><span>賺</span></div>`+
+    list.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).map(b=>{const c=costOf(b).total,pr=+b.totalPrice||0,g=pr-c;
+      return`<div class="pc"><span><b>${esc(b.customerName||"—")}</b><small>${+b.date.slice(5,7)}/${+b.date.slice(8,10)}</small></span><span>${Math.round(pr).toLocaleString("en-US")}</span><span>${Math.round(c).toLocaleString("en-US")}</span><span class="${g<0?"neg":"pos"}">${g<0?"-":""}${Math.round(Math.abs(g)).toLocaleString("en-US")}</span></div>`}).join(""):'<div class="empty">這個月還沒有完成的預約</div>';
 }
 
 /* ---------- 營收 ---------- */
@@ -900,7 +913,9 @@ function renderAcc(){
   const rows=A.filter(a=>a.date&&a.date.slice(0,7)===accYM),inc=rows.filter(a=>a.type==="收入"),exp=rows.filter(a=>a.type!=="收入");
   const fx=F.filter(f=>fixedOn(f,accYM)),sum=l=>l.reduce((t,a)=>t+(+a.amount||0),0),fxs=fx.reduce((t,f)=>t+f.amount,0);
   const none='<div class="empty">這個月還沒有紀錄</div>';
-  $("accInc").innerHTML=`<div class="lh in"><span>收入</span><span>${money(sum(inc))}</span></div>${inc.map(accRow).join("")||none}`;
+  const now=new Date(),bk=B.filter(b=>b.status!=="已取消"&&b.date&&b.date.slice(0,7)===accYM&&(b.status==="已完成"||isPast(b,now))&&+b.totalPrice).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+  const bks=bk.reduce((t,b)=>t+(+b.totalPrice||0),0);
+  $("accInc").innerHTML=`<div class="lh in"><span>收入</span><span>${money(sum(inc)+bks)}</span></div>${bk.map(b=>`<div class="rw i"><div class="rw-main"><span class="nm">${esc(b.customerName||"客人")}<span class="tg">預約</span></span><small>${+b.date.slice(5,7)}/${+b.date.slice(8,10)} ${esc(b.time||"")}</small></div><b class="am">${money(+b.totalPrice)}</b></div>`).join("")}${inc.map(accRow).join("")}${(bk.length||inc.length)?"":none}`;
   $("accExp").innerHTML=`<div class="lh out"><span>支出</span><span>${money(sum(exp)+fxs)}</span></div>${exp.map(accRow).join("")}${fx.map(f=>`<div class="rw o"><div class="rw-main"><span class="nm">${esc(f.item)}<span class="tg">固定</span></span></div><b class="am">${money(f.amount)}</b></div>`).join("")}${(exp.length||fx.length)?"":none}`;
   renderFixed();
 }
@@ -960,8 +975,9 @@ function baseOpen(ds,group){
 function dayOpen(ds,group){const s=S[ds];if(s&&s.status==="開放")return true;if(s&&s.status==="關閉")return false;return baseOpen(ds,group)}
 function syncShift(){
   labels();
-  document.querySelectorAll("#sgG button").forEach(b=>b.classList.toggle("on",!!M[shYM]&&b.dataset.id===shGroup));
-  document.querySelectorAll("#sgT button").forEach(b=>b.classList.toggle("on",!!M[shYM]&&b.dataset.id===shType));
+  const c=M[shYM];if(c){shGroup=c.shiftGroup;shType=c.shiftType}
+  document.querySelectorAll("#sgG button").forEach(b=>b.classList.toggle("on",!!c&&b.dataset.id===c.shiftGroup));
+  document.querySelectorAll("#sgT button").forEach(b=>b.classList.toggle("on",!!c&&b.dataset.id===c.shiftType));
   $("shUnset").hidden=!!M[shYM];
   renderCal();
 }
@@ -974,24 +990,62 @@ function renderCal(){
   for(let d=1;d<=days;d++){
     const ds=`${shYM}-${pad(d)}`,o=dayOpen(ds,sh.shiftGroup),mn=!!S[ds],past=ds<today;
     if(o)open++;if(mn)man++;
-    const cls=["d",cnt[ds]?"has":"",o?(sh.shiftType==="白班"?"ya":"yb"):"off",mn?"man":"",ds===today?"today":"",past?"past":""].join(" ");
+    const lim=o&&S[ds]&&S[ds].slots;
+    const cls=["d",cnt[ds]?"has":"",o?(sh.shiftType==="白班"?"ya":"yb"):"off",mn?"man":"",lim?"lim":"",ds===shSel?"pick":"",ds===today?"today":"",past?"past":""].join(" ");
     h+=`<button type="button" class="${cls}" data-a="day" data-id="${ds}" aria-label="${m}月${d}日 ${o?"可約":"休息"}${cnt[ds]?"，有"+cnt[ds]+"筆預約":""}">${d}${cnt[ds]?`<i class="bk-n">${cnt[ds]}</i>`:""}</button>`;
   }
   $("calGrid").innerHTML=h;
   const bk=Object.values(cnt).reduce((a,b)=>a+b,0);
   $("shSum").innerHTML=`<span>可約 ${open} 天</span><span>休息 ${days-open} 天</span>${man?`<span>手動調整 ${man} 天</span>`:""}${bk?`<span>預約 ${bk} 筆</span>`:""}`;
-  const by={};B.filter(b=>b.status!=="已取消"&&b.date&&b.date.slice(0,7)===shYM).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).forEach(b=>(by[b.date]=by[b.date]||[]).push(b));
-  const dks=Object.keys(by);
-  $("shBk").innerHTML=dks.length?dks.map(ds=>{const t=new Date(ds+"T00:00");return`<div class="dg"><div class="dt">${t.getMonth()+1}/${t.getDate()}<small>週${WD[t.getDay()]}</small></div><div class="it">${by[ds].map(b=>`<div><span>${esc(b.time||"--:--")}</span><b>${esc(b.customerName||"（未填名稱）")}</b></div>`).join("")}</div></div>`}).join(""):'<div class="empty">這個月還沒有預約</div>';
+  renderDay();
 }
-async function tapDay(ds){
-  if(ds<ymd(new Date()))return;
-  const sh=curShift(shYM),now=dayOpen(ds,sh.shiftGroup),want=!now;
+/* 點日期 → 下方出現這天的設定：可約／休息、可預約的時段（自動儲存） */
+let shSel="",dayQ=new Set(),dayT=null;
+const HRS=Array.from({length:24},(_,i)=>pad(i));
+function tapDay(ds){if(ds<ymd(new Date()))return;shSel=shSel===ds?"":ds;renderCal()}
+function dayHours(ds){const s=S[ds];return s&&s.slots?s.slots.split(",").map(x=>x.slice(0,2)):HRS.slice()}
+function renderDay(){
+  const p=$("dayPanel");if(!p)return;
+  if(!shSel||shSel.slice(0,7)!==shYM){p.hidden=true;return}
+  const ds=shSel,g=curShift(shYM).shiftGroup,o=dayOpen(ds,g),hs=dayHours(ds),t=new Date(ds+"T00:00");
+  const bks=B.filter(b=>b.status!=="已取消"&&b.date===ds).sort((a,b)=>(a.time||"").localeCompare(b.time||""));
+  p.hidden=false;
+  p.innerHTML=`<div class="dp-h"><b>${t.getMonth()+1}/${t.getDate()}（週${WD[t.getDay()]}）</b>${ib("dclose","","x","關閉")}</div>
+    ${bks.length?`<div class="dp-bk">${bks.map(b=>`<span>${esc(b.time)} ${esc(b.customerName||"")}</span>`).join("")}</div>`:""}
+    <div class="sg"><button type="button" class="${o?"on":""}" data-a="dopen" data-id="1">可約</button><button type="button" class="${o?"":"on"}" data-a="dopen" data-id="0">休息</button></div>
+    ${o?`<div class="hrs">${HRS.map(h=>`<button type="button" class="${hs.includes(h)?"on":""}" data-a="dhr" data-id="${h}">${h}:00</button>`).join("")}</div>
+    <div class="two"><button class="btn alt" type="button" data-a="dall">全天</button><button class="btn alt" type="button" data-a="dmonth">套用到整個月</button></div>`:""}`;
+}
+function setDay(ds,open,hours){
+  const g=curShift(ds.slice(0,7)).shiftGroup,base=baseOpen(ds,g);
+  const slots=open&&hours&&hours.length&&hours.length<24?hours.slice().sort().map(h=>h+":00").join(","):"";
+  if(open===base&&!slots)delete S[ds];else S[ds]={status:open?"開放":"關閉",slots};
+  dayQ.add(ds);clearTimeout(dayT);dayT=setTimeout(flushDays,700);
+}
+async function flushDays(){
+  const days=[...dayQ].map(ds=>S[ds]?{date:ds,status:S[ds].status,slots:S[ds].slots||""}:{date:ds,remove:true});dayQ.clear();if(!days.length)return;
+  const r=await api({action:"saveDays",days});
+  if(!r||r.result!=="success"){await say(r&&r.message==="unknown_action"?"Google 後台還沒更新成新版，\n請先用最新的程式碼.gs 更新 Apps Script。":(r&&r.message)||"儲存失敗，將重新載入資料");fetchData()}
+}
+async function dayOpenTap(v){
+  const ds=shSel;if(!ds)return;const want=v==="1";
   const n=B.filter(b=>b.status!=="已取消"&&b.date===ds).length;
   if(!want&&n&&!await ask(`這天已經有 ${n} 筆預約，\n確定要改成休息嗎？\n（已有的預約不會被刪除）`))return;
-  if(want===baseOpen(ds,sh.shiftGroup)){delete S[ds];bg({action:"deleteSchedule",targetDate:ds})}
-  else{S[ds]={status:want?"開放":"關閉",slots:""};bg({action:"updateSchedule",targetDate:ds,status:want?"開放":"關閉"})}
-  renderCal();
+  setDay(ds,want,want?dayHours(ds):null);renderCal();
+}
+function dayHrTap(h){
+  const ds=shSel;if(!ds)return;const hs=dayHours(ds),i=hs.indexOf(h);
+  if(i>=0){if(hs.length===1)return;hs.splice(i,1)}else hs.push(h);
+  setDay(ds,true,hs);renderCal();
+}
+function dayAll(){if(shSel){setDay(shSel,true,null);renderCal()}}
+async function dayMonth(){
+  const ds=shSel;if(!ds)return;const hs=dayHours(ds),g=curShift(shYM).shiftGroup,today=ymd(new Date());
+  const[y,m]=shYM.split("-").map(Number),days=new Date(y,m,0).getDate(),list=[];
+  for(let d=1;d<=days;d++){const x=`${shYM}-${pad(d)}`;if(x>=today&&x!==ds&&dayOpen(x,g))list.push(x)}
+  if(!list.length)return;
+  if(!await ask(`把 ${hs.length===24?"全天":hs.length+" 個時段"} 套用到這個月其他 ${list.length} 天可約日嗎？`))return;
+  list.forEach(x=>setDay(x,true,hs.length===24?null:hs));renderCal();
 }
 function setShift(k,v){
   const cur=curShift(shYM),nx={shiftGroup:k==="g"?v:cur.shiftGroup,shiftType:k==="t"?v:cur.shiftType};
