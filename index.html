@@ -458,6 +458,15 @@ async function initLiff(){
   }catch(e){}
 }
 function loginWithLine(){if(typeof liff!=="undefined"&&!liff.isLoggedIn())liff.login();else if(member)alert("你已經是會員了！");else joinMember(true)}
+let OA_CHAT=false;try{OA_CHAT=new URLSearchParams(location.search).get("chat")==="oa"||/chat%3Doa|chat=oa/.test(location.search)}catch(_){}
+function fromOaChat(){
+  try{
+    if(typeof liff==="undefined"||!liff.isInClient()||!liff.isLoggedIn())return false;
+    if(!OA_CHAT)OA_CHAT=new URLSearchParams(location.search).get("chat")==="oa";
+    const c=liff.getContext&&liff.getContext();
+    return OA_CHAT&&!!c&&c.type==="utou";
+  }catch(e){return false}
+}
 /* 連動 LINE ＝ 自動加入會員（不用填任何資料） */
 async function joinMember(manual){
   try{
@@ -736,9 +745,15 @@ async function sendBooking(){
     const finalTotal=Number.isFinite(res.totalPrice)?res.totalPrice:total;
     if(res.discount>0&&cp){lines.push(`• 折價券：${cp.title}（−NT$ ${res.discount}）`);coupons=coupons.filter(x=>x.id!==cp.id);selCoupon=""}
     const msg=`【美甲服務預約單】\n----------------------------\n${lines.join("\n")}\n----------------------------\n預計總金額：NT$ ${finalTotal} 元`;
-    if(res.lineSent||res.adminNotified){
-      await say(res.lineSent?"預約成功！\n預約確認已經傳到你的 LINE。":"預約成功！\n我們已經收到你的預約。",true);
-      btn.textContent="已完成預約";return;
+    /* 從官方帳號聊天室打開（連結帶 ?chat=oa）→ 用客人自己的 LINE 自動傳出預約單，不花官方帳號額度 */
+    if(fromOaChat()){
+      try{
+        await liff.sendMessages([{type:"text",text:msg.slice(0,4900)}]);
+        await say("預約成功！\n預約單已經自動傳給我們了。",true);
+        btn.textContent="已完成預約";
+        try{liff.closeWindow()}catch(_){}
+        return;
+      }catch(e){/* 沒有傳送權限或不在聊天室 → 改用下面原本的方式 */}
     }
     await say("預約成功！\n接著會開啟 LINE，請按「傳送」把預約單送給我們。",true);
     location.href=`https://line.me/R/oaMessage/${LINE_OFFICIAL_ACCOUNT_ID}/?${encodeURIComponent(msg)}`;
