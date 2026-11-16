@@ -144,6 +144,8 @@ select:disabled{opacity:.6}
 .member{display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px 12px;border-radius:14px 10px 15px 10px;background:#eef1e4;border:1.4px solid #c9d1b6;color:#4f5a42;font-size:14.5px;animation:pop .22s ease-out}
 .member b{font-weight:700}
 .member .ic{color:#7d8c66}
+.admin-link{margin-left:auto;display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:13px 9px 14px 8px;background:var(--ink);color:#fff;text-decoration:none;font-size:13.5px;white-space:nowrap}
+.admin-link:active{transform:scale(.95)}
 .join-hint{font-size:13px;color:var(--soft);margin-top:6px}
 .slot-toggle{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:4px;padding:10px;border:1.5px dashed #b9aa9b;border-radius:16px 12px 18px 11px;background:#fdfbf6;color:var(--ink);font-size:15px;cursor:pointer}
 .slot-toggle .ic{transition:transform .2s}
@@ -372,6 +374,7 @@ select:disabled{opacity:.6}
 const LINE_OFFICIAL_ACCOUNT_ID="@344gjuzg";
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycbzu25rQUBTULTCgpqFnSfx21oVWyb1LoFnqQtGLGGUhJ6UFCHzu7po873wKRphQEQEkIg/exec";
 const LIFF_ID="2011884932-heTsoGVG", CACHE_KEY="nail_app_backend_cache";
+const ADMIN_URL="https://liff.line.me/2011884932-2EMCidxw"; // 後台（只有管理者的 LINE 帳號會看到這個按鈕）
 const ALL_COLORS=["紅色","粉色","橘色","黃色","紅咖色","深咖/可可色","淺咖色","綠色","藍色","紫色","黑色","銀色/白色","灰色","金色/香檳色"];
 const $=id=>document.getElementById(id);
 const isObj=v=>v&&typeof v==="object"&&!Array.isArray(v);
@@ -435,6 +438,7 @@ function renderMember(){
   const box=$("memberBox");box.hidden=false;
   box.innerHTML=`<svg class="ic"><use href="#i-gift"/></svg><span><b></b> 會員${coupons.length?`・有 ${coupons.length} 張折價券`:""}</span>`;
   box.querySelector("b").textContent=cleanText(member.name||$("customerName").value,30)||"LINE";
+  if(member.isAdmin===true){const a=document.createElement("a");a.className="admin-link";a.href=ADMIN_URL;a.textContent="進入後台 ›";box.appendChild(a)}
 }
 function renderCoupons(){
   const sec=$("couponSection"),l=$("couponList");
